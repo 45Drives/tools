@@ -1,0 +1,293 @@
+#!/bin/bash
+# ---------------------------------------------------------------------------
+# zcreate - creates zpools based on system hardware. Also takes input for fine tuned options 
+
+# Copyright 2016, Brett Kelly <bkelly@45drives.com>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+usage() { # Help
+        cat << EOF
+Usage:	zcreate
+	[-a] Set ashift value
+	[-b] Build Flag. Include to build the array
+	[-c] Custom Flag. Include for manual pool configuration
+	[-D] Destroys zpool
+	[-d] Specify how many drives to use. 
+		Default is every drive attached to HBA controller
+	[-f] Force Flag. Use if bricks are already present on zpool
+	[-l] Specify RAID level
+		Default is "raidz2"
+		Options: "raidz[123]", "mirror", "stripe"
+	[-m] Specify alternate mount point
+		Default: /{pool}
+	[-n] Specify zpool name. Defaults to "zpool"
+	[-q] Quiet Mode
+	[-t] IF flag is present, DO NOT apply default ZFS tuneables
+	[-v] Specify number of VDEVs to use
+	[-z] Debug flag. Prints all varibles&temp files to terminal
+	[-h] Displays this message
+EOF
+        exit 0
+}
+pause(){ # Waits for user input to continue
+read -p "Press any to continue $1" con
+case $con in
+*)
+	;;
+esac
+}
+getbays() { # Fills array BAYS with physical slot number, whether there is a drive present or not (creates array of all drive slots, wheter a is drive present or not)
+	i=0
+	j=3
+	BAYS=$((cat /etc/zfs/vdev_id.conf| awk "NR>2" | wc -l) 2>/dev/null)
+	while [ $i -lt $BAYS ];do
+		bay=$(cat /etc/zfs/vdev_id.conf | awk -v j=$j 'NR==j{print $2}')
+		BAY[$i]=$bay
+		let i=i+1
+		let j=j+1
+	done
+}
+getdrives() { # For each DRIVE in BAY, check if it is a block device. If true add to DRIVES array (excludes empty drive slots)
+	DRIVES=()
+	for DRIVE in ${BAY[*]};do
+		if [ -b /dev/disk/by-vdev/$DRIVE ];then
+			DRIVES+=( "$DRIVE" )
+		fi
+	done
+}
+setvdevcount() { # Starting at default VDEV_COUNT for chassis size, if DRIVE_COUNT is indivisible by VDEV_COUNT, increment VDEV_COUNT by one and keep checking until it is.
+	case $BAYS in 
+	30)
+		VDEV_COUNT=3
+		;;
+	45)
+		VDEV_COUNT=5
+		;;
+	60)
+		VDEV_COUNT=5
+		;;
+	*)
+		VDEV_COUNT=1
+	esac
+	while :
+	do
+		if (( $DRIVE_COUNT % $VDEV_COUNT == 0));then
+			break
+		fi
+		let VDEV_COUNT=VDEV_COUNT+1
+	done
+}
+autosort(){ # Sorts drives per VDEV automatically and saves each as a newline in z.tmp
+	if [ -e $DIR/z.tmp ];then
+		rm -f $DIR/z.tmp
+	fi
+	DRIVESpVDEV=$((DRIVE_COUNT / VDEV_COUNT))
+	i=0
+	while [ $i -lt $VDEV_COUNT ];do
+		j=0
+		i_=$(expr $i + 1)
+		j_=$((DRIVESpVDEV * i))
+		while [ $((j + j_)) -lt $((i_ * DRIVESpVDEV)) ];do
+			VDEV[$j]=${DRIVES[$((j + j_))]}
+			let j=j+1
+		done
+		echo "${VDEV[*]}" >> $DIR/z.tmp
+		let i=i+1
+	done
+}
+customsort() { # Sorts drives per VDEV based on user input and saves each as a newline in z.tmp
+	if [ -e $DIR/z.tmp ];then
+		rm -f $DIR/z.tmp
+	fi
+	lsdev
+	read -p "Number of VDEVs: " VDEV_COUNT
+	read -p "RAID Level: " RAID_LEVEL
+	read -p "Pool Name: " ZPOOL_NAME
+	i=0
+	while [ $i -lt $VDEV_COUNT ];do
+		read -p "VDEV_$i: " VDEV
+		echo $VDEV >> $DIR/z.tmp
+		let i=i+1
+	done
+	if [ $BUILD_FLAG == no ];then
+		pause "building pool"
+		BUILD_FLAG=yes
+	fi
+}
+createpool(){ # Reads z.tmp file and writes zpool creation command and saves in z.conf
+	if [ -e $DIR/z.conf ];then
+		rm -f $DIR/z.conf
+	fi
+	printf "zpool create %s %s " "-f" $ZPOOL_NAME >> $DIR/z.conf
+	if [ ! -z $MOUNT_DIR ];then
+		printf "%s %s " "-m" $MOUNT_DIR >> $DIR/z.conf
+	fi
+	if [ "$ASHIFT_FLAG" == "yes" ];then
+		printf "%s %s " "-o" "ashift=$ASHIFT" >> $DIR/z.conf
+	fi
+	i=1
+	while [ $i -lt $((VDEV_COUNT + 1)) ];do
+		printf "%s %s " $RAID_LEVEL $(cat z.tmp | awk -v i=$i 'NR==i') >> $DIR/z.conf
+		let i=i+1
+	done
+	echo >> $DIR/z.conf
+}
+checkroot(){
+	SCRIPT_NAME=$(basename "$0")
+	if [ "$EUID" -ne 0 ];then
+		echo "You must have root privileges to run $SCRIPT_NAME"
+		exit 0
+	fi
+}
+
+DEBUG_FLAG=no
+CUSTOM_FLAG=no
+BUILD_FLAG=no
+DESTROY_FLAG=no
+FORCE=no
+DIR=$(pwd)
+DRIVE_COUNT=0
+RAID_LEVEL=
+VDEV_COUNT=0
+ZPOOL_NAME=zpool
+QUIET=no
+TUNE_FLAG=yes
+ASHIFT_FLAG=no
+
+while getopts 'a:bcd:Dfm:n:l:tqv:zh' OPTION; do
+	case ${OPTION} in
+	a)
+		ASHIFT_FLAG=yes
+		ASHIFT=${OPTARG}
+		;;
+	b)
+		BUILD_FLAG=yes
+		;;
+	c)
+		CUSTOM_FLAG=yes
+		;;
+	D)
+		DESTROY_FLAG=yes
+		;;
+	d)
+		DRIVE_COUNT=${OPTARG}
+		;;
+	f)
+		FORCE=yes
+		;;
+	l)
+		RAID_LEVEL=${OPTARG}
+		;;
+	m)
+		MOUNT_DIR=${OPTARG}
+		;;
+	n)
+		ZPOOL_NAME=${OPTARG}
+		;;
+	q)
+		QUIET=yes
+		;;
+	t)
+		TUNE_FLAG=no
+		;;
+	v)
+		VDEV_COUNT=${OPTARG}
+		;;
+	z)
+		DEBUG_FLAG=yes
+		;;
+	h)
+		usage
+		;;
+	esac
+done
+
+checkroot
+if [ ! -e /etc/zfs/vdev_id.conf ];then
+	echo -e "/etc/zfs/vdev_id.conf does not exist.\nUse dmap to configure drive alias first"
+	exit 0
+fi
+getbays
+getdrives
+
+if [ "$DESTROY_FLAG" == "yes" ];then
+	echo "Destroying $ZPOOL_NAME, You Sure?"
+	pause
+	read -p "ALL data will be lost. Continue?(y/N)" del
+	case $del in
+		y)
+			zpool destroy $ZPOOL_NAME
+			exit 0
+			;;
+		*)
+			echo "pool destroyed..All data deleted.."
+			pause
+			echo "Nah just fucking with ya"
+			pause
+			zpool status $ZPOOL_NAME
+			exit 0
+			;;
+	esac
+fi
+# If no user input for DRIVE_COUNT then DRIVE_COUNT is eqaul to the number of elements in the DRIVES array
+if [ $DRIVE_COUNT -eq 0 ];then
+	DRIVE_COUNT=${#DRIVES[@]}
+fi
+# If no user input for VDEV_COUNT then choose best VDEV_COUNT for amount of drives present
+if [ $VDEV_COUNT -eq 0 ];then
+	setvdevcount
+fi
+# If no user input for RAID_LEVEL then default to "RAIDZ2". If user inputs "stripe" then set RAID_LEVEL to empty string
+if [ "$RAID_LEVEL" == "stripe" ];then
+	RAID_LEVEL=
+elif [ -z $RAID_LEVEL ];then
+	RAID_LEVEL=raidz2
+fi
+# If custom flag is set lanuch manual configuration; else use auto mode
+if [ "$CUSTOM_FLAG" = "yes" ];then
+	customsort
+else
+	autosort
+fi
+
+createpool
+
+# If quiet flag is present, complete build with no stdout. If no flag then output the zpool command saved in z.conf
+if [ "$QUIET" == "yes" ];then
+	:
+elif [ "$QUIET" == "no" ];then
+	cat $DIR/z.conf
+fi
+# If build flag is present; run the zpool create command saved in z.conf
+if [ $BUILD_FLAG == yes ];then
+	cat $DIR/z.conf | /bin/sh
+	if [ $TUNE_FLAG == yes ];then
+		/opt/gtools/bin/tunepool $ZPOOL_NAME $QUIET
+	fi
+	systemctl restart zfs-import-cache.service
+fi
+
+if [ $DEBUG_FLAG == yes ];then
+	echo "drive count: $DRIVE_COUNT"
+	echo "raid level: $RAID_LEVEL"
+	echo "zpool name $ZPOOL_NAME"
+	echo "vdev count: $VDEV_COUNT"
+	echo "drives/vdev: $DRIVESpVDEV"
+	echo "DRIVESarray: ${DRIVES[*]}"
+	cat $DIR/z.conf
+	cat $DIR/z.tmp
+else
+	rm -f $DIR/z.conf
+	rm -f $DIR/z.tmp
+fi
+if [ $BUILD_FLAG == no ];then
+	echo
+	echo "Use "-b" flag to build the above zpool"
+	echo "Use "-h" flag for more options"
+	exit 0
+fi
+

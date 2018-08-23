@@ -1,0 +1,89 @@
+#!/bin/bash
+# ---------------------------------------------------------------------------
+# mapr750 - Used by dmap to generate Highpoint HBA models alias config 
+
+# Copyright 2016, Brett Kelly <bkelly@45drives.com>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+CHASSIS=$1
+DISK_CONTROLLER=$2
+CONFIG_PATH=$ALIAS_CONFIG_PATH
+if [ -z $CONFIG_PATH ];then
+        SCRIPT_NAME=$(basename "$0")
+	echo "($SCRIPT_NAME)ALIAS_CONFIG_PATH must be defined"
+	exit 1
+fi
+if [ -e $ALIAS_CONFIG_PATH/vdev_id.conf ];then
+        rm -f $ALIAS_CONFIG_PATH/vdev_id.conf
+fi
+
+echo "# by-vdev" >> $ALIAS_CONFIG_PATH/vdev_id.conf
+echo "# name     fully qualified or base name of device link" >> $ALIAS_CONFIG_PATH/vdev_id.conf
+case $CHASSIS in
+30)
+	card1=$(lspci | grep $DISK_CONTROLLER | awk 'NR==1{print $1}')
+	#Card 1
+	slot=1
+	while [ $slot -lt 31 ];do
+       	echo "alias 1-$slot     /dev/disk/by-path/pci-0000:$card1-scsi-0:0:$(expr $slot - 1):0" >> $ALIAS_CONFIG_PATH/vdev_id.conf
+       		let slot=slot+1
+	done
+	;;
+45)
+	card1=$(lspci | grep $DISK_CONTROLLER | awk 'NR==1{print $1}')
+	card2=$(lspci | grep $DISK_CONTROLLER | awk 'NR==2{print $1}')
+	#Card 1
+	slot=1
+	while [ $slot -lt 25 ];do	
+       		echo "alias 1-$slot     /dev/disk/by-path/pci-0000:$card1-scsi-0:0:$(expr $slot - 1):0" >> $ALIAS_CONFIG_PATH/vdev_id.conf
+       		let slot=slot+1
+	done
+	#Card 2
+	slot=1
+	while [ $slot -lt 22 ];do
+       		if [ $slot -eq 21 ];then
+       		        echo "alias 2-$slot     /dev/disk/by-path/pci-0000:$card2-scsi-0:0:23:0" >> $ALIAS_CONFIG_PATH/vdev_id.conf
+        	else
+        	        echo "alias 2-$slot     /dev/disk/by-path/pci-0000:$card2-scsi-0:0:$(expr $slot - 1):0" >> $ALIAS_CONFIG_PATH/vdev_id.conf
+        	fi
+        	let slot=slot+1
+	done
+	;;
+60)
+	card1=$(lspci | grep $DISK_CONTROLLER | awk 'NR==1{print $1}')
+	card2=$(lspci | grep $DISK_CONTROLLER | awk 'NR==2{print $1}')
+	#Card 1
+	slot=1
+	while [ $slot -lt 33 ];do
+        	echo "alias 1-$slot     /dev/disk/by-path/pci-0000:$card1-scsi-0:0:$(expr $slot - 1):0" >> $ALIAS_CONFIG_PATH/vdev_id.conf
+        	let slot=slot+1
+	done
+	#Card 2
+	slot=1
+	while [ $slot -lt 29 ];do
+        	echo "alias 2-$slot     /dev/disk/by-path/pci-0000:$card2-scsi-0:0:$(expr $slot - 1):0" >> $ALIAS_CONFIG_PATH/vdev_id.conf
+        	let slot=slot+1
+	done
+	;;
+40)
+	card1=$(lspci | grep $DISK_CONTROLLER | awk 'NR==1{print $1}')
+	#CARD1
+	slot=1
+	while [ $slot -lt 41 ];do
+		echo "alias 1-$slot     /dev/disk/by-path/pci-0000:$card1-scsi-0:0:$(expr $slot - 1):0" >> $ALIAS_CONFIG_PATH/vdev_id.conf
+        let slot=slot+1
+	done
+	#MOBO
+	mobo=41
+	s=2
+	while [ $mobo -lt 46 ];do
+		echo "alias 1-$mobo     /dev/disk/by-path/pci-0000:00:1f.2-ata-$s.0" >> $ALIAS_CONFIG_PATH/vdev_id.conf
+		let s=s+1
+		let mobo=mobo+1
+	done
+	;;
+esac
