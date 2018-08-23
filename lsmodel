@@ -28,6 +28,14 @@ ASR="Adaptec"
 HBA1000="Adaptec Series 8"
 R3740="3740"
 
+DEVICE_PATH=$ALIAS_DEVICE_PATH
+CONFIG_PATH=$ALIAS_CONFIG_PATH
+
+if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
+	echo "Both ALIAS_DEVICE_PATH and ALIAS_CONFIG_PATH must be defined"
+	exit 1
+fi
+
 line() { # takes a number as first input Length, and any character as second input, defaults to "-" if no option
 	if [ -z $2 ]; then
 		printf -v line '%*s' "$1"
@@ -38,7 +46,7 @@ line() { # takes a number as first input Length, and any character as second inp
 	fi
 }
 setBAYstatus() {
-	MODEL=$((hdparm -I /dev/disk/by-vdev/${BAY[$1]} | grep -i model | awk -F: '{print $2}' | tr -d '[:space:]') 2>/dev/null)
+	MODEL=$((hdparm -I $ALIAS_DEVICE_PATH/${BAY[$1]} | grep -i model | awk -F: '{print $2}' | tr -d '[:space:]') 2>/dev/null)
 	if [ -z $MODEL ];then
 		printf -v absent "$DGREY%-22s$NC" "N/A"
 		#absent=$(echo -e "${DGREY}${BAY[$1]}${NC}")
@@ -50,7 +58,7 @@ setBAYstatus() {
 	fi
 }
 setBAYstatusNC() {
-	MODEL=$((hdparm -I /dev/disk/by-vdev/${BAY[$1]} | grep -i model | awk -F: '{print $2}' | tr -d '[:space:]') 2>/dev/null)
+	MODEL=$((hdparm -I $ALIAS_DEVICE_PATH/${BAY[$1]} | grep -i model | awk -F: '{print $2}' | tr -d '[:space:]') 2>/dev/null)
 	if [ -z $MODEL ];then
 		printf -v absent "%-22s" "N/A"
 		#absent=$(echo -e "${DGREY}${BAY[$1]}${NC}")
@@ -82,7 +90,7 @@ i=0
 j=3
 ## LOOP THROUGH BAYS
 while [ $i -lt $BAYS ];do
-	bay=$(cat /etc/zfs/vdev_id.conf | awk -v j=$j 'NR==j{print $2}')
+	bay=$(cat $ALIAS_CONFIG_PATH/vdev_id.conf | awk -v j=$j 'NR==j{print $2}')
 	BAY[$i]=$bay
 	let i=i+1
 	let j=j+1
@@ -100,7 +108,7 @@ while getopts 'onh' OPTION; do
 		;;
 	esac
 done
-BAYS=$((cat /etc/zfs/vdev_id.conf| awk "NR>2" | wc -l) 2>/dev/null)
+BAYS=$((cat $ALIAS_CONFIG_PATH/vdev_id.conf| awk "NR>2" | wc -l) 2>/dev/null)
 getCARDname
 getBAY
 printf "| %s %s %s %s |\n" Disk Controller: $CARD DriverVersion: $DRIVERVERSION
