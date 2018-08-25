@@ -46,27 +46,27 @@ line() { # takes a number as first input Length, and any character as second inp
 	fi
 }
 setBAYstatus() {
-	MODEL=$((hdparm -I $ALIAS_DEVICE_PATH/${BAY[$1]} | grep -i model | awk -F: '{print $2}' | tr -d '[:space:]') 2>/dev/null)
-	if [ -z $MODEL ];then
-		printf -v absent "$DGREY%-22s$NC" "N/A"
+	TYPE=$(smartctl -a $ALIAS_DEVICE_PATH/${BAY[$1]} | grep -i rotation | awk '{print $3}')
+	if [ -z $TYPE ];then
+		printf -v absent "$DGREY%-5s$NC($DGREY%-5s$NC)" "--" "--"
 		#absent=$(echo -e "${DGREY}${BAY[$1]}${NC}")
 		BAYSTATUS[$1]=$absent
 	else
-		printf -v model "$YELLOW%-22s$NC" $MODEL
+		printf -v type "$YELLOW%-5s$NC($YELLOW%-5s$NC)" ${BAY[$1]} $TYPE
 		#unknown=$(echo -e "${YELLOW}${BAY[$1]}${NC}")
-		BAYSTATUS[$1]=$model
+		BAYSTATUS[$1]=$type
 	fi
 }
 setBAYstatusNC() {
-	MODEL=$((hdparm -I $ALIAS_DEVICE_PATH/${BAY[$1]} | grep -i model | awk -F: '{print $2}' | tr -d '[:space:]') 2>/dev/null)
-	if [ -z $MODEL ];then
-		printf -v absent "%-22s" "N/A"
+	TYPE=$(smartctl -a $ALIAS_DEVICE_PATH/${BAY[$1]} | grep -i rotation | awk '{print $3}')
+	if [ -z $TYPE ];then
+		printf -v absent "%-5s" "N/A"
 		#absent=$(echo -e "${DGREY}${BAY[$1]}${NC}")
 		BAYSTATUS[$1]=$absent
 	else
-		printf -v model "%-22s" $MODEL
+		printf -v type "%-5s" ${BAY[$1]} $TYPE
 		#unknown=$(echo -e "${YELLOW}${BAY[$1]}${NC}")
-		BAYSTATUS[$1]=$model
+		BAYSTATUS[$1]=$type
 	fi
 }
 getCARDname() {
@@ -108,6 +108,7 @@ while getopts 'onh' OPTION; do
 		;;
 	esac
 done
+rpm -qa | grep -qw smartmontools || yum install smartmontools -y
 BAYS=$((cat $ALIAS_CONFIG_PATH/vdev_id.conf| awk "NR>2" | wc -l) 2>/dev/null)
 getCARDname
 getBAY
@@ -141,7 +142,7 @@ case $BAYS in
 	;;
 30)
 	#30unit
-	line 24 _
+	line 31 _
 	while [ $i -lt $WIDTH ];do
 		i_=$(expr $WIDTH_ - $i ) # invert counter for first row
 		j_=$(expr $WIDTH + $WIDTH_ - $i )
@@ -171,9 +172,9 @@ case $BAYS in
 		let i=i+1
 		let j=j+1
 	done
-	line 24 -
-	printf "| %-5s | %-5s |\n" ROW1 ROW2
-	line 24 =
+	line 31 -
+	printf "| %-12s | %-12s |\n" ROW1 ROW2
+	line 31 =
 	;;
 45)
 	#45Unit

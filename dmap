@@ -23,15 +23,15 @@ EOF
         exit 0
 }
 gethba() {
-if [[ $(lspci | grep $R750) ]];then
-	DISK_CONTROLLER=$R750
-elif [[ $(lspci | grep $LSI_9201) ]];then
-	DISK_CONTROLLER=$LSI_9201
-elif [[ $(lspci | grep $LSI_9305) ]];then
-	DISK_CONTROLLER=$LSI_9305
-elif [[ $(lspci | grep $HBA1000) ]];then
-	CARD="$HBA1000"
-fi
+	if [[ $(lspci | grep $R750) ]];then
+		DISK_CONTROLLER=$R750
+	elif [[ $(lspci | grep $LSI_9201) ]];then
+		DISK_CONTROLLER=$LSI_9201
+	elif [[ $(lspci | grep $LSI_9305) ]];then
+		DISK_CONTROLLER=$LSI_9305
+	elif [[ $(lspci | grep $HBA1000) ]];then
+		CARD="$HBA1000"
+	fi
 }
 getsize(){
   if [[ $(ipmitool fru | grep "Product Part Number") ]];then
@@ -54,7 +54,7 @@ getsize(){
       ;;
     esac
   else
-    echo "nothing here buds"
+    echo "Cant determine Chassis Size automatically"
     if [ -z $CHASSIS ]; then
     	read -p "Chassis Size? " CHASSIS
     fi
@@ -91,6 +91,11 @@ checkroot(){
 }
 
 CONFIG_PATH=$ALIAS_CONFIG_PATH
+if [ -z $CONFIG_PATH ];then
+    SCRIPT_NAME=$(basename "$0")
+	echo "($SCRIPT_NAME)ALIAS_CONFIG_PATH must be defined"
+	exit 1
+fi
 R750="0750"
 LSI_9201="2116"
 LSI_9305="3224"
@@ -133,7 +138,7 @@ done
 checkroot
 
 if [ $RESET_MAP == yes ];then
-	rm -f /etc/zfs/vdev_id.conf
+	rm -f $ALIAS_CONFIG_PATH/vdev_id.conf
 	udevadm trigger
 	udevadm settle
 	echo "Drive Aliasing reset"
@@ -164,5 +169,5 @@ fi
 if [ $QUIET == "yes" ];then
 	:
 else
-	cat /etc/zfs/vdev_id.conf
+	cat $ALIAS_CONFIG_PATH/vdev_id.conf
 fi
