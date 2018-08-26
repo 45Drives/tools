@@ -104,6 +104,56 @@ getSTATUS() {
         let b=b+1
     done
 }
+displayBAYS() {
+    r=0
+    case $HYBRID_SIZE in
+    8)
+        echo "8SSD BAYS"
+        ;;
+    16)
+        line 24 _
+        while [ $r -lt $ROWS ];do
+            r_=$(($r * 15))
+            if [ $r -eq $((ROWS -1)) ];then
+                printf "|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|\n" ROW$r \
+                "${BAYSTATUS[$((0 + $r_))]}" "${BAYSTATUS[$((1 + $r_))]}" "${BAYSTATUS[$((2 + $r_))]}" "${BAYSTATUS[$((3 + $r_))]}" "${BAYSTATUS[$((4 + $r_))]}" \
+                "${BAYSTATUS[$((5 + $r_))]}" "${BAYSTATUS[$((6 + $r_))]}" "${BAYSTATUS[$((7 + $r_))]}" "${BAYSTATUS[$((8 + $r_))]}" "${BAYSTATUS[$((9 + $r_))]}" \
+                "${BAYSTATUS[$((10 + $r_))]}" "${BAYSTATUS[$((11 + $r_))]}" "${BAYSTATUS[$((12 + $r_))]}" "${BAYSTATUS[$((13 + $r_))]}" "${BAYSTATUS[$((14 + $r_))]}" \
+                "${BAYSTATUS[$((15 + $r_))]}" "${BAYSTATUS[$((16 + $r_))]}" "${BAYSTATUS[$((17 + $r_))]}" "${BAYSTATUS[$((18 + $r_))]}" "${BAYSTATUS[$((19 + $r_))]}" \
+                "${BAYSTATUS[$((20 + $r_))]}" "${BAYSTATUS[$((21 + $r_))]}"
+            else
+                printf "|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|\n" ROW$r \
+                "${BAYSTATUS[$((0 + $r_))]}" "${BAYSTATUS[$((1 + $r_))]}" "${BAYSTATUS[$((2 + $r_))]}" "${BAYSTATUS[$((3 + $r_))]}" "${BAYSTATUS[$((4 + $r_))]}" \
+                "${BAYSTATUS[$((5 + $r_))]}" "${BAYSTATUS[$((6 + $r_))]}" "${BAYSTATUS[$((7 + $r_))]}" "${BAYSTATUS[$((8 + $r_))]}" "${BAYSTATUS[$((9 + $r_))]}" \
+                "${BAYSTATUS[$((10 + $r_))]}" "${BAYSTATUS[$((11 + $r_))]}" "${BAYSTATUS[$((12 + $r_))]}" "${BAYSTATUS[$((13 + $r_))]}" "${BAYSTATUS[$((14 + $r_))]}" 
+            fi
+            let r=r+1
+        done
+        ;;
+    32)
+        line 24 _
+        while [ $r -lt $ROWS ];do
+            r_=$(($r * 15))
+            if [ $r -eq $((ROWS -1)) ];then
+                printf "|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|\n" ROW$r \
+                "${BAYSTATUS[$((0 + $r_))]}" "${BAYSTATUS[$((1 + $r_))]}" "${BAYSTATUS[$((2 + $r_))]}" "${BAYSTATUS[$((3 + $r_))]}" "${BAYSTATUS[$((4 + $r_))]}" \
+                "${BAYSTATUS[$((5 + $r_))]}" "${BAYSTATUS[$((6 + $r_))]}" "${BAYSTATUS[$((7 + $r_))]}" "${BAYSTATUS[$((8 + $r_))]}" "${BAYSTATUS[$((9 + $r_))]}" \
+                "${BAYSTATUS[$((10 + $r_))]}" "${BAYSTATUS[$((11 + $r_))]}" "${BAYSTATUS[$((12 + $r_))]}" "${BAYSTATUS[$((13 + $r_))]}" "${BAYSTATUS[$((14 + $r_))]}" \
+                "${BAYSTATUS[$((15 + $r_))]}" "${BAYSTATUS[$((16 + $r_))]}" "${BAYSTATUS[$((17 + $r_))]}" "${BAYSTATUS[$((18 + $r_))]}" "${BAYSTATUS[$((19 + $r_))]}" \
+                "${BAYSTATUS[$((20 + $r_))]}" "${BAYSTATUS[$((21 + $r_))]}" "${BAYSTATUS[$((22 + $r_))]}" "${BAYSTATUS[$((23 + $r_))]}" "${BAYSTATUS[$((24 + $r_))]}" \
+                "${BAYSTATUS[$((25 + $r_))]}" "${BAYSTATUS[$((26 + $r_))]}" "${BAYSTATUS[$((27 + $r_))]}" "${BAYSTATUS[$((28 + $r_))]}" "${BAYSTATUS[$((29 + $r_))]}" \
+                "${BAYSTATUS[$(( + $r_))]}" "${BAYSTATUS[$((31 + $r_))]}" 
+            else
+                printf "|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|\n" ROW$r \
+                "${BAYSTATUS[$((0 + $r_))]}" "${BAYSTATUS[$((1 + $r_))]}" "${BAYSTATUS[$((2 + $r_))]}" "${BAYSTATUS[$((3 + $r_))]}" "${BAYSTATUS[$((4 + $r_))]}" \
+                "${BAYSTATUS[$((5 + $r_))]}" "${BAYSTATUS[$((6 + $r_))]}" "${BAYSTATUS[$((7 + $r_))]}" "${BAYSTATUS[$((8 + $r_))]}" "${BAYSTATUS[$((9 + $r_))]}" \
+                "${BAYSTATUS[$((10 + $r_))]}" "${BAYSTATUS[$((11 + $r_))]}" "${BAYSTATUS[$((12 + $r_))]}" "${BAYSTATUS[$((13 + $r_))]}" "${BAYSTATUS[$((14 + $r_))]}" 
+            fi
+            let r=r+1
+        done
+        ;;
+    esac
+}
 
 ## VARIBLES
 R750="0750"
@@ -139,68 +189,20 @@ printf "| %s %s %s %s |\n" Disk Controller: $CARD DriverVersion: $DRIVERVERSION
 case $BAYS in
 15)
     ROWS=1
-    r=0
-    case $HYBRID_SIZE in
-    8)
-        echo "s15-8 hybrid"
-        ;;
-    32)
-        echo "s15-32 ALL FLASH"
-        ;;
-    esac
-    ;;
+    displayBAYS
 30)
     ROWS=2
-    r=0
-    case $HYBRID_SIZE in
-    16)
-        line 24 _
-        while [ $r -lt $ROWS ];do
-            r_=$(($r * 15))
-            if [ $r -eq $((ROWS -1)) ];then
-                printf "|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|\n" ROW$r \
-                "${BAYSTATUS[$((0 + $r_))]}" "${BAYSTATUS[$((1 + $r_))]}" "${BAYSTATUS[$((2 + $r_))]}" "${BAYSTATUS[$((3 + $r_))]}" "${BAYSTATUS[$((4 + $r_))]}" \
-                "${BAYSTATUS[$((5 + $r_))]}" "${BAYSTATUS[$((6 + $r_))]}" "${BAYSTATUS[$((7 + $r_))]}" "${BAYSTATUS[$((8 + $r_))]}" "${BAYSTATUS[$((9 + $r_))]}" \
-                "${BAYSTATUS[$((10 + $r_))]}" "${BAYSTATUS[$((11 + $r_))]}" "${BAYSTATUS[$((12 + $r_))]}" "${BAYSTATUS[$((13 + $r_))]}" "${BAYSTATUS[$((14 + $r_))]}" \
-                "${BAYSTATUS[$((15 + $r_))]}" "${BAYSTATUS[$((16 + $r_))]}" "${BAYSTATUS[$((17 + $r_))]}" "${BAYSTATUS[$((18 + $r_))]}" "${BAYSTATUS[$((19 + $r_))]}" \
-                "${BAYSTATUS[$((20 + $r_))]}" "${BAYSTATUS[$((21 + $r_))]}"
-            else
-                printf "|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|\n" ROW$r \
-                "${BAYSTATUS[$((0 + $r_))]}" "${BAYSTATUS[$((1 + $r_))]}" "${BAYSTATUS[$((2 + $r_))]}" "${BAYSTATUS[$((3 + $r_))]}" "${BAYSTATUS[$((4 + $r_))]}" \
-                "${BAYSTATUS[$((5 + $r_))]}" "${BAYSTATUS[$((6 + $r_))]}" "${BAYSTATUS[$((7 + $r_))]}" "${BAYSTATUS[$((8 + $r_))]}" "${BAYSTATUS[$((9 + $r_))]}" \
-                "${BAYSTATUS[$((10 + $r_))]}" "${BAYSTATUS[$((11 + $r_))]}" "${BAYSTATUS[$((12 + $r_))]}" "${BAYSTATUS[$((13 + $r_))]}" "${BAYSTATUS[$((14 + $r_))]}" 
-            fi
-            let r=r+1
-        done
-        ;;
-    32)
-        echo "s30 32 hybrid"
-        ;;
-    esac
+    displayBAYS
     ;;
 45)
     ROWS=3
-    case $HYBRID_SIZE in
-    16)
-        echo "s45 16 hybrid"
-        ;;
-    32)
-        echo "s45 32 hybrid"
-        ;;
-    esac
+    displayBAYS
 	;;
 60)
     ROWS=4
-    case $HYBRID_SIZE in
-    16)
-        echo "xl60 16 hybrid"
-        ;;
-    32)
-        echo "xl60 32 hybrid"
-        ;;
-    esac
+    displayBAYS
 	;;
 *)
-	echo -e "\nError!\n\tUnable to Display Drive Map\n\tConfigure Drive Aliasing (1)\n"
+	echo -e "\nError!\n\tUnable to Display Drive Map\n\tConfigure Drive Aliasing\n"
 	;;
 esac
