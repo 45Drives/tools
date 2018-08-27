@@ -47,27 +47,29 @@ line() { # takes a number as first input Length, and any character as second inp
 }
 setBAYstatus() {
 	TYPE=$(smartctl -a $ALIAS_DEVICE_PATH/${BAY[$1]} | grep -i rotation | awk '{print $3}')
-	if [ -z $TYPE ];then
-		printf -v absent "$DGREY%-5s$NC($DGREY%-5s$NC)" "--" "--"
-		#absent=$(echo -e "${DGREY}${BAY[$1]}${NC}")
-		BAYSTATUS[$1]=$absent
+	if [ $ALIAS_FLAG == "yes" ];then
+		ALIAS_NAME=${BAY[$1]}
+		if [ -z $TYPE ];then
+			printf -v absent "$DGREY%-5s$NC($DGREY%-5s$NC)" "--" "--"
+			#absent=$(echo -e "${DGREY}${BAY[$1]}${NC}")
+			BAYSTATUS[$1]=$absent
+		else
+			printf -v type "$YELLOW%-5s$NC($YELLOW%-5s$NC)" $ALIAS_NAME $TYPE
+			#unknown=$(echo -e "${YELLOW}${BAY[$1]}${NC}")
+			BAYSTATUS[$1]=$type
+		fi
 	else
-		printf -v type "$YELLOW%-5s$NC($YELLOW%-5s$NC)" ${BAY[$1]} $TYPE
-		#unknown=$(echo -e "${YELLOW}${BAY[$1]}${NC}")
-		BAYSTATUS[$1]=$type
-	fi
-}
-setBAYstatusNC() {
-	TYPE=$(smartctl -a $ALIAS_DEVICE_PATH/${BAY[$1]} | grep -i rotation | awk '{print $3}')
-	if [ -z $TYPE ];then
-		printf -v absent "%-5s" "N/A"
-		#absent=$(echo -e "${DGREY}${BAY[$1]}${NC}")
-		BAYSTATUS[$1]=$absent
-	else
-		printf -v type "%-5s" ${BAY[$1]} $TYPE
-		#unknown=$(echo -e "${YELLOW}${BAY[$1]}${NC}")
-		BAYSTATUS[$1]=$type
-	fi
+		DEVICE_NAME=$(readlink $ALIAS_DEVICE_PATH/${BAY[$1]})
+		if [ -z $TYPE ];then
+			printf -v absent "$DGREY%-5s$NC($DGREY%-5s$NC)" "--" "--"
+			#absent=$(echo -e "${DGREY}${BAY[$1]}${NC}")
+			BAYSTATUS[$1]=$absent
+		else
+			printf -v type "$YELLOW%-5s$NC($YELLOW%-5s$NC)" $DEVICE_NAME $TYPE
+			#unknown=$(echo -e "${YELLOW}${BAY[$1]}${NC}")
+			BAYSTATUS[$1]=$type
+		fi
+	fi		
 }
 getCARDname() {
 if [[ $(lspci | grep $R750) ]];then
@@ -96,15 +98,15 @@ while [ $i -lt $BAYS ];do
 	let j=j+1
 done
 }
-COLOR_FLAG=yes
 OLD_MAP=no
-while getopts 'onh' OPTION; do
+ALIAS_FLAG=yes
+while getopts 'osh' OPTION; do
 	case ${OPTION} in
-	n)
-		COLOR_FLAG=no
-		;;
 	o)
 		OLD_MAP=yes
+		;;
+	s)
+		ALIAS_FLAG=no
 		;;
 	esac
 done
