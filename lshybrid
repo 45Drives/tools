@@ -152,6 +152,9 @@ displayBAYS() {
             let r=r+1
         done
         ;;
+    *)
+    	echo "Error: Either HYBRID_SIZE is no set correctly (see /etc/profile.d/alias.sh) or this is not a hyrbid chassis
+	;;
     esac
 }
 
