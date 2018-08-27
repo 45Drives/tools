@@ -48,11 +48,11 @@ line() { # takes a number as first input Length, and any character as second inp
 setBAYstatus() {
 	MODEL=$((hdparm -I $ALIAS_DEVICE_PATH/${BAY[$1]} | grep -i model | awk -F: '{print $2}' | tr -d '[:space:]') 2>/dev/null)
 	if [ -z $MODEL ];then
-		printf -v absent "$DGREY%-22s$NC" "N/A"
+		printf -v absent "$DGREY%-5s$NC($DGREY%-22s$NC)" "--" "--"
 		#absent=$(echo -e "${DGREY}${BAY[$1]}${NC}")
 		BAYSTATUS[$1]=$absent
 	else
-		printf -v model "$YELLOW%-22s$NC" $MODEL
+		printf -v model "$YELLOW%-5s$NC($YELLOW%-22s$NC)" ${BAY[$1]} $MODEL
 		#unknown=$(echo -e "${YELLOW}${BAY[$1]}${NC}")
 		BAYSTATUS[$1]=$model
 	fi

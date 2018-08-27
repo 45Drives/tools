@@ -41,15 +41,15 @@ line() { # takes a number as first input Length, and any character as second inp
 }
 setBAYstatus() {
 	if [ ! -b $DEVICE_PATH/$DRIVE ];then
-		printf -v absent "$DGREY%-5s$NC" ${BAY[$1]}  
+		printf -v absent "$DGREY%s$NC" ${BAY[$1]}  
 		BAYSTATUS[$1]=$absent
 	fi
 	partcount=$((ls $DEVICE_PATH/ | grep -w ${BAY[$1]} | wc -l) 2>/dev/null)
 	if [ "$partcount" -eq "1" ];then
-		printf -v present "$YELLOW%-5s$NC" ${BAY[$1]}  	
+		printf -v present "$YELLOW%s$NC" ${BAY[$1]}  	
 		BAYSTATUS[$1]=$present
 	elif [ "$partcount" -gt "1" ];then
-		printf -v partition "$GREEN%-5s$NC" ${BAY[$1]} 	
+		printf -v partition "$GREEN%s$NC" ${BAY[$1]} 	
 		BAYSTATUS[$1]=$partition
 	fi
 }
