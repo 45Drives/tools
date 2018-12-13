@@ -107,6 +107,8 @@ QUIET=no
 RESET_MAP=no
 UDEV_TRIG=yes
 OLD_MAP=no
+COLOR_FLAG=yes
+BIN_DIR=/opt/ctools
 
 
 while getopts 'c:oms:qrh' OPTION; do
