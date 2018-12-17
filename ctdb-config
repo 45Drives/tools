@@ -208,7 +208,7 @@ if [ $GDEPLOY_MODE == no ];then
 	
 fi
 
-systemctl restart ctdb
+#systemctl restart ctdb
 #IF SMB_FLAG =yes
 ## Configure SMB as to get share up at minimum
 
