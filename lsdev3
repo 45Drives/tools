@@ -1,0 +1,276 @@
+
+#!/bin/bash
+# ---------------------------------------------------------------------------
+# lsdev - List devices in the system by their alias
+
+# Copyright 2016, Brett Kelly <bkelly@45drives.com>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.############
+
+############
+
+declare -A BAY
+declare -A BAYSTATUS
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+LGREEN='\033[1;32m'
+LGREY='\033[1;37m'
+DGREY='\033[1;30m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;36m'
+NC='\033[0m'
+R750="0750"
+LSI_9201="2116"
+LSI_9305="3224"
+ASR="Adaptec"
+HBA1000="Adaptec Series 8"
+R3740="3740"
+
+DEVICE_PATH=$ALIAS_DEVICE_PATH
+CONFIG_PATH=$ALIAS_CONFIG_PATH
+
+if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
+        echo "Both ALIAS_DEVICE_PATH and ALIAS_CONFIG_PATH must be defined"
+        exit 1
+fi
+line() { # takes a number as first input Length, and any character as second input, defaults to "-" if no option
+        if [ -z $2 ]; then
+                printf -v line '%*s' "$1"
+                echo ${line// /-}
+        else
+                printf -v line '%*s' "$1"
+                echo ${line// /$2}
+        fi
+}
+setBAYstatus() {
+		LINUX_NAME=$(readlink $ALIAS_DEVICE_PATH/${BAY[$1]})
+        if [ ! -b $DEVICE_PATH/$DRIVE ];then
+                printf -v absent "$DGREY%-6s$NC" ${BAY[$1]} "-"
+                BAYSTATUS[$1]=$absent
+        fi
+        partcount=$((ls $DEVICE_PATH/ | grep -w ${BAY[$1]} | wc -l) 2>/dev/null)
+        if [ "$partcount" -eq "1" ];then
+                printf -v present "$YELLOW%-6s$NC" ${BAY[$1]} "("$LINUX_NAME")"
+                BAYSTATUS[$1]=$present
+        elif [ "$partcount" -gt "1" ];then
+                printf -v partition "$GREEN%-6s$NC" ${BAY[$1]} "("$LINUX_NAME")"
+                BAYSTATUS[$1]=$partition
+        fi
+}
+setBAYstatusNC() {
+        if [ ! -b $DEVICE_PATH/$DRIVE ];then
+                printf -v absent "%-5s" ${BAY[$1]}
+                BAYSTATUS[$1]=$absent
+        fi
+        partcount=$((ls $DEVICE_PATH/ | grep -w ${BAY[$1]} | wc -l) 2>/dev/null)
+        if [ "$partcount" -eq "1" ];then
+                printf -v present "*%-5s" ${BAY[$1]}
+                BAYSTATUS[$1]=$present
+        elif [ "$partcount" -gt "1" ];then
+                printf -v partition "**%-5s" ${BAY[$1]}
+                BAYSTATUS[$1]=$partition
+        fi
+}
+getCARDname() {
+if [[ $(lspci | grep $R750) ]];then
+        CARD="HighPoint R750"
+        DRIVERVERSION=$(cat /proc/scsi/r750/* 2>/dev/null | awk 'NR==1{print $5}')
+        OLD_MAP=yes #Default R750 to always use old mapping
+elif [[ $(lspci | grep $LSI_9201) ]];then
+        CARD="LSI 9201-16i"
+        DRIVERVERSION=$(modinfo mpt2sas | grep version | awk 'NR==1{print $2}')
+elif [[ $(lspci | grep $LSI_9305) ]];then
+        CARD="LSI 9305-16i"
+        DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
+elif [[ $(lspci | grep $HBA1000) ]];then
+        CARD="Adaptec HBA-1000i"
+        DRIVERVERSION=$(rpm -qa | grep -i aacraid)
+fi
+}
+getBAY() {
+i=0
+j=3
+## LOOP THROUGH BAYS
+while [ $i -lt $BAYS ];do
+        bay=$(cat $CONFIG_PATH/vdev_id.conf | awk -v j=$j 'NR==j{print $2}')
+        BAY[$i]=$bay
+        let i=i+1
+        let j=j+1
+done
+}
+COLOR_FLAG=yes
+OLD_MAP=no
+while getopts 'onh' OPTION; do
+        case ${OPTION} in
+        n)
+                COLOR_FLAG=no
+                ;;
+        o)
+                OLD_MAP=yes
+                ;;
+        esac
+done
+BAYS=$((cat $CONFIG_PATH/vdev_id.conf| awk "NR>2" | wc -l) 2>/dev/null)
+getCARDname
+getBAY
+printf "| %s %s %s %s |\n" Disk Controller: $CARD DriverVersion: $DRIVERVERSION
+# initialize 4 counters, one for each potenital row in the server
+
+WIDTH=15
+WIDTH_=$(expr $WIDTH - 1)
+i=0 # first row, start at 0
+j=$(expr $i + $WIDTH) #2nd row offset i by width of the server
+k=$(expr $i + $WIDTH + $WIDTH) # 3rd row offset i by 2 widths
+l=$(expr $i + $WIDTH + $WIDTH + $WIDTH) # 4th row, offset by 3 widths
+case $BAYS in
+15)
+        #30unit
+        line 24 _
+        while [ $i -lt $WIDTH ];do
+                i_=$(expr $WIDTH_ - $i ) # invert counter for first row
+                if [ $COLOR_FLAG == no ];then
+                        setBAYstatusNC $i_
+                else
+                        setBAYstatus $i_
+                fi
+                printf "| %s |\n" "${BAYSTATUS[$i_]}" #displays drives in a snake pattern
+                let i=i+1
+                let j=j+1
+        done
+        line 24 -
+        printf "| %-5s |\n" ROW1
+        line 24 =
+        ;;
+30)
+        #30unit
+        line 24 _
+        while [ $i -lt $WIDTH ];do
+                i_=$(expr $WIDTH_ - $i ) # invert counter for first row
+                j_=$(expr $WIDTH + $WIDTH_ - $i )
+                if [ $COLOR_FLAG == no ];then
+                        setBAYstatusNC $i_
+                        if [ $OLD_MAP == yes ];then
+                                setBAYstatusNC $j
+                        else
+                                setBAYstatusNC $j_
+                        fi
+
+                else
+                        setBAYstatus $i_
+                        if [ $OLD_MAP == yes ];then
+                                setBAYstatus $j
+                        else
+                                setBAYstatus $j_
+                        fi
+
+                fi
+                if [ $OLD_MAP = yes ];then
+                        printf "| %s | %s |\n" "${BAYSTATUS[$i_]}" "${BAYSTATUS[$j]}"
+                else
+                        printf "| %s | %s |\n" "${BAYSTATUS[$i_]}" "${BAYSTATUS[$j_]}"
+                fi
+
+                let i=i+1
+                let j=j+1
+        done
+        line 24 -
+        printf "| %-5s | %-5s |\n" ROW1 ROW2
+        line 24 =
+        ;;
+45)
+        #45Unit
+        line 24 _
+        while [ $i -lt $WIDTH ];do
+                k_=$(expr $WIDTH + $WIDTH + $WIDTH_ - $i )
+                j_=$(expr $WIDTH + $WIDTH_ - $i )
+                i_=$(expr $WIDTH_ - $i )
+                if [ $COLOR_FLAG == no ];then
+                        setBAYstatusNC $i_
+                        if [ $OLD_MAP == yes ];then
+                                setBAYstatusNC $j
+                        else
+                                setBAYstatusNC $j_
+                        fi
+                        setBAYstatusNC $k_
+                else
+                        setBAYstatus $i_
+                        if [ $OLD_MAP == yes ];then
+                                setBAYstatus $j
+                        else
+                                setBAYstatus $j_
+                        fi
+
+                        setBAYstatus $k_
+                fi
+                if [ $OLD_MAP = yes ];then
+                        printf "| %s | %s | %s |\n" "${BAYSTATUS[$i_]}" "${BAYSTATUS[$j]}" "${BAYSTATUS[$k_]}"
+                else
+                        printf "| %s | %s | %s |\n" "${BAYSTATUS[$i_]}" "${BAYSTATUS[$j_]}" "${BAYSTATUS[$k_]}"
+                fi
+                let i=i+1
+                let j=j+1
+                let k=k+1
+        done
+        line 24 -
+        printf "| %-5s | %-5s | %-5s |\n" ROW1 ROW2 ROW3
+        line 24 =
+        ;;
+60)
+        #60unit
+        line 32 _
+        while [ $i -lt $WIDTH ];do
+                l_=$(expr $WIDTH + $WIDTH + $WIDTH + $WIDTH_ - $i )
+                k_=$(expr $WIDTH + $WIDTH + $WIDTH_ - $i )
+                j_=$(expr $WIDTH + $WIDTH_ - $i )
+                i_=$(expr $WIDTH_ - $i )
+                if [ $COLOR_FLAG == no ];then
+                        setBAYstatusNC $i_
+                        if [ $OLD_MAP == yes ];then
+                                setBAYstatusNC $j
+                        else
+                                setBAYstatusNC $j_
+                        fi
+                        setBAYstatusNC $k_
+                        if [ $OLD_MAP == yes ];then
+                                setBAYstatusNC $l
+                        else
+                                setBAYstatusNC $l_
+                        fi
+
+                else
+                        setBAYstatus $i_
+                        if [ $OLD_MAP == yes ];then
+                                setBAYstatus $j
+                        else
+                                setBAYstatus $j_
+                        fi
+                        setBAYstatus $k_
+                        if [ $OLD_MAP == yes ];then
+                                setBAYstatus $l
+                        else
+                                setBAYstatus $l_
+                        fi
+
+                fi
+                if [ $OLD_MAP = yes ];then
+                        printf "| %s | %s | %s | %s |\n" "${BAYSTATUS[$i_]}" "${BAYSTATUS[$j]}" "${BAYSTATUS[$k_]}" "${BAYSTATUS[$l]}"
+                else
+                        printf "| %s | %s | %s | %s |\n" "${BAYSTATUS[$i_]}" "${BAYSTATUS[$j_]}" "${BAYSTATUS[$k_]}" "${BAYSTATUS[$l_]}"
+                fi
+                let i=i+1
+                let j=j+1
+                let k=k+1
+                let l=l+1
+        done
+        line 32 -
+        printf "| %-5s | %-5s | %-5s | %-5s |\n" ROW1 ROW2 ROW3 ROW4
+        line 32 =
+        echo
+        ;;
+*)
+        echo -e "\nError!\n\tUnable to Display Drive Map\n\tConfigure Drive Aliasing (1)\n"
+        ;;
+esac
