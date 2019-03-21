@@ -22,6 +22,9 @@ done
 EXTRA=$(vgs db-vg1 -o vg_free --nosuffix --noheading --units B | awk '{print $1}' | cut -d . -f 1)
 EXTRA=$(( $EXTRA / 1024 ))
 EXTRAosd=$(( $EXTRA / $OSD_COUNT ))
+if [ $EXTRAosd -lt 4096 ];then
+	exit 1
+fi	
 EXTRAosd=$(( $EXTRAosd - 4096 ))
 for i in `seq 1 $OSD_COUNT`;do	
         lvextend -L+"$EXTRAosd"k /dev/$VG_NAME/db-lv$i
