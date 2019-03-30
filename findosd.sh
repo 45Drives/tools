@@ -12,7 +12,7 @@ if [ $# -eq 0 ];then
 fi
 rpm -q jq >/dev/null  || yum install jq -y
 OSD_FSID=$(ceph osd find $OSD_ID 2>/dev/null | jq -r '.osd_fsid')
-OSD_HOST=$(ceph osd find $OSD_ID | jq -r '.host')
+OSD_HOST=$(ceph osd find $OSD_ID | jq -r '.crush_location.host')
 
 if [ "$OSD_HOST" != "$(hostname)" ];then
 	echo "osd.$OSD_ID is located on host=$OSD_HOST"
