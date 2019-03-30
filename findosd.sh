@@ -12,15 +12,15 @@ if [ $# -eq 0 ];then
 fi
 rpm -q jq >/dev/null  || yum install jq -y
 OSD_FSID=$(ceph osd find $OSD_ID 2>/dev/null | jq -r '.osd_fsid')
-OSD_HOST=$(ceph osd find $OSD_ID | jq -r '.host') ; echo $OSD_HOST
+OSD_HOST=$(ceph osd find $OSD_ID | jq -r '.host')
 
 if [ "$OSD_HOST" != "$(hostname)" ];then
 	echo "osd.$OSD_ID is located on host=$OSD_HOST"
 	exit 1
 fi
 
-OSD_VOLID=$(lvs --noheadings -o lv_name,vg_name | grep $OSD_FSID | awk '{print $2}') ; echo $OSD_VOLID
-OSD_DEVID=$(pvs --noheadings -o pv_name,vg_name | grep $OSD_VOLID | awk '{print $1}') ; echo $OSD_DEVID
+OSD_VOLID=$(lvs --noheadings -o lv_name,vg_name | grep $OSD_FSID | awk '{print $2}')
+OSD_DEVID=$(pvs --noheadings -o pv_name,vg_name | grep $OSD_VOLID | awk '{print $1}')
 
 if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
         echo "Both ALIAS_DEVICE_PATH and ALIAS_CONFIG_PATH must be defined"
