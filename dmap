@@ -140,7 +140,7 @@ done
 checkroot
 
 if [ $RESET_MAP == yes ];then
-	rm -f $ALIAS_CONFIG_PATH/vdev_id.conf
+	rm -f $CONFIG_PATH/vdev_id.conf
 	udevadm trigger
 	udevadm settle
 	echo "Drive Aliasing reset"
@@ -171,5 +171,5 @@ fi
 if [ $QUIET == "yes" ];then
 	:
 else
-	cat $ALIAS_CONFIG_PATH/vdev_id.conf
+	cat $CONFIG_PATH/vdev_id.conf
 fi
