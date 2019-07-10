@@ -46,7 +46,7 @@ line() { # takes a number as first input Length, and any character as second inp
         fi
 }
 setBAYstatus() {
-		LINUX_NAME=$(readlink $ALIAS_DEVICE_PATH/${BAY[$1]})
+		LINUX_NAME=$(readlink $DEVICE_PATH/${BAY[$1]})
         if [ ! -b $DEVICE_PATH/$DRIVE ];then
                 printf -v absent "$DGREY%-6s$NC" ${BAY[$1]} "-"
                 BAYSTATUS[$1]=$absent
