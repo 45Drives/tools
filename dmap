@@ -90,7 +90,7 @@ checkroot(){
 	fi
 }
 
-CONFIG_PATH=$ALIAS_CONFIG_PATH
+CONFIG_PATH=/etc
 if [ -z $CONFIG_PATH ];then
     SCRIPT_NAME=$(basename "$0")
 	echo "($SCRIPT_NAME)ALIAS_CONFIG_PATH must be defined"
