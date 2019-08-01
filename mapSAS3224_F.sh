@@ -1,6 +1,6 @@
 #!/bin/bash
 # ---------------------------------------------------------------------------
-# mapSAS3224 - Used by dmap to generate LSI HBA models using SAS chipset 3224 alias config
+# mapSAS3224_F - Used by dmap to generate LSI HBA models using SAS chipset 3224 alias config
 
 # Copyright 2016, Brett Kelly <bkelly@45drives.com> Mitch Hall <mhall@45drives.com>
 
