@@ -12,7 +12,7 @@
 CHASSIS=$1 
 DISK_CONTROLLER=$2
 OLD_MAP=$3 #either 'yes' or 'no'
-CONFIG_PATH=$ALIAS_CONFIG_PATH
+CONFIG_PATH=/etc
 if [ -z $CONFIG_PATH ];then
         SCRIPT_NAME=$(basename "$0")
 	echo "($SCRIPT_NAME)ALIAS_CONFIG_PATH must be defined"
@@ -57,7 +57,7 @@ read_card(){
 			else
 				i_=$i
 			fi
-			echo "alias $CARD-$slot     /dev/disk/by-path/pci-0000:$CARD_ID-sas-phy$(expr $t - $i_)-lun-0" >> $ALIAS_CONFIG_PATH/vdev_id.tmp
+			echo "alias $CARD-$slot     /dev/disk/by-path/pci-0000:$CARD_ID-sas-phy$(expr $t - $i_)-lun-0" >> $CONFIG_PATH/vdev_id.tmp
 			let i=i+1
 		done
 		let PORT=PORT+1
@@ -68,22 +68,22 @@ read_card(){
 }
 trimconf(){
 	TRIM=$1
-	echo "$(head -n -$TRIM $ALIAS_CONFIG_PATH/vdev_id.tmp)" > $ALIAS_CONFIG_PATH/vdev_id.tmp
+	echo "$(head -n -$TRIM $CONFIG_PATH/vdev_id.tmp)" > $CONFIG_PATH/vdev_id.tmp
 }
 
 if [ $# = 0 ];then
 	usage
 fi
 
-if [ -e $ALIAS_CONFIG_PATH/vdev_id.conf ];then
-        rm -f $ALIAS_CONFIG_PATH/vdev_id.conf
+if [ -e $CONFIG_PATH/vdev_id.conf ];then
+        rm -f $CONFIG_PATH/vdev_id.conf
 fi
 
 PORT_COUNT=4
 DRIVE_COUNT=4
 
-echo "# by-vdev" >> $ALIAS_CONFIG_PATH/vdev_id.conf
-echo "# name     fully qualified or base name of device link" >> $ALIAS_CONFIG_PATH/vdev_id.conf
+echo "# by-vdev" >> $CONFIG_PATH/vdev_id.conf
+echo "# name     fully qualified or base name of device link" >> $CONFIG_PATH/vdev_id.conf
 case $CHASSIS in
 15)
 	CARD1=$(lspci | grep $DISK_CONTROLLER | awk 'NR==1{print $1}')
@@ -126,5 +126,5 @@ case $CHASSIS in
 	fi
 	;;
 esac
-cat $ALIAS_CONFIG_PATH/vdev_id.tmp >> $ALIAS_CONFIG_PATH/vdev_id.conf
-rm -f $ALIAS_CONFIG_PATH/vdev_id.tmp
+cat $CONFIG_PATH/vdev_id.tmp >> $CONFIG_PATH/vdev_id.conf
+rm -f $CONFIG_PATH/vdev_id.tmp
