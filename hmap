@@ -23,17 +23,10 @@ EOF
         exit 0
 }
 gethba() {
-	if [[ $(lspci | grep $R750) ]];then
-		DISK_CONTROLLER=$R750
-	elif [[ $(lspci | grep $LSI_9201) ]];then
-		DISK_CONTROLLER=$LSI_9201
-	elif [[ $(lspci | grep $LSI_9305) ]];then
+    if [[ $(lspci | grep $LSI_9305) ]];then
 		DISK_CONTROLLER=$LSI_9305
     elif [[ $(lspci | grep $LSI_9405) ]];then
         DISK_CONTROLLER=$LSI_9405
-	elif [[ $(lspci | grep $HBA1000) ]];then
-		CARD="$HBA1000"
-	fi
 }
 getsize(){
   if [[ $(ipmitool fru | grep "Product Part Number") ]];then
