@@ -1,22 +1,20 @@
 #!/bin/bash
 # ---------------------------------------------------------------------------
 # zcreate - creates zpools based on system hardware. Also takes input for fine tuned options 
-
-# Copyright 2016, Brett Kelly <bkelly@45drives.com>
+# v2.0
+# Copyright 2019, Brett Kelly <bkelly@45drives.com>
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
+# FUNCTIONS
 usage() { # Help
         cat << EOF
 Usage:	zcreate
 	[-a] Set ashift value
 	[-b] Build Flag. Include to build the array
-	[-C] Device class. Only use this type of device. 
-		Default: Use all drives
-		Options: "hdd","ssd"
 	[-c] Custom Flag. Include for manual pool configuration
 	[-D] Destroys zpool
 	[-d] Specify how many drives to use. 
@@ -37,13 +35,13 @@ EOF
         exit 0
 }
 pause(){ # Waits for user input to continue
-read -p "Press any to continue $1" con
-case $con in
-*)
-	;;
-esac
+    read -p "Press any to continue $1" con
+    case $con in
+    *)
+	    ;;
+    esac
 }
-getbays() { # Fills array BAYS with physical slot number, whether there is a drive present or not (creates array of all drive slots, wheter a is drive present or not)
+getbays() { # Creates array BAYS of all drive slots in chassis, whether a is drive present or not)
 	i=0
 	j=3
 	BAYS=$((cat /etc/zfs/vdev_id.conf| awk "NR>2" | wc -l) 2>/dev/null)
@@ -178,8 +176,10 @@ ZPOOL_NAME=zpool
 QUIET=no
 TUNE_FLAG=yes
 ASHIFT_FLAG=no
+DEVICE_CLASS=
 
-while getopts 'a:bC:cd:Dfm:n:l:tqv:zh' OPTION; do
+# PARSE INPUT
+while getopts 'a:bcC:d:Dfm:n:l:tqv:zh' OPTION; do
 	case ${OPTION} in
 	a)
 		ASHIFT_FLAG=yes
@@ -234,6 +234,7 @@ while getopts 'a:bC:cd:Dfm:n:l:tqv:zh' OPTION; do
 	esac
 done
 
+# START HERE
 checkroot
 if [ ! -e /etc/zfs/vdev_id.conf ];then
 	echo -e "/etc/zfs/vdev_id.conf does not exist.\nUse dmap to configure drive alias first"

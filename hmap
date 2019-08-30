@@ -1,166 +1,130 @@
 #!/bin/bash
 # ---------------------------------------------------------------------------
-# dmap - Generate alias config for hardware
-
-# Copyright 2016, Brett Kelly <bkelly@45drives.com>
-
+# hmap - Generate alias config for hardware
+# Copyright 2019, Brett Kelly <bkelly@45drives.com>
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
 usage() { # Help
-        cat << EOF
-Usage:	dmap
-		[-m] Creates map but doesnt trigger udev rules
-		[-o] Use Old mapping (Non universal)
-		[-s] Specify chassis size
-		[-q] Quiet Mode
-		[-r] Resets drive map
-		[-h] Displays this message
-
+       cat << EOF
+Usage:    hmap
+        [-m] Creates map but doesnt trigger udev rules
+        [-q] Quiet Mode
+        [-r] Resets drive map
+        [-s] Specify chassis size
+        [-h] Displays this message
 EOF
+exit 0
+}
+checkroot(){
+    SCRIPT_NAME=$(basename "$0")
+    if [ "$EUID" -ne 0 ];then
+        echo "You must have root privileges to run $SCRIPT_NAME"
         exit 0
+    fi
+}
+getsize(){
+ if [[ $(ipmitool fru | grep "Product Part Number") ]];then
+   SIZE=$(ipmitool fru | grep "Product Part Number" | cut -f2 -d ':' | xargs echo)
+   case $SIZE in
+   Q30|q30|30)
+     CHASSIS=30
+     ;;
+   F32|f32|32)
+     CHASSIS=32
+     ;;
+   S45|s45|45)
+     CHASSIS=45
+     ;;
+   XL60|xl60|60)
+     CHASSIS=60
+     ;;
+   esac
+ else
+   echo "Cant determine Chassis Size automatically"
+   if [ -z $CHASSIS ]; then
+       read -p "Chassis Size? " CHASSIS
+   fi
+ fi
 }
 gethba() {
     if [[ $(lspci | grep $LSI_9305) ]];then
-		DISK_CONTROLLER=$LSI_9305
+        DISK_CONTROLLER=$LSI_9305
     elif [[ $(lspci | grep $LSI_9405) ]];then
-        DISK_CONTROLLER=$LSI_9405
-}
-getsize(){
-  if [[ $(ipmitool fru | grep "Product Part Number") ]];then
-    SIZE=$(ipmitool fru | grep "Product Part Number" | cut -f2 -d ':' | xargs echo)
-    case $SIZE in
-    AV15|av15|15)
-      CHASSIS=15
-      ;;
-    Q30|q30|30)
-      CHASSIS=30
-      ;;
-    F32|f32|32)
-      CHASSIS=32
-      ;;
-    S45|s45|45)
-      CHASSIS=45
-      ;;
-    S45l|s45l|45l)
-      CHASSIS=45
-      ;;
-    XL60|xl60|60)
-      CHASSIS=60
-      ;;
-    esac
-  else
-    echo "Cant determine Chassis Size automatically"
-    if [ -z $CHASSIS ]; then
-    	read -p "Chassis Size? " CHASSIS
+       DISK_CONTROLLER=$LSI_9405
     fi
-  fi
 }
 checkchassis(){
-	if [ $1 -eq 30 ] || [ $1 -eq 32 ] || [ $1 -eq 45 ] || [ $1 -eq 60 ] || [ $1 -eq 15 ];then
-		:
-	elif [ $1 -eq 40 ];then
-		if [ "$DISK_CONTROLLER" == "$R750" ];then
-			:
-		else
-			echo "Chassis: $1 is only supported for Controller: $R750"
-			exit 0
-		fi
-	elif [ $1 -eq 15 ];then
-		if [ "$DISK_CONTROLLER" == "$R750" ];then
-			echo "Chassis: $1 is not supported for Controller: $R750"
-			exit 0
-		else
-			:
-		fi
-	else
-		echo "$1 is not an available chassis size, (15,30,45,60 or 40(lite))"
-		exit 0
-	fi
-}
-checkroot(){
-	SCRIPT_NAME=$(basename "$0")
-	if [ "$EUID" -ne 0 ];then
-		echo "You must have root privileges to run $SCRIPT_NAME"
-		exit 0
-	fi
+    if [ $1 -eq 30 ] || [ $1 -eq 32 ] || [ $1 -eq 45 ] || [ $1 -eq 60 ] || [ $1 -eq 15 ];then
+        :
+    else
+        echo "$1 is not an available chassis size, (15,30,32,45,60)"
+        exit 0
+    fi
 }
 
-CONFIG_PATH=/etc
-
-R750="0750"
-LSI_9201="2116"
-LSI_9305="3224"
-LSI_9361="3316"
-LSI_9405="3616"
-HBA1000="Adaptec Series 8"
 DISK_CONTROLLER=
 CHASSIS=
+SIZE=
 QUIET=no
 RESET_MAP=no
 UDEV_TRIG=yes
-OLD_MAP=no
-COLOR_FLAG=yes
-BIN_DIR=/opt/ctools
+BIN_DIR="/opt/ctools"
+CONFIG_PATH="/etc"
+LSI_9305="3224"
 
-
-while getopts 'c:oms:qrh' OPTION; do
-	case ${OPTION} in
-	c)
-		DISK_CONTROLLER=${OPTARG}
-		;;
-	s)
-		CHASSIS=${OPTARG}
-		;;
-	o)
-		OLD_MAP=yes
-		;;
-	m)
-		UDEV_TRIG=no
-		;;
-	q)
-		QUIET=yes
-		;;
-	r)
-		RESET_MAP=yes
-		;;
-	h)
-		usage
-		;;
-	esac
+# Input Arguments
+while getopts 'mqrs:h' OPTION; do
+    case ${OPTION} in
+    m)
+        UDEV_TRIG=no
+        ;;
+    q)
+        QUIET=yes
+        ;;
+    r)
+        RESET_MAP=yes
+        ;;
+    s)
+        CHASSIS=${OPTARG}
+        ;;
+    h)
+        usage
+        ;;
+    esac
 done
 
 checkroot
 
+#Reset Drive map
 if [ $RESET_MAP == yes ];then
-	rm -f $CONFIG_PATH/vdev_id.conf
-	udevadm trigger
-	udevadm settle
-	echo "Drive Aliasing reset"
-	exit 0
+    rm -f $CONFIG_PATH/vdev_id.conf
+    udevadm trigger
+    udevadm settle
+    echo "Drive Aliasing reset"
+    exit 0
 fi
-
 getsize
 gethba
 checkchassis $CHASSIS
 
-if [ "$DISK_CONTROLLER" == "$R750" ];then
-	$BIN_DIR/mapr750 $CHASSIS $DISK_CONTROLLER $OLD_MAP
-elif [ "$DISK_CONTROLLER" == "$LSI_9201" ];then
-	$BIN_DIR/mapSAS2116 $CHASSIS $DISK_CONTROLLER $OLD_MAP
-elif [[ "$DISK_CONTROLLER" == "$LSI_9305" && ("$CHASSIS" -eq 32) ]];then
-    $BIN_DIR/mapSAS3224_F $CHASSIS $DISK_CONTROLLER
-elif [[ "$DISK_CONTROLLER" == "$LSI_9405" && ("$CHASSIS" -eq 32) ]];then
-    $BIN_DIR/mapSAS3616 $CHASSIS $DISK_CONTROLLER
-elif [ "$DISK_CONTROLLER" == "$LSI_9305" ];then
-	$BIN_DIR/mapSAS3224 $CHASSIS $DISK_CONTROLLER $OLD_MAP
-elif [ "$DISK_CONTROLLER" == "$HBA1000" ];then
-	$BIN_DIR/mapadaptec $CHASSIS $DISK_CONTROLLER $OLD_MAP
-elif [ "$DISK_CONTROLLER" == "$LSI_9361" ];then
-	$BIN_DIR/mapSAS3316 $CHASSIS $DISK_CONTROLLER $OLD_MAP
+CARD_COUNT=$(lspci | grep -i $DISK_CONTROLLER | wc -l )
+CARD_COUNT2=$(/opt/MegaRAID/storcli/storcli64 show all | grep 24i | wc -l)
+
+if [ $CARD_COUNT2 -eq 1 ]; then
+    HYBRID=16
+elif [ $CARD_COUNT2 -eq 2 ]; then
+    HYBRID=32
+else
+    echo "This is not a hybrid chassis"
+    echo "Run dmap instead"
+    exit 0
 fi
+
+## Call mapping script
+/opt/ctools/mapH$HYBRID $CHASSIS
 
 if [ $UDEV_TRIG == "yes" ];then
 	udevadm trigger
