@@ -92,7 +92,13 @@ fi
 
 echo "# by-vdev" >> $CONFIG_PATH/vdev_id.conf
 echo "# name     fully qualified or base name of device link" >> $CONFIG_PATH/vdev_id.conf
-case $CHASSIS in 
+case $CHASSIS in
+30)
+	CARD1=$(lspci | grep $DISK_CONTROLLER | awk 'NR==1{print $1}')
+	CARD2=$(lspci | grep $DISK_CONTROLLER | awk 'NR==2{print $1}')
+	read_card 1 $CARD1 6 yes
+	read_card 2 $CARD2 6 no
+	;;
 45)
 	CARD1=$(lspci | grep $DISK_CONTROLLER | awk 'NR==1{print $1}')
 	CARD2=$(lspci | grep $DISK_CONTROLLER | awk 'NR==2{print $1}')
