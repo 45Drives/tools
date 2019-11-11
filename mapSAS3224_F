@@ -75,3 +75,5 @@ case $CHASSIS in
     read_card 2 $CARD2
     ;;
 esac
+cat $CONFIG_PATH/vdev_id.tmp >> $CONFIG_PATH/vdev_id.conf
+rm -f $CONFIG_PATH/vdev_id.tmp
