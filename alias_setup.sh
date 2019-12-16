@@ -4,8 +4,7 @@ VDEV_RULES="http://images.45drives.com/ceph/udev/69-vdev.rules"
 VDEV_ID="http://images.45drives.com/ceph/udev/vdev_id"
 
 if rpm -q zfs >/dev/null 2>&1;then
-	echo "ZFS is installed quiting"
-	echo "This will overwrite ZFS udev rules"
+	echo "ZFS is installed; quiting"
 	exit 1
 fi
 
