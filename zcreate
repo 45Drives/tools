@@ -289,9 +289,9 @@ fi
 # If build flag is present; run the zpool create command saved in z.conf
 if [ $BUILD_FLAG == yes ];then
 	cat $DIR/z.conf | /bin/sh
-	if [ $TUNE_FLAG == yes ];then
-		/opt/gtools/bin/tunepool $ZPOOL_NAME $QUIET
-	fi
+#	if [ $TUNE_FLAG == yes ];then
+#		/opt/tools/bin/tunepool $ZPOOL_NAME $QUIET
+#	fi
 	systemctl restart zfs-import-cache.service
 fi
 
