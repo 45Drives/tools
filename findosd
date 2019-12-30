@@ -5,6 +5,12 @@
 
 DEVICE_PATH=$ALIAS_DEVICE_PATH
 CONFIG_PATH=$ALIAS_CONFIG_PATH
+if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
+        echo "No alias device or config path set in profile.d ... Defaulting to /etc, and /dev"
+        DEVICE_PATH=/dev
+		CONFIG_PATH=/etc
+fi
+
 OSD_ID=$1
 if [ $# -eq 0 ];then
         echo "OSD ID required <int>"
@@ -25,10 +31,6 @@ fi
 OSD_VOLID=$(lvs --noheadings -o lv_name,vg_name | grep $OSD_FSID | awk '{print $2}')
 OSD_DEVID=$(pvs --noheadings -o pv_name,vg_name | grep $OSD_VOLID | awk '{print $1}')
 
-if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
-        echo "Both ALIAS_DEVICE_PATH and ALIAS_CONFIG_PATH must be defined"
-        exit 1
-fi
 IFS=$'\n' 
 j=0
 for i in $(cat $CONFIG_PATH/vdev_id.conf); do

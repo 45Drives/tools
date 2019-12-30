@@ -72,7 +72,6 @@ QUIET=no
 RESET_MAP=no
 UDEV_TRIG=yes
 BIN_DIR="/opt/ctools"
-CONFIG_PATH="/etc"
 LSI_9305="3224"
 
 # Input Arguments
@@ -97,6 +96,11 @@ while getopts 'mqrs:h' OPTION; do
 done
 
 checkroot
+CONFIG_PATH=$ALIAS_CONFIG_PATH
+if [ -z $CONFIG_PATH ];then
+		echo "No alias config path set in profile.d ... Defaulting to /etc"
+        CONFIG_PATH=/etc
+fi
 
 #Reset Drive map
 if [ $RESET_MAP == yes ];then

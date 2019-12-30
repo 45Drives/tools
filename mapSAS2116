@@ -13,12 +13,14 @@ CHASSIS=$1
 DISK_CONTROLLER=$2
 OLD_MAP=$3 #either 'yes' or 'no'
 
+DEVICE_PATH=$ALIAS_DEVICE_PATH
 CONFIG_PATH=$ALIAS_CONFIG_PATH
-if [ -z $CONFIG_PATH ];then
-        SCRIPT_NAME=$(basename "$0")
-	echo "($SCRIPT_NAME)ALIAS_CONFIG_PATH must be defined"
-	exit 1
+if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
+        echo "No alias device or config path set in profile.d ... Defaulting to /etc, and /dev"
+        DEVICE_PATH=/dev
+	CONFIG_PATH=/etc
 fi
+
 usage(){
         cat << EOF
 Usage: mapSAS3224 CHASSIS CONTROLLER_ID 
