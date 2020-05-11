@@ -46,8 +46,8 @@ line() { # takes a number as first input Length, and any character as second inp
         fi
 }
 setBAYstatus() {
-		OSD_ID=osd.$(ceph-volume lvm list $(readlink -f $ALIAS_DEVICE_PATH/${BAY[$1]}) --format json | jq -r '.[] | .[].tags["ceph.osd_id"]')
-        if [ ! -b $DEVICE_PATH/$DRIVE ];then
+	OSD_ID=osd.$(ceph-volume lvm list $(readlink -f $DEVICE_PATH/${BAY[$1]}) --format json | jq -r '.[] | .[].tags["ceph.osd_id"]')
+	if [ ! -b $DEVICE_PATH/$DRIVE ];then
                 printf -v absent "$DGREY%-6s$NC" ${BAY[$1]} "-"
                 BAYSTATUS[$1]=$absent
         fi
