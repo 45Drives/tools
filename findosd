@@ -28,7 +28,7 @@ else
 	fi
 fi
 
-OSD_VOLID=$(lvs --noheadings -o lv_name,vg_name | grep $OSD_FSID | awk '{print $2}')
+OSD_VOLID=$(ceph-volume lvm list --format json | jq -r '.[] |.[].tags["ceph.osd_fsid"] + ":" + .[].vg_name' | grep $(ceph osd find $OSD_ID | jq -r '.osd_fsid') | cut -d : -f 2 | cut -d / -f 3)
 OSD_DEVID=$(pvs --noheadings -o pv_name,vg_name | grep $OSD_VOLID | awk '{print $1}')
 
 IFS=$'\n' 
