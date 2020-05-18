@@ -28,12 +28,17 @@ ASR="Adaptec"
 HBA1000="Adaptec Series 8"
 R3740="3740"
 
+if ! rpm -q ceph-osd >/dev/null 2>&1;then
+	echo "ceph-osd (ceph-volume) is not installed"
+	exit 1
+fi
+
 DEVICE_PATH=$ALIAS_DEVICE_PATH
 CONFIG_PATH=$ALIAS_CONFIG_PATH
 if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
         echo "No alias device or config path set in profile.d ... Defaulting to /etc, and /dev"
         DEVICE_PATH=/dev
-		CONFIG_PATH=/etc
+	CONFIG_PATH=/etc
 fi
 
 line() { # takes a number as first input Length, and any character as second input, defaults to "-" if no option
@@ -85,9 +90,9 @@ elif [[ $(lspci | grep $LSI_9201) ]];then
 elif [[ $(lspci | grep $LSI_9305) ]];then
         CARD="LSI 9305-16i"
         DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
-elif [[ $(lspci | grep $HBA1000) ]];then
-        CARD="Adaptec HBA-1000i"
-        DRIVERVERSION=$(rpm -qa | grep -i aacraid)
+elif [[ $(dmidecode -t baseboard | grep -i "product name" | cut -d : -f 2 | xargs echo) == "X11SSH-CTF" ]] && [[ ! $(lspci | grep $LSI_9305) ]];then
+        CARD="AV15 BASE"
+        DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
 fi
 }
 getBAY() {
