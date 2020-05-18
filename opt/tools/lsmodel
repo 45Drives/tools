@@ -46,7 +46,10 @@ line() { # takes a number as first input Length, and any character as second inp
 	fi
 }
 setBAYstatus() {
-	MODEL=$((hdparm -I $ALIAS_DEVICE_PATH/${BAY[$1]} | grep -i model | awk -F: '{print $2}' | tr -d '[:space:]') 2>/dev/null)
+	MODEL=$(smartctl -a $ALIAS_DEVICE_PATH/${BAY[$1]} --json | jq -r '.model_name')
+	if [ $MODEL == "null" ];then
+		MODEL=""
+	fi
 	if [ -z $MODEL ];then
 		printf -v absent "$DGREY%-5s$NC($DGREY%-22s$NC)" "--" "--"
 		#absent=$(echo -e "${DGREY}${BAY[$1]}${NC}")
@@ -58,7 +61,10 @@ setBAYstatus() {
 	fi
 }
 setBAYstatusNC() {
-	MODEL=$((hdparm -I $ALIAS_DEVICE_PATH/${BAY[$1]} | grep -i model | awk -F: '{print $2}' | tr -d '[:space:]') 2>/dev/null)
+	MODEL=$(smartctl -a $ALIAS_DEVICE_PATH/${BAY[$1]} --json | jq -r '.model_name')
+	if [ $MODEL == "null" ];then
+		TYPE=""
+	fi
 	if [ -z $MODEL ];then
 		printf -v absent "%-22s" "N/A"
 		#absent=$(echo -e "${DGREY}${BAY[$1]}${NC}")
