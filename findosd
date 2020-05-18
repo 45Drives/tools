@@ -1,5 +1,5 @@
 #!/bin/bash
-# sh findosd.sh <osd.id>
+# findosd <osd.id>
 # MUST BE RUN FROM OSD HOST WHERE OSD IS LOCATED
 # IF OSD HOST IS NOT THIS HOST EXIT
 
