@@ -87,9 +87,9 @@ elif [[ $(lspci | grep $LSI_9201) ]];then
 elif [[ $(lspci | grep $LSI_9305) ]];then
         CARD="LSI 9305-16i"
         DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
-elif [[ $(lspci | grep $HBA1000) ]];then
-        CARD="Adaptec HBA-1000i"
-        DRIVERVERSION=$(rpm -qa | grep -i aacraid)
+elif [[ $(dmidecode -t baseboard | grep -i "product name" | cut -d : -f 2 | xargs echo) == "X11SSH-CTF" ]] && [[ ! $(lspci | grep $LSI_9305) ]];then
+        CARD="AV15 BASE"
+        DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
 fi
 }
 getBAY() {
@@ -129,7 +129,7 @@ k=$(expr $i + $WIDTH + $WIDTH) # 3rd row offset i by 2 widths
 l=$(expr $i + $WIDTH + $WIDTH + $WIDTH) # 4th row, offset by 3 widths
 case $BAYS in
 15)
-        #30unit
+        #15unit
         line 24 _
         while [ $i -lt $WIDTH ];do
                 i_=$(expr $WIDTH_ - $i ) # invert counter for first row

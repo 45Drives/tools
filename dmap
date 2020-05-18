@@ -31,39 +31,38 @@ gethba() {
 		DISK_CONTROLLER=$LSI_9305
     elif [[ $(lspci | grep $LSI_9405) ]];then
         DISK_CONTROLLER=$LSI_9405
-	elif [[ $(lspci | grep $HBA1000) ]];then
-		CARD="$HBA1000"
+	elif [[ $(dmidecode -t baseboard | grep -i "product name" | cut -d : -f 2 | xargs echo) == "X11SSH-CTF" ]] && [[ ! $(lspci | grep $LSI_9305) ]];then
+		DISK_CONTROLLER=$AV15BASE
 	fi
 }
 getsize(){
-  if [[ $(ipmitool fru | grep "Product Part Number") ]];then
-    SIZE=$(ipmitool fru | grep "Product Part Number" | cut -f2 -d ':' | xargs echo)
-    case $SIZE in
-    AV15|av15|15)
-      CHASSIS=15
-      ;;
-    Q30|q30|30)
-      CHASSIS=30
-      ;;
-    F32|f32|32)
-      CHASSIS=32
-      ;;
-    S45|s45|45)
-      CHASSIS=45
-      ;;
-    S45l|s45l|45l)
-      CHASSIS=45
-      ;;
-    XL60|xl60|60)
-      CHASSIS=60
-      ;;
-    esac
-  else
-    echo "Cant determine Chassis Size automatically"
-    if [ -z $CHASSIS ]; then
-    	read -p "Chassis Size? " CHASSIS
-    fi
-  fi
+	if [[ $(ipmitool fru 2>&1 | grep "Product Part Number") ]];then
+		SIZE=$(ipmitool fru | grep "Product Part Number" | cut -f2 -d ':' | xargs echo)
+		case $SIZE in
+		AV15|av15|15)
+		CHASSIS=15
+		;;
+		Q30|q30|30)
+		CHASSIS=30
+      	;;
+    	F32|f32|32)
+      	CHASSIS=32
+      	;;
+    	S45|s45|45)
+      	CHASSIS=45
+      	;;
+    	S45l|s45l|45l)
+      	CHASSIS=45
+      	;;
+    	XL60|xl60|60)
+      	CHASSIS=60
+      	;;
+    	esac
+  	else
+    		echo "Cant determine Chassis Size automatically"
+    		read -p "Chassis Size? " CHASSIS
+ 
+	fi
 }
 checkchassis(){
 	if [ $1 -eq 30 ] || [ $1 -eq 32 ] || [ $1 -eq 45 ] || [ $1 -eq 60 ] || [ $1 -eq 15 ];then
@@ -101,6 +100,7 @@ LSI_9305="3224"
 LSI_9361="3316"
 LSI_9405="3616"
 HBA1000="Adaptec Series 8"
+AV15BASE="3008"
 DISK_CONTROLLER=
 CHASSIS=
 QUIET=no
@@ -151,7 +151,9 @@ if [ $RESET_MAP == yes ];then
 	exit 0
 fi
 
-getsize
+if [ -z $CHASSIS ]; then
+	getsize
+fi
 gethba
 checkchassis $CHASSIS
 
@@ -165,10 +167,8 @@ elif [[ "$DISK_CONTROLLER" == "$LSI_9405" && ("$CHASSIS" -eq 32) ]];then
     $BIN_DIR/mapSAS3616 $CHASSIS $DISK_CONTROLLER
 elif [ "$DISK_CONTROLLER" == "$LSI_9305" ];then
 	$BIN_DIR/mapSAS3224 $CHASSIS $DISK_CONTROLLER $OLD_MAP
-elif [ "$DISK_CONTROLLER" == "$HBA1000" ];then
-	$BIN_DIR/mapadaptec $CHASSIS $DISK_CONTROLLER $OLD_MAP
-elif [ "$DISK_CONTROLLER" == "$LSI_9361" ];then
-	$BIN_DIR/mapSAS3316 $CHASSIS $DISK_CONTROLLER $OLD_MAP
+elif [ "$DISK_CONTROLLER" == "$AV15BASE" ];then
+	$BIN_DIR/mapAV15BASE $CHASSIS $DISK_CONTROLLER
 fi
 
 if [ $UDEV_TRIG == "yes" ];then

@@ -1,0 +1,50 @@
+#!/bin/bash
+# ---------------------------------------------------------------------------
+# mapAV15BASE - Used by dmap to generate LSI HBA models using SAS chipset 3224 alias config 
+
+# Copyright 2020, Brett Kelly <bkelly@45drives.com>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+CHASSIS=$1 
+DISK_CONTROLLER=$2
+DEVICE_PATH=$ALIAS_DEVICE_PATH
+CONFIG_PATH=$ALIAS_CONFIG_PATH
+if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
+        echo "No alias device or config path set in profile.d ... Defaulting to /etc, and /dev"
+        DEVICE_PATH=/dev
+		CONFIG_PATH=/etc
+fi
+
+usage(){
+	cat << EOF
+Usage: mapAV15BASE CHASSIS CONTROLLER_ID 
+EOF
+	exit 0
+}
+
+if [ $# = 0 ];then
+	usage
+fi
+
+if [ -e $CONFIG_PATH/vdev_id.conf ];then
+        rm -f $CONFIG_PATH/vdev_id.conf
+fi
+
+echo "# by-vdev" >> $CONFIG_PATH/vdev_id.conf
+echo "# name     fully qualified or base name of device link" >> $CONFIG_PATH/vdev_id.conf
+
+CARD_ID1=$(lspci | grep $DISK_CONTROLLER | awk 'NR==1{print $1}')
+CARD_ID2=$(lspci | grep -i "intel.*sata" | awk 'NR==1{print $1}')
+for i in `seq 0 7`; do
+    echo "alias 1-$(( i + 1 ))     /dev/disk/by-path/pci-0000:$CARD_ID1-sas-phy$i-lun-0" >> $CONFIG_PATH/vdev_id.tmp
+done
+for i in `seq 0 6`; do
+    echo "alias 1-$(( i + 9 ))     /dev/disk/by-path/pci-0000:$CARD_ID2-ata-$(( i + 1 )).0" >> $CONFIG_PATH/vdev_id.tmp
+done
+
+cat $CONFIG_PATH/vdev_id.tmp >> $CONFIG_PATH/vdev_id.conf
+rm -f $CONFIG_PATH/vdev_id.tmp

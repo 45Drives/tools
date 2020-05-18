@@ -26,34 +26,32 @@ checkroot(){
     fi
 }
 getsize(){
- if [[ $(ipmitool fru | grep "Product Part Number") ]];then
-   SIZE=$(ipmitool fru | grep "Product Part Number" | cut -f2 -d ':' | xargs echo)
-   case $SIZE in
-   Q30|q30|30)
-     CHASSIS=30
-     ;;
-   F32|f32|32)
-     CHASSIS=32
-     ;;
-   S45|s45|45)
-     CHASSIS=45
-     ;;
-   XL60|xl60|60)
-     CHASSIS=60
-     ;;
-   esac
- else
-   echo "Cant determine Chassis Size automatically"
-   if [ -z $CHASSIS ]; then
-       read -p "Chassis Size? " CHASSIS
-   fi
- fi
+    if [[ $(ipmitool fru 2>&1 | grep "Product Part Number") ]];then
+        SIZE=$(ipmitool fru | grep "Product Part Number" | cut -f2 -d ':' | xargs echo)
+        case $SIZE in
+        Q30|q30|30)
+        CHASSIS=30
+        ;;
+        S45|s45|45)
+        CHASSIS=45
+        ;;
+        XL60|xl60|60)
+        CHASSIS=60
+        ;;
+        esac
+    else
+        echo "Cant determine Chassis Size automatically"
+        read -p "Chassis Size? " CHASSIS
+    fi
 }
 gethba() {
     if [[ $(lspci | grep $LSI_9305) ]];then
         DISK_CONTROLLER=$LSI_9305
     elif [[ $(lspci | grep $LSI_9405) ]];then
-       DISK_CONTROLLER=$LSI_9405
+        DISK_CONTROLLER=$LSI_9405
+    else
+        echo "HBA card in system is not supported"
+        exit 1
     fi
 }
 checkchassis(){
@@ -61,7 +59,7 @@ checkchassis(){
         :
     else
         echo "$1 is not an available chassis size, (15,30,32,45,60)"
-        exit 0
+        exit 1
     fi
 }
 
@@ -71,8 +69,13 @@ SIZE=
 QUIET=no
 RESET_MAP=no
 UDEV_TRIG=yes
-BIN_DIR="/opt/ctools"
+BIN_DIR="/opt/tools"
 LSI_9305="3224"
+
+if [ ! -f "$BIN_DIR/storcli64" ]; then
+    curl -so $BIN_DIR/storcli64 http://images.45drives.com/tools/storcli64 > /dev/null
+    chmod +x $BIN_DIR/storcli64
+fi
 
 # Input Arguments
 while getopts 'mqrs:h' OPTION; do
@@ -110,12 +113,15 @@ if [ $RESET_MAP == yes ];then
     echo "Drive Aliasing reset"
     exit 0
 fi
-getsize
+
+if [ -z $CHASSIS ]; then
+	getsize
+fi
 gethba
 checkchassis $CHASSIS
 
 CARD_COUNT=$(lspci | grep -i $DISK_CONTROLLER | wc -l )
-CARD_COUNT2=$(/opt/MegaRAID/storcli/storcli64 show all | grep 24i | wc -l)
+CARD_COUNT2=$($BIN_DIR/storcli64 show all | grep 24i | wc -l)
 
 if [ $CARD_COUNT2 -eq 1 ]; then
     HYBRID=16
@@ -123,12 +129,12 @@ elif [ $CARD_COUNT2 -eq 2 ]; then
     HYBRID=32
 else
     echo "This is not a hybrid chassis"
-    echo "Run dmap instead"
+    echo "Use dmap instead"
     exit 0
 fi
 
 ## Call mapping script
-/opt/ctools/mapH$HYBRID $CHASSIS
+$BIN_DIR/mapH$HYBRID $CHASSIS
 
 if [ $UDEV_TRIG == "yes" ];then
 	udevadm trigger

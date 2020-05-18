@@ -235,9 +235,13 @@ while getopts 'a:bC:cd:Dfm:n:l:tqv:zh' OPTION; do
 done
 
 checkroot
+if ! rpm -q zfs >/dev/null 2>&1;then
+	echo "ZFS is not installed"
+	exit 1
+fi
 if [ ! -e /etc/zfs/vdev_id.conf ];then
 	echo -e "/etc/zfs/vdev_id.conf does not exist.\nUse dmap to configure drive alias first"
-	exit 0
+	exit 1
 fi
 getbays
 getdrives
