@@ -2,7 +2,7 @@
 %define          debug_package %{nil}
 %define        __os_install_post %{_dbpath}/brp-compress
 
-Name:		tools
+Name:		45drives-tools
 Version:	1.1
 Release:	2%{?dist}
 Summary:	Server CLI Tools

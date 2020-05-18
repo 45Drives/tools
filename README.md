@@ -37,4 +37,15 @@ $ git clone https://github.com/45Drives/tools.git
 $ #Install dependancies
 $ yum install ipmitool jq smartmontools dmidecode
 ```
-
+### RPM BUILD
+Assuming rpmbuild enviroment set up already
+```sh
+$ cd ~/rpmbuild/SOURCES/
+$ curl -LO https://github.com/45Drives/tools/archive/v1.1.tar.gz
+$ tar -zxvf v1.1.tar.gz
+$ mv tools-1.1 45drives-tools-1.1/
+$ cp 45drives-tools-1.1/tools.spec SPECS/tools.spec
+$ tar -zcvf 45drives-tools-1.1.tar.gz 45drives-tools-1.1/
+$ cd ~/rpmbuild
+$ rpmbuild -ba SPECS/tools.spec
+```
