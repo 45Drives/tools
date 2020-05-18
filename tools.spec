@@ -4,7 +4,7 @@
 
 Name:		tools
 Version:	1.1
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -33,12 +33,17 @@ Requires: dmidecode
 %install
 rm -rf %{buildroot}
 mkdir -p  %{buildroot}
+mkdir -p %{buildroot}%{_bindir}
 
 # in builddir
-for file in alias_setup.sh *map findosd ls* map* wipedev zcreate; do
-    cp -a $f %{buildroot}
-    ln -sf /opt/tools/* %{buildroot}%{_bindir} 
-done
+cp -a etc/ %{buildroot}
+cp -a opt/ %{buildroot}
+
+pushd opt/tools/
+    for i in ls* *map findosd wipedev zcreate; do
+        ln -sf /opt/tools/$i %{buildroot}%{_bindir}
+    done
+popd
 
 %clean
 rm -rf %{buildroot}
@@ -49,11 +54,11 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 /opt/tools/*
 /etc/profile.d/tools.sh
+%{_bindir}/*
 
 %changelog
 * Mon May 18 2020 Brett Kelly <bkelly@45drives.com> 1.1
-- Third build, link files from opt/tools to bin dir
+- Second build, link files from opt/tools to bin dir
 * Mon May 18 2020 Brett Kelly <bkelly@45drives.com> 1.1
-- Second build added zfs check in profile.d script. Organized code. Removed uneeded scripts
-* Mon May 11 2020 Josh Boudreau <jboudreau@45drives.com> 1.0
-- First build from GitHub source
+- First build of v1.1. Added zfs check in profile.d script. Organized code. Removed unneeded scripts
+

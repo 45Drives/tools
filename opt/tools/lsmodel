@@ -86,10 +86,9 @@ getCARDname() {
 	elif [[ $(lspci | grep $LSI_9305) ]];then
 		CARD="LSI 9305-16i"
 		DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
-	elif [[ $(lspci | grep $HBA1000) ]];then
-		CARD="Adaptec HBA-1000i"
-		DRIVERVERSION=$(rpm -qa | grep -i aacraid)
-	fi
+	elif [[ $(dmidecode -t baseboard | grep -i "product name" | cut -d : -f 2 | xargs echo) == "X11SSH-CTF" ]] && [[ ! $(lspci | grep $LSI_9305) ]];then
+    	CARD="AV15 BASE"
+    	DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
 }
 getBAY() {
 i=0

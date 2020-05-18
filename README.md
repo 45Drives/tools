@@ -35,6 +35,6 @@ $ mkdir /opt/tools
 $ cd /opt/tools
 $ git clone https://github.com/45Drives/tools.git
 $ #Install dependancies
-$ yum install DEPS
+$ yum install ipmitool jq smartmontools dmidecode
 ```
 

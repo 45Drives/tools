@@ -24,8 +24,6 @@ NC='\033[0m'
 R750="0750"
 LSI_9201="2116"
 LSI_9305="3224"
-ASR="Adaptec"
-HBA1000="Adaptec Series 8"
 R3740="3740"
 COLOR_FLAG="yes"
 

@@ -80,20 +80,20 @@ setBAYstatusNC() {
         fi
 }
 getCARDname() {
-if [[ $(lspci | grep $R750) ]];then
-        CARD="HighPoint R750"
-        DRIVERVERSION=$(cat /proc/scsi/r750/* 2>/dev/null | awk 'NR==1{print $5}')
-        OLD_MAP=yes #Default R750 to always use old mapping
-elif [[ $(lspci | grep $LSI_9201) ]];then
-        CARD="LSI 9201-16i"
-        DRIVERVERSION=$(modinfo mpt2sas | grep version | awk 'NR==1{print $2}')
-elif [[ $(lspci | grep $LSI_9305) ]];then
-        CARD="LSI 9305-16i"
-        DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
-elif [[ $(dmidecode -t baseboard | grep -i "product name" | cut -d : -f 2 | xargs echo) == "X11SSH-CTF" ]] && [[ ! $(lspci | grep $LSI_9305) ]];then
-        CARD="AV15 BASE"
-        DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
-fi
+        if [[ $(lspci | grep $R750) ]];then
+                CARD="HighPoint R750"
+                DRIVERVERSION=$(cat /proc/scsi/r750/* 2>/dev/null | awk 'NR==1{print $5}')
+                OLD_MAP=yes #Default R750 to always use old mapping
+        elif [[ $(lspci | grep $LSI_9201) ]];then
+                CARD="LSI 9201-16i"
+                DRIVERVERSION=$(modinfo mpt2sas | grep version | awk 'NR==1{print $2}')
+        elif [[ $(lspci | grep $LSI_9305) ]];then
+                CARD="LSI 9305-16i"
+                DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
+        elif [[ $(dmidecode -t baseboard | grep -i "product name" | cut -d : -f 2 | xargs echo) == "X11SSH-CTF" ]] && [[ ! $(lspci | grep $LSI_9305) ]];then
+                CARD="AV15 BASE"
+                DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
+        fi
 }
 getBAY() {
 	i=0
