@@ -1,0 +1,148 @@
+#!/bin/bash
+# ---------------------------------------------------------------------------
+# hmap - Generate alias config for hardware
+# Copyright 2019, Brett Kelly <bkelly@45drives.com>
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+usage() { # Help
+       cat << EOF
+Usage:    hmap
+        [-m] Creates map but doesnt trigger udev rules
+        [-q] Quiet Mode
+        [-r] Resets drive map
+        [-s] Specify chassis size
+        [-h] Displays this message
+EOF
+exit 0
+}
+checkroot(){
+    SCRIPT_NAME=$(basename "$0")
+    if [ "$EUID" -ne 0 ];then
+        echo "You must have root privileges to run $SCRIPT_NAME"
+        exit 0
+    fi
+}
+getsize(){
+    if [[ $(ipmitool fru 2>&1 | grep "Product Part Number") ]];then
+        SIZE=$(ipmitool fru | grep "Product Part Number" | cut -f2 -d ':' | xargs echo)
+        case $SIZE in
+        Q30|q30|30)
+        CHASSIS=30
+        ;;
+        S45|s45|45)
+        CHASSIS=45
+        ;;
+        XL60|xl60|60)
+        CHASSIS=60
+        ;;
+        esac
+    else
+        echo "Cant determine Chassis Size automatically"
+        read -p "Chassis Size? " CHASSIS
+    fi
+}
+gethba() {
+    if [[ $(lspci | grep $LSI_9305) ]];then
+        DISK_CONTROLLER=$LSI_9305
+    elif [[ $(lspci | grep $LSI_9405) ]];then
+        DISK_CONTROLLER=$LSI_9405
+    else
+        echo "HBA card in system is not supported"
+        exit 1
+    fi
+}
+checkchassis(){
+    if [ $1 -eq 30 ] || [ $1 -eq 32 ] || [ $1 -eq 45 ] || [ $1 -eq 60 ] || [ $1 -eq 15 ];then
+        :
+    else
+        echo "$1 is not an available chassis size, (15,30,32,45,60)"
+        exit 1
+    fi
+}
+
+DISK_CONTROLLER=
+CHASSIS=
+SIZE=
+QUIET=no
+RESET_MAP=no
+UDEV_TRIG=yes
+BIN_DIR="/opt/tools"
+LSI_9305="3224"
+
+if [ ! -f "$BIN_DIR/storcli64" ]; then
+    curl -so $BIN_DIR/storcli64 http://images.45drives.com/tools/storcli64 > /dev/null
+    chmod +x $BIN_DIR/storcli64
+fi
+
+# Input Arguments
+while getopts 'mqrs:h' OPTION; do
+    case ${OPTION} in
+    m)
+        UDEV_TRIG=no
+        ;;
+    q)
+        QUIET=yes
+        ;;
+    r)
+        RESET_MAP=yes
+        ;;
+    s)
+        CHASSIS=${OPTARG}
+        ;;
+    h)
+        usage
+        ;;
+    esac
+done
+
+checkroot
+CONFIG_PATH=$ALIAS_CONFIG_PATH
+if [ -z $CONFIG_PATH ];then
+		echo "No alias config path set in profile.d ... Defaulting to /etc"
+        CONFIG_PATH=/etc
+fi
+
+#Reset Drive map
+if [ $RESET_MAP == yes ];then
+    rm -f $CONFIG_PATH/vdev_id.conf
+    udevadm trigger
+    udevadm settle
+    echo "Drive Aliasing reset"
+    exit 0
+fi
+
+if [ -z $CHASSIS ]; then
+	getsize
+fi
+gethba
+checkchassis $CHASSIS
+
+CARD_COUNT=$(lspci | grep -i $DISK_CONTROLLER | wc -l )
+CARD_COUNT2=$($BIN_DIR/storcli64 show all | grep 24i | wc -l)
+
+if [ $CARD_COUNT2 -eq 1 ]; then
+    HYBRID=16
+elif [ $CARD_COUNT2 -eq 2 ]; then
+    HYBRID=32
+else
+    echo "This is not a hybrid chassis"
+    echo "Use dmap instead"
+    exit 0
+fi
+
+## Call mapping script
+$BIN_DIR/mapH$HYBRID $CHASSIS
+
+if [ $UDEV_TRIG == "yes" ];then
+	udevadm trigger
+	udevadm settle
+fi
+
+if [ $QUIET == "yes" ];then
+	:
+else
+	cat $CONFIG_PATH/vdev_id.conf
+fi
