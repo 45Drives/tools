@@ -15,7 +15,7 @@
     - lsmodel : List devices by their alias and model number
     - lstype : List devices by their alias and device type (hdd or ssd). For HDD reports rotational speed
   - ZFS Drive Tools
-    - zcreate : Creates zpools based on system hardware. Also takes input for fine tuned options, use '-h' flag for more options   
+    - zcreate : Automatically creates zpools based on system hardware. Also takes input for fine tuned options, use '-h' flag for more options   
   - Ceph Drive Tools
     - lsosd : List devices by their alias and osd id (Node must be member of Ceph Cluster)
     - findosd : Takes osd id as input and outputs device alias. If osd is located on another host output is that hostname

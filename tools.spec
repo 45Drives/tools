@@ -40,7 +40,7 @@ cp -a etc/ %{buildroot}
 cp -a opt/ %{buildroot}
 
 pushd opt/tools/
-    for i in ls* *map findosd wipedev zcreate; do
+    for i in ls* *map findosd zcreate; do
         ln -sf /opt/tools/$i %{buildroot}%{_bindir}
     done
 popd

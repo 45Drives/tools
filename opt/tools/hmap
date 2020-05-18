@@ -45,12 +45,12 @@ getsize(){
     fi
 }
 gethba() {
-    if [[ $(lspci | grep $LSI_9305) ]];then
+    if [[ $((lspci | grep $LSI_9305) 2>/dev/null) ]];then
         DISK_CONTROLLER=$LSI_9305
-    elif [[ $(lspci | grep $LSI_9405) ]];then
+    elif [[ $((lspci | grep $LSI_9405) 2>/dev/null) ]];then
         DISK_CONTROLLER=$LSI_9405
     else
-        echo "HBA card in system is not supported"
+        echo "HBA card in system is not supported, try dmap"
         exit 1
     fi
 }
