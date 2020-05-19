@@ -26,7 +26,7 @@ bay_index = 1
 for line in vdev_id:
     if line[0] == '#':
         continue
-    regex = re.search("^alias ([\d{1,2}])-([\d{1,2}])\s+(.*)$")
+    regex = re.search("^alias ([\d{1,2}])-([\d{1,2}])\s+(.*)$",line)
     print(regex.group(0))
     print(regex.group(1))
     print(regex.group(2))
