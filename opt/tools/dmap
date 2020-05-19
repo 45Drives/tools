@@ -33,6 +33,9 @@ gethba() {
         DISK_CONTROLLER=$LSI_9405
 	elif [[ $(dmidecode -t baseboard | grep -i "product name" | cut -d : -f 2 | xargs echo) == "X11SSH-CTF" ]] && [[ ! $(lspci | grep $LSI_9305) ]];then
 		DISK_CONTROLLER=$AV15BASE
+	else
+		echo "No Supported HBA Detected"
+		exit
 	fi
 }
 getsize(){

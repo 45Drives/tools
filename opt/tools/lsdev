@@ -265,6 +265,6 @@ case $BAYS in
         echo
         ;;
 *)
-        echo -e "\nError!\n\tUnable to Display Drive Map\n\tConfigure Drive Aliasing (1)\n"
+        echo -e "\nError!\n\tUnable to Display Drive Map\n\tConfigure Drive Aliasing (dmap)\n"
         ;;
 esac
