@@ -31,7 +31,6 @@ $ dnf install URL
 Install from git repo...
 
 ```sh
-$ mkdir /opt/tools
 $ cd /opt/tools
 $ git clone https://github.com/45Drives/tools.git
 $ #Install dependancies
