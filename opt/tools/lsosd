@@ -51,32 +51,21 @@ line() { # takes a number as first input Length, and any character as second inp
         fi
 }
 setBAYstatus() {
-	OSD_ID=osd.$(ceph-volume lvm list $(readlink -f $DEVICE_PATH/${BAY[$1]}) --format json | jq -r '.[] | .[].tags["ceph.osd_id"]')
-	if [ ! -b $DEVICE_PATH/$DRIVE ];then
-                printf -v absent "$DGREY%-6s$NC" ${BAY[$1]} "-"
-                BAYSTATUS[$1]=$absent
-        fi
-        partcount=$((ls $DEVICE_PATH/ | grep -w ${BAY[$1]} | wc -l) 2>/dev/null)
-        if [ "$partcount" -eq "1" ];then
-                printf -v present "$YELLOW%-6s$NC" ${BAY[$1]} "("$OSD_ID")"
-                BAYSTATUS[$1]=$present
-        elif [ "$partcount" -gt "1" ];then
-                printf -v partition "$GREEN%-6s$NC" ${BAY[$1]} "("$OSD_ID")"
-                BAYSTATUS[$1]=$partition
+	OSD_ID=$(ceph-volume lvm list $(readlink -f $DEVICE_PATH/${BAY[$1]}) --format json | jq -r '.[] | .[].tags["ceph.osd_id"]')
+        BAYSTATUS[$1]=$(printf "$DGREY%-6s$NC" ${BAY[$1]} "-")
+        if [ ! -z "$OSD_ID" ];then
+                BAYSTATUS[$1]=$(printf "$GREEN%-8s$NC" ${BAY[$1]} "("osd.$OSD_ID")")
+        elif [ -z "$OSD_ID" ] && [ -b $DEVICE_PATH/${BAY[$1]} ];then
+                BAYSTATUS[$1]=$(printf "$YELLOW%-8s$NC" ${BAY[$1]} "--")
         fi
 }
 setBAYstatusNC() {
-        if [ ! -b $DEVICE_PATH/$DRIVE ];then
-                printf -v absent "%-5s" ${BAY[$1]}
-                BAYSTATUS[$1]=$absent
-        fi
-        partcount=$((ls $DEVICE_PATH/ | grep -w ${BAY[$1]} | wc -l) 2>/dev/null)
-        if [ "$partcount" -eq "1" ];then
-                printf -v present "*%-5s" ${BAY[$1]}
-                BAYSTATUS[$1]=$present
-        elif [ "$partcount" -gt "1" ];then
-                printf -v partition "**%-5s" ${BAY[$1]}
-                BAYSTATUS[$1]=$partition
+	OSD_ID=$(ceph-volume lvm list $(readlink -f $DEVICE_PATH/${BAY[$1]}) --format json | jq -r '.[] | .[].tags["ceph.osd_id"]')
+        BAYSTATUS[$1]=$(printf "$DGREY%-6s$NC" ${BAY[$1]} "-")
+        if [ ! -z "$OSD_ID" ];then
+                BAYSTATUS[$1]=$(printf "**%-8s" ${BAY[$1]} "("osd.$OSD_ID")")
+        elif [ -z "$OSD_ID" ] && [ -b $DEVICE_PATH/${BAY[$1]} ];then
+                BAYSTATUS[$1]=$(printf "%-8s$NC" ${BAY[$1]} "--")
         fi
 }
 getCARDname() {
@@ -121,8 +110,6 @@ done
 BAYS=$((cat $CONFIG_PATH/vdev_id.conf| awk "NR>2" | wc -l) 2>/dev/null)
 getCARDname
 getBAY
-#BAYS=${#BAY[@]} ; 
-echo $BAYS
 printf "| %s %s %s %s |\n" Disk Controller: $CARD DriverVersion: $DRIVERVERSION
 # initialize 4 counters, one for each potenital row in the server
 
@@ -184,7 +171,7 @@ case $BAYS in
                 let j=j+1
         done
         line 24 -
-        printf "| %-5s | %-5s |\n" ROW1 ROW2
+        printf "| %-7s | %-7s |\n" ROW1 ROW2
         line 24 =
         ;;
 45)

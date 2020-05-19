@@ -1,7 +1,7 @@
 
 #!/bin/bash
 # ---------------------------------------------------------------------------
-# lsdev - List devices in the system by their alias
+# lshealth - List devices in the system by their alias and smart status
 
 # Copyright 2016, Brett Kelly <bkelly@45drives.com>
 
@@ -12,7 +12,6 @@
 
 ############
 
-declare -A BAY
 declare -A BAYSTATUS
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -25,16 +24,13 @@ NC='\033[0m'
 R750="0750"
 LSI_9201="2116"
 LSI_9305="3224"
-ASR="Adaptec"
-HBA1000="Adaptec Series 8"
-R3740="3740"
 
 DEVICE_PATH=$ALIAS_DEVICE_PATH
 CONFIG_PATH=$ALIAS_CONFIG_PATH
 if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
         echo "No alias device or config path set in profile.d ... Defaulting to /etc, and /dev"
         DEVICE_PATH=/dev
-	CONFIG_PATH=/etc
+	    CONFIG_PATH=/etc
 fi
 
 line() { # takes a number as first input Length, and any character as second input, defaults to "-" if no option
@@ -48,52 +44,49 @@ line() { # takes a number as first input Length, and any character as second inp
 }
 setBAYstatus() {
         BAYSTATUS[$1]=$(printf "$DGREY%-6s$NC" ${BAY[$1]} "-")
-	LINUX_NAME=$(readlink -f $DEVICE_PATH/${BAY[$1]})
-        partcount=$((ls $DEVICE_PATH/ | grep -w ${BAY[$1]} | wc -l) 2>/dev/null)
-        
-        if [ "$partcount" -eq "1" ];then
-                BAYSTATUS[$1]=$(printf "$YELLOW%-6s$NC" ${BAY[$1]} "("$LINUX_NAME")")
-        elif [ "$partcount" -gt "1" ];then
-                BAYSTATUS[$1]=$(printf "$GREEN%-6s$NC" ${BAY[$1]} "("$LINUX_NAME")")
+	    SMART_STATUS=$(smartctl -a $DEVICE_PATH/${BAY[$1]} --json | jq '.smart_status.passed' )
+        if [ $SMART_STATUS == "true" ];then
+                BAYSTATUS[$1]=$(printf "$GREEN%-6s$NC" ${BAY[$1]} "(DRIVE OK)")
+        elif [ $SMART_STATUS == "false" ];then
+                BAYSTATUS[$1]=$(printf "$YELLOW%-6s$NC" ${BAY[$1]} "(DRIVE FAIL)")
         fi
 }
 setBAYstatusNC() {
-        BAYSTATUS[$1]=$(printf "%-5s" ${BAY[$1]})
-        LINUX_NAME=$(readlink -f $DEVICE_PATH/${BAY[$1]})
-        partcount=$((ls $DEVICE_PATH/ | grep -w ${BAY[$1]} | wc -l) 2>/dev/null)
-        
-        if [ "$partcount" -eq "1" ];then
-                BAYSTATUS[$1]=$(printf "*%-5s" ${BAY[$1]} "("$LINUX_NAME")")
-        elif [ "$partcount" -gt "1" ];then
-                BAYSTATUS[$1]=$(printf "**%-5s" ${BAY[$1]} "("$LINUX_NAME")")
+        BAYSTATUS[$1]=$(printf "$DGREY%-6s$NC" ${BAY[$1]} "-")
+	    SMART_STATUS=$(smartctl -a $DEVICE_PATH/${BAY[$1]} --json | jq '.smart_status.passed' )
+        if [ $SMART_STATUS == "true" ];then
+                BAYSTATUS[$1]=$(printf "%-6s" ${BAY[$1]} "(DRIVE OK)")
+        elif [ $SMART_STATUS == "false" ];then
+                BAYSTATUS[$1]=$(printf "%-6s" ${BAY[$1]} "(DRIVE FAIL)")
         fi
 }
+
 getCARDname() {
-if [[ $(lspci | grep $R750) ]];then
-        CARD="HighPoint R750"
-        DRIVERVERSION=$(cat /proc/scsi/r750/* 2>/dev/null | awk 'NR==1{print $5}')
-        OLD_MAP=yes #Default R750 to always use old mapping
-elif [[ $(lspci | grep $LSI_9201) ]];then
-        CARD="LSI 9201-16i"
-        DRIVERVERSION=$(modinfo mpt2sas | grep version | awk 'NR==1{print $2}')
-elif [[ $(lspci | grep $LSI_9305) ]];then
-        CARD="LSI 9305-16i"
-        DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
-elif [[ $(dmidecode -t baseboard | grep -i "product name" | cut -d : -f 2 | xargs echo) == "X11SSH-CTF" ]] && [[ ! $(lspci | grep $LSI_9305) ]];then
-        CARD="AV15 BASE"
-        DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
-fi
+        if [[ $(lspci | grep $R750) ]];then
+                CARD="HighPoint R750"
+                DRIVERVERSION=$(cat /proc/scsi/r750/* 2>/dev/null | awk 'NR==1{print $5}')
+                OLD_MAP=yes #Default R750 to always use old mapping
+        elif [[ $(lspci | grep $LSI_9201) ]];then
+                CARD="LSI 9201-16i"
+                DRIVERVERSION=$(modinfo mpt2sas | grep version | awk 'NR==1{print $2}')
+        elif [[ $(lspci | grep $LSI_9305) ]];then
+                CARD="LSI 9305-16i"
+                DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
+        elif [[ $(dmidecode -t baseboard | grep -i "product name" | cut -d : -f 2 | xargs echo) == "X11SSH-CTF" ]] && [[ ! $(lspci | grep $LSI_9305) ]];then
+                CARD="AV15 BASE"
+                DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
+        fi
 }
 getBAY() {
-i=0
-j=3
-## LOOP THROUGH BAYS
-while [ $i -lt $BAYS ];do
-        bay=$(cat $CONFIG_PATH/vdev_id.conf | awk -v j=$j 'NR==j{print $2}')
-        BAY[$i]=$bay
-        let i=i+1
-        let j=j+1
-done
+	i=0
+	j=3
+	## LOOP THROUGH BAYS
+	while [ $i -lt $BAYS ];do
+		bay=$(cat $CONFIG_PATH/vdev_id.conf | awk -v j=$j 'NR==j{print $2}')
+		BAY[$i]=$bay
+		let i=i+1
+		let j=j+1
+	done
 }
 COLOR_FLAG=yes
 OLD_MAP=no
@@ -110,6 +103,8 @@ done
 BAYS=$((cat $CONFIG_PATH/vdev_id.conf| awk "NR>2" | wc -l) 2>/dev/null)
 getCARDname
 getBAY
+#BAYS=${#BAY[@]} ; 
+echo $BAYS
 printf "| %s %s %s %s |\n" Disk Controller: $CARD DriverVersion: $DRIVERVERSION
 # initialize 4 counters, one for each potenital row in the server
 
@@ -121,7 +116,7 @@ k=$(expr $i + $WIDTH + $WIDTH) # 3rd row offset i by 2 widths
 l=$(expr $i + $WIDTH + $WIDTH + $WIDTH) # 4th row, offset by 3 widths
 case $BAYS in
 15)
-        #15unit
+        #30unit
         line 24 _
         while [ $i -lt $WIDTH ];do
                 i_=$(expr $WIDTH_ - $i ) # invert counter for first row
