@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+import json
+import re
+
+CONFIG_PATH = "/etc"
+
+# bay declaration. Modify this and append bay.copy to lists
+bay = {
+        "occupied": "false",
+        "partitioned": "false",
+        "dev-by-path": "",
+        "dev": ""
+}
+
+row = []; # list of bays
+
+server = []; # list of rows
+
+# read aliases from vdev_id.conf
+
+vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
+
+row_index = 1
+bay_index = 1
+
+for line in vdev_id:
+    if line[0] == '#':
+        continue
+    regex = re.search("^alias ([\d{1,2}])-([\d{1,2}])\s+(.*)$")
+    print(regex.group(0))
+    print(regex.group(1))
+    print(regex.group(2))
+    print(regex.group(3))
+    print()
+
+print(json.dumps(server))
