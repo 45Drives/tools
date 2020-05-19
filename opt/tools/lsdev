@@ -9,28 +9,33 @@ bay = {
         "occupied": "false",
         "partitioned": "false",
         "dev-by-path": "",
-        "dev": ""
+        "dev": "",
+        "bay-id": ""
 }
 
-row = []; # list of bays
-
-server = []; # list of rows
+server = [[]]; # list of rows
 
 # read aliases from vdev_id.conf
 
 vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
 
-row_index = 1
-bay_index = 1
+row_index = 0
 
 for line in vdev_id:
-    if line[0] == '#':
+    if not line or line[0] == '#':
         continue
-    regex = re.search("^alias ([\d{1,2}])-([\d{1,2}])\s+(.*)$",line)
-    print(regex.group(0))
-    print(regex.group(1))
-    print(regex.group(2))
-    print(regex.group(3))
-    print()
+    regex = re.search("^alias (\d{1,2})-(\d{1,2})\s+(.*)$",line)
+    
+    new_row_index = int(regex.group(1))
+    new_bay_index = int(regex.group(2))
+     
+    if new_row_index > row_index:
+        row_index = new_row_index
+        server.append([]);
+    
+    bay["dev-by-path"] = regex.group(3)
+    bay["bay-id"] = str(new_row_index) + "-" + str(new_bay_index)
 
-print(json.dumps(server))
+    server[row_index-1].append(bay.copy());
+
+print(json.dumps(server, indent = 4))
