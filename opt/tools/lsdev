@@ -16,7 +16,7 @@ import re
 
 CONFIG_PATH = "/etc"
 
-# bay declaration. Modify this and append bay.copy to lists
+# bay declaration. Append bay.copy() to lists
 bay = {
         "occupied": "false",
         "partitioned": "false",
@@ -25,9 +25,9 @@ bay = {
         "bay-id": ""
 }
 
-server = [[]]; # list of rows
+server = [[]]; # server[row][bay]
 
-# read aliases from vdev_id.conf
+# initialize server[rows][bays]
 
 vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
 
@@ -43,11 +43,11 @@ for line in vdev_id:
      
     if new_row_index > row_index:
         row_index = new_row_index
-        server.append([]);
+        server.append([]); # insert new row
     
     bay["dev-by-path"] = regex.group(3)
     bay["bay-id"] = str(new_row_index) + "-" + str(new_bay_index)
-
+    
     server[row_index-1].append(bay.copy());
 
 print(json.dumps(server, indent = 4))
