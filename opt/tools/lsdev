@@ -136,7 +136,7 @@ def build_server(json_output):
 
 def get_controller(server):
     try:
-        stream = subprocess.Popen("lspci", shell=True, stdout=subprocess.PIPE,
+        stream = subprocess.Popen("lspci", stdout=subprocess.PIPE,
                 universal_newlines=True).stdout
     except OSError:
         print("Error executing lspci.")
@@ -157,7 +157,7 @@ def get_controller(server):
     else:
         return "?","?"
     try:
-        drv_stream = subprocess.Popen("modinfo " + drv_arg, shell=True, stdout=subprocess.PIPE,
+        drv_stream = subprocess.Popen("modinfo " + drv_arg, stdout=subprocess.PIPE,
                 universal_newlines=True).stdout
     except OSError:
         print("Error executing modinfo.")
