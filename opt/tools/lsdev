@@ -26,7 +26,7 @@ def count_partitions(path):
 def smartctl(drive):
     stream = os.popen("smartctl -a " + drive["dev"] + " --json")
     output = json.loads(stream.read())
-    drive["model-family"] = output["model_family"]
+    drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
     drive["model-name"] = output["model_name"]
     drive["serial"] = output["serial_number"]
     drive["capacity"] = output["user_capacity"]["bytes"]
