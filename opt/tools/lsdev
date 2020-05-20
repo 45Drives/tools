@@ -14,6 +14,7 @@
 import json
 import re
 import os
+import subprocess
 from optparse import OptionParser
 
 # read from environment variable
@@ -51,7 +52,8 @@ def count_partitions(path):
 
 def smartctl(drive):
     try:
-        stream = os.popen("smartctl -a " + drive["dev"] + " --json")
+        stream = subprocess.Popen(["smartctl", "-a", drive["dev"], "--json"],
+                shell=True, stdout=PIPE, text=True).stdout
     except OSError:
         print("Error executing smartctl. Is it installed?")
         exit(1)
@@ -133,7 +135,11 @@ def build_server(json_output):
     return server
 
 def get_controller(server):
-    stream = os.popen("lspci")
+    try:
+        stream = subprocess.Popen("lspci", shell=True, stdout=subprocess.PIPE, text=True).stdout
+    except OSError:
+        print("Error executing lspci.")
+        exit(1)
     string = stream.read()
     controller = "?"
     drv_vers = "?"
