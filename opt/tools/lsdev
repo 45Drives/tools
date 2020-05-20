@@ -60,6 +60,7 @@ def smartctl(drive):
         elif attr["name"] == "Power_Cycle_Count":
             drive["power-cycle-count"] = attr["raw"]["string"]
         elif attr["name"] == "Temperature_Celcius":
+            print( attr["raw"]["string"].split())
             drive["temp-c"] = attr["raw"]["string"].split()[0]
         elif attr["name"] == "Current_Pending_Sector":
             drive["current-pending-sensor"] = attr["raw"]["string"]
