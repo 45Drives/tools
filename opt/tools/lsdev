@@ -26,6 +26,19 @@ class ANSI_colours:
     GREY='\033[1;30m'
     END='\033[0m'
 
+class box:
+    TL=u'\u2554' # ╔
+    TR=u'\u2557' # ╗
+    BL=u'\u255a' # ╚
+    BR=u'\u255d' # ╝
+    H=u'\u2550'  # ═
+    V=u'\u2551'  # ║
+    TT=u'\u2566' # ╦
+    LT=u'\u2560' # ╠
+    RT=u'\u2563' # ╣
+    BT=u'\u2569' # ╩
+    CT=u'\u256C' # ╬
+
 def count_partitions(path):
     partitions = open("/proc/partitions", mode='r')
     blk_name = os.path.basename(path)
@@ -106,10 +119,20 @@ def build_server():
     return server
 
 def print_bays(server, colour_opt):
+    hr_top = "-"*(24*3+1)
+    hr_mid = hr_top
+    hr_bot = hr_mid
+    div = "|"
+    if colour_opt:
+        hr_top = box.TL + (box.H*21 + box.TT)*(len(server["rows"])-1) + box.H*21 + box.TR
+        hr_mid = box.LT + (box.H*21 + box.CT)*(len(server["rows"])-1) + box.H*21 + box.RT
+        hr_bot = box.BL + (box.H*21 + box.BT)*(len(server["rows"])-1) + box.H*21 + box.BR
+        div = box.V
+    print(hr_top)
     for bay in reversed(range(15)):
         for row in server["rows"]:
             path = "(" + row[bay]["dev"] + ")" if row[bay]["dev"] else "-"
-            string = "{:<6}  {:<11} ".format(row[bay]["bay-id"],path)
+            string = " {:<6}  {:<11} ".format(row[bay]["bay-id"],path)
             if colour_opt:
                 if row[bay]["occupied"] and row[bay]["health"] == "POOR":
                     string = ANSI_colours.RED + string + ANSI_colours.END
@@ -128,8 +151,13 @@ def print_bays(server, colour_opt):
                     string = "**" + string
                 else:
                     string = "  " + string
-            print("| " + string, end='')
-        print("|")
+            print(div + string, end='')
+        print(div)
+    print(hr_mid)
+    for i in range(len(server["rows"])):
+        print(div + ("{:^21}" if colour_opt else "{:^23}").format("Row " + str(i + 1)), end='')
+    print(div)
+    print(hr_bot)
 
 def main():
     parser = OptionParser()
