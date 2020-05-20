@@ -122,18 +122,27 @@ def build_server():
 def get_controller(server):
     stream = os.popen("lspci")
     string = stream.read()
-    if re.search("0750",string,re.MULTILINE) != None:
-        return "Highpoint R750"
+    controller = "?"
+    drv_vers = "?"
+    drv_arg = ""
     if re.search("2116",string,re.MULTILINE) != None:
-        return "LSI 9201-16i"
-    if re.search("3224",string,re.MULTILINE) != None:
-        return "LSI 9305-16i"
-    if len(server["rows"]) == 1:
-        return "AV15 Base"
-    return "?"
-
-def get_driver():
-    return ""
+        controller = "LSI 9201-16i"
+        drv_arg = "mpt2sas"
+    elif re.search("3224",string,re.MULTILINE) != None:
+        controller = "LSI 9305-16i"
+        drv_arg = "mpt3sas"
+    elif len(server["rows"]) == 1:
+        controller = "AV15 Base"
+        drv_arg = "mpt3sas"
+    else:
+        return "?","?"
+    popen("modinfo " + drv_arg)
+    for line in drv_stream:
+        regex = re.search("^version:\s+(\d.*)$",line)
+        if regex != None:
+            drv_vers = regex.group(1)
+            break
+    return controller,drv_vers
 
 def print_bays(server, colour_opt):
     cell_width = 21 if colour_opt else 24
@@ -215,8 +224,7 @@ def main():
             "driver-version": ""
         }
     }
-    server["meta"]["disk-controller"] = get_controller(server)
-    server["meta"]["driver-version"] = get_driver()
+    server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller(server)
     if options.json == True:
         print(json.dumps(server, indent = 4))
         exit(0)
