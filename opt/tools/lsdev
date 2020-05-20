@@ -33,15 +33,15 @@ def smartctl(drive):
     drive["firm-ver"] = output["firmware_version"]
     drive["rotation-rate"] = output["rotation_rate"]
     for attr in output["ata_smart_attributes"]["table"]:
-        if attr["id"] == 4: # ["name"] == "Start_Stop_Count":
+        if attr["name"] == "Start_Stop_Count":
             drive["start-stop-count"] = attr["value"]
-        elif attr["id"] == 12: # ["name"] == "Power_Cycle_Count":
+        elif attr["name"] == "Power_Cycle_Count":
             drive["power-cycle-count"] = attr["value"]
-        elif attr["id"] == 194: # ["name"] == "Temperature_Celcius":
+        elif attr["name"] == "Temperature_Celcius":
             drive["temp-c"] = attr["value"]
-        elif attr["id"] == 197: # ["name"] == "Current_Pending_Sector":
+        elif attr["name"] == "Current_Pending_Sector":
             drive["current-pending-sensor"] = attr["value"]
-        elif attr["id"] == 198: # ["name"] == "Offline_Uncorrectable":
+        elif attr["name"] == "Offline_Uncorrectable":
             drive["offline-uncorrectable"] = attr["value"]
     drive["power-on-time"] = output["power_on_time"]["hours"]
     drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
