@@ -19,6 +19,13 @@ from optparse import OptionParser
 CONFIG_PATH = "/etc"
 DEVICE_PATH = "/dev"
 
+class ANSI_colours:
+    GREEN='\033[1;32m'
+    RED='\033[0;31m'
+    CYAN='\033[0;36m'
+    GREY='\033[1;30m'
+    END='\033[0m'
+
 def count_partitions(path):
     partitions = open("/proc/partitions", mode='r')
     blk_name = os.path.basename(path)
@@ -56,7 +63,7 @@ def build_server():
         bay = {
             "dev-by-path": "",
             "bay-id": "",
-            "occupied": "false",
+            "occupied": False,
             "dev": "",
             "partitions": "",
             "model-family": "",
@@ -89,9 +96,9 @@ def build_server():
         bay["bay-id"] = str(new_row_index) + "-" + str(new_bay_index)
         # if symlink exists in /dev/disk/by-path/ then bay is occupied
         if os.path.islink(bay["dev-by-path"]): 
-            bay["occupied"] = "true"
+            bay["occupied"] = True
             bay["dev"] = os.path.realpath(bay["dev-by-path"])
-            bay["partitions"] = str(count_partitions(bay["dev"]))
+            bay["partitions"] = count_partitions(bay["dev"])
             smartctl(bay) # get metadata
         # insert copy of bay
         server[row_index-1].append(bay.copy());
@@ -101,9 +108,19 @@ def build_server():
 def print_bays(server, colour_opt):
     for bay in reversed(range(15)):
         for row in server["rows"]:
-            string = "| " + row[bay]["bay-id"] + "\t"
-            string += "(" + row[bay]["dev"] + ") \t" if row[bay]["dev"] else "- \t"
-            print(string, end = '')
+            path = "(" + row[bay]["dev"] + ")" if row[bay]["dev"] else "-"
+            string = "{:<4}  {:<11} ".format(row[bay]["bay-id"],path)
+            if colour_opt:
+                if row[bay]["occupied"] and row[bay]["health"] == "POOR":
+                    string = ANSI_colours.RED + string + ANSI_colours.END
+                elif row[bay]["occupied"] and row[bay]["partitions"] == 0:
+                    string = ANSI_colours.GREEN + string + ANSI_colours.END
+                elif row[bay]["occupied"]: # partitions present
+                    string = ANSI_colours.CYAN + string + ANSI_colours.END
+                else:
+                    string = ANSI_colours.GREY + string + ANSI_colours.END
+
+            print("| " + string, end='')
         print("|")
 
 def main():
