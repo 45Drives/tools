@@ -17,8 +17,12 @@ import os
 from optparse import OptionParser
 
 # read from environment variable
-CONFIG_PATH = "/etc"
-DEVICE_PATH = "/dev"
+DEVICE_PATH = os.getenv("ALIAS_DEVICE_PATH")
+CONFIG_PATH = os.getenv("ALIAS_CONFIG_PATH")
+if DEVICE_PATH == None:
+    DEVICE_PATH = "/dev/"
+if CONFIG_PATH == None:
+    CONFIG_PATH = "/etc/"
 
 class ANSI_colours:
     LGREEN='\033[1;32m'
