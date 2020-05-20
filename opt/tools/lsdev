@@ -50,7 +50,11 @@ def count_partitions(path):
     return len(re.findall(blk_name + "\d{1,2}",partitions.read(),re.MULTILINE))
 
 def smartctl(drive):
-    stream = os.popen("smartctl -a " + drive["dev"] + " --json")
+    try:
+        stream = os.popen("smartctl -a " + drive["dev"] + " --json")
+    except OSError:
+        print("Error executing smartctl. Is it installed?")
+        exit(1)
     output = json.loads(stream.read())
     drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
     drive["model-name"] = output["model_name"]
