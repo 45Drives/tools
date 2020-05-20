@@ -136,7 +136,8 @@ def build_server(json_output):
 
 def get_controller(server):
     try:
-        stream = subprocess.Popen("lspci", shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout
+        stream = subprocess.Popen("lspci", shell=True, stdout=subprocess.PIPE,
+                universal_newlines=True).stdout
     except OSError:
         print("Error executing lspci.")
         exit(1)
@@ -155,7 +156,12 @@ def get_controller(server):
         drv_arg = "mpt3sas"
     else:
         return "?","?"
-    drv_stream = os.popen("modinfo " + drv_arg)
+    try:
+        drv_stream = subprocess.Popen(["modinfo", drv_arg], shell=True, stdout=subprocess.PIPE,
+                universal_newlines=True).stdout
+    except OSError:
+        print("Error executing modinfo.")
+        exit(1)
     for line in drv_stream:
         regex = re.search("^version:\s+(\d.*)$",line)
         if regex != None:
