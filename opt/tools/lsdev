@@ -13,19 +13,26 @@
 
 import json
 import re
+import os.path
 
 CONFIG_PATH = "/etc"
+DEVICE_PATH = "/dev"
 
 # bay declaration. Append bay.copy() to lists
 bay = {
-        "occupied": "false",
-        "partitioned": "false",
-        "dev-by-path": "",
-        "dev": "",
-        "bay-id": ""
+    "occupied": "false",
+    "partitions": "0",
+    "dev-by-path": "",
+    "dev": "",
+    "bay-id": ""
 }
 
 server = [[]]; # server[row][bay]
+
+def count_partitions(path):
+    partitions = open("/proc/partitions", mode='r')
+    blk_name = os.path.basename(path)
+    return len(re.findall(blk_name + "\d{1,2}",partitions.read(),re.MULTILINE))
 
 # initialize server[rows][bays]
 
@@ -34,8 +41,10 @@ vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
 row_index = 0
 
 for line in vdev_id:
+    # skip blank lines and comments
     if not line or line[0] == '#':
         continue
+    
     regex = re.search("^alias (\d{1,2})-(\d{1,2})\s+(.*)$",line)
     
     new_row_index = int(regex.group(1))
@@ -45,9 +54,20 @@ for line in vdev_id:
         row_index = new_row_index
         server.append([]); # insert new row
     
-    bay["dev-by-path"] = regex.group(3)
+    # process bay
+    bay["dev-by-path"] = regex.group(3) # third capture group
     bay["bay-id"] = str(new_row_index) + "-" + str(new_bay_index)
+    # if symlink exists in /dev/disk/by-path/ then bay is occupied
+    if os.path.isfile(bay["dev-by-path"]): 
+        bay["occupied"] = "true"
+        bay["dev"] = os.path.realpath(bay["dev-by-path"])
+        bay["partitions"] = count_partitions(bay["dev"]).str()
+    else:
+        bay["occupied"] = "false"
+        bay["dev"] = ""
+        bay["partitions"] = "0"
     
     server[row_index-1].append(bay.copy());
 
+vdev_id.close()
 print(json.dumps(server, indent = 4))
