@@ -20,9 +20,9 @@ from optparse import OptionParser
 DEVICE_PATH = os.getenv("ALIAS_DEVICE_PATH")
 CONFIG_PATH = os.getenv("ALIAS_CONFIG_PATH")
 if DEVICE_PATH == None:
-    DEVICE_PATH = "/dev/"
+    DEVICE_PATH = "/dev"
 if CONFIG_PATH == None:
-    CONFIG_PATH = "/etc/"
+    CONFIG_PATH = "/etc"
 
 class ANSI_colours:
     LGREEN='\033[1;32m'
@@ -75,7 +75,11 @@ def smartctl(drive):
 # initialize server[rows][bays]
 def build_server(json_output):
     server = [[]]; # server[row][bay]
-    vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
+    try:
+        vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
+    except IOError:
+        print("Error opening " + CONFIG_PATH + "/vdev_id.conf. Run `dmap`.")
+        exit(1)
     row_index = 1
     for line in vdev_id:
         bay = {
