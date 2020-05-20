@@ -61,7 +61,7 @@ for line in vdev_id:
     if os.path.islink(bay["dev-by-path"]): 
         bay["occupied"] = "true"
         bay["dev"] = os.path.realpath(bay["dev-by-path"])
-        bay["partitions"] = count_partitions(bay["dev"]).str()
+        bay["partitions"] = str(count_partitions(bay["dev"]))
     else:
         bay["occupied"] = "false"
         bay["dev"] = ""
