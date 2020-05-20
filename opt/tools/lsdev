@@ -69,7 +69,7 @@ def smartctl(drive):
     drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
 
 # initialize server[rows][bays]
-def build_server():
+def build_server(json_output):
     server = [[]]; # server[row][bay]
     vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
     row_index = 1
@@ -113,7 +113,8 @@ def build_server():
             bay["occupied"] = True
             bay["dev"] = os.path.realpath(bay["dev-by-path"])
             bay["partitions"] = count_partitions(bay["dev"])
-            smartctl(bay) # get metadata
+            if json_output:
+                smartctl(bay) # get metadata
         # insert copy of bay
         server[row_index-1].append(bay.copy());
     vdev_id.close()
@@ -218,7 +219,7 @@ def main():
             dest="colour", default=True, help="replace colour coding with asterisks")
     (options, args) = parser.parse_args()
     server = {
-        "rows": build_server(),
+        "rows": build_server(options.json),
         "meta": {
             "disk-controller": "",
             "driver-version": ""
