@@ -125,7 +125,7 @@ def print_bays(server, colour_opt):
                 elif row[bay]["occupied"] and row[bay]["partitions"] == 0:
                     string = "* " + string
                 elif row[bay]["occupied"]: # partitions present
-                    string = "**i" + string
+                    string = "**" + string
                 else:
                     string = "  " + string
             print("| " + string, end='')
