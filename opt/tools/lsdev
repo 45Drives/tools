@@ -52,7 +52,7 @@ def count_partitions(path):
 
 def smartctl(drive):
     try:
-        stream = subprocess.Popen(["smartctl", "-a", drive["dev"], "--json"],
+        stream = subprocess.Popen("smartctl -a" + drive["dev"] + "--json",
                 shell=True, stdout=subprocess.PIPE, universal_newlines=True).stdout
     except OSError:
         print("Error executing smartctl. Is it installed?")
