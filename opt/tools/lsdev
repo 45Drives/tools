@@ -16,6 +16,7 @@ import re
 import os
 from optparse import OptionParser
 
+# read from environment variable
 CONFIG_PATH = "/etc"
 DEVICE_PATH = "/dev"
 
@@ -118,8 +119,18 @@ def build_server():
     vdev_id.close()
     return server
 
-def get_controller():
-    return ""
+def get_controller(server):
+    stream = os.popen("lspci")
+    string = stream.read()
+    if re.search("0750",string,re.MULTILINE) != None:
+        return "Highpoint R750"
+    if re.search("2116",string,re.MULTILINE) != None:
+        return "LSI 9201-16i"
+    if re.search("3224",string,re.MULTILINE) != None:
+        return "LSI 9305-16i"
+    if len(server["rows"]) == 1:
+        return "AV15 Base"
+    return "?"
 
 def get_driver():
     return ""
@@ -204,6 +215,8 @@ def main():
             "driver-version": ""
         }
     }
+    server["meta"]["disk-controller"] = get_controller(server)
+    server["meta"]["driver-version"] = get_driver()
     if options.json == True:
         print(json.dumps(server, indent = 4))
         exit(0)
