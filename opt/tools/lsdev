@@ -20,9 +20,9 @@ CONFIG_PATH = "/etc"
 DEVICE_PATH = "/dev"
 
 class ANSI_colours:
-    GREEN='\033[1;32m'
+    LGREEN='\033[1;32m'
+    GREEN='\033[0;32m'
     RED='\033[0;31m'
-    CYAN='\033[0;36m'
     GREY='\033[1;30m'
     END='\033[0m'
 
@@ -116,7 +116,7 @@ def print_bays(server, colour_opt):
                 elif row[bay]["occupied"] and row[bay]["partitions"] == 0:
                     string = ANSI_colours.GREEN + string + ANSI_colours.END
                 elif row[bay]["occupied"]: # partitions present
-                    string = ANSI_colours.CYAN + string + ANSI_colours.END
+                    string = ANSI_colours.LGREEN + string + ANSI_colours.END
                 else:
                     string = ANSI_colours.GREY + string + ANSI_colours.END
 
