@@ -14,6 +14,7 @@
 import json
 import re
 import os
+from optparse import OptionParser
 
 CONFIG_PATH = "/etc"
 DEVICE_PATH = "/dev"
@@ -45,7 +46,6 @@ def smartctl(drive):
             drive["offline-uncorrectable"] = attr["value"]
     drive["power-on-time"] = output["power_on_time"]["hours"]
     drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
-
 
 # initialize server[rows][bays]
 def build_server():
@@ -98,12 +98,30 @@ def build_server():
     vdev_id.close()
     return server
 
+def print_bays(server, colour_opt):
+    for bay in reversed(range(15)):
+        for row in server["rows"]:
+            string = "| " + row[bay]["bay-id"] + "\t"
+            string += "(" + row[bay]["dev"] + ") \t" if row[bay]["dev"] else "- \t"
+            print(string, end = '')
+        print("|")
+
 def main():
+    parser = OptionParser()
+    parser.add_option("-j","--json", action="store_true",
+            dest="json", default=False, help="output in JSON format")
+    parser.add_option("-n","--no-color","--no-colour", action="store_false",
+            dest="colour", default=True, help="replace colour coding with asterisks")
+    (options, args) = parser.parse_args()
     server = {
-        "bays": build_server(),
+        "rows": build_server(),
         "meta": "test"
     }
-    print(json.dumps(server, indent = 4))
+    if options.json == True:
+        print(json.dumps(server, indent = 4))
+        exit(0)
+    print_bays(server,options.colour)
+    exit(0)
 
 if __name__ == "__main__":
     main()
