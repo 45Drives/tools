@@ -109,7 +109,7 @@ def print_bays(server, colour_opt):
     for bay in reversed(range(15)):
         for row in server["rows"]:
             path = "(" + row[bay]["dev"] + ")" if row[bay]["dev"] else "-"
-            string = "{:<4}  {:<11} ".format(row[bay]["bay-id"],path)
+            string = "{:<6}  {:<11} ".format(row[bay]["bay-id"],path)
             if colour_opt:
                 if row[bay]["occupied"] and row[bay]["health"] == "POOR":
                     string = ANSI_colours.RED + string + ANSI_colours.END
@@ -119,7 +119,13 @@ def print_bays(server, colour_opt):
                     string = ANSI_colours.LGREEN + string + ANSI_colours.END
                 else:
                     string = ANSI_colours.GREY + string + ANSI_colours.END
-
+            else: # no colour
+                if row[bay]["occupied"] and row[bay]["health"] == "POOR":
+                    string = "!" + string
+                elif row[bay]["occupied"] and row[bay]["partitions"] == 0:
+                    string = "*" + string
+                elif row[bay]["occupied"]: # partitions present
+                    string = "**" + string
             print("| " + string, end='')
         print("|")
 
