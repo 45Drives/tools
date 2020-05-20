@@ -136,7 +136,7 @@ def get_controller(server):
         drv_arg = "mpt3sas"
     else:
         return "?","?"
-    popen("modinfo " + drv_arg)
+    drv_stream = os.popen("modinfo " + drv_arg)
     for line in drv_stream:
         regex = re.search("^version:\s+(\d.*)$",line)
         if regex != None:
