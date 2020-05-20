@@ -118,16 +118,47 @@ def build_server():
     vdev_id.close()
     return server
 
+def get_controller():
+    return ""
+
+def get_driver():
+    return ""
+
 def print_bays(server, colour_opt):
-    hr_top = "-"*(24*3+1)
+    cell_width = 21 if colour_opt else 24
+    hr_top = "-"*(cell_width*3+1)
     hr_mid = hr_top
     hr_bot = hr_mid
     div = "|"
     if colour_opt:
-        hr_top = box.TL + (box.H*21 + box.TT)*(len(server["rows"])-1) + box.H*21 + box.TR
-        hr_mid = box.LT + (box.H*21 + box.CT)*(len(server["rows"])-1) + box.H*21 + box.RT
-        hr_bot = box.BL + (box.H*21 + box.BT)*(len(server["rows"])-1) + box.H*21 + box.BR
+        hr_top = box.LT + (box.H*cell_width + box.TT)*(len(server["rows"])-1) + box.H*cell_width + box.TR
+        hr_mid = box.LT + (box.H*cell_width + box.CT)*(len(server["rows"])-1) + box.H*cell_width + box.RT
+        hr_bot = box.BL + (box.H*cell_width + box.BT)*(len(server["rows"])-1) + box.H*cell_width + box.BR
         div = box.V
+    title = "Storinator Disk Info"
+    controller = "Disk Controller: " + get_controller()
+    driver = "Driver version: " + get_driver()
+    info_len = max(len(title),len(controller),len(driver))
+    info_top = "-"*(info_len+4)
+    if colour_opt:
+        info_top = box.TL + box.H*(info_len+2) + box.TR
+        tmplist = list(hr_top)
+        index = len(info_top)-1
+        if index + 1 == len(tmplist): # edge of lower table
+            tmplist[index] = box.RT
+        elif index + 1 > len(tmplist):
+            tmplist[-1] = box.TT # last current one
+            for char in list(box.H*(index - len(tmplist)) + box.BR):
+                tmplist.append(char)
+        elif (index) % (cell_width + 1) == 0: # if intersects with bay cell
+            tmplist[index] = box.CT
+        else:
+            tmplist[index] = box.BT
+        hr_top = "".join(tmplist)
+    print(info_top)
+    print(div + " {txt:<{width}} ".format(txt=title,width=info_len) + div)
+    print(div + " {txt:<{width}} ".format(txt=controller,width=info_len) + div)
+    print(div + " {txt:<{width}} ".format(txt=driver,width=info_len) + div)
     print(hr_top)
     for bay in reversed(range(15)):
         for row in server["rows"]:
