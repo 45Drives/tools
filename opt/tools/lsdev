@@ -121,11 +121,13 @@ def print_bays(server, colour_opt):
                     string = ANSI_colours.GREY + string + ANSI_colours.END
             else: # no colour
                 if row[bay]["occupied"] and row[bay]["health"] == "POOR":
-                    string = "!" + string
+                    string = "! " + string
                 elif row[bay]["occupied"] and row[bay]["partitions"] == 0:
-                    string = "*" + string
+                    string = "* " + string
                 elif row[bay]["occupied"]: # partitions present
-                    string = "**" + string
+                    string = "**i" + string
+                else:
+                    string = "  " + string
             print("| " + string, end='')
         print("|")
 
