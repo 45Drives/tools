@@ -136,8 +136,8 @@ def print_bays(server, colour_opt):
         hr_bot = box.BL + (box.H*cell_width + box.BT)*(len(server["rows"])-1) + box.H*cell_width + box.BR
         div = box.V
     title = "Storinator Disk Info"
-    controller = "Disk Controller: " + get_controller()
-    driver = "Driver version: " + get_driver()
+    controller = "Disk Controller: " + server["meta"]["disk-controller"]
+    driver = "Driver version: " + server["meta"]["driver-version"]
     info_len = max(len(title),len(controller),len(driver))
     info_top = "-"*(info_len+4)
     if colour_opt:
@@ -199,7 +199,10 @@ def main():
     (options, args) = parser.parse_args()
     server = {
         "rows": build_server(),
-        "meta": "test"
+        "meta": {
+            "disk-controller": "",
+            "driver-version": ""
+        }
     }
     if options.json == True:
         print(json.dumps(server, indent = 4))
