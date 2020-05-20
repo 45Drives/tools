@@ -13,7 +13,7 @@
 
 import json
 import re
-import os.path
+import os
 
 CONFIG_PATH = "/etc"
 DEVICE_PATH = "/dev"
@@ -23,15 +23,24 @@ def count_partitions(path):
     blk_name = os.path.basename(path)
     return len(re.findall(blk_name + "\d{1,2}",partitions.read(),re.MULTILINE))
 
+def smartctl(drive):
+    output = json.loads(os.popen("smartctl -a " + drive["dev"] + " --json").read())
+    print(json.dumps(output))
+
 # initialize server[rows][bays]
 def build_server():
     # bay declaration. Append bay.copy() to lists
     bay = {
-        "occupied": "false",
-        "partitions": "0",
         "dev-by-path": "",
+        "bay-id": "",
+        "occupied": "false",
         "dev": "",
-        "bay-id": ""
+        "partitions": "",
+        "model": "",
+        "serial": "",
+        "capacity": "",
+        "firm-ver": "",
+        "rotation-rate": ""
     }
     server = [[]]; # server[row][bay]
     vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
@@ -56,10 +65,16 @@ def build_server():
             bay["occupied"] = "true"
             bay["dev"] = os.path.realpath(bay["dev-by-path"])
             bay["partitions"] = str(count_partitions(bay["dev"]))
+            smartctl(bay) # get metadata
         else:
             bay["occupied"] = "false"
             bay["dev"] = ""
-            bay["partitions"] = "0"
+            bay["partitions"] = ""
+            bay["model"] = ""
+            bay["serial"] = ""
+            bay["capacity"] = ""
+            bay["firm-ver"] = ""
+            bay["rotation-rate"] = ""
         # insert copy of bay
         server[row_index-1].append(bay.copy());
     vdev_id.close()
