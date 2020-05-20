@@ -66,7 +66,10 @@ def build_server():
     return server
 
 def main():
-    server = build_server()
+    server = {
+        "bays": build_server(),
+        "meta": "test"
+    }
     print(json.dumps(server, indent = 4))
 
 if __name__ == "__main__":
