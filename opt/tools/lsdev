@@ -91,6 +91,17 @@ def build_server(json_output):
         # skip blank lines and comments
         if not line or line == "" or line[0] == '#':
             continue
+        # extract bay indices and by-path path
+        regex = re.search("^alias (\d{1,2})-(\d{1,2})\s+(.*)$",line)
+        if regex == None:
+            continue
+        new_row_index = int(regex.group(1))
+        new_bay_index = int(regex.group(2))
+        # new row
+        if new_row_index > row_index:
+            row_index = new_row_index
+            server.append([]); # insert new row
+        # process bay
         bay = {
             "dev-by-path": "",
             "bay-id": "",
@@ -111,15 +122,6 @@ def build_server(json_output):
             "power-on-time": "",
             "health": ""
         }
-        # extract bay indices and by-path path
-        regex = re.search("^alias (\d{1,2})-(\d{1,2})\s+(.*)$",line)
-        new_row_index = int(regex.group(1))
-        new_bay_index = int(regex.group(2))
-        # new row
-        if new_row_index > row_index:
-            row_index = new_row_index
-            server.append([]); # insert new row
-        # process bay
         bay["dev-by-path"] = regex.group(3) # third capture group
         bay["bay-id"] = str(new_row_index) + "-" + str(new_bay_index)
         # if symlink exists in /dev/disk/by-path/ then bay is occupied
