@@ -232,6 +232,15 @@ def print_bays(server, colour_opt):
         print(div + ("{:^21}" if colour_opt else "{:^23}").format("Row " + str(i + 1)), end='')
     print(div)
     print(hr_bot)
+    # legend
+    print(" Legend:")
+    if colour_opt:
+        print(ANSI_colours.GREY + " Empty " + 
+                ANSI_colours.GREEN + " Occupied (no partitions) " +
+                ANSI_colours.LGREEN + " Occupied (1 or more partitions)" +
+                ANSI_colours.END)
+    else:
+        print("    Empty " + "  * Occupied (no partitions) " + " ** Occupied (1 or more partitions)")
 
 def main():
     parser = OptionParser()
