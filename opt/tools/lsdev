@@ -88,6 +88,9 @@ def build_server(json_output):
         exit(1)
     row_index = 1
     for line in vdev_id:
+        # skip blank lines and comments
+        if not line or line == "" or line[0] == '#':
+            continue
         bay = {
             "dev-by-path": "",
             "bay-id": "",
@@ -108,9 +111,6 @@ def build_server(json_output):
             "power-on-time": "",
             "health": ""
         }
-        # skip blank lines and comments
-        if not line or line[0] == '#':
-            continue
         # extract bay indices and by-path path
         regex = re.search("^alias (\d{1,2})-(\d{1,2})\s+(.*)$",line)
         new_row_index = int(regex.group(1))
