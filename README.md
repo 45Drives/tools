@@ -31,8 +31,7 @@ $ dnf install URL
 Install from git repo...
 
 ```sh
-$ mkdir /opt/tools
-$ cd /opt/tools
+$ cd /opt
 $ git clone https://github.com/45Drives/tools.git
 $ #Install dependancies
 $ yum install ipmitool jq smartmontools dmidecode
