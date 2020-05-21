@@ -72,7 +72,7 @@ def smartctl(drive):
         elif attr["name"] == "Temperature_Celsius":
             drive["temp-c"] = attr["raw"]["string"].split()[0]
         elif attr["name"] == "Current_Pending_Sector":
-            drive["current-pending-sensor"] = attr["raw"]["string"]
+            drive["current-pending-sector"] = attr["raw"]["string"]
         elif attr["name"] == "Offline_Uncorrectable":
             drive["offline-uncorrectable"] = attr["raw"]["string"]
     drive["power-on-time"] = output["power_on_time"]["hours"]
@@ -117,7 +117,7 @@ def build_server(json_output):
             "start-stop-countt": "",
             "power-cycle-count": "",
             "temp-c": "",
-            "current-pending-sensor": "",
+            "current-pending-sector": "",
             "offline-uncorrectable": "",
             "power-on-time": "",
             "health": ""
