@@ -1,270 +1,267 @@
-
-#!/bin/bash
-# ---------------------------------------------------------------------------
+#!/usr/bin/env python3
+# --------------------------------------------------------------------
 # lsdev - List devices in the system by their alias
-
-# Copyright 2016, Brett Kelly <bkelly@45drives.com>
-
+#
+# Copyright (C) 2020, Josh Boudreau <jboudreau@45drives.com>
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.############
+# (at your option) any later version.
+# --------------------------------------------------------------------
 
-############
 
-declare -A BAY
-declare -A BAYSTATUS
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-LGREEN='\033[1;32m'
-LGREY='\033[1;37m'
-DGREY='\033[1;30m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;36m'
-NC='\033[0m'
-R750="0750"
-LSI_9201="2116"
-LSI_9305="3224"
-ASR="Adaptec"
-HBA1000="Adaptec Series 8"
-R3740="3740"
+import json
+import re
+import os
+import subprocess
+from optparse import OptionParser
 
-DEVICE_PATH=$ALIAS_DEVICE_PATH
-CONFIG_PATH=$ALIAS_CONFIG_PATH
-if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
-        echo "No alias device or config path set in profile.d ... Defaulting to /etc, and /dev"
-        DEVICE_PATH=/dev
-	CONFIG_PATH=/etc
-fi
+# read from environment variable
+DEVICE_PATH = os.getenv("ALIAS_DEVICE_PATH")
+CONFIG_PATH = os.getenv("ALIAS_CONFIG_PATH")
+if DEVICE_PATH == None:
+    DEVICE_PATH = "/dev"
+if CONFIG_PATH == None:
+    CONFIG_PATH = "/etc"
 
-line() { # takes a number as first input Length, and any character as second input, defaults to "-" if no option
-        if [ -z $2 ]; then
-                printf -v line '%*s' "$1"
-                echo ${line// /-}
-        else
-                printf -v line '%*s' "$1"
-                echo ${line// /$2}
-        fi
-}
-setBAYstatus() {
-        BAYSTATUS[$1]=$(printf "$DGREY%-6s$NC" ${BAY[$1]} "-")
-	LINUX_NAME=$(readlink -f $DEVICE_PATH/${BAY[$1]})
-        partcount=$((ls $DEVICE_PATH/ | grep -w ${BAY[$1]} | wc -l) 2>/dev/null)
-        
-        if [ "$partcount" -eq "1" ];then
-                BAYSTATUS[$1]=$(printf "$YELLOW%-6s$NC" ${BAY[$1]} "("$LINUX_NAME")")
-        elif [ "$partcount" -gt "1" ];then
-                BAYSTATUS[$1]=$(printf "$GREEN%-6s$NC" ${BAY[$1]} "("$LINUX_NAME")")
-        fi
-}
-setBAYstatusNC() {
-        BAYSTATUS[$1]=$(printf "%-5s" ${BAY[$1]})
-        LINUX_NAME=$(readlink -f $DEVICE_PATH/${BAY[$1]})
-        partcount=$((ls $DEVICE_PATH/ | grep -w ${BAY[$1]} | wc -l) 2>/dev/null)
-        
-        if [ "$partcount" -eq "1" ];then
-                BAYSTATUS[$1]=$(printf "*%-5s" ${BAY[$1]} "("$LINUX_NAME")")
-        elif [ "$partcount" -gt "1" ];then
-                BAYSTATUS[$1]=$(printf "**%-5s" ${BAY[$1]} "("$LINUX_NAME")")
-        fi
-}
-getCARDname() {
-if [[ $(lspci | grep $R750) ]];then
-        CARD="HighPoint R750"
-        DRIVERVERSION=$(cat /proc/scsi/r750/* 2>/dev/null | awk 'NR==1{print $5}')
-        OLD_MAP=yes #Default R750 to always use old mapping
-elif [[ $(lspci | grep $LSI_9201) ]];then
-        CARD="LSI 9201-16i"
-        DRIVERVERSION=$(modinfo mpt2sas | grep version | awk 'NR==1{print $2}')
-elif [[ $(lspci | grep $LSI_9305) ]];then
-        CARD="LSI 9305-16i"
-        DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
-elif [[ $(dmidecode -t baseboard | grep -i "product name" | cut -d : -f 2 | xargs echo) == "X11SSH-CTF" ]] && [[ ! $(lspci | grep $LSI_9305) ]];then
-        CARD="AV15 BASE"
-        DRIVERVERSION=$(modinfo mpt3sas | grep version | awk 'NR==1{print $2}')
-fi
-}
-getBAY() {
-i=0
-j=3
-## LOOP THROUGH BAYS
-while [ $i -lt $BAYS ];do
-        bay=$(cat $CONFIG_PATH/vdev_id.conf | awk -v j=$j 'NR==j{print $2}')
-        BAY[$i]=$bay
-        let i=i+1
-        let j=j+1
-done
-}
-COLOR_FLAG=yes
-OLD_MAP=no
-while getopts 'onh' OPTION; do
-        case ${OPTION} in
-        n)
-                COLOR_FLAG=no
-                ;;
-        o)
-                OLD_MAP=yes
-                ;;
-        esac
-done
-BAYS=$((cat $CONFIG_PATH/vdev_id.conf| awk "NR>2" | wc -l) 2>/dev/null)
-getCARDname
-getBAY
-printf "| %s %s %s %s |\n" Disk Controller: $CARD DriverVersion: $DRIVERVERSION
-# initialize 4 counters, one for each potenital row in the server
+class ANSI_colours:
+    LGREEN='\033[1;32m'
+    GREEN='\033[0;32m'
+    RED='\033[0;31m'
+    GREY='\033[1;30m'
+    END='\033[0m'
 
-WIDTH=15
-WIDTH_=$(expr $WIDTH - 1)
-i=0 # first row, start at 0
-j=$(expr $i + $WIDTH) #2nd row offset i by width of the server
-k=$(expr $i + $WIDTH + $WIDTH) # 3rd row offset i by 2 widths
-l=$(expr $i + $WIDTH + $WIDTH + $WIDTH) # 4th row, offset by 3 widths
-case $BAYS in
-15)
-        #15unit
-        line 24 _
-        while [ $i -lt $WIDTH ];do
-                i_=$(expr $WIDTH_ - $i ) # invert counter for first row
-                if [ $COLOR_FLAG == no ];then
-                        setBAYstatusNC $i_
-                else
-                        setBAYstatus $i_
-                fi
-                printf "| %s |\n" "${BAYSTATUS[$i_]}" #displays drives in a snake pattern
-                let i=i+1
-                let j=j+1
-        done
-        line 24 -
-        printf "| %-5s |\n" ROW1
-        line 24 =
-        ;;
-30)
-        #30unit
-        line 24 _
-        while [ $i -lt $WIDTH ];do
-                i_=$(expr $WIDTH_ - $i ) # invert counter for first row
-                j_=$(expr $WIDTH + $WIDTH_ - $i )
-                if [ $COLOR_FLAG == no ];then
-                        setBAYstatusNC $i_
-                        if [ $OLD_MAP == yes ];then
-                                setBAYstatusNC $j
-                        else
-                                setBAYstatusNC $j_
-                        fi
+class box:
+    TL=u'\u2554' # ╔
+    TR=u'\u2557' # ╗
+    BL=u'\u255a' # ╚
+    BR=u'\u255d' # ╝
+    H=u'\u2550'  # ═
+    V=u'\u2551'  # ║
+    TT=u'\u2566' # ╦
+    LT=u'\u2560' # ╠
+    RT=u'\u2563' # ╣
+    BT=u'\u2569' # ╩
+    CT=u'\u256C' # ╬
 
-                else
-                        setBAYstatus $i_
-                        if [ $OLD_MAP == yes ];then
-                                setBAYstatus $j
-                        else
-                                setBAYstatus $j_
-                        fi
+def count_partitions(path):
+    partitions = open("/proc/partitions", mode='r')
+    blk_name = os.path.basename(path)
+    return len(re.findall(blk_name + "\d{1,2}",partitions.read(),re.MULTILINE))
 
-                fi
-                if [ $OLD_MAP = yes ];then
-                        printf "| %s | %s |\n" "${BAYSTATUS[$i_]}" "${BAYSTATUS[$j]}"
-                else
-                        printf "| %s | %s |\n" "${BAYSTATUS[$i_]}" "${BAYSTATUS[$j_]}"
-                fi
+def smartctl(drive):
+    try:
+        stream = subprocess.Popen(["smartctl", "-a", drive["dev"], "--json"],
+                stdout=subprocess.PIPE, universal_newlines=True).stdout
+    except OSError:
+        print("Error executing smartctl. Is it installed?")
+        exit(1)
+    output = json.loads(stream.read())
+    drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
+    drive["model-name"] = output["model_name"]
+    drive["serial"] = output["serial_number"]
+    drive["capacity"] = output["user_capacity"]["bytes"]
+    drive["firm-ver"] = output["firmware_version"]
+    drive["rotation-rate"] = output["rotation_rate"]
+    for attr in output["ata_smart_attributes"]["table"]:
+        if attr["name"] == "Start_Stop_Count":
+            drive["start-stop-count"] = attr["raw"]["string"]
+        elif attr["name"] == "Power_Cycle_Count":
+            drive["power-cycle-count"] = attr["raw"]["string"]
+        elif attr["name"] == "Temperature_Celsius":
+            drive["temp-c"] = attr["raw"]["string"].split()[0]
+        elif attr["name"] == "Current_Pending_Sector":
+            drive["current-pending-sensor"] = attr["raw"]["string"]
+        elif attr["name"] == "Offline_Uncorrectable":
+            drive["offline-uncorrectable"] = attr["raw"]["string"]
+    drive["power-on-time"] = output["power_on_time"]["hours"]
+    drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
 
-                let i=i+1
-                let j=j+1
-        done
-        line 24 -
-        printf "| %-5s | %-5s |\n" ROW1 ROW2
-        line 24 =
-        ;;
-45)
-        #45Unit
-        line 24 _
-        while [ $i -lt $WIDTH ];do
-                k_=$(expr $WIDTH + $WIDTH + $WIDTH_ - $i )
-                j_=$(expr $WIDTH + $WIDTH_ - $i )
-                i_=$(expr $WIDTH_ - $i )
-                if [ $COLOR_FLAG == no ];then
-                        setBAYstatusNC $i_
-                        if [ $OLD_MAP == yes ];then
-                                setBAYstatusNC $j
-                        else
-                                setBAYstatusNC $j_
-                        fi
-                        setBAYstatusNC $k_
-                else
-                        setBAYstatus $i_
-                        if [ $OLD_MAP == yes ];then
-                                setBAYstatus $j
-                        else
-                                setBAYstatus $j_
-                        fi
+# initialize server[rows][bays]
+def build_server(json_output):
+    server = [[]]; # server[row][bay]
+    try:
+        vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
+    except IOError:
+        print("Error opening " + CONFIG_PATH + "/vdev_id.conf. Run `dmap`.")
+        exit(1)
+    row_index = 1
+    for line in vdev_id:
+        # skip blank lines and comments
+        if not line or line == "" or line[0] == '#':
+            continue
+        # extract bay indices and by-path path
+        regex = re.search("^alias (\d{1,2})-(\d{1,2})\s+(.*)$",line)
+        if regex == None:
+            continue
+        new_row_index = int(regex.group(1))
+        new_bay_index = int(regex.group(2))
+        # new row
+        if new_row_index > row_index:
+            row_index = new_row_index
+            server.append([]); # insert new row
+        # process bay
+        bay = {
+            "dev-by-path": "",
+            "bay-id": "",
+            "occupied": False,
+            "dev": "",
+            "partitions": "",
+            "model-family": "",
+            "model-name": "",
+            "serial": "",
+            "capacity": "",
+            "firm-ver": "",
+            "rotation-rate": "",
+            "start-stop-countt": "",
+            "power-cycle-count": "",
+            "temp-c": "",
+            "current-pending-sensor": "",
+            "offline-uncorrectable": "",
+            "power-on-time": "",
+            "health": ""
+        }
+        bay["dev-by-path"] = regex.group(3) # third capture group
+        bay["bay-id"] = str(new_row_index) + "-" + str(new_bay_index)
+        # if symlink exists in /dev/disk/by-path/ then bay is occupied
+        if os.path.islink(bay["dev-by-path"]): 
+            bay["occupied"] = True
+            bay["dev"] = os.path.realpath(bay["dev-by-path"])
+            bay["partitions"] = count_partitions(bay["dev"])
+            if json_output:
+                smartctl(bay) # get metadata
+        # insert copy of bay
+        server[row_index-1].append(bay.copy());
+    vdev_id.close()
+    return server
 
-                        setBAYstatus $k_
-                fi
-                if [ $OLD_MAP = yes ];then
-                        printf "| %s | %s | %s |\n" "${BAYSTATUS[$i_]}" "${BAYSTATUS[$j]}" "${BAYSTATUS[$k_]}"
-                else
-                        printf "| %s | %s | %s |\n" "${BAYSTATUS[$i_]}" "${BAYSTATUS[$j_]}" "${BAYSTATUS[$k_]}"
-                fi
-                let i=i+1
-                let j=j+1
-                let k=k+1
-        done
-        line 24 -
-        printf "| %-5s | %-5s | %-5s |\n" ROW1 ROW2 ROW3
-        line 24 =
-        ;;
-60)
-        #60unit
-        line 32 _
-        while [ $i -lt $WIDTH ];do
-                l_=$(expr $WIDTH + $WIDTH + $WIDTH + $WIDTH_ - $i )
-                k_=$(expr $WIDTH + $WIDTH + $WIDTH_ - $i )
-                j_=$(expr $WIDTH + $WIDTH_ - $i )
-                i_=$(expr $WIDTH_ - $i )
-                if [ $COLOR_FLAG == no ];then
-                        setBAYstatusNC $i_
-                        if [ $OLD_MAP == yes ];then
-                                setBAYstatusNC $j
-                        else
-                                setBAYstatusNC $j_
-                        fi
-                        setBAYstatusNC $k_
-                        if [ $OLD_MAP == yes ];then
-                                setBAYstatusNC $l
-                        else
-                                setBAYstatusNC $l_
-                        fi
+def get_controller(server):
+    try:
+        stream = subprocess.Popen("lspci", stdout=subprocess.PIPE,
+                universal_newlines=True).stdout
+    except OSError:
+        print("Error executing lspci.")
+        exit(1)
+    string = stream.read()
+    controller = "?"
+    drv_vers = "?"
+    drv_arg = ""
+    if re.search("2116",string,re.MULTILINE) != None:
+        controller = "LSI 9201-16i"
+        drv_arg = "mpt2sas"
+    elif re.search("3224",string,re.MULTILINE) != None:
+        controller = "LSI 9305-16i"
+        drv_arg = "mpt3sas"
+    elif len(server["rows"]) == 1:
+        controller = "AV15 Base"
+        drv_arg = "mpt3sas"
+    else:
+        return "?","?"
+    try:
+        drv_stream = subprocess.Popen(["modinfo", drv_arg], stdout=subprocess.PIPE,
+                universal_newlines=True).stdout
+    except OSError:
+        print("Error executing modinfo.")
+        exit(1)
+    for line in drv_stream:
+        regex = re.search("^version:\s+(\d.*)$",line)
+        if regex != None:
+            drv_vers = regex.group(1)
+            break
+    return controller,drv_vers
 
-                else
-                        setBAYstatus $i_
-                        if [ $OLD_MAP == yes ];then
-                                setBAYstatus $j
-                        else
-                                setBAYstatus $j_
-                        fi
-                        setBAYstatus $k_
-                        if [ $OLD_MAP == yes ];then
-                                setBAYstatus $l
-                        else
-                                setBAYstatus $l_
-                        fi
+def print_bays(server, colour_opt):
+    cell_width = 21 if colour_opt else 24
+    hr_top = "-"*(cell_width*3+1)
+    hr_mid = hr_top
+    hr_bot = hr_mid
+    div = "|"
+    if colour_opt:
+        hr_top = box.LT + (box.H*cell_width + box.TT)*(len(server["rows"])-1) + box.H*cell_width + box.TR
+        hr_mid = box.LT + (box.H*cell_width + box.CT)*(len(server["rows"])-1) + box.H*cell_width + box.RT
+        hr_bot = box.BL + (box.H*cell_width + box.BT)*(len(server["rows"])-1) + box.H*cell_width + box.BR
+        div = box.V
+    title = "Storinator Disk Info"
+    controller = "Disk Controller: " + server["meta"]["disk-controller"]
+    driver = "Driver version: " + server["meta"]["driver-version"]
+    info_len = max(len(title),len(controller),len(driver))
+    info_top = "-"*(info_len+4)
+    if colour_opt:
+        info_top = box.TL + box.H*(info_len+2) + box.TR
+        tmplist = list(hr_top)
+        index = len(info_top)-1
+        if index + 1 == len(tmplist): # edge of lower table
+            tmplist[index] = box.RT
+        elif index + 1 > len(tmplist):
+            tmplist[-1] = box.TT # last current one
+            for char in list(box.H*(index - len(tmplist)) + box.BR):
+                tmplist.append(char)
+        elif (index) % (cell_width + 1) == 0: # if intersects with bay cell
+            tmplist[index] = box.CT
+        else:
+            tmplist[index] = box.BT
+        hr_top = "".join(tmplist)
+    print(info_top)
+    print(div + " {txt:<{width}} ".format(txt=title,width=info_len) + div)
+    print(div + " {txt:<{width}} ".format(txt=controller,width=info_len) + div)
+    print(div + " {txt:<{width}} ".format(txt=driver,width=info_len) + div)
+    print(hr_top)
+    for bay in reversed(range(15)):
+        for row in server["rows"]:
+            path = "(" + row[bay]["dev"] + ")" if row[bay]["dev"] else "-"
+            string = " {:<6}  {:<11} ".format(row[bay]["bay-id"],path)
+            if colour_opt:
+                if row[bay]["occupied"] and row[bay]["partitions"] == 0:
+                    string = ANSI_colours.GREEN + string + ANSI_colours.END
+                elif row[bay]["occupied"]: # partitions present
+                    string = ANSI_colours.LGREEN + string + ANSI_colours.END
+                else:
+                    string = ANSI_colours.GREY + string + ANSI_colours.END
+            else: # no colour
+                if row[bay]["occupied"] and row[bay]["partitions"] == 0:
+                    string = " *" + string
+                elif row[bay]["occupied"]: # partitions present
+                    string = "**" + string
+                else:
+                    string = "  " + string
+            print(div + string, end='')
+        print(div)
+    print(hr_mid)
+    for i in range(len(server["rows"])):
+        print(div + ("{:^21}" if colour_opt else "{:^23}").format("Row " + str(i + 1)), end='')
+    print(div)
+    print(hr_bot)
+    # legend
+    print(" Legend:")
+    if colour_opt:
+        print(ANSI_colours.GREY + " Empty " + 
+                ANSI_colours.GREEN + " Occupied (no partitions) " +
+                ANSI_colours.LGREEN + " Occupied (1 or more partitions)" +
+                ANSI_colours.END)
+    else:
+        print("    Empty " + "  * Occupied (no partitions) " + " ** Occupied (1 or more partitions)")
 
-                fi
-                if [ $OLD_MAP = yes ];then
-                        printf "| %s | %s | %s | %s |\n" "${BAYSTATUS[$i_]}" "${BAYSTATUS[$j]}" "${BAYSTATUS[$k_]}" "${BAYSTATUS[$l]}"
-                else
-                        printf "| %s | %s | %s | %s |\n" "${BAYSTATUS[$i_]}" "${BAYSTATUS[$j_]}" "${BAYSTATUS[$k_]}" "${BAYSTATUS[$l_]}"
-                fi
-                let i=i+1
-                let j=j+1
-                let k=k+1
-                let l=l+1
-        done
-        line 32 -
-        printf "| %-5s | %-5s | %-5s | %-5s |\n" ROW1 ROW2 ROW3 ROW4
-        line 32 =
-        echo
-        ;;
-*)
-        echo -e "\nError!\n\tUnable to Display Drive Map\n\tConfigure Drive Aliasing (dmap)\n"
-        ;;
-esac
+def main():
+    parser = OptionParser()
+    parser.add_option("-j","--json", action="store_true",
+            dest="json", default=False, help="output in JSON format")
+    parser.add_option("-n","--no-color","--no-colour", action="store_false",
+            dest="colour", default=True, help="replace colour coding with asterisks")
+    (options, args) = parser.parse_args()
+    server = {
+        "rows": build_server(options.json),
+        "meta": {
+            "disk-controller": "",
+            "driver-version": ""
+        }
+    }
+    server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller(server)
+    if options.json == True:
+        print(json.dumps(server, indent = 4))
+        exit(0)
+    print_bays(server,options.colour)
+    exit(0)
+
+if __name__ == "__main__":
+    main()
