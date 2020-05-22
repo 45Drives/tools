@@ -115,7 +115,7 @@ def build_server(json_output):
             "capacity": "",
             "firm-ver": "",
             "rotation-rate": "",
-            "start-stop-countt": "",
+            "start-stop-count": "",
             "power-cycle-count": "",
             "temp-c": "",
             "current-pending-sector": "",
