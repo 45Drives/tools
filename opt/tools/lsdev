@@ -208,8 +208,8 @@ def print_bays(server, colour_opt):
     print(div + " {txt:<{width}} ".format(txt=controller,width=info_len) + div)
     print(div + " {txt:<{width}} ".format(txt=driver,width=info_len) + div)
     print(hr_top)
-    for bay in reversed(range(15)):
-        for row in server["rows"]:
+    for bay in range(15):
+        for row in reversed(server["rows"]):
             path = "(" + row[bay]["dev"] + ")" if row[bay]["dev"] else "-"
             string = " {:<6}  {:<11} ".format(row[bay]["bay-id"],path)
             if colour_opt:
@@ -229,7 +229,7 @@ def print_bays(server, colour_opt):
             print(div + string, end='')
         print(div)
     print(hr_mid)
-    for i in range(len(server["rows"])):
+    for i in reversed(range(len(server["rows"]))):
         print(div + ("{:^21}" if colour_opt else "{:^23}").format("Row " + str(i + 1)), end='')
     print(div)
     print(hr_bot)
