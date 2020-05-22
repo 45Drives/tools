@@ -16,6 +16,7 @@ import re
 import os
 import subprocess
 from optparse import OptionParser
+import math
 
 # read from environment variable
 DEVICE_PATH = os.getenv("ALIAS_DEVICE_PATH")
@@ -61,7 +62,7 @@ def smartctl(drive):
     drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
     drive["model-name"] = output["model_name"]
     drive["serial"] = output["serial_number"]
-    drive["capacity"] = output["user_capacity"]["bytes"]
+    drive["capacity"] = format_bytes(output["user_capacity"]["bytes"])
     drive["firm-ver"] = output["firmware_version"]
     drive["rotation-rate"] = output["rotation_rate"]
     for attr in output["ata_smart_attributes"]["table"]:
@@ -70,7 +71,7 @@ def smartctl(drive):
         elif attr["name"] == "Power_Cycle_Count":
             drive["power-cycle-count"] = attr["raw"]["string"]
         elif attr["name"] == "Temperature_Celsius":
-            drive["temp-c"] = attr["raw"]["string"].split()[0]
+            drive["temp-c"] = attr["raw"]["string"].split()[0] + u"\u2103"
         elif attr["name"] == "Current_Pending_Sector":
             drive["current-pending-sensor"] = attr["raw"]["string"]
         elif attr["name"] == "Offline_Uncorrectable":
@@ -241,6 +242,15 @@ def print_bays(server, colour_opt):
                 ANSI_colours.END)
     else:
         print("    Empty " + "  * Occupied (no partitions) " + " ** Occupied (1 or more partitions)")
+
+def format_bytes(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
 
 def main():
     parser = OptionParser()
