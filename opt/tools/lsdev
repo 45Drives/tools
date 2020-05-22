@@ -234,6 +234,7 @@ def print_bays(server, colour_opt):
     print(div)
     print(hr_bot)
     # legend
+    print(" <-- motherboard | front plate -->")
     print(" Legend:")
     if colour_opt:
         print(ANSI_colours.GREY + " Empty " + 
