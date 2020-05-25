@@ -77,7 +77,7 @@ def smartctl(drive):
         elif attr["name"] == "Offline_Uncorrectable":
             drive["offline-uncorrectable"] = attr["raw"]["string"]
         elif attr["name"] == "Free_Space":
-            drive["free-space"] = attr["raw"]["string"]
+            drive["free-space"] = attr["raw"]["value"]
     drive["power-on-time"] = output["power_on_time"]["hours"]
     drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
 
