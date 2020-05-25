@@ -136,10 +136,10 @@ def build_server(json_output):
             bay["partitions"] = count_partitions(bay["dev"])
             if json_output:
                 smartctl(bay) # get metadata
-                if(bay["percent-used"]):
+                if(bay["free-space"]):
                     bay["percent-used"] = str((int(bay["capacity"]) - int(bay["free-space"])) * 100 / int(bay["capacity"])) + "%"
+                    bay["free-space"] = format_bytes(bay["free-space"])
                 bay["capacity"] = format_bytes(bay["capacity"])
-                bay["free-space"] = format_bytes(bay["free-space"])
         # insert copy of bay
         server[row_index-1].append(bay.copy());
     vdev_id.close()
