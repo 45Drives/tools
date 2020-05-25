@@ -62,7 +62,7 @@ def smartctl(drive):
     drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
     drive["model-name"] = output["model_name"]
     drive["serial"] = output["serial_number"]
-    drive["capacity"] = format_bytes(output["user_capacity"]["bytes"])
+    drive["capacity"] = output["user_capacity"]["bytes"]
     drive["firm-ver"] = output["firmware_version"]
     drive["rotation-rate"] = output["rotation_rate"]
     for attr in output["ata_smart_attributes"]["table"]:
@@ -76,6 +76,8 @@ def smartctl(drive):
             drive["current-pending-sector"] = attr["raw"]["string"]
         elif attr["name"] == "Offline_Uncorrectable":
             drive["offline-uncorrectable"] = attr["raw"]["string"]
+        elif attr["name"] == "Free_Space":
+            drive["free-space"] = attr["raw"]["string"]
     drive["power-on-time"] = output["power_on_time"]["hours"]
     drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
 
@@ -113,6 +115,8 @@ def build_server(json_output):
             "model-name": "",
             "serial": "",
             "capacity": "",
+            "free-space": "",
+            "percent-used": "",
             "firm-ver": "",
             "rotation-rate": "",
             "start-stop-count": "",
@@ -132,6 +136,9 @@ def build_server(json_output):
             bay["partitions"] = count_partitions(bay["dev"])
             if json_output:
                 smartctl(bay) # get metadata
+                bay["percent-used"] = str((int(bay["capacity"]) - int(bay["free-space"])) * 100 / int(bay["capacity"])) + "%"
+                bay["capacity"] = format_bytes(bay["capacity"])
+                bay["free-space"] = format_bytes(bay["free-space"])
         # insert copy of bay
         server[row_index-1].append(bay.copy());
     vdev_id.close()
