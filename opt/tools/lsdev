@@ -18,6 +18,8 @@ import subprocess
 from optparse import OptionParser
 import math
 
+EXIT_CODE = 0;
+
 # read from environment variable
 DEVICE_PATH = os.getenv("ALIAS_DEVICE_PATH")
 CONFIG_PATH = os.getenv("ALIAS_CONFIG_PATH")
@@ -58,6 +60,9 @@ def smartctl(drive):
     except OSError:
         print("Error executing smartctl. Is it installed?")
         exit(1)
+    if stream.wait() != 0:
+        EXIT_CODE = stream.returncode
+        return
     output = json.loads(stream.read())
     drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
     drive["model-name"] = output["model_name"]
