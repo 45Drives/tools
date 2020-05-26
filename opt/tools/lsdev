@@ -18,7 +18,7 @@ import subprocess
 from optparse import OptionParser
 import math
 
-EXIT_CODE = 0;
+EXIT_CODE = 0
 
 # read from environment variable
 DEVICE_PATH = os.getenv("ALIAS_DEVICE_PATH")
@@ -54,6 +54,7 @@ def count_partitions(path):
     return len(re.findall(blk_name + "\d{1,2}",partitions.read(),re.MULTILINE))
 
 def smartctl(drive):
+    global EXIT_CODE
     try:
         child = subprocess.Popen(["smartctl", "-a", drive["dev"], "--json"],
                 stdout=subprocess.PIPE, universal_newlines=True)
