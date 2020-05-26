@@ -62,7 +62,7 @@ def smartctl(drive):
         exit(1)
     if child.wait() != 0:
         EXIT_CODE = child.returncode
-        exit(EXIT_CODE)
+        return
     output = json.loads(child.stdout.read())
     drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
     drive["model-name"] = output["model_name"]
@@ -139,7 +139,8 @@ def build_server(json_output):
             bay["partitions"] = count_partitions(bay["dev"])
             if json_output:
                 smartctl(bay) # get metadata
-                bay["capacity"] = format_bytes(bay["capacity"])
+                if EXIT_CODE == 0:
+                    bay["capacity"] = format_bytes(bay["capacity"])
         # insert copy of bay
         server[row_index-1].append(bay.copy());
     vdev_id.close()
@@ -278,7 +279,7 @@ def main():
     server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller(server)
     if options.json == True:
         print(json.dumps(server, indent = 4))
-        exit(0)
+        exit(EXIT_CODE)
     print_bays(server,options.colour)
     exit(0)
 
