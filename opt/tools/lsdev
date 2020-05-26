@@ -62,7 +62,7 @@ def smartctl(drive):
         exit(1)
     if child.wait() != 0:
         EXIT_CODE = child.returncode
-        return
+        exit(EXIT_CODE)
     output = json.loads(child.stdout.read())
     drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
     drive["model-name"] = output["model_name"]
