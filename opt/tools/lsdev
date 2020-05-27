@@ -20,17 +20,6 @@ import math
 
 EXIT_CODE = 0
 
-# pkexec won't carry over environment variables
-# possibly change this check to see if /etc/zfs/vdev_id.conf exists,
-# if DNE, use /etc/vdev_id.conf
-# read from environment variable
-DEVICE_PATH = os.getenv("ALIAS_DEVICE_PATH")
-CONFIG_PATH = os.getenv("ALIAS_CONFIG_PATH")
-if DEVICE_PATH == None:
-    DEVICE_PATH = "/dev"
-if CONFIG_PATH == None:
-    CONFIG_PATH = "/etc"
-
 class ANSI_colours:
     LGREEN='\033[1;32m'
     GREEN='\033[0;32m'
@@ -91,6 +80,7 @@ def smartctl(drive):
 # initialize server[rows][bays]
 def build_server(json_output):
     server = [[]]; # server[row][bay]
+    CONFIG_PATH = "/etc/zfs" if os.path.isfile("/etc/zfs/vdev_id.conf") else "/etc"
     try:
         vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
     except IOError:
