@@ -20,6 +20,9 @@ import math
 
 EXIT_CODE = 0
 
+# pkexec won't carry over environment variables
+# possibly change this check to see if /etc/zfs/vdev_id.conf exists,
+# if DNE, use /etc/vdev_id.conf
 # read from environment variable
 DEVICE_PATH = os.getenv("ALIAS_DEVICE_PATH")
 CONFIG_PATH = os.getenv("ALIAS_CONFIG_PATH")
