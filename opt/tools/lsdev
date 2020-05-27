@@ -112,8 +112,6 @@ def build_server(json_output):
             "model-name": "",
             "serial": "",
             "capacity": "",
-            "free-space": "",
-            "percent-used": "",
             "firm-ver": "",
             "rotation-rate": "",
             "start-stop-count": "",
