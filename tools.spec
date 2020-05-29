@@ -19,6 +19,7 @@ Requires: ipmitool
 Requires: jq
 Requires: smartmontools > 7.0
 Requires: dmidecode
+Requires: pciutils
 
 %description
 
