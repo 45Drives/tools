@@ -3,8 +3,8 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.1
-Release:	2%{?dist}
+Version:	1.3
+Release:	1%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -58,8 +58,14 @@ rm -rf %{buildroot}
 %{_bindir}/*
 
 %changelog
+* Sat May 30 2020 Brett Kelly <bkelly@45drives.com> 1.3
+- First build 1.3, added generate-osd-vars.sh 
+* Tue May 26 2020 Brett Kelly <bkelly@45drives.com> 1.2
+- First build 1.2, added lsdev json output, smartctl attr 
 * Mon May 18 2020 Brett Kelly <bkelly@45drives.com> 1.1
 - Second build, link files from opt/tools to bin dir
 * Mon May 18 2020 Brett Kelly <bkelly@45drives.com> 1.1
 - First build of v1.1. Added zfs check in profile.d script. Organized code. Removed unneeded scripts
+* Mon May 12 2020 Josh Boudreau <jboudreau@45drives.com> 1.0
+- First build of v1.0
 
