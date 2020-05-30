@@ -11,7 +11,6 @@
 DEVICE_PATH=$ALIAS_DEVICE_PATH
 CONFIG_PATH=$ALIAS_CONFIG_PATH
 if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
-        echo "No alias device or config path set in profile.d ... Defaulting to /etc, and /dev"
         DEVICE_PATH=/dev
 	    CONFIG_PATH=/etc
 fi
