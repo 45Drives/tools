@@ -72,9 +72,9 @@ UDEV_TRIG=yes
 BIN_DIR="/opt/tools"
 LSI_9305="3224"
 
-if [ ! -f "$BIN_DIR/storcli64" ]; then
-    curl -so $BIN_DIR/storcli64 http://images.45drives.com/tools/storcli64 > /dev/null
-    chmod +x $BIN_DIR/storcli64
+if ! rpm -q storcli >/dev/null 2>&1 ; then
+    echo "error: storcli required"
+    exit 1
 fi
 
 # Input Arguments
@@ -121,7 +121,7 @@ gethba
 checkchassis $CHASSIS
 
 CARD_COUNT=$(lspci | grep -i $DISK_CONTROLLER | wc -l )
-CARD_COUNT2=$($BIN_DIR/storcli64 show all | grep 24i | wc -l)
+CARD_COUNT2=$(/opt/MegaRAID/storcli/storcli64 show all | grep 24i | wc -l)
 
 if [ $CARD_COUNT2 -eq 1 ]; then
     HYBRID=16

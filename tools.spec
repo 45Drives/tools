@@ -4,7 +4,7 @@
 
 Name:		45drives-tools
 Version:	1.3
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -21,6 +21,7 @@ Requires: smartmontools > 7.0
 Requires: dmidecode
 Requires: python3
 Requires: pciutils
+Requires: storcli
 
 %description
 
@@ -58,7 +59,7 @@ rm -rf %{buildroot}
 /etc/profile.d/tools.sh
 %{_bindir}/*
 
-%changelog* 
+%changelog
 * Sat May 30 2020 Brett Kelly <bkelly@45drives.com> 1.3
 - Second build 1.3, added python dependancy 
 * Sat May 30 2020 Brett Kelly <bkelly@45drives.com> 1.3
