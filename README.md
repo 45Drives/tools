@@ -36,7 +36,7 @@ Install from git repo...
 $ cd /opt
 $ git clone https://github.com/45Drives/tools.git
 $ #Install dependancies
-$ yum install ipmitool jq smartmontools dmidecode pciutils
+$ yum install ipmitool jq smartmontools dmidecode pciutils python3
 ```
 ### RPM BUILD
 Assuming rpmbuild enviroment set up already

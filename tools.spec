@@ -19,6 +19,7 @@ Requires: ipmitool
 Requires: jq
 Requires: smartmontools > 7.0
 Requires: dmidecode
+Requires: python3
 Requires: pciutils
 
 %description
@@ -57,7 +58,9 @@ rm -rf %{buildroot}
 /etc/profile.d/tools.sh
 %{_bindir}/*
 
-%changelog
+%changelog* 
+* Sat May 30 2020 Brett Kelly <bkelly@45drives.com> 1.3
+- Second build 1.3, added python dependancy 
 * Sat May 30 2020 Brett Kelly <bkelly@45drives.com> 1.3
 - First build 1.3, added generate-osd-vars.sh 
 * Tue May 26 2020 Brett Kelly <bkelly@45drives.com> 1.2
@@ -66,6 +69,6 @@ rm -rf %{buildroot}
 - Second build, link files from opt/tools to bin dir
 * Mon May 18 2020 Brett Kelly <bkelly@45drives.com> 1.1
 - First build of v1.1. Added zfs check in profile.d script. Organized code. Removed unneeded scripts
-* Mon May 12 2020 Josh Boudreau <jboudreau@45drives.com> 1.0
+* Tue May 12 2020 Josh Boudreau <jboudreau@45drives.com> 1.0
 - First build of v1.0
 
