@@ -15,10 +15,6 @@ if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
         DEVICE_PATH=/dev
 	    CONFIG_PATH=/etc
 fi
-if [ ! -f $CONFIG_PATH/vdev_id.conf ]; then
-    echo "ERROR: vdev_id.conf doesnt exist. Configure device aliasing"
-    exit 1
-fi
 LSI_9305="3224"
 LSI_9361="3316"
 LSI_9405="3616"
@@ -103,11 +99,10 @@ printvars() {
     echo ""
 }
 
-
-getdrives
 gethba
 getchassis
+if [ -s $CONFIG_PATH/vdev_id.conf ]; then
+    getdrives
+fi
 
 printvars
-
-
