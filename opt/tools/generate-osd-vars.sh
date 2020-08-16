@@ -27,7 +27,20 @@ getdrives() {
 	    bay=$(echo $i | grep alias | awk '{print $2}')
 	    if [ ! -z "$bay" ];then 
             if [ -b $DEVICE_PATH/$bay ];then
-                BAY[$j]=$bay
+                if [ "$CAS" == "true" ];then
+                    if casadm -L -o csv | grep $(readlink $DEVICE_PATH/$bay) > /dev/null ; then
+                        castype=$(casadm -L -o csv | grep $(readlink $DEVICE_PATH/$bay) | cut -d , -f 1)
+                        if [ "$castype" == "core" ] ; then  
+                            BAY[$j]=$(casadm -L -o csv | grep $(readlink $DEVICE_PATH/$bay) | cut -d , -f 6 | cut -d / -f 3 )
+                        elif [ "$castype" == "cache" ] ; then
+                            :
+                        fi
+                    else
+                        BAY[$j]=$bay
+                    fi
+                else
+                    BAY[$j]=$bay
+                fi
             fi
 	    fi
 	    let j=j+1
@@ -80,6 +93,18 @@ getchassis() {
         HYBRID_CHASSIS="false"
     fi
 }
+checkcas(){
+if rpm -qa | grep -q open-cas-linux ; then
+    cascheck=$(casadm -L)
+    if [ "$cascheck" == "No caches running" ] ; then
+        CAS="false"
+    else
+        CAS="true"
+    fi
+else
+    CAS="false"
+fi
+}
 
 printvars() {
     ## PRINT
@@ -101,6 +126,7 @@ printvars() {
 
 gethba
 getchassis
+checkcas
 if [ -s $CONFIG_PATH/vdev_id.conf ]; then
     getdrives
 fi

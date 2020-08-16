@@ -20,6 +20,7 @@
     - lsosd : List devices by their alias and osd id (Node must be member of Ceph Cluster)
     - findosd : Takes osd id as input and outputs device alias. If osd is located on another host output is that hostname
     - generate-osd-vars.sh : Outputs list of devive names and device alias to stdout. Used by ceph-ansible playbook to autogenerate devices varibles
+  - Polkit rules are for use with Cockpit
   
 ### Installation
 CentOS 7.X
