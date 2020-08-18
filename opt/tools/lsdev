@@ -223,8 +223,8 @@ def print_bays(server, colour_opt, output_opt):
 	print(hr_top)
 	for bay in range(15):
 		for row in reversed(server["rows"]):
-			path = "(" + row[bay]["dev"] + ")" if row[bay]["dev"] else "-"
-			string = " {:<6}  {:<11} ".format(row[bay]["bay-id"],path)
+			output = "(" + row[bay]["dev"] + ")" if row[bay]["dev"] else "-"
+			string = " {:<6}  {:<11} ".format(row[bay]["bay-id"],output)
 			if colour_opt:
 				if row[bay]["occupied"] and row[bay]["partitions"] == 0:
 					string = ANSI_colours.GREEN + string + ANSI_colours.END
