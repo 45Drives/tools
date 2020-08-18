@@ -78,7 +78,7 @@ def smartctl(drive):
 	drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
 
 def check_opts(options):
-	return options.json or options.outputHealth or outputModel or outputSerial
+	return options.json or options.outputHealth or options.outputModel or options.outputSerial
 
 # initialize server[rows][bays]
 def build_server(options):
@@ -281,10 +281,18 @@ def main():
 		}
 	}
 	server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller(server)
-	if options.json == True:
+	if(options.json):
 		print(json.dumps(server, indent = 4))
-		exit(EXIT_CODE)
-	print_bays(server,options.colour)
+	elif(options.outputHealth):
+		print_bays(server,options.colour)
+	elif(options.outputModel):
+		print_bays(server,options.colour)
+	elif(options.outputType):
+		print_bays(server,options.colour)
+	elif(options.outputSerial):
+		print_bays(server,options.colour)
+	else:
+		print_bays(server,options.colour)
 	exit(0)
 
 if __name__ == "__main__":
