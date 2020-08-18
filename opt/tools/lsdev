@@ -82,7 +82,7 @@ def check_opts(options):
 
 # initialize server[rows][bays]
 def build_server(options):
-	call_smart_ctl = check_opts(options)
+	call_smartctl = check_opts(options)
 	server = [[]]; # server[row][bay]
 	CONFIG_PATH = "/etc/zfs" if os.path.isfile("/etc/zfs/vdev_id.conf") else "/etc"
 	try:
@@ -133,7 +133,7 @@ def build_server(options):
 			bay["occupied"] = True
 			bay["dev"] = os.path.realpath(bay["dev-by-path"])
 			bay["partitions"] = count_partitions(bay["dev"])
-			if json_output:
+			if call_smartctl:
 				smartctl(bay) # get metadata
 				if EXIT_CODE == 0:
 					bay["capacity"] = format_bytes(bay["capacity"])
