@@ -185,7 +185,21 @@ def get_controller(server):
 			break
 	return controller,drv_vers
 
+def choose_output(bay, output_opt):
+	# switch on output_opt to determine output string
+	if output_opt == outputType.DEFAULT:
+		return "(" + bay["dev"] + ")" if bay["dev"] else "-"
+	if output_opt == outputType.HEALTH:
+		return bay["health"] if bay["health"] else "-"
+	if output_opt == outputType.MODEL:
+		return bay["model-name"] if bay["model-name"] else "-"
+	if output_opt == outputType.TYPE:
+		return "Type"
+	if output_opt == outputType.SERIAL:
+		return bay["serial"] if bay["serial"] else "-"
+
 def print_bays(server, colour_opt, output_opt):
+	# TODO: fix column width for model name being too long
 	cell_width = 21 if colour_opt else 24
 	hr_top = "-"*(cell_width*3+1)
 	hr_mid = hr_top
@@ -223,7 +237,7 @@ def print_bays(server, colour_opt, output_opt):
 	print(hr_top)
 	for bay in range(15):
 		for row in reversed(server["rows"]):
-			output = "(" + row[bay]["dev"] + ")" if row[bay]["dev"] else "-"
+			output = choose_output(row[bay], output_opt)
 			string = " {:<6}  {:<11} ".format(row[bay]["bay-id"],output)
 			if colour_opt:
 				if row[bay]["occupied"] and row[bay]["partitions"] == 0:
