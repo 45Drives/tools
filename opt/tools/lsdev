@@ -17,6 +17,7 @@ import os
 import subprocess
 from optparse import OptionParser
 import math
+from enum import Enum
 
 EXIT_CODE = 0
 
@@ -39,6 +40,13 @@ class box:
 	RT=u'\u2563' # ╣
 	BT=u'\u2569' # ╩
 	CT=u'\u256C' # ╬
+
+class outputType(Enum):
+	DEFAULT = 0
+	HEALTH = 1
+	MODEL = 2
+	TYPE = 3
+	SERIAL = 4
 
 def count_partitions(path):
 	partitions = open("/proc/partitions", mode='r')
@@ -177,7 +185,7 @@ def get_controller(server):
 			break
 	return controller,drv_vers
 
-def print_bays(server, colour_opt):
+def print_bays(server, colour_opt, output_opt):
 	cell_width = 21 if colour_opt else 24
 	hr_top = "-"*(cell_width*3+1)
 	hr_mid = hr_top
@@ -284,15 +292,15 @@ def main():
 	if(options.json):
 		print(json.dumps(server, indent = 4))
 	elif(options.outputHealth):
-		print_bays(server,options.colour)
+		print_bays(server, options.colour, outputType.HEALTH)
 	elif(options.outputModel):
-		print_bays(server,options.colour)
+		print_bays(server, options.colour, outputType.MODEL)
 	elif(options.outputType):
-		print_bays(server,options.colour)
+		print_bays(server, options.colour, outputType.TYPE)
 	elif(options.outputSerial):
-		print_bays(server,options.colour)
+		print_bays(server, options.colour, outputType.SERIAL)
 	else:
-		print_bays(server,options.colour)
+		print_bays(server, options.colour, outputType.DEFAULT)
 	exit(0)
 
 if __name__ == "__main__":
