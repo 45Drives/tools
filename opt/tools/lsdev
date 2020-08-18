@@ -21,259 +21,271 @@ import math
 EXIT_CODE = 0
 
 class ANSI_colours:
-    LGREEN='\033[1;32m'
-    GREEN='\033[0;32m'
-    RED='\033[0;31m'
-    GREY='\033[1;30m'
-    END='\033[0m'
+	LGREEN='\033[1;32m'
+	GREEN='\033[0;32m'
+	RED='\033[0;31m'
+	GREY='\033[1;30m'
+	END='\033[0m'
 
 class box:
-    TL=u'\u2554' # ╔
-    TR=u'\u2557' # ╗
-    BL=u'\u255a' # ╚
-    BR=u'\u255d' # ╝
-    H=u'\u2550'  # ═
-    V=u'\u2551'  # ║
-    TT=u'\u2566' # ╦
-    LT=u'\u2560' # ╠
-    RT=u'\u2563' # ╣
-    BT=u'\u2569' # ╩
-    CT=u'\u256C' # ╬
+	TL=u'\u2554' # ╔
+	TR=u'\u2557' # ╗
+	BL=u'\u255a' # ╚
+	BR=u'\u255d' # ╝
+	H=u'\u2550'  # ═
+	V=u'\u2551'  # ║
+	TT=u'\u2566' # ╦
+	LT=u'\u2560' # ╠
+	RT=u'\u2563' # ╣
+	BT=u'\u2569' # ╩
+	CT=u'\u256C' # ╬
 
 def count_partitions(path):
-    partitions = open("/proc/partitions", mode='r')
-    blk_name = os.path.basename(path)
-    return len(re.findall(blk_name + "\d{1,2}",partitions.read(),re.MULTILINE))
+	partitions = open("/proc/partitions", mode='r')
+	blk_name = os.path.basename(path)
+	return len(re.findall(blk_name + "\d{1,2}",partitions.read(),re.MULTILINE))
 
 def smartctl(drive):
-    global EXIT_CODE
-    try:
-        child = subprocess.Popen(["smartctl", "-a", drive["dev"], "--json"],
-                stdout=subprocess.PIPE, universal_newlines=True)
-    except OSError:
-        print("Error executing smartctl. Is it installed?")
-        exit(1)
-    if child.wait() != 0:
-        EXIT_CODE = child.returncode
-        return
-    output = json.loads(child.stdout.read())
-    drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
-    drive["model-name"] = output["model_name"] if "model_name" in output.keys() else "?"
-    drive["serial"] = output["serial_number"] if "serial_number" in output.keys() else "?"
-    drive["capacity"] = output["user_capacity"]["bytes"] if "user_capacity" in output.keys() else "?"
-    drive["firm-ver"] = output["firmware_version"] if "firmware_version" in output.keys() else "?"
-    drive["rotation-rate"] = output["rotation_rate"] if "rotation_rate" in output.keys() else "?"
-    for attr in output["ata_smart_attributes"]["table"]:
-        if attr["name"] == "Start_Stop_Count":
-            drive["start-stop-count"] = attr["raw"]["string"]
-        elif attr["name"] == "Power_Cycle_Count":
-            drive["power-cycle-count"] = attr["raw"]["string"]
-        elif attr["name"] == "Temperature_Celsius":
-            drive["temp-c"] = attr["raw"]["string"].split()[0] + u"\u2103"
-        elif attr["name"] == "Current_Pending_Sector":
-            drive["current-pending-sector"] = attr["raw"]["string"]
-        elif attr["name"] == "Offline_Uncorrectable":
-            drive["offline-uncorrectable"] = attr["raw"]["string"]
-    drive["power-on-time"] = output["power_on_time"]["hours"] if "power_on_time" in output.keys() else "?"
-    drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
+	global EXIT_CODE
+	try:
+		child = subprocess.Popen(["smartctl", "-a", drive["dev"], "--json"],
+				stdout=subprocess.PIPE, universal_newlines=True)
+	except OSError:
+		print("Error executing smartctl. Is it installed?")
+		exit(1)
+	if child.wait() != 0:
+		EXIT_CODE = child.returncode
+		return
+	output = json.loads(child.stdout.read())
+	drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
+	drive["model-name"] = output["model_name"] if "model_name" in output.keys() else "?"
+	drive["serial"] = output["serial_number"] if "serial_number" in output.keys() else "?"
+	drive["capacity"] = output["user_capacity"]["bytes"] if "user_capacity" in output.keys() else "?"
+	drive["firm-ver"] = output["firmware_version"] if "firmware_version" in output.keys() else "?"
+	drive["rotation-rate"] = output["rotation_rate"] if "rotation_rate" in output.keys() else "?"
+	for attr in output["ata_smart_attributes"]["table"]:
+		if attr["name"] == "Start_Stop_Count":
+			drive["start-stop-count"] = attr["raw"]["string"]
+		elif attr["name"] == "Power_Cycle_Count":
+			drive["power-cycle-count"] = attr["raw"]["string"]
+		elif attr["name"] == "Temperature_Celsius":
+			drive["temp-c"] = attr["raw"]["string"].split()[0] + u"\u2103"
+		elif attr["name"] == "Current_Pending_Sector":
+			drive["current-pending-sector"] = attr["raw"]["string"]
+		elif attr["name"] == "Offline_Uncorrectable":
+			drive["offline-uncorrectable"] = attr["raw"]["string"]
+	drive["power-on-time"] = output["power_on_time"]["hours"] if "power_on_time" in output.keys() else "?"
+	drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
+
+def check_opts(options):
+	return options.json || options.outputHealth || outputModel || outputSerial
 
 # initialize server[rows][bays]
-def build_server(json_output):
-    server = [[]]; # server[row][bay]
-    CONFIG_PATH = "/etc/zfs" if os.path.isfile("/etc/zfs/vdev_id.conf") else "/etc"
-    try:
-        vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
-    except IOError:
-        print("Error opening " + CONFIG_PATH + "/vdev_id.conf. Run `dmap`.")
-        exit(1)
-    row_index = 1
-    for line in vdev_id:
-        # skip blank lines and comments
-        if not line or line == "" or line[0] == '#':
-            continue
-        # extract bay indices and by-path path
-        regex = re.search("^alias (\d{1,2})-(\d{1,2})\s+(.*)$",line)
-        if regex == None:
-            continue
-        new_row_index = int(regex.group(1))
-        new_bay_index = int(regex.group(2))
-        # new row
-        if new_row_index > row_index:
-            row_index = new_row_index
-            server.append([]); # insert new row
-        # process bay
-        bay = {
-            "dev-by-path": "",
-            "bay-id": "",
-            "occupied": False,
-            "dev": "",
-            "partitions": "",
-            "model-family": "",
-            "model-name": "",
-            "serial": "",
-            "capacity": "",
-            "firm-ver": "",
-            "rotation-rate": "",
-            "start-stop-count": "",
-            "power-cycle-count": "",
-            "temp-c": "",
-            "current-pending-sector": "",
-            "offline-uncorrectable": "",
-            "power-on-time": "",
-            "health": ""
-        }
-        bay["dev-by-path"] = regex.group(3) # third capture group
-        bay["bay-id"] = str(new_row_index) + "-" + str(new_bay_index)
-        # if symlink exists in /dev/disk/by-path/ then bay is occupied
-        if os.path.islink(bay["dev-by-path"]): 
-            bay["occupied"] = True
-            bay["dev"] = os.path.realpath(bay["dev-by-path"])
-            bay["partitions"] = count_partitions(bay["dev"])
-            if json_output:
-                smartctl(bay) # get metadata
-                if EXIT_CODE == 0:
-                    bay["capacity"] = format_bytes(bay["capacity"])
-        # insert copy of bay
-        server[row_index-1].append(bay.copy());
-    vdev_id.close()
-    return server
+def build_server(options):
+	call_smart_ctl = check_opts(options)
+	server = [[]]; # server[row][bay]
+	CONFIG_PATH = "/etc/zfs" if os.path.isfile("/etc/zfs/vdev_id.conf") else "/etc"
+	try:
+		vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
+	except IOError:
+		print("Error opening " + CONFIG_PATH + "/vdev_id.conf. Run `dmap`.")
+		exit(1)
+	row_index = 1
+	for line in vdev_id:
+		# skip blank lines and comments
+		if not line or line == "" or line[0] == '#':
+			continue
+		# extract bay indices and by-path path
+		regex = re.search("^alias (\d{1,2})-(\d{1,2})\s+(.*)$",line)
+		if regex == None:
+			continue
+		new_row_index = int(regex.group(1))
+		new_bay_index = int(regex.group(2))
+		# new row
+		if new_row_index > row_index:
+			row_index = new_row_index
+			server.append([]); # insert new row
+		# process bay
+		bay = {
+			"dev-by-path": "",
+			"bay-id": "",
+			"occupied": False,
+			"dev": "",
+			"partitions": "",
+			"model-family": "",
+			"model-name": "",
+			"serial": "",
+			"capacity": "",
+			"firm-ver": "",
+			"rotation-rate": "",
+			"start-stop-count": "",
+			"power-cycle-count": "",
+			"temp-c": "",
+			"current-pending-sector": "",
+			"offline-uncorrectable": "",
+			"power-on-time": "",
+			"health": ""
+		}
+		bay["dev-by-path"] = regex.group(3) # third capture group
+		bay["bay-id"] = str(new_row_index) + "-" + str(new_bay_index)
+		# if symlink exists in /dev/disk/by-path/ then bay is occupied
+		if os.path.islink(bay["dev-by-path"]): 
+			bay["occupied"] = True
+			bay["dev"] = os.path.realpath(bay["dev-by-path"])
+			bay["partitions"] = count_partitions(bay["dev"])
+			if json_output:
+				smartctl(bay) # get metadata
+				if EXIT_CODE == 0:
+					bay["capacity"] = format_bytes(bay["capacity"])
+		# insert copy of bay
+		server[row_index-1].append(bay.copy());
+	vdev_id.close()
+	return server
 
 def get_controller(server):
-    try:
-        stream = subprocess.Popen("lspci", stdout=subprocess.PIPE,
-                universal_newlines=True).stdout
-    except OSError:
-        print("Error executing lspci.")
-        exit(1)
-    string = stream.read()
-    controller = "?"
-    drv_vers = "?"
-    drv_arg = ""
-    if re.search("2116",string,re.MULTILINE) != None:
-        controller = "LSI 9201-16i"
-        drv_arg = "mpt2sas"
-    elif re.search("3224",string,re.MULTILINE) != None:
-        controller = "LSI 9305-16i"
-        drv_arg = "mpt3sas"
-    elif len(server["rows"]) == 1:
-        controller = "AV15 Base"
-        drv_arg = "mpt3sas"
-    else:
-        return "?","?"
-    try:
-        drv_stream = subprocess.Popen(["modinfo", drv_arg], stdout=subprocess.PIPE,
-                universal_newlines=True).stdout
-    except OSError:
-        print("Error executing modinfo.")
-        exit(1)
-    for line in drv_stream:
-        regex = re.search("^version:\s+(\d.*)$",line)
-        if regex != None:
-            drv_vers = regex.group(1)
-            break
-    return controller,drv_vers
+	try:
+		stream = subprocess.Popen("lspci", stdout=subprocess.PIPE,
+				universal_newlines=True).stdout
+	except OSError:
+		print("Error executing lspci.")
+		exit(1)
+	string = stream.read()
+	controller = "?"
+	drv_vers = "?"
+	drv_arg = ""
+	if re.search("2116",string,re.MULTILINE) != None:
+		controller = "LSI 9201-16i"
+		drv_arg = "mpt2sas"
+	elif re.search("3224",string,re.MULTILINE) != None:
+		controller = "LSI 9305-16i"
+		drv_arg = "mpt3sas"
+	elif len(server["rows"]) == 1:
+		controller = "AV15 Base"
+		drv_arg = "mpt3sas"
+	else:
+		return "?","?"
+	try:
+		drv_stream = subprocess.Popen(["modinfo", drv_arg], stdout=subprocess.PIPE,
+				universal_newlines=True).stdout
+	except OSError:
+		print("Error executing modinfo.")
+		exit(1)
+	for line in drv_stream:
+		regex = re.search("^version:\s+(\d.*)$",line)
+		if regex != None:
+			drv_vers = regex.group(1)
+			break
+	return controller,drv_vers
 
 def print_bays(server, colour_opt):
-    cell_width = 21 if colour_opt else 24
-    hr_top = "-"*(cell_width*3+1)
-    hr_mid = hr_top
-    hr_bot = hr_mid
-    div = "|"
-    if colour_opt:
-        hr_top = box.LT + (box.H*cell_width + box.TT)*(len(server["rows"])-1) + box.H*cell_width + box.TR
-        hr_mid = box.LT + (box.H*cell_width + box.CT)*(len(server["rows"])-1) + box.H*cell_width + box.RT
-        hr_bot = box.BL + (box.H*cell_width + box.BT)*(len(server["rows"])-1) + box.H*cell_width + box.BR
-        div = box.V
-    title = "Storinator Disk Info"
-    controller = "Disk Controller: " + server["meta"]["disk-controller"]
-    driver = "Driver version: " + server["meta"]["driver-version"]
-    info_len = max(len(title),len(controller),len(driver))
-    info_top = "-"*(info_len+4)
-    if colour_opt:
-        info_top = box.TL + box.H*(info_len+2) + box.TR
-        tmplist = list(hr_top)
-        index = len(info_top)-1
-        if index + 1 == len(tmplist): # edge of lower table
-            tmplist[index] = box.RT
-        elif index + 1 > len(tmplist):
-            tmplist[-1] = box.TT # last current one
-            for char in list(box.H*(index - len(tmplist)) + box.BR):
-                tmplist.append(char)
-        elif (index) % (cell_width + 1) == 0: # if intersects with bay cell
-            tmplist[index] = box.CT
-        else:
-            tmplist[index] = box.BT
-        hr_top = "".join(tmplist)
-    print(info_top)
-    print(div + " {txt:<{width}} ".format(txt=title,width=info_len) + div)
-    print(div + " {txt:<{width}} ".format(txt=controller,width=info_len) + div)
-    print(div + " {txt:<{width}} ".format(txt=driver,width=info_len) + div)
-    print(hr_top)
-    for bay in range(15):
-        for row in reversed(server["rows"]):
-            path = "(" + row[bay]["dev"] + ")" if row[bay]["dev"] else "-"
-            string = " {:<6}  {:<11} ".format(row[bay]["bay-id"],path)
-            if colour_opt:
-                if row[bay]["occupied"] and row[bay]["partitions"] == 0:
-                    string = ANSI_colours.GREEN + string + ANSI_colours.END
-                elif row[bay]["occupied"]: # partitions present
-                    string = ANSI_colours.LGREEN + string + ANSI_colours.END
-                else:
-                    string = ANSI_colours.GREY + string + ANSI_colours.END
-            else: # no colour
-                if row[bay]["occupied"] and row[bay]["partitions"] == 0:
-                    string = " *" + string
-                elif row[bay]["occupied"]: # partitions present
-                    string = "**" + string
-                else:
-                    string = "  " + string
-            print(div + string, end='')
-        print(div)
-    print(hr_mid)
-    for i in reversed(range(len(server["rows"]))):
-        print(div + ("{:^21}" if colour_opt else "{:^23}").format("Row " + str(i + 1)), end='')
-    print(div)
-    print(hr_bot)
-    # legend
-    print(" <-- motherboard | front plate -->")
-    print(" Legend:")
-    if colour_opt:
-        print(ANSI_colours.GREY + " Empty " + 
-                ANSI_colours.GREEN + " Occupied (no partitions) " +
-                ANSI_colours.LGREEN + " Occupied (1 or more partitions)" +
-                ANSI_colours.END)
-    else:
-        print("    Empty " + "  * Occupied (no partitions) " + " ** Occupied (1 or more partitions)")
+	cell_width = 21 if colour_opt else 24
+	hr_top = "-"*(cell_width*3+1)
+	hr_mid = hr_top
+	hr_bot = hr_mid
+	div = "|"
+	if colour_opt:
+		hr_top = box.LT + (box.H*cell_width + box.TT)*(len(server["rows"])-1) + box.H*cell_width + box.TR
+		hr_mid = box.LT + (box.H*cell_width + box.CT)*(len(server["rows"])-1) + box.H*cell_width + box.RT
+		hr_bot = box.BL + (box.H*cell_width + box.BT)*(len(server["rows"])-1) + box.H*cell_width + box.BR
+		div = box.V
+	title = "Storinator Disk Info"
+	controller = "Disk Controller: " + server["meta"]["disk-controller"]
+	driver = "Driver version: " + server["meta"]["driver-version"]
+	info_len = max(len(title),len(controller),len(driver))
+	info_top = "-"*(info_len+4)
+	if colour_opt:
+		info_top = box.TL + box.H*(info_len+2) + box.TR
+		tmplist = list(hr_top)
+		index = len(info_top)-1
+		if index + 1 == len(tmplist): # edge of lower table
+			tmplist[index] = box.RT
+		elif index + 1 > len(tmplist):
+			tmplist[-1] = box.TT # last current one
+			for char in list(box.H*(index - len(tmplist)) + box.BR):
+				tmplist.append(char)
+		elif (index) % (cell_width + 1) == 0: # if intersects with bay cell
+			tmplist[index] = box.CT
+		else:
+			tmplist[index] = box.BT
+		hr_top = "".join(tmplist)
+	print(info_top)
+	print(div + " {txt:<{width}} ".format(txt=title,width=info_len) + div)
+	print(div + " {txt:<{width}} ".format(txt=controller,width=info_len) + div)
+	print(div + " {txt:<{width}} ".format(txt=driver,width=info_len) + div)
+	print(hr_top)
+	for bay in range(15):
+		for row in reversed(server["rows"]):
+			path = "(" + row[bay]["dev"] + ")" if row[bay]["dev"] else "-"
+			string = " {:<6}  {:<11} ".format(row[bay]["bay-id"],path)
+			if colour_opt:
+				if row[bay]["occupied"] and row[bay]["partitions"] == 0:
+					string = ANSI_colours.GREEN + string + ANSI_colours.END
+				elif row[bay]["occupied"]: # partitions present
+					string = ANSI_colours.LGREEN + string + ANSI_colours.END
+				else:
+					string = ANSI_colours.GREY + string + ANSI_colours.END
+			else: # no colour
+				if row[bay]["occupied"] and row[bay]["partitions"] == 0:
+					string = " *" + string
+				elif row[bay]["occupied"]: # partitions present
+					string = "**" + string
+				else:
+					string = "  " + string
+			print(div + string, end='')
+		print(div)
+	print(hr_mid)
+	for i in reversed(range(len(server["rows"]))):
+		print(div + ("{:^21}" if colour_opt else "{:^23}").format("Row " + str(i + 1)), end='')
+	print(div)
+	print(hr_bot)
+	# legend
+	print(" <-- motherboard | front plate -->")
+	print(" Legend:")
+	if colour_opt:
+		print(ANSI_colours.GREY + " Empty " + 
+				ANSI_colours.GREEN + " Occupied (no partitions) " +
+				ANSI_colours.LGREEN + " Occupied (1 or more partitions)" +
+				ANSI_colours.END)
+	else:
+		print("    Empty " + "  * Occupied (no partitions) " + " ** Occupied (1 or more partitions)")
 
 def format_bytes(size_bytes):
-    if size_bytes == 0:
-        return "0B"
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-    i = int(math.floor(math.log(size_bytes, 1024)))
-    p = math.pow(1024, i)
-    s = round(size_bytes / p, 2)
-    return "%s %s" % (s, size_name[i])
+	if size_bytes == 0:
+		return "0B"
+	size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+	i = int(math.floor(math.log(size_bytes, 1024)))
+	p = math.pow(1024, i)
+	s = round(size_bytes / p, 2)
+	return "%s %s" % (s, size_name[i])
 
 def main():
-    parser = OptionParser()
-    parser.add_option("-j","--json", action="store_true",
-            dest="json", default=False, help="output in JSON format")
-    parser.add_option("-n","--no-color","--no-colour", action="store_false",
-            dest="colour", default=True, help="replace colour coding with asterisks")
-    (options, args) = parser.parse_args()
-    server = {
-        "rows": build_server(options.json),
-        "meta": {
-            "disk-controller": "",
-            "driver-version": ""
-        }
-    }
-    server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller(server)
-    if options.json == True:
-        print(json.dumps(server, indent = 4))
-        exit(EXIT_CODE)
-    print_bays(server,options.colour)
-    exit(0)
+	parser = OptionParser()
+	parser.add_option("-j", "--json", action="store_true",
+			dest="json", default=False, help="Output in JSON format")
+	parser.add_option("-n", "--no-color", "--no-colour", action="store_false",
+			dest="colour", default=True, help="Replace colour coding with asterisks")
+	parser.add_option("-H", "--health", action="store_true", dest="outputHealth",
+			default=False, help="Output SMARTCTL health")
+	parser.add_option("-m", "--model", action="store_true", dest="outputModel",
+			default=False, help="Output model names")
+	parser.add_option("-t", "--type", action="store_true", dest="outputType",
+			default=False, help="Output drive types (HDD/SSD)")
+	parser.add_option("-s", "--serial", action="store_true", dest="outputSerial",
+			default=False, help="Output serial numbers")
+	(options, args) = parser.parse_args()
+	server = {
+		"rows": build_server(options),
+		"meta": {
+			"disk-controller": "",
+			"driver-version": ""
+		}
+	}
+	server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller(server)
+	if options.json == True:
+		print(json.dumps(server, indent = 4))
+		exit(EXIT_CODE)
+	print_bays(server,options.colour)
+	exit(0)
 
 if __name__ == "__main__":
-    main()
+	main()
