@@ -3,12 +3,17 @@
 # lsdev - List devices in the system by their alias
 #
 # Copyright (C) 2020, Josh Boudreau <jboudreau@45drives.com>
-#
+#                     Mark Hooper   <mhooper@45drives.com>
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# --------------------------------------------------------------------
+#
+# TODO:
+# - Fix print width formatting for model number (serial)
+# - Investigate improvements using hdparm for (serial,model)
+# - re-tune lsosd (low priority)
+#--------------------------------------------------------------------
 
 
 import json
