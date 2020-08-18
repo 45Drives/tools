@@ -78,7 +78,7 @@ def smartctl(drive):
 	drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
 
 def check_opts(options):
-	return options.json || options.outputHealth || outputModel || outputSerial
+	return options.json or options.outputHealth or outputModel or outputSerial
 
 # initialize server[rows][bays]
 def build_server(options):
