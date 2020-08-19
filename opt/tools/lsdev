@@ -229,10 +229,13 @@ def build_server(options):
 	return server
 
 ################################################################################
-# function name: 
-# desc:
+# function name: get_controller
+# receives: nothing
+# does: executes lspci and searches for HBA conrtoller card name and 
+#       then calls modinfo on arg dependent on card type to get driver version
+# returns: (controller name, driver version)
 ################################################################################
-def get_controller(server):
+def get_controller():
 	try:
 		stream = subprocess.Popen("lspci", stdout=subprocess.PIPE,
 				universal_newlines=True).stdout
@@ -269,11 +272,14 @@ def get_controller(server):
 		if regex != None:
 			drv_vers = regex.group(1)
 			break
-	return controller,drv_vers
+	return controller, drv_vers
 
 ################################################################################
-# function name: 
-# desc:
+# function name: disk_type
+# receives: block device path
+# does: reads /sys/block/<device>/queue/rotational to determine if the drive is
+#       a HDD or SDD
+# returns: "HDD" or "SDD" depending on value read, or "-" if error
 ################################################################################
 def disk_type(device_path):
 	#get the value of "/sys/block/[device_name]/queue/rotational
@@ -422,7 +428,7 @@ def main():
 	}
 	
 	#get server information
-	server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller(server)
+	server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller()
 	
 	#print relevant information based on command line arguments 
 	if(options.json):
