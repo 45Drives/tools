@@ -14,7 +14,6 @@
 # - re-tune lsosd (low priority)
 ################################################################################
 
-
 import json
 import re
 import os
@@ -83,7 +82,7 @@ def smartctl_needed(options):
 # function name: smartctl
 # receives: drive dictionary from build_server()
 # does: executes smartctl -a --json <drive path> and saves output values
-# 			in drive dictionary
+#       in drive dictionary
 # returns: nothing
 ################################################################################
 def smartctl(drive):
@@ -131,14 +130,14 @@ def lsblk_needed(options):
 # function name: get_model_serial
 # receives: nothing
 # does: creates dictionary of hard drive model numbers
-# 			and serial numbers with the device path as the key
+#       and serial numbers with the device path as the key
 # returns: dictionary of model and serial numbers
 ################################################################################
 def get_model_serial():
 	model_serial = {}
-	try: 	
+	try:
 		lsblk_result = subprocess.Popen(
-			["lsblk","-a","-n","-r","-o","name,model,serial"], 
+			["lsblk","-a","-n","-r","-o","name,model,serial"],
 			stdout=subprocess.PIPE,universal_newlines=True
 		).stdout
 	except OSError:
@@ -153,13 +152,19 @@ def get_model_serial():
 		serial = regex.group(3).replace("\\x20"," ")
 		model_serial[drive_path] = (model, serial)
 	return model_serial
-		
 
 ################################################################################
-# function name: 
-# desc:
+# function name: build_server
+# receives: CLI options
+# does: checks if smartctl or get_model_serial need to be called,
+#       opens vdev_id.conf, iterates through lines and creates 2D array in
+#       server["rows"] containing bay dictionaries, sets values in bay
+#       dictionary before inserting into array. Uses either smartctl() to fill
+#       all fields of dictionary, uses dict returned by get_model_serial() to
+#       model and serial fields, or uses neither depending on call_smartctl and
+#       call_lsblk values.
+# returns: server dictionary ({rows: [[]], meta: {}})
 ################################################################################
-# initialize server[rows][bays]
 def build_server(options):
 	call_smartctl = smartctl_needed(options)
 	call_lsblk = lsblk_needed(options) # grab model num and serial from lslk (get_model_serial())
@@ -210,7 +215,7 @@ def build_server(options):
 		bay["dev-by-path"] = regex.group(3) # third capture group
 		bay["bay-id"] = str(new_row_index) + "-" + str(new_bay_index)
 		# if symlink exists in /dev/disk/by-path/ then bay is occupied
-		if os.path.islink(bay["dev-by-path"]): 
+		if os.path.islink(bay["dev-by-path"]):
 			bay["occupied"] = True
 			bay["dev"] = os.path.realpath(bay["dev-by-path"])
 			bay["partitions"] = count_partitions(bay["dev"])
@@ -229,10 +234,13 @@ def build_server(options):
 	return server
 
 ################################################################################
-# function name: 
-# desc:
+# function name: get_controller
+# receives: nothing
+# does: executes lspci and searches for HBA conrtoller card name and
+#       then calls modinfo on arg dependent on card type to get driver version
+# returns: (controller name, driver version)
 ################################################################################
-def get_controller(server):
+def get_controller():
 	try:
 		stream = subprocess.Popen("lspci", stdout=subprocess.PIPE,
 				universal_newlines=True).stdout
@@ -269,11 +277,14 @@ def get_controller(server):
 		if regex != None:
 			drv_vers = regex.group(1)
 			break
-	return controller,drv_vers
+	return controller, drv_vers
 
 ################################################################################
-# function name: 
-# desc:
+# function name: disk_type
+# receives: block device path
+# does: reads /sys/block/<device>/queue/rotational to determine if the drive is
+#       a HDD or SDD
+# returns: "HDD" or "SDD" depending on value read, or "-" if error
 ################################################################################
 def disk_type(device_path):
 	#get the value of "/sys/block/[device_name]/queue/rotational
@@ -287,13 +298,16 @@ def disk_type(device_path):
 	return ("HDD" if is_rotational else "SSD")
 
 ################################################################################
-# function name: 
-# desc:
+# function name: choose_output
+# receives: bay dictionary from build_server() and output_opt
+#           enum (class outputType)
+# does: "switches" on output_opt
+# returns: string corresponding to chosen output type
 ################################################################################
 def choose_output(bay, output_opt):
 	# switch on output_opt to determine output string
 	if output_opt == outputType.DEFAULT:
-		return "(" + bay["dev"] + ")" if bay["dev"] else "-"
+		return bay["dev"] if bay["dev"] else "-"
 	if output_opt == outputType.HEALTH:
 		return bay["health"] if bay["health"] else "-"
 	if output_opt == outputType.MODEL:
@@ -302,12 +316,54 @@ def choose_output(bay, output_opt):
 		return disk_type(bay["dev"])
 	if output_opt == outputType.SERIAL:
 		return bay["serial"] if bay["serial"] else "-"
-		
+
 ################################################################################
-# function name: 
-# desc:
+# function name: print_bays
+# receives: server dictionary ({rows: [], meta: {}})
+# does: prints table representing server with output based on
+#       output_opt and choose_output() call
+# returns: nothing
+# DEPRECATED: to be replaced with generic table formatting function
 ################################################################################
 def print_bays(server, colour_opt, output_opt):
+	print_array = []
+	
+	for row in reversed(server["rows"]):
+		print_array.append([])
+		for bay in row:
+			cell_string = "{txt:<4} (".format(txt=bay["bay-id"]) + choose_output(bay, output_opt) + ")"
+			colour = ""
+			if colour_opt:
+				if bay["occupied"] == False:
+					colour = "GREY"
+				elif bay["partitions"] == 0:
+					colour = "GREEN"
+				elif bay["partitions"] > 0:
+					colour = "LGREEN"
+			else:
+				if bay["occupied"] and bay["partitions"] == 0:
+					cell_string = " * " + cell_string
+				elif bay["occupied"] and bay["partitions"] > 0:
+					cell_string = "** " + cell_string
+				else:
+					cell_string = "   " + cell_string
+			print_array[-1].append((cell_string, colour))
+	
+	# call pretty table printer here
+	
+	
+	
+	# test
+	for i in range(len(print_array[0])):
+		for j in range(len(print_array)):
+			print(print_array[j][i], end='')
+		print()
+	# end test
+	
+	return
+	
+	# \/ to be removed from function \/
+	
 	# TODO: fix column width for model name being too long
 	cell_width = 21 if colour_opt else 24
 	hr_top = "-"*(cell_width*3+1)
@@ -373,7 +429,7 @@ def print_bays(server, colour_opt, output_opt):
 	print(" <-- motherboard | front plate -->")
 	print(" Legend:")
 	if colour_opt:
-		print(ANSI_colours.GREY + " Empty " + 
+		print(ANSI_colours.GREY + " Empty " +
 				ANSI_colours.GREEN + " Occupied (no partitions) " +
 				ANSI_colours.LGREEN + " Occupied (1 or more partitions)" +
 				ANSI_colours.END)
@@ -381,8 +437,10 @@ def print_bays(server, colour_opt, output_opt):
 		print("    Empty " + "  * Occupied (no partitions) " + " ** Occupied (1 or more partitions)")
 
 ################################################################################
-# function name: 
-# desc:
+# function name: format_bytes
+# receives: integer value in bytes
+# does: formats size_bytes in SI base units
+# returns: string containing formatted size_bytes value
 ################################################################################
 def format_bytes(size_bytes):
 	if size_bytes == 0:
@@ -394,8 +452,12 @@ def format_bytes(size_bytes):
 	return "%s %s" % (s, size_name[i])
 
 ################################################################################
-# function name: 
-# desc:
+# function name: main
+# receives: nothing
+# does: parses CLI options, initializes server dictionary
+#       ({rows: [[]], meta: {}}), retrieves controller name and driver version
+#       from get_controller(), if-else to decide what data to print
+# returns: 0 (success)
 ################################################################################
 def main():
 	parser = OptionParser() #use optparse to handle command line arguments
@@ -422,9 +484,9 @@ def main():
 	}
 	
 	#get server information
-	server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller(server)
+	server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller()
 	
-	#print relevant information based on command line arguments 
+	#print relevant information based on command line arguments
 	if(options.json):
 		print(json.dumps(server, indent = 4))
 	elif(options.outputHealth):
