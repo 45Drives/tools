@@ -331,10 +331,27 @@ def print_bays(server, colour_opt, output_opt):
 	for row in reversed(server["rows"]):
 		print_array.append([])
 		for bay in row:
-			cell_string = bay["bay-id"] + " (" + choose_output(bay, output_opt) + ")"
-			print_array[-1].append((cell_string, "GREEN"))
+			cell_string = "{txt:<4} (".format(txt=bay["bay-id"]) + choose_output(bay, output_opt) + ")"
+			colour = ""
+			if colour_opt:
+				if bay["occupied"] == False:
+					colour = "GREY"
+				elif bay["partitions"] == 0:
+					colour = "GREEN"
+				elif bay["partitions"] > 0:
+					colour = "LGREEN"
+			else:
+				if bay["occupied"] and bay["partitions"] == 0:
+					cell_string = " * " + cell_string
+				elif bay["occupied"] and bay["partitions"] > 0:
+					cell_string = "** " + cell_string
+				else:
+					cell_string = "   " + cell_string
+			print_array[-1].append((cell_string, colour))
 	
 	# call pretty table printer here
+	
+	
 	
 	# test
 	for i in range(len(print_array[0])):
