@@ -307,7 +307,7 @@ def disk_type(device_path):
 def choose_output(bay, output_opt):
 	# switch on output_opt to determine output string
 	if output_opt == outputType.DEFAULT:
-		return "(" + bay["dev"] + ")" if bay["dev"] else "-"
+		return bay["dev"] if bay["dev"] else "-"
 	if output_opt == outputType.HEALTH:
 		return bay["health"] if bay["health"] else "-"
 	if output_opt == outputType.MODEL:
@@ -326,6 +326,27 @@ def choose_output(bay, output_opt):
 # DEPRECATED: to be replaced with generic table formatting function
 ################################################################################
 def print_bays(server, colour_opt, output_opt):
+	print_array = []
+	
+	for row in reversed(server["rows"]):
+		print_array.append([])
+		for bay in row:
+			cell_string = bay["bay-id"] + " (" + choose_output(bay, output_opt) + ")"
+			print_array[-1].append((cell_string, "GREEN"))
+	
+	# call pretty table printer here
+	
+	# test
+	for i in range(len(print_array[0])):
+		for j in range(len(print_array)):
+			print(print_array[j][i], end='')
+		print()
+	# end test
+	
+	return
+	
+	# \/ to be removed from function \/
+	
 	# TODO: fix column width for model name being too long
 	cell_width = 21 if colour_opt else 24
 	hr_top = "-"*(cell_width*3+1)
