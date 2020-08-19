@@ -11,7 +11,6 @@
 #
 # TODO:
 # - Fix print width formatting for model number (serial)
-# - Investigate improvements using hdparm for (serial,model)
 # - re-tune lsosd (low priority)
 #--------------------------------------------------------------------
 
@@ -26,6 +25,7 @@ from enum import Enum
 
 EXIT_CODE = 0
 
+# escape sequences for supported color options
 class ANSI_colours:
 	LGREEN='\033[1;32m'
 	GREEN='\033[0;32m'
@@ -33,6 +33,7 @@ class ANSI_colours:
 	GREY='\033[1;30m'
 	END='\033[0m'
 
+# characters used to draw box around lsdev output
 class box:
 	TL=u'\u2554' # ╔
 	TR=u'\u2557' # ╗
@@ -53,13 +54,19 @@ class outputType(Enum):
 	TYPE = 3
 	SERIAL = 4
 
-
-
+################################################################################
+# function name: 
+# desc:
+################################################################################
 def count_partitions(path):
 	partitions = open("/proc/partitions", mode='r')
 	blk_name = os.path.basename(path)
 	return len(re.findall(blk_name + "\d{1,2}",partitions.read(),re.MULTILINE))
 
+################################################################################
+# function name: 
+# desc:
+################################################################################
 def smartctl(drive):
 	global EXIT_CODE
 	try:
@@ -95,6 +102,10 @@ def smartctl(drive):
 def smartctl_needed(options):
 	return options.json or options.outputHealth
 
+################################################################################
+# function name: 
+# desc:
+################################################################################
 # initialize server[rows][bays]
 def build_server(options):
 	call_smartctl = smartctl_needed(options)
@@ -157,6 +168,10 @@ def build_server(options):
 	vdev_id.close()
 	return server
 
+################################################################################
+# function name: 
+# desc:
+################################################################################
 def get_controller(server):
 	try:
 		stream = subprocess.Popen("lspci", stdout=subprocess.PIPE,
@@ -168,6 +183,7 @@ def get_controller(server):
 	controller = "?"
 	drv_vers = "?"
 	drv_arg = ""
+	
 	if re.search("2116",string,re.MULTILINE) != None:
 		controller = "LSI 9201-16i"
 		drv_arg = "mpt2sas"
@@ -179,12 +195,15 @@ def get_controller(server):
 		drv_arg = "mpt3sas"
 	else:
 		return "?","?"
+	
+	#run modinfo command to obtain the drive version
 	try:
 		drv_stream = subprocess.Popen(["modinfo", drv_arg], stdout=subprocess.PIPE,
 				universal_newlines=True).stdout
 	except OSError:
 		print("Error executing modinfo.")
 		exit(1)
+	
 	for line in drv_stream:
 		regex = re.search("^version:\s+(\d.*)$",line)
 		if regex != None:
@@ -192,6 +211,10 @@ def get_controller(server):
 			break
 	return controller,drv_vers
 
+################################################################################
+# function name: 
+# desc:
+################################################################################
 def disk_type(device_path):
 	#get the value of "/sys/block/[device_name]/queue/rotational
 	#this check will return 1 if block device is a spinner, 0 if not
@@ -203,6 +226,10 @@ def disk_type(device_path):
 	is_rotational = bool(int(rotational.read(1)))
 	return ("HDD" if is_rotational else "SSD")
 
+################################################################################
+# function name: 
+# desc:
+################################################################################
 def choose_output(bay, output_opt):
 	# switch on output_opt to determine output string
 	if output_opt == outputType.DEFAULT:
@@ -215,7 +242,11 @@ def choose_output(bay, output_opt):
 		return disk_type(bay["dev"])
 	if output_opt == outputType.SERIAL:
 		#return bay["serial"] if bay["serial"] else "-"
-
+		
+################################################################################
+# function name: 
+# desc:
+################################################################################
 def print_bays(server, colour_opt, output_opt):
 	# TODO: fix column width for model name being too long
 	cell_width = 21 if colour_opt else 24
@@ -289,6 +320,10 @@ def print_bays(server, colour_opt, output_opt):
 	else:
 		print("    Empty " + "  * Occupied (no partitions) " + " ** Occupied (1 or more partitions)")
 
+################################################################################
+# function name: 
+# desc:
+################################################################################
 def format_bytes(size_bytes):
 	if size_bytes == 0:
 		return "0B"
@@ -298,8 +333,12 @@ def format_bytes(size_bytes):
 	s = round(size_bytes / p, 2)
 	return "%s %s" % (s, size_name[i])
 
+################################################################################
+# function name: 
+# desc:
+################################################################################
 def main():
-	parser = OptionParser()
+	parser = OptionParser() #use optparse to handle command line arguments
 	parser.add_option("-j", "--json", action="store_true",
 			dest="json", default=False, help="Output in JSON format")
 	parser.add_option("-n", "--no-color", "--no-colour", action="store_false",
@@ -313,6 +352,7 @@ def main():
 	parser.add_option("-s", "--serial", action="store_true", dest="outputSerial",
 			default=False, help="Output serial numbers")
 	(options, args) = parser.parse_args()
+	
 	server = {
 		"rows": build_server(options),
 		"meta": {
@@ -320,7 +360,11 @@ def main():
 			"driver-version": ""
 		}
 	}
+	
+	#get server information
 	server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller(server)
+	
+	#print relevant information based on command line arguments 
 	if(options.json):
 		print(json.dumps(server, indent = 4))
 	elif(options.outputHealth):
