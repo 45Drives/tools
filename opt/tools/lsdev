@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# --------------------------------------------------------------------
+################################################################################
 # lsdev - List devices in the system by their alias
 #
 # Copyright (C) 2020, Josh Boudreau <jboudreau@45drives.com>
@@ -12,7 +12,7 @@
 # TODO:
 # - Fix print width formatting for model number (serial)
 # - re-tune lsosd (low priority)
-#--------------------------------------------------------------------
+################################################################################
 
 
 import json
@@ -54,9 +54,16 @@ class outputType(Enum):
 	TYPE = 3
 	SERIAL = 4
 
+class model_serial_ind:
+	MODEL = 0
+	SERIAL = 1
+
 ################################################################################
-# function name: 
-# desc:
+# function name: count_partitions
+# receives: block device path
+# does: reads /proc/partitions, counts lines matching device base name followed
+#       by an integer
+# returns: number of partitions on device referenced by path
 ################################################################################
 def count_partitions(path):
 	partitions = open("/proc/partitions", mode='r')
@@ -64,8 +71,20 @@ def count_partitions(path):
 	return len(re.findall(blk_name + "\d{1,2}",partitions.read(),re.MULTILINE))
 
 ################################################################################
-# function name: 
-# desc:
+# function name: smartctl_needed
+# receives: options from CLI flags
+# does: check if smartctl() needs to be called
+# returns: True if smartctl() needs to be called, else False
+################################################################################
+def smartctl_needed(options):
+	return options.json or options.outputHealth
+
+################################################################################
+# function name: smartctl
+# receives: drive dictionary from build_server()
+# does: executes smartctl -a --json <drive path> and saves output values
+# 			in drive dictionary
+# returns: nothing
 ################################################################################
 def smartctl(drive):
 	global EXIT_CODE
@@ -99,8 +118,42 @@ def smartctl(drive):
 	drive["power-on-time"] = output["power_on_time"]["hours"] if "power_on_time" in output.keys() else "?"
 	drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
 
-def smartctl_needed(options):
-	return options.json or options.outputHealth
+################################################################################
+# function name: lsblk_needed
+# receives: options from CLI flags
+# does: check if get_model_serial() needs to be called
+# returns: True if get_model_serial() needs to be called, else False
+################################################################################
+def lsblk_needed(options):
+	return (not smartctl_needed(options)) and (options.outputModel or options.outputSerial)
+
+################################################################################
+# function name: get_model_serial
+# receives: nothing
+# does: creates dictionary of hard drive model numbers
+# 			and serial numbers with the device path as the key
+# returns: dictionary of model and serial numbers
+################################################################################
+def get_model_serial():
+	model_serial = {}
+	try: 	
+		lsblk_result = subprocess.Popen(
+			["lsblk","-a","-n","-r","-o","name,model,serial"], 
+			stdout=subprocess.PIPE,universal_newlines=True
+		).stdout
+	except OSError:
+		print("Error executing lsblk.")
+		exit(1)
+	for line in lsblk_result:
+		regex = re.search("^(sd[a-z]{1,2})\s+([^\s]+)\s+([^\s]+)$",line)
+		if regex == None:
+			continue
+		drive_path = "/dev/" + regex.group(1) # /dev/sd<x>
+		model = regex.group(2).replace("\\x20"," ") # replace ascii space with " "
+		serial = regex.group(3).replace("\\x20"," ")
+		model_serial[drive_path] = (model, serial)
+	return model_serial
+		
 
 ################################################################################
 # function name: 
@@ -109,6 +162,8 @@ def smartctl_needed(options):
 # initialize server[rows][bays]
 def build_server(options):
 	call_smartctl = smartctl_needed(options)
+	call_lsblk = lsblk_needed(options) # grab model num and serial from lslk (get_model_serial())
+	model_serial = get_model_serial() if call_lsblk else {}
 	server = [[]]; # server[row][bay]
 	CONFIG_PATH = "/etc/zfs" if os.path.isfile("/etc/zfs/vdev_id.conf") else "/etc"
 	try:
@@ -163,6 +218,11 @@ def build_server(options):
 				smartctl(bay) # get metadata
 				if EXIT_CODE == 0:
 					bay["capacity"] = format_bytes(bay["capacity"])
+			if call_lsblk:
+				key = bay["dev"]
+				ms = model_serial[key] if key in model_serial.keys() else ("-", "-")
+				bay["model-name"] = ms[model_serial_ind.MODEL]
+				bay["serial"] = ms[model_serial_ind.SERIAL]
 		# insert copy of bay
 		server[row_index-1].append(bay.copy());
 	vdev_id.close()
@@ -237,11 +297,11 @@ def choose_output(bay, output_opt):
 	if output_opt == outputType.HEALTH:
 		return bay["health"] if bay["health"] else "-"
 	if output_opt == outputType.MODEL:
-		#return bay["model-name"] if bay["model-name"] else "-"
+		return bay["model-name"] if bay["model-name"] else "-"
 	if output_opt == outputType.TYPE:
 		return disk_type(bay["dev"])
 	if output_opt == outputType.SERIAL:
-		#return bay["serial"] if bay["serial"] else "-"
+		return bay["serial"] if bay["serial"] else "-"
 		
 ################################################################################
 # function name: 
