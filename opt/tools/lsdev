@@ -21,6 +21,7 @@ import subprocess
 from optparse import OptionParser
 import math
 from enum import Enum
+from table_print.py import *
 
 EXIT_CODE = 0
 
@@ -349,9 +350,19 @@ def print_bays(server, colour_opt, output_opt):
 					cell_string = "   " + cell_string
 			print_array[-1].append((cell_string, colour))
 	
+	header_text = [
+		"Storinator Disk Info",
+		"Disk Controller: " + server["meta"]["disk-controller"],
+		"Driver version: " + server["meta"]["driver-version"]
+	]
+	
+	col_headers = []
+	for row in reversed(range(len(server["rows"]))):
+		col_headers.append("Row " + str(row))
+	
 	# call pretty table printer here
 	
-	
+	print_table(h_txt = print_array, c_txt = col_headers, h_txt = header_text, padding = 1)
 	
 	# test
 	for i in range(len(print_array[0])):
