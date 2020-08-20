@@ -21,7 +21,7 @@ import subprocess
 from optparse import OptionParser
 import math
 from enum import Enum
-from table_print.py import *
+from table_print import *
 
 EXIT_CODE = 0
 
@@ -358,11 +358,11 @@ def print_bays(server, colour_opt, output_opt):
 	
 	col_headers = []
 	for row in reversed(range(len(server["rows"]))):
-		col_headers.append("Row " + str(row))
+		col_headers.append("Row " + str(row + 1))
 	
 	# call pretty table printer here
 	
-	print_table(h_txt = print_array, c_txt = col_headers, h_txt = header_text, padding = 1)
+	table_print(c_count = len(print_array), c_txt = print_array, c_labels = col_headers, h_txt = header_text, padding = 1)
 	
 	# test
 	for i in range(len(print_array[0])):
