@@ -298,15 +298,15 @@ def choose_output(bay, options):
 		return bay["dev"] if bay["dev"] else "-"
 	output = []
 	if options.outputDev:
-		output.append(bay["dev"] if bay["dev"] else "-")
+		output.append(bay["dev"].rstrip() if bay["dev"] else "-")
 	if options.outputModel:
-		output.append(bay["model-name"] if bay["model-name"] else "-")
+		output.append(bay["model-name"].rstrip() if bay["model-name"] else "-")
 	if options.outputSerial:
-		output.append(bay["serial"] if bay["serial"] else "-")
+		output.append(bay["serial"].rstrip() if bay["serial"] else "-")
 	if options.outputType:
 		output.append(disk_type(bay["dev"]))
 	if options.outputHealth:
-		output.append(bay["health"] if bay["health"] else "-")
+		output.append(bay["health"].rstrip() if bay["health"] else "-")
 	return ",".join(output)
 
 ################################################################################
