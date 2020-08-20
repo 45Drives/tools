@@ -22,6 +22,7 @@ from optparse import OptionParser
 import math
 from enum import Enum
 from table_print import *
+from hdparm import get_model_serial_firmware
 
 EXIT_CODE = 0
 
@@ -56,7 +57,7 @@ def count_partitions(path):
 # returns: True if smartctl() needs to be called, else False
 ################################################################################
 def smartctl_needed(options):
-	return options.json or options.outputHealth
+	return options.json or options.outputHealth or options.outputTemp
 
 ################################################################################
 # function name: smartctl
@@ -98,13 +99,13 @@ def smartctl(drive):
 	drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
 
 ################################################################################
-# function name: lsblk_needed
+# function name: hdparm_needed
 # receives: options from CLI flags
 # does: check if get_model_serial() needs to be called
 # returns: True if get_model_serial() needs to be called, else False
 ################################################################################
-def lsblk_needed(options):
-	return (not smartctl_needed(options)) and (options.outputModel or options.outputSerial)
+def hdparm_needed(options):
+	return (not smartctl_needed(options)) and (options.outputModel or options.outputSerial or options.outputFirm)
 
 ################################################################################
 # function name: get_model_serial
@@ -147,8 +148,8 @@ def get_model_serial():
 ################################################################################
 def build_server(options):
 	call_smartctl = smartctl_needed(options)
-	call_lsblk = lsblk_needed(options) # grab model num and serial from lslk (get_model_serial())
-	model_serial = get_model_serial() if call_lsblk else {}
+	call_hdparm = hdparm_needed(options) # grab model num and serial from lslk (get_model_serial())
+	# model_serial = get_model_serial() if call_lsblk else {}
 	server = [[]]; # server[row][bay]
 	CONFIG_PATH = "/etc/zfs" if os.path.isfile("/etc/zfs/vdev_id.conf") else "/etc"
 	try:
@@ -203,11 +204,12 @@ def build_server(options):
 				smartctl(bay) # get metadata
 				if EXIT_CODE == 0:
 					bay["capacity"] = format_bytes(bay["capacity"])
-			if call_lsblk:
-				key = bay["dev"]
-				ms = model_serial[key] if key in model_serial.keys() else ("-", "-")
-				bay["model-name"] = ms[model_serial_ind.MODEL]
-				bay["serial"] = ms[model_serial_ind.SERIAL]
+			if call_hdparm:
+				bay["model-name"], bay["serial"], bay["firm-ver"] = get_model_serial_firmware(bay["dev"])
+				#key = bay["dev"]
+				#ms = model_serial[key] if key in model_serial.keys() else ("-", "-")
+				#bay["model-name"] = ms[model_serial_ind.MODEL]
+				#bay["serial"] = ms[model_serial_ind.SERIAL]
 		# insert copy of bay
 		server[row_index-1].append(bay.copy());
 	vdev_id.close()
@@ -285,7 +287,8 @@ def disk_type(device_path):
 ################################################################################
 def no_output_flags(options):
 	return (not options.outputHealth and not options.outputModel
-			and not options.outputType and not options.outputSerial)
+			and not options.outputType and not options.outputSerial
+			and not options.outputTemp and not options.outputFirm)
 
 ################################################################################
 # function name: choose_output
@@ -303,10 +306,14 @@ def choose_output(bay, options):
 		output.append(bay["model-name"].rstrip() if bay["model-name"] else "-")
 	if options.outputSerial:
 		output.append(bay["serial"].rstrip() if bay["serial"] else "-")
+	if options.outputFirm:
+		output.append(bay["firm-ver"].rstrip() if bay["firm-ver"] else "-")
 	if options.outputType:
 		output.append(disk_type(bay["dev"]))
 	if options.outputHealth:
 		output.append(bay["health"].rstrip() if bay["health"] else "-")
+	if options.outputTemp:
+		output.append(bay["temp-c"].rstrip() if bay["temp-c"] else "-")
 	return ",".join(output)
 
 ################################################################################
@@ -325,10 +332,14 @@ def choose_output_header(options):
 		output.append("Model")
 	if options.outputSerial:
 		output.append("Serial")
+	if options.outputFirm:
+		output.append("Firmware")
 	if options.outputType:
 		output.append("Type")
 	if options.outputHealth:
 		output.append("Health")
+	if options.outputTemp:
+		output.append("Temp C")
 	return "ID " + ",".join(output)
 
 ################################################################################
@@ -419,13 +430,17 @@ def main():
 	parser.add_option("-d", "--device", action="store_true", dest="outputDev",
 			default=False, help="Output device name \"/dev/sd<x>/\"")
 	parser.add_option("-H", "--health", action="store_true", dest="outputHealth",
-			default=False, help="Output SMARTCTL health")
+			default=False, help="Output SMARTCTL health (slow)")
 	parser.add_option("-m", "--model", action="store_true", dest="outputModel",
 			default=False, help="Output model names")
 	parser.add_option("-t", "--type", action="store_true", dest="outputType",
 			default=False, help="Output drive types (HDD/SSD)")
 	parser.add_option("-s", "--serial", action="store_true", dest="outputSerial",
 			default=False, help="Output serial numbers")
+	parser.add_option("-T", "--temp", action="store_true", dest="outputTemp",
+			default=False, help="Output temperature (deg-C) (slow)")
+	parser.add_option("-f", "--firmware", action="store_true", dest="outputFirm",
+			default=False, help="Output firmware version")
 	(options, args) = parser.parse_args()
 	
 	server = {
