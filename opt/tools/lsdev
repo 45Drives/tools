@@ -33,20 +33,6 @@ class ANSI_colours:
 	GREY='\033[1;30m'
 	END='\033[0m'
 
-# characters used to draw box around lsdev output
-class box:
-	TL=u'\u2554' # ╔
-	TR=u'\u2557' # ╗
-	BL=u'\u255a' # ╚
-	BR=u'\u255d' # ╝
-	H=u'\u2550'  # ═
-	V=u'\u2551'  # ║
-	TT=u'\u2566' # ╦
-	LT=u'\u2560' # ╠
-	RT=u'\u2563' # ╣
-	BT=u'\u2569' # ╩
-	CT=u'\u256C' # ╬
-
 class model_serial_ind:
 	MODEL = 0
 	SERIAL = 1
