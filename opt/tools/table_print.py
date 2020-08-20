@@ -32,7 +32,7 @@ class box:
 	CT=(u'\u256C','+') # ╬
 
 class table():
-	def __init__(self,ansi=True,h_txt=['TABLE HEADER TXT','second line of the table header'],c_count=3,c_labels=["COLUMN 1","COLUMN 2","COLUMN 3"],c_txt=[[("00","GREEN"),("01","GREY")],[("10","RED"),("11","LGREEN")],[("20","RED"),("21","GREEN")]],padding=1): 
+	def __init__(self,ansi,c_count,h_txt,c_labels,c_txt,padding): 
 		self.box_idx=(0 if ansi else 1) #used to index into the box tuple
 		self.h_txt=h_txt
 		self.c_labels=c_labels
@@ -53,6 +53,19 @@ class table():
 		self.column_width_sum=0
 		idx=self.box_idx
 		
+		#place the padding into the strings provided
+		
+		for i in range(len(self.h_txt)):
+			self.h_txt[i] = " "*self.padding + self.h_txt[i] + " "*self.padding
+		
+		for i in range(len(self.c_labels)):
+			self.c_labels[i] = " "*self.padding + self.c_labels[i] + " "*self.padding
+			
+		for i in range(len(self.c_txt)):
+			for j in range(len(self.c_txt[i])):
+				tmp = ((" "*self.padding + self.c_txt[i][j][0] + " "*self.padding),self.c_txt[i][j][1])
+				self.c_txt[i][j] = tmp
+		
 		# find the length of the longest string in each column (excluding headers)
 		for rows in self.c_txt:
 			self.column_width.append(len(max(rows, key=lambda t: len(t[0]))[0]))
@@ -63,21 +76,22 @@ class table():
 		for i in range(0,len(self.c_labels)):
 			label_len=len(self.c_labels[i])
 			if label_len > self.column_width[i]:
-				self.column_width[i]=label_len 
-			self.column_width[i]+=(2*self.padding)
-			self.table_width+=self.column_width[i]+1
+				self.column_width[i]=label_len
+			self.table_width+=self.column_width[i]
 			self.column_width_sum+=self.column_width[i]
 
 		# adjust the table width in the case where the header text is longer
 		# than the sum of all column widths 
-		header_len=len(max(self.h_txt,key=len))+(2*self.padding) 
+		header_len=len(max(self.h_txt,key=len))
 		if header_len > self.table_width:
 			self.table_width=header_len
 		
+		self.table_width+=(self.c_count-1)
+		self.column_width_sum+=(self.c_count-1)
 		################################################################################################
 		
 		# top of header
-		self.table_lines.append(box.TL[idx]+(box.H[idx])*self.table_width+box.TR[idx])
+		self.table_lines.append(box.TL[idx]+(box.H[idx]*self.table_width)+box.TR[idx])
 		
 		# header lines
 		for header_txt in self.h_txt:
@@ -86,19 +100,19 @@ class table():
 		# bottom of header
 		line=box.LT[idx]
 		for i in range(self.c_count):
-			line+=(box.H[idx])*(self.column_width[i]) #add in horizontal separators
+			line+=(box.H[idx])*(self.column_width[i])
 			if i < self.c_count-1:
-				line += box.TT[idx] #add in the column separator
-		line+=(box.H[idx])*(self.table_width-self.column_width_sum-1)+box.RT[idx]
+				line += box.TT[idx]
+		line+=(box.H[idx])*(self.table_width-self.column_width_sum)+box.RT[idx]
 		self.table_lines.append(line)
 		
 		# column labels
 		line=box.V[idx]
 		for i in range(self.c_count):
-			line+=(" "*self.padding)+self.c_labels[i]+(" "*(self.column_width[i]-len(self.c_labels[i])-1))
+			line+=self.c_labels[i]+(" "*(self.column_width[i]-len(self.c_labels[i])))
 			if i < self.c_count-1:
 				line += box.V[idx] #add in the column separator
-		line+=(" ")*(self.table_width-self.column_width_sum-1)+box.V[idx]
+		line+=(" ")*(self.table_width-self.column_width_sum)+box.V[idx]
 		self.table_lines.append(line)
 		
 		# bottom of column label
@@ -107,7 +121,7 @@ class table():
 			line+=(box.H[idx])*(self.column_width[i]) #add in horizontal separators
 			if i < self.c_count-1:
 				line += box.CT[idx] #add in the column separator
-		line+=(box.H[idx])*(self.table_width-self.column_width_sum-1)+box.RT[idx]
+		line+=(box.H[idx])*(self.table_width-self.column_width_sum)+box.RT[idx]
 		self.table_lines.append(line)
 		
 		#column content
@@ -116,47 +130,31 @@ class table():
 			for j in range(self.c_count):
 				if i < len(self.c_txt[j]):
 					if self.c_txt[j][i][1] in ANSI_colors.keys() and idx==0:
-						line+=(" "*self.padding)+(ANSI_colors[self.c_txt[j][i][1]])+(self.c_txt[j][i][0])+(ANSI_colors["END"])+(" "*(self.column_width[j]-len(self.c_txt[j][i][0])-1))
+						line+=(ANSI_colors[self.c_txt[j][i][1]])+(self.c_txt[j][i][0])+(ANSI_colors["END"])+(" "*(self.column_width[j]-len(self.c_txt[j][i][0])))
 					else:	
-						line+=(" "*self.padding)+(self.c_txt[j][i][0])+(" "*(self.column_width[j]-len(self.c_txt[j][i][0])-1))
+						line+=(self.c_txt[j][i][0])+(" "*(self.column_width[j]-len(self.c_txt[j][i][0])))
 				else:
 					line+=(" "*(self.column_width[j]))
 				if j < self.c_count-1:
 					line+=box.V[idx]
-			line+=(" ")*(self.table_width-self.column_width_sum-1)+box.V[idx]
+			line+=(" ")*(self.table_width-self.column_width_sum)+box.V[idx]
 			self.table_lines.append(line)
 		
 		# bottom of table
 		line=box.BL[idx]
 		for i in range(self.c_count):
-			line+=(box.H[idx])*(self.column_width[i]) #add in horizontal separators
+			line+=(box.H[idx])*(self.column_width[i]) 
 			if i < self.c_count-1:
-				line += box.BT[idx] #add in the column separator
-		line+=(box.H[idx])*(self.table_width-self.column_width_sum-1)+box.BR[idx]
+				line += box.BT[idx] 
+		line+=(box.H[idx])*(self.table_width-self.column_width_sum)+box.BR[idx]
 		self.table_lines.append(line)
 		
 		# final print
 		for i in range(len(self.table_lines)):
 			print(self.table_lines[i])
 
-test = table()
-test.table_print()
+def table_print(ansi=True,c_count=2,h_txt=['Header Text','Header Text'],c_labels=["COLUMN 1","COLUMN 2"],c_txt=[[("-",""),("-","")],[("-",""),("-","")]],padding=1):
+	test = table(ansi,c_count,h_txt,c_labels,c_txt,padding)
+	test.table_print()
 
-test.h_txt = ["HI","FREN"]
-test.table_print()
-
-test.h_txt = ["HI","THIS IS A TEST TO SEE IF WE CAN BREAK THE OUTPUT BASED ON HEADER"]
-test.table_print()
-
-test.c_txt[0][0] = ("smol","")
-test.table_print()
-
-test.h_txt = ["A","B","C","D"]
-test.table_print()
-test.c_labels=["A","BEE","cee"]
-test.c_txt=[[("one","RED"),("two","RED")],[("three",""),("4","GREY")],[("|5|","LGREEN"),("s6ix","GREEN")]]
-test.c_count=3
-test.table_print()
-
-test.c_labels=["BIGGER","BETTER","FASTER"]
-test.table_print()
+table_print()
