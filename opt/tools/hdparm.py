@@ -28,8 +28,3 @@ def get_model_serial_firmware(device_name):
 			firmware=regex_firmware.group(1).rstrip()
 			break
 	return (model,serial,firmware)
-
-
-device = "/dev/sda"
-msf = get_model_serial_firmware(device)
-print(msf)

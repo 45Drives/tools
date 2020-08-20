@@ -154,4 +154,3 @@ def table_print(ansi=True,c_count=2,h_txt=['Header Text','Header Text'],c_labels
 	test = table(ansi,c_count,h_txt,c_labels,c_txt,padding)
 	test.table_print()
 
-table_print()
