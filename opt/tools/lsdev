@@ -10,7 +10,6 @@
 # (at your option) any later version.
 #
 # TODO:
-# - Fix print width formatting for model number (serial)
 # - re-tune lsosd (low priority)
 ################################################################################
 
