@@ -47,13 +47,6 @@ class box:
 	BT=u'\u2569' # ╩
 	CT=u'\u256C' # ╬
 
-class outputType(Enum):
-	DEFAULT = 0
-	HEALTH = 1
-	MODEL = 2
-	TYPE = 3
-	SERIAL = 4
-
 class model_serial_ind:
 	MODEL = 0
 	SERIAL = 1
@@ -299,42 +292,76 @@ def disk_type(device_path):
 	return ("HDD" if is_rotational else "SSD")
 
 ################################################################################
+# function name: no_output_flags
+# receives: options from parseOptions
+# does: determines if no flags are passed for default output
+# returns: True if default output, else False
+################################################################################
+def no_output_flags(options):
+	return (not options.outputHealth and not options.outputModel
+			and not options.outputType and not options.outputSerial)
+
+################################################################################
 # function name: choose_output
 # receives: bay dictionary from build_server() and output_opt
-#           enum (class outputType)
-# does: "switches" on output_opt
-# returns: string corresponding to chosen output type
+# does: creates string of info based on passed flags
+# returns: string corresponding to chosen output type(s)
 ################################################################################
-def choose_output(bay, output_opt):
-	# switch on output_opt to determine output string
-	if output_opt == outputType.DEFAULT:
+def choose_output(bay, options):
+	if no_output_flags(options):
 		return bay["dev"] if bay["dev"] else "-"
-	if output_opt == outputType.HEALTH:
-		return bay["health"] if bay["health"] else "-"
-	if output_opt == outputType.MODEL:
-		return bay["model-name"] if bay["model-name"] else "-"
-	if output_opt == outputType.TYPE:
-		return disk_type(bay["dev"])
-	if output_opt == outputType.SERIAL:
-		return bay["serial"] if bay["serial"] else "-"
+	output = []
+	if options.outputDev:
+		output.append(bay["dev"] if bay["dev"] else "-")
+	if options.outputModel:
+		output.append(bay["model-name"] if bay["model-name"] else "-")
+	if options.outputSerial:
+		output.append(bay["serial"] if bay["serial"] else "-")
+	if options.outputType:
+		output.append(disk_type(bay["dev"]))
+	if options.outputHealth:
+		output.append(bay["health"] if bay["health"] else "-")
+	return ",".join(output)
+
+################################################################################
+# function name: choose_output_header
+# receives: options from CLI opt parser
+# does: creates header for column based on output options passed
+# returns: header string corresponding to chosen output type
+################################################################################
+def choose_output_header(options):
+	if no_output_flags(options):
+		return "ID Dev"
+	output = []
+	if options.outputDev:
+		output.append("Dev")
+	if options.outputModel:
+		output.append("Model")
+	if options.outputSerial:
+		output.append("Serial")
+	if options.outputType:
+		output.append("Type")
+	if options.outputHealth:
+		output.append("Health")
+	return "ID " + ",".join(output)
 
 ################################################################################
 # function name: print_bays
-# receives: server dictionary ({rows: [], meta: {}})
+# receives: server dictionary ({rows: [], meta: {}}), options
 # does: prints table representing server with output based on
-#       output_opt and choose_output() call
+#       options and choose_output() call
 # returns: nothing
 # DEPRECATED: to be replaced with generic table formatting function
 ################################################################################
-def print_bays(server, colour_opt, output_opt):
+def print_bays(server, options):
 	print_array = []
 	
 	for row in reversed(server["rows"]):
 		print_array.append([])
 		for bay in row:
-			cell_string = "{txt:<4} (".format(txt=bay["bay-id"]) + choose_output(bay, output_opt) + ")"
+			cell_string = "{txt:<4} (".format(txt=bay["bay-id"]) + choose_output(bay, options) + ")"
 			colour = ""
-			if colour_opt:
+			if options.colour:
 				if bay["occupied"] == False:
 					colour = "GREY"
 				elif bay["partitions"] == 0:
@@ -358,88 +385,15 @@ def print_bays(server, colour_opt, output_opt):
 	
 	col_headers = []
 	for row in reversed(range(len(server["rows"]))):
-		col_headers.append("Row " + str(row + 1))
+		h_txt = ("Row " + str(row + 1) + " (" + choose_output_header(options)) + ")"
+		col_headers.append(h_txt)
 	
-	# call pretty table printer here
+	table_print(ansi = options.colour, c_count = len(print_array), c_txt = print_array, c_labels = col_headers, h_txt = header_text, padding = 1)
 	
-	table_print(c_count = len(print_array), c_txt = print_array, c_labels = col_headers, h_txt = header_text, padding = 1)
-	
-	# test
-	for i in range(len(print_array[0])):
-		for j in range(len(print_array)):
-			print(print_array[j][i], end='')
-		print()
-	# end test
-	
-	return
-	
-	# \/ to be removed from function \/
-	
-	# TODO: fix column width for model name being too long
-	cell_width = 21 if colour_opt else 24
-	hr_top = "-"*(cell_width*3+1)
-	hr_mid = hr_top
-	hr_bot = hr_mid
-	div = "|"
-	if colour_opt:
-		hr_top = box.LT + (box.H*cell_width + box.TT)*(len(server["rows"])-1) + box.H*cell_width + box.TR
-		hr_mid = box.LT + (box.H*cell_width + box.CT)*(len(server["rows"])-1) + box.H*cell_width + box.RT
-		hr_bot = box.BL + (box.H*cell_width + box.BT)*(len(server["rows"])-1) + box.H*cell_width + box.BR
-		div = box.V
-	title = "Storinator Disk Info"
-	controller = "Disk Controller: " + server["meta"]["disk-controller"]
-	driver = "Driver version: " + server["meta"]["driver-version"]
-	info_len = max(len(title),len(controller),len(driver))
-	info_top = "-"*(info_len+4)
-	if colour_opt:
-		info_top = box.TL + box.H*(info_len+2) + box.TR
-		tmplist = list(hr_top)
-		index = len(info_top)-1
-		if index + 1 == len(tmplist): # edge of lower table
-			tmplist[index] = box.RT
-		elif index + 1 > len(tmplist):
-			tmplist[-1] = box.TT # last current one
-			for char in list(box.H*(index - len(tmplist)) + box.BR):
-				tmplist.append(char)
-		elif (index) % (cell_width + 1) == 0: # if intersects with bay cell
-			tmplist[index] = box.CT
-		else:
-			tmplist[index] = box.BT
-		hr_top = "".join(tmplist)
-	print(info_top)
-	print(div + " {txt:<{width}} ".format(txt=title,width=info_len) + div)
-	print(div + " {txt:<{width}} ".format(txt=controller,width=info_len) + div)
-	print(div + " {txt:<{width}} ".format(txt=driver,width=info_len) + div)
-	print(hr_top)
-	for bay in range(15):
-		for row in reversed(server["rows"]):
-			output = choose_output(row[bay], output_opt)
-			string = " {:<6}  {:<11} ".format(row[bay]["bay-id"],output)
-			if colour_opt:
-				if row[bay]["occupied"] and row[bay]["partitions"] == 0:
-					string = ANSI_colours.GREEN + string + ANSI_colours.END
-				elif row[bay]["occupied"]: # partitions present
-					string = ANSI_colours.LGREEN + string + ANSI_colours.END
-				else:
-					string = ANSI_colours.GREY + string + ANSI_colours.END
-			else: # no colour
-				if row[bay]["occupied"] and row[bay]["partitions"] == 0:
-					string = " *" + string
-				elif row[bay]["occupied"]: # partitions present
-					string = "**" + string
-				else:
-					string = "  " + string
-			print(div + string, end='')
-		print(div)
-	print(hr_mid)
-	for i in reversed(range(len(server["rows"]))):
-		print(div + ("{:^21}" if colour_opt else "{:^23}").format("Row " + str(i + 1)), end='')
-	print(div)
-	print(hr_bot)
 	# legend
 	print(" <-- motherboard | front plate -->")
 	print(" Legend:")
-	if colour_opt:
+	if options.colour:
 		print(ANSI_colours.GREY + " Empty " +
 				ANSI_colours.GREEN + " Occupied (no partitions) " +
 				ANSI_colours.LGREEN + " Occupied (1 or more partitions)" +
@@ -476,6 +430,8 @@ def main():
 			dest="json", default=False, help="Output in JSON format")
 	parser.add_option("-n", "--no-color", "--no-colour", action="store_false",
 			dest="colour", default=True, help="Replace colour coding with asterisks")
+	parser.add_option("-d", "--device", action="store_true", dest="outputDev",
+			default=False, help="Output device name \"/dev/sd<x>/\"")
 	parser.add_option("-H", "--health", action="store_true", dest="outputHealth",
 			default=False, help="Output SMARTCTL health")
 	parser.add_option("-m", "--model", action="store_true", dest="outputModel",
@@ -500,16 +456,8 @@ def main():
 	#print relevant information based on command line arguments
 	if(options.json):
 		print(json.dumps(server, indent = 4))
-	elif(options.outputHealth):
-		print_bays(server, options.colour, outputType.HEALTH)
-	elif(options.outputModel):
-		print_bays(server, options.colour, outputType.MODEL)
-	elif(options.outputType):
-		print_bays(server, options.colour, outputType.TYPE)
-	elif(options.outputSerial):
-		print_bays(server, options.colour, outputType.SERIAL)
 	else:
-		print_bays(server, options.colour, outputType.DEFAULT)
+		print_bays(server, options)
 	exit(0)
 
 if __name__ == "__main__":
