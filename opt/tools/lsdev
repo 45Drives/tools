@@ -22,7 +22,6 @@ from optparse import OptionParser
 import math
 from enum import Enum
 from table_print import *
-from hdparm import get_model_serial_firmware
 
 EXIT_CODE = 0
 
@@ -108,31 +107,35 @@ def hdparm_needed(options):
 	return (not smartctl_needed(options)) and (options.outputModel or options.outputSerial or options.outputFirm)
 
 ################################################################################
-# function name: get_model_serial
-# receives: nothing
-# does: creates dictionary of hard drive model numbers
-#       and serial numbers with the device path as the key
-# returns: dictionary of model and serial numbers
+# function name: get_model_serial_firmware
+# receives: device name
+# does: executes hdparm and grabs model, serial, and firm vers
+# returns: tuple of model, serial, firm vers
 ################################################################################
-def get_model_serial():
-	model_serial = {}
+def get_model_serial_firmware(device_name):
+	model="unknown"
+	serial="unknown"
+	firmware="unknown"
 	try:
-		lsblk_result = subprocess.Popen(
-			["lsblk","-a","-n","-r","-o","name,model,serial"],
+		hdparm_result = subprocess.Popen(
+			["hdparm","-I", device_name],
 			stdout=subprocess.PIPE,universal_newlines=True
 		).stdout
 	except OSError:
-		print("Error executing lsblk.")
+		print("Error executing hdparm. Is it installed?")
 		exit(1)
-	for line in lsblk_result:
-		regex = re.search("^(sd[a-z]{1,2})\s+([^\s]+)\s+([^\s]+)$",line)
-		if regex == None:
-			continue
-		drive_path = "/dev/" + regex.group(1) # /dev/sd<x>
-		model = regex.group(2).replace("\\x20"," ") # replace ascii space with " "
-		serial = regex.group(3).replace("\\x20"," ")
-		model_serial[drive_path] = (model, serial)
-	return model_serial
+	for line in hdparm_result:
+		regex_model = re.search("^\s+Model Number:\s+(.*)$",line)
+		regex_serial = re.search("^\s+Serial Number:\s+(.*)$",line)
+		regex_firmware = re.search("^\s+Firmware Revision:\s+(.*)$",line)
+		if regex_model != None:
+			 model=regex_model.group(1).rstrip()
+		if regex_serial != None:
+			serial=regex_serial.group(1).rstrip()
+		if regex_firmware != None:
+			firmware=regex_firmware.group(1).rstrip()
+			break
+	return (model,serial,firmware)
 
 ################################################################################
 # function name: build_server
