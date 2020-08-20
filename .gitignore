@@ -1,0 +1,2 @@
+# ignore the __pycache__ folder
+/opt/tools/__pycache__

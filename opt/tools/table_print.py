@@ -5,11 +5,8 @@
 ################################################################################
 
 # TODO: 
-# find max length of c_txt lists and use that as the check during column content
-# portion
-# fix odd number column alignment
+# add multi-line column headers with color
 
-# escape sequences for supported color options
 ANSI_colors={
 	"LGREEN":'\033[1;32m',
 	"GREEN":'\033[0;32m',
@@ -157,4 +154,3 @@ def table_print(ansi=True,c_count=2,h_txt=['Header Text','Header Text'],c_labels
 	test = table(ansi,c_count,h_txt,c_labels,c_txt,padding)
 	test.table_print()
 
-table_print()
