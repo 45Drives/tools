@@ -9,7 +9,8 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# TODO: comments explaning which cards show up lspci 
+# TODO: fix the get chassis size from user loop (when ./dmap -s 45, then 13 ..look at the mod) 
+#     
 ################################################################################
 
 ################################################################################
@@ -58,6 +59,7 @@ import sys
 from optparse import OptionParser
 
 g_quiet = False
+g_supported_chassis_sizes = [15,30,32,45,60]
 
 # a look up table used to ensure that the physical path is assigned in
 # the correct order for each hba card that we use. The keys are 
@@ -87,7 +89,6 @@ def get_controller_types():
 def get_chassis_size():
 	# ipmitool fru - to get the chassis size (get user to put it in if unsuccessful)
 	chassis_size = 0
-	return chassis_size
 	try:
 		ipmitool_result = subprocess.Popen(["ipmitool","fru"], stdout=subprocess.PIPE,
 			universal_newlines=True).stdout
@@ -138,6 +139,35 @@ def create_config(chassis_size,controller_types,dev_path):
 		vdev_id_conf += line + "\n"
 	return vdev_id_conf
 
+def check_chassis_size(chassis_size,controller_types):
+	if int(chassis_size) not in g_supported_chassis_sizes:
+		log(str(chassis_size) + " is not a valid chassis size")
+		return False
+	elif chassis_size == 32: 
+		# stornado
+		card_count = chassis_size//16
+		if card_count != controller_types:
+			log(
+				str(chassis_size) + 
+				" is not congruent with the number of hba cards detected {ct}".format(
+					ct=controller_types
+					)
+				)
+			return False
+	elif not chassis_size%15:
+		# chassis size is divisible by 15
+		card_count = chassis_size//15
+		if card_count != controller_types:
+			log(
+				str(chassis_size) +
+				" is not congruent with the number of hba cards detected {ct}".format(
+					ct=controller_types
+					)
+				)
+			return False
+	return True
+
+
 def get_chassis_size_from_user(controller_types):
 	chassis_size = 0
 	while not chassis_size:
@@ -145,34 +175,10 @@ def get_chassis_size_from_user(controller_types):
 		regex = re.match("\d\d",result)
 		if regex != None:
 			chassis_size = int(regex.group(0))
-			if chassis_size not in [15,30,32,45,60]:
-				chassis_size = 0
-				log(result, " is not a valid chassis size")
-			elif chassis_size == 32: 
-				# stornado
-				card_count = chassis_size//16
-				if card_count != len(controller_types):
-					log(
-						result, 
-						" is not congruent with the number of hba cards detected {ct}".format(
-							ct=len(controller_types)
-							)
-						)
-					chassis_size = 0
-			elif not chassis_size%15:
-				# chassis size is divisible by 15
-				card_count = chassis_size//15
-				if card_count != len(controller_types):
-					log(
-						result, 
-						" is not congruent with the number of hba cards detected {ct}".format(
-							ct=len(controller_types)
-							)
-						)
-					chassis_size = 0
+			if check_chassis_size(chassis_size,len(controller_types)):
+				break	
 		else:
 			log(result, " is not a valid chassis size")
-
 	return chassis_size
 
 def trigger_udev():
@@ -209,12 +215,13 @@ def log(message):
 		print(message)
 
 def check_root():
-	root_test =	subprocess.run(["ls","/root"]).returncode
+	root_test =	subprocess.run(["ls","/root"],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
 	if root_test:
 		log("dmap must be run with root privileges")
 		sys.exit(root_test)
 
 def main():
+	# ensure that script has been run with root privilages
 	check_root()
 
 	parser = OptionParser()
@@ -223,27 +230,40 @@ def main():
 	parser.add_option("-q","--quiet",action="store_true",dest="quiet",default=False,help="Quiet Mode")
 	parser.add_option("-r","--reset-map",action="store_true",dest="reset_map",default=False,help="Resets the drive map")
 	(options, args) = parser.parse_args()
-	g_quiet = if options.quiet else False
+	g_quiet = options.quiet
 
+	# get the path variables required to determine config path and device path
 	conf_path, dev_path = get_path_variables()
 	
+	# erase existing config file and reset map if specified by user (-r)
 	if options.reset_map:
 		reset_map(conf_path)
 
+	# get the ID and controller type as a list of tuples
 	controller_types = get_controller_types()
 	
-	chassis_size = get_chassis_size() if not options.specify_chassis_size else options.specify_chassis_size
-	
-	if not chassis_size and not g_quiet:
+	# calculate chassis size, or use provided option argument (-s)
+	chassis_size = get_chassis_size() if not options.specify_chassis_size else int(options.specify_chassis_size)
+	# get the chassis size from user if unable to calculate automatically
+	if not check_chassis_size(chassis_size,len(controller_types)) and not g_quiet:
 		chassis_size = get_chassis_size_from_user(controller_types)
-	else if not chassis_size:
+	elif not chassis_size:
 		sys.exit(1)
 	
+	# generate config file as a string
 	vdev_id_conf = create_config(chassis_size,controller_types,dev_path)
-	print(vdev_id_conf)
 	
+	# write file to disk
+	f = open(conf_path + "vdev_id.conf","w")
+	f.write(vdev_id_conf)
+	f.close()
+
+	#trigger udev
 	if options.trigger_udev:
 		trigger_udev()
+
+	#print config file to stdout
+	log(vdev_id_conf)
 
 if __name__ == "__main__":
     main()
