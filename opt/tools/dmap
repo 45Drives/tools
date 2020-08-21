@@ -54,6 +54,7 @@
 import re
 import subprocess
 import os
+import sys
 from optparse import OptionParser
 
 g_quiet = False
@@ -75,7 +76,7 @@ def get_controller_types():
 			universal_newlines=True).stdout
 	except OSError:
 		log("Error executing lspci.")
-		exit(1)
+		sys.exit(1)
 	for line in lspci_result:
 		for key in controller_types:
 			regex = re.search("^(\S+).*{hba}.*$".format(hba=key),line)
@@ -182,7 +183,7 @@ def trigger_udev():
 			trigger_successful = True
 	except OSError:
 		log("Error triggering udevadm (udevadm trigger)")
-		exit(1)
+		sys.exit(1)
 
 	if trigger_successful:
 		try:
@@ -191,38 +192,58 @@ def trigger_udev():
 				raise OSError()
 		except OSError:
 			log("Error settling udevadm (udevadm settle)")
-			exit(1)
+			sys.exit(1)			
+
+def reset_map(config_path):
+	try:
+		os.remove(config_path + "vdev_id.conf")
+	except OSError:
+		pass
+	trigger_udev()
+	log("Drive Aliasing reset")
+	sys.exit(0)
 
 
 def log(message):
 	if not g_quiet:
 		print(message)
 
+def check_root():
+	root_test =	subprocess.run(["ls","/root"]).returncode
+	if root_test:
+		log("dmap must be run with root privileges")
+		sys.exit(root_test)
 
 def main():
+	check_root()
+
 	parser = OptionParser()
 	parser.add_option("-m","--no-udev",action="store_false",dest="trigger_udev",default=True,help="Creates map but doesnt trigger udev rules")
 	parser.add_option("-s","--chassis-size",dest="specify_chassis_size",help="Specify chassis size")
 	parser.add_option("-q","--quiet",action="store_true",dest="quiet",default=False,help="Quiet Mode")
+	parser.add_option("-r","--reset-map",action="store_true",dest="reset_map",default=False,help="Resets the drive map")
 	(options, args) = parser.parse_args()
 	g_quiet = if options.quiet else False
+
+	conf_path, dev_path = get_path_variables()
+	
+	if options.reset_map:
+		reset_map(conf_path)
+
 	controller_types = get_controller_types()
+	
 	chassis_size = get_chassis_size() if not options.specify_chassis_size else options.specify_chassis_size
+	
 	if not chassis_size and not g_quiet:
 		chassis_size = get_chassis_size_from_user(controller_types)
 	else if not chassis_size:
-		exit(1)
-	conf_path, dev_path = get_path_variables()
+		sys.exit(1)
+	
 	vdev_id_conf = create_config(chassis_size,controller_types,dev_path)
+	print(vdev_id_conf)
 	
 	if options.trigger_udev:
 		trigger_udev()
-	#for controller in controller_types:
-	#	log("CONTROLLERS: ",controller[0],controller[1])
-	#log("CHASSIS SIZE: ",chassis_size)
-	#log("CONFIG PATH: ",conf_path)
-	#log("DEVICE PATH: ",dev_path)
-	#return 0
 
 if __name__ == "__main__":
     main()
