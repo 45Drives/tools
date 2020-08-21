@@ -83,12 +83,12 @@ def get_controller_types():
 def get_chassis_size():
 	# ipmitool fru - to get the chassis size (get user to put it in if unsuccessful)
 	chassis_size = 0
+	return chassis_size
 	try:
 		ipmitool_result = subprocess.Popen(["ipmitool","fru"], stdout=subprocess.PIPE,
 			universal_newlines=True).stdout
 	except OSError:
-		print("Error executing ipmitool.")
-		exit(1)
+		return chassis_size
 	for line in ipmitool_result:
 			regex = re.search("^\s+Product Part Number\s+:\s+\w{0,2}(\d{2})\w?$",line)
 			if regex != None:
@@ -103,22 +103,86 @@ def get_path_variables():
 	conf_path = os.getenv('ALIAS_CONFIG_PATH')
 	if conf_path == None:
 		conf_path = "/etc/"
+	if conf_path[-1] != "/":
+		conf_path+="/"	
+	
 	dev_path = os.getenv('ALIAS_DEVICE_PATH')
 	if dev_path == None:
 		dev_path = "/dev/"
+	if dev_path[-1] != "/":
+		dev_path+="/"
+	
 	return conf_path, dev_path
 
+def create_config(chassis_size,controller_types,dev_path):
+	vdev_id_conf = "# This file was created using dmap (/opt/tools/dmap)\n"
+	drives_per_row = 15 if chassis_size%16 != 0 else 16
+	for i in range(chassis_size):
+		row_index = ((i//drives_per_row)+1)
+		card_index = row_index-1
+		bay_index = ((i%drives_per_row)+1)
+		phy_index = bay_index-1
+		line = "alias {row}-{bay}     {dp}disk/by-path/pci-0000:{ct}-sas-phy{phy_num}-lun-0".format(
+			row=row_index,
+			bay=bay_index,
+			dp=dev_path,
+			ct=controller_types[card_index][0],
+			phy_num=lut[controller_types[card_index][1]][phy_index]
+			)
+		vdev_id_conf += line + "\n"
+	return vdev_id_conf
+
+def get_chassis_size_from_user(controller_types):
+	chassis_size = 0
+	while not chassis_size:
+		result = input("Cannot determine chassis size.\nPlease indicate total number of hard drive bays: ")
+		regex = re.match("\d\d",result)
+		if regex != None:
+			chassis_size = int(regex.group(0))
+			if chassis_size not in [15,30,32,45,60]:
+				chassis_size = 0
+				print(result, " is not a valid chassis size")
+			elif chassis_size == 32: 
+				# stornado
+				card_count = chassis_size//16
+				if card_count != len(controller_types):
+					print(
+						result, 
+						" is not congruent with the number of hba cards detected {ct}".format(
+							ct=len(controller_types)
+							)
+						)
+					chassis_size = 0
+			elif not chassis_size%15:
+				# chassis size is divisible by 15
+				card_count = chassis_size//15
+				if card_count != len(controller_types):
+					print(
+						result, 
+						" is not congruent with the number of hba cards detected {ct}".format(
+							ct=len(controller_types)
+							)
+						)
+					chassis_size = 0
+		else:
+			print(result, " is not a valid chassis size")
+
+	return chassis_size
 
 def main():
 	controller_types = get_controller_types()
 	chassis_size = get_chassis_size()
+	if not chassis_size:
+		chassis_size = get_chassis_size_from_user(controller_types)
 	conf_path, dev_path = get_path_variables()
-	for controller in controller_types:
-		print("CONTROLLERS: ",controller[0],controller[1])
-	print("CHASSIS SIZE: ",chassis_size)
-	print("CONFIG PATH: ",conf_path)
-	print("DEVICE PATH: ",dev_path)
-	return 0
+	vdev_id_conf = create_config(chassis_size,controller_types,dev_path)
+	
+	#for controller in controller_types:
+	#	print("CONTROLLERS: ",controller[0],controller[1])
+	#print("CHASSIS SIZE: ",chassis_size)
+	#print("CONFIG PATH: ",conf_path)
+	#print("DEVICE PATH: ",dev_path)
+	#return 0
 
 if __name__ == "__main__":
     main()
