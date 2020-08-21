@@ -54,6 +54,9 @@
 import re
 import subprocess
 import os
+from optparse import OptionParser
+
+g_quiet = False
 
 # a look up table used to ensure that the physical path is assigned in
 # the correct order for each hba card that we use. The keys are 
@@ -71,7 +74,7 @@ def get_controller_types():
 		lspci_result = subprocess.Popen(["lspci"], stdout=subprocess.PIPE,
 			universal_newlines=True).stdout
 	except OSError:
-		print("Error executing lspci.")
+		log("Error executing lspci.")
 		exit(1)
 	for line in lspci_result:
 		for key in controller_types:
@@ -102,12 +105,14 @@ def get_path_variables():
 	# get the device path, if it fails assume /dev/
 	conf_path = os.getenv('ALIAS_CONFIG_PATH')
 	if conf_path == None:
+		log("No alias config path set in profile.d ... Defaulting to /etc/")
 		conf_path = "/etc/"
 	if conf_path[-1] != "/":
 		conf_path+="/"	
 	
 	dev_path = os.getenv('ALIAS_DEVICE_PATH')
 	if dev_path == None:
+		log("No alias device path set in profile.d ... Defaulting to /dev/")
 		dev_path = "/dev/"
 	if dev_path[-1] != "/":
 		dev_path+="/"
@@ -141,12 +146,12 @@ def get_chassis_size_from_user(controller_types):
 			chassis_size = int(regex.group(0))
 			if chassis_size not in [15,30,32,45,60]:
 				chassis_size = 0
-				print(result, " is not a valid chassis size")
+				log(result, " is not a valid chassis size")
 			elif chassis_size == 32: 
 				# stornado
 				card_count = chassis_size//16
 				if card_count != len(controller_types):
-					print(
+					log(
 						result, 
 						" is not congruent with the number of hba cards detected {ct}".format(
 							ct=len(controller_types)
@@ -157,7 +162,7 @@ def get_chassis_size_from_user(controller_types):
 				# chassis size is divisible by 15
 				card_count = chassis_size//15
 				if card_count != len(controller_types):
-					print(
+					log(
 						result, 
 						" is not congruent with the number of hba cards detected {ct}".format(
 							ct=len(controller_types)
@@ -165,23 +170,58 @@ def get_chassis_size_from_user(controller_types):
 						)
 					chassis_size = 0
 		else:
-			print(result, " is not a valid chassis size")
+			log(result, " is not a valid chassis size")
 
 	return chassis_size
 
+def trigger_udev():
+	trigger_successful = False
+	try:
+		trigger_call = subprocess.run(["udevadm","trigger"])
+		if trigger_call.returncode == 0:
+			trigger_successful = True
+	except OSError:
+		log("Error triggering udevadm (udevadm trigger)")
+		exit(1)
+
+	if trigger_successful:
+		try:
+			settle_call = subprocess.run(["udevadm","settle"])
+			if settle_call.returncode != 0:
+				raise OSError()
+		except OSError:
+			log("Error settling udevadm (udevadm settle)")
+			exit(1)
+
+
+def log(message):
+	if not g_quiet:
+		print(message)
+
+
 def main():
+	parser = OptionParser()
+	parser.add_option("-m","--no-udev",action="store_false",dest="trigger_udev",default=True,help="Creates map but doesnt trigger udev rules")
+	parser.add_option("-s","--chassis-size",dest="specify_chassis_size",help="Specify chassis size")
+	parser.add_option("-q","--quiet",action="store_true",dest="quiet",default=False,help="Quiet Mode")
+	(options, args) = parser.parse_args()
+	g_quiet = if options.quiet else False
 	controller_types = get_controller_types()
-	chassis_size = get_chassis_size()
-	if not chassis_size:
+	chassis_size = get_chassis_size() if not options.specify_chassis_size else options.specify_chassis_size
+	if not chassis_size and not g_quiet:
 		chassis_size = get_chassis_size_from_user(controller_types)
+	else if not chassis_size:
+		exit(1)
 	conf_path, dev_path = get_path_variables()
 	vdev_id_conf = create_config(chassis_size,controller_types,dev_path)
 	
+	if options.trigger_udev:
+		trigger_udev()
 	#for controller in controller_types:
-	#	print("CONTROLLERS: ",controller[0],controller[1])
-	#print("CHASSIS SIZE: ",chassis_size)
-	#print("CONFIG PATH: ",conf_path)
-	#print("DEVICE PATH: ",dev_path)
+	#	log("CONTROLLERS: ",controller[0],controller[1])
+	#log("CHASSIS SIZE: ",chassis_size)
+	#log("CONFIG PATH: ",conf_path)
+	#log("DEVICE PATH: ",dev_path)
 	#return 0
 
 if __name__ == "__main__":
