@@ -8,12 +8,9 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-#
-# TODO: fix help menu
 #     
 ################################################################################
 
-################################################################################
 # dmap is used to create /etc/vdev_id.conf 
 
 ######################### EXAMPLE /etc/vdev_id.conf ############################
@@ -46,16 +43,10 @@
 #alias 2-12     /dev/disk/by-path/pci-0000:04:00.0-sas-phy16-lun-0
 #alias 2-13     /dev/disk/by-path/pci-0000:04:00.0-sas-phy22-lun-0
 #alias 2-14     /dev/disk/by-path/pci-0000:04:00.0-sas-phy23-lun-0
-#alias 2-15     /dev/disk/by-path/pci-0000:04:00.0-sas-phy21-lun-0"
+#alias 2-15     /dev/disk/by-path/pci-0000:04:00.0-sas-phy21-lun-0
 
-# an example formatted string that can be used to make the required entries:
-#line = "alias {row}-{bay}     {dp}disk/by-path/pci-0000:{ct}-sas-phy{phy_num}-lun-0".format(
-#	row=row_index,
-#			bay=bay_index,
-#			dp=dev_path,
-#			ct=controller_types[card_index][0],
-#			phy_num=g_lut[controller_types[card_index][1]][phy_index]
-#			)
+###############################################################################
+###############################################################################
 
 import re
 import subprocess
@@ -300,14 +291,14 @@ def check_root():
 ###############################################################################
 # Name: main (dmap)
 # Args: (see parser)
-# Desc: 
+# Desc: generates vdev_id.conf
 ###############################################################################
 def main():
 	# ensure that script has been run with root privilages
 	check_root()
 	parser = OptionParser()
 	parser.add_option("-m","--no-udev",action="store_false",dest="trigger_udev",default=True,help="Creates map but doesnt trigger udev rules")
-	parser.add_option("-s","--chassis-size",dest="specify_chassis_size",help="Specify chassis size")
+	parser.add_option("-s","--size",action="store",dest="sz",default=None,help="Specify chassis size")
 	parser.add_option("-q","--quiet",action="store_true",dest="quiet",default=False,help="Quiet Mode")
 	parser.add_option("-r","--reset-map",action="store_true",dest="reset_map",default=False,help="Resets the drive map")
 	(options, args) = parser.parse_args()
@@ -327,7 +318,7 @@ def main():
 	controller_types = get_controller_types()
 	
 	# calculate chassis size, or use provided option argument (-s)
-	chassis_size = get_chassis_size() if not options.specify_chassis_size else int(options.specify_chassis_size)
+	chassis_size = get_chassis_size() if not options.sz else int(options.sz)
 	# get the chassis size from user if unable to calculate automatically
 	if not check_chassis_size(chassis_size,len(controller_types)) and not g_quiet:
 		chassis_size = get_chassis_size_from_user(controller_types)
