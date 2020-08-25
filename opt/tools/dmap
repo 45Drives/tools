@@ -8,7 +8,8 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-#     
+# 
+# TODO: Test on multiple bare metal configurations    
 ################################################################################
 
 # dmap is used to create /etc/vdev_id.conf 
@@ -173,11 +174,11 @@ def create_config(chassis_size,controller_types,dev_path):
 ###############################################################################
 def check_chassis_size(chassis_size,controller_types):
 	if chassis_size < 15:
-		# chassis size is less than the minimum (15)
+		# ERROR: chassis size is less than the minimum (15)
 		log(str(chassis_size) + " is less than the minimum chassis size (15)")
 		return False
 	elif int(chassis_size) not in g_supported_chassis_sizes:
-		# chassis size is not a standard chassis size [15,30,32,45,60]
+		# ERROR: chassis size is not a standard chassis size [15,30,32,45,60]
 		log(str(chassis_size) + " is not a valid chassis size " + str(g_supported_chassis_sizes))
 		return False
 	elif chassis_size == 32: 
