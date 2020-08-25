@@ -136,6 +136,48 @@ def get_model_serial_firmware(device_name):
 			break
 	return (model,serial,firmware)
 
+def check_ceph():
+	try:
+		child = subprocess.Popen(
+			["ceph","--version"],
+			stdout=subprocess.PIPE,universal_newlines=True
+		)
+	except OSError:
+		return False
+	if child.wait() != 0:
+		return False
+	return True
+
+################################################################################
+# function name: get_osd_dict
+# receives: nothing
+# does: executes ceph-volume lvm list --format json, parses output into dict
+#       relating device path to osd name
+# returns: dictionary of dev path : osd name
+################################################################################
+def get_osd_dict():
+	global EXIT_CODE
+	osds = {}
+	
+	try:
+		child = subprocess.Popen(
+			["ceph-volume","lvm","list","--format","json"],
+			stdout=subprocess.PIPE,universal_newlines=True
+		)
+	except OSError:
+		print("Error executing ceph-volume. Is it installed?")
+		exit(1)
+	if child.wait() != 0:
+		EXIT_CODE = child.returncode
+		return
+	output = json.loads(child.stdout.read())
+	
+	for osd in output.keys():
+		dev_path = output[osd][0]["devices"][0]
+		osds[dev_path] = f"osd.{osd}"
+	
+	return osds
+
 ################################################################################
 # function name: build_server
 # receives: CLI options
@@ -165,7 +207,7 @@ def build_server(options):
 		if not line or line == "" or line[0] == '#':
 			continue
 		# extract bay indices and by-path path
-		regex = re.search("^alias (\d{1,2})-(\d{1,2})\s+(.*)$",line)
+		regex = re.search("^alias\s+(\d{1,2})-(\d{1,2})\s+(.*)$",line)
 		if regex == None:
 			continue
 		new_row_index = int(regex.group(1))
@@ -290,15 +332,16 @@ def disk_type(device_path):
 def no_output_flags(options):
 	return (not options.outputHealth and not options.outputModel
 			and not options.outputType and not options.outputSerial
-			and not options.outputTemp and not options.outputFirm)
+			and not options.outputTemp and not options.outputFirm
+			and not options.outputOSD)
 
 ################################################################################
 # function name: choose_output
-# receives: bay dictionary from build_server() and output_opt
+# receives: bay dictionary from build_server(), output_opt, and osd dictionary
 # does: creates string of info based on passed flags
 # returns: string corresponding to chosen output type(s)
 ################################################################################
-def choose_output(bay, options):
+def choose_output(bay, options, osd):
 	if no_output_flags(options):
 		return bay["dev"] if bay["dev"] else "-"
 	output = []
@@ -316,6 +359,8 @@ def choose_output(bay, options):
 		output.append(bay["health"].rstrip() if bay["health"] else "-")
 	if options.outputTemp:
 		output.append(bay["temp-c"].rstrip() if bay["temp-c"] else "-")
+	if options.outputOSD:
+		output.append(osd[bay["dev"]] if bay["dev"] in osd.keys() else "-")
 	return ",".join(output)
 
 ################################################################################
@@ -342,6 +387,8 @@ def choose_output_header(options):
 		output.append("Health")
 	if options.outputTemp:
 		output.append("Temp C")
+	if options.outputOSD:
+		output.append("OSD")
 	return "ID " + ",".join(output)
 
 ################################################################################
@@ -352,13 +399,13 @@ def choose_output_header(options):
 # returns: nothing
 # DEPRECATED: to be replaced with generic table formatting function
 ################################################################################
-def print_bays(server, options):
+def print_bays(server, options, osd):
 	print_array = []
 	
 	for row in reversed(server["rows"]):
 		print_array.append([])
 		for bay in row:
-			cell_string = "{txt:<4} (".format(txt=bay["bay-id"]) + choose_output(bay, options) + ")"
+			cell_string = "{txt:<4} (".format(txt=bay["bay-id"]) + choose_output(bay, options, osd) + ")"
 			colour = ""
 			if options.colour:
 				if bay["occupied"] == False:
@@ -443,6 +490,8 @@ def main():
 			default=False, help="Output temperature (deg-C) (slow)")
 	parser.add_option("-f", "--firmware", action="store_true", dest="outputFirm",
 			default=False, help="Output firmware version")
+	parser.add_option("-o", "--ceph-osd", action="store_true", dest="outputOSD",
+			default=False, help="Output OSD name - Ceph only")
 	(options, args) = parser.parse_args()
 	
 	server = {
@@ -453,6 +502,13 @@ def main():
 		}
 	}
 	
+	osd = {}
+	if options.outputOSD:
+		if check_ceph():
+			osd = get_osd_dict()
+		else:
+			log("-o --ceph-osd can only be used with Ceph.")
+	
 	#get server information
 	server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller()
 	
@@ -460,7 +516,7 @@ def main():
 	if(options.json):
 		print(json.dumps(server, indent = 4))
 	else:
-		print_bays(server, options)
+		print_bays(server, options, osd)
 	exit(0)
 
 if __name__ == "__main__":
