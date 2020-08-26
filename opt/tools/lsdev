@@ -136,6 +136,12 @@ def get_model_serial_firmware(device_name):
 			break
 	return (model,serial,firmware)
 
+################################################################################
+# function name: check_ceph
+# receives: nothing
+# does: executes ceph --version
+# returns: False if ceph not installed or exit code not 0, else True
+################################################################################
 def check_ceph():
 	try:
 		child = subprocess.Popen(
