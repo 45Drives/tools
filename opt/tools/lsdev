@@ -337,7 +337,7 @@ def no_output_flags(options):
 
 ################################################################################
 # function name: choose_output
-# receives: bay dictionary from build_server(), output_opt, and osd dictionary
+# receives: bay dictionary from build_server(), output_opt, and Ceph OSD LUT
 # does: creates string of info based on passed flags
 # returns: string corresponding to chosen output type(s)
 ################################################################################
@@ -393,7 +393,7 @@ def choose_output_header(options):
 
 ################################################################################
 # function name: print_bays
-# receives: server dictionary ({rows: [], meta: {}}), options
+# receives: server dictionary ({rows: [], meta: {}}), options, Ceph OSD LUT
 # does: prints table representing server with output based on
 #       options and choose_output() call
 # returns: nothing
