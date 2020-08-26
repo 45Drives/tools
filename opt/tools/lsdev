@@ -502,6 +502,7 @@ def main():
 		}
 	}
 	
+	#get Ceph OSD LUT
 	osd = {}
 	if options.outputOSD:
 		if check_ceph():
