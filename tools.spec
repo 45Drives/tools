@@ -3,7 +3,7 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.3
+Version:	1.5
 Release:	2%{?dist}
 Summary:	Server CLI Tools
 
@@ -22,9 +22,9 @@ Requires: dmidecode
 Requires: python3
 Requires: pciutils
 Requires: storcli
+Requires: hdparm
 
 %description
-
 45Drives server cli tools
 
 %prep
@@ -43,7 +43,7 @@ cp -a etc/ %{buildroot}
 cp -a opt/ %{buildroot}
 
 pushd opt/tools/
-    for i in ls* *map findosd zcreate; do
+    for i in lsdev *map findosd zcreate; do
         ln -sf /opt/tools/$i %{buildroot}%{_bindir}
     done
 popd
@@ -60,6 +60,8 @@ rm -rf %{buildroot}
 %{_bindir}/*
 
 %changelog
+* Tue Sep 1 2020 Mark Hooper <mhooper@45drives.com> 1.5
+- First build 1.5, added hdparm dependancy
 * Sat May 30 2020 Brett Kelly <bkelly@45drives.com> 1.3
 - Second build 1.3, added python dependancy 
 * Sat May 30 2020 Brett Kelly <bkelly@45drives.com> 1.3
