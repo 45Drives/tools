@@ -1,186 +1,345 @@
-#!/bin/bash
-# ---------------------------------------------------------------------------
-# dmap - Generate alias config for hardware
-
-# Copyright 2016, Brett Kelly <bkelly@45drives.com>
-
+#!/usr/bin/env python3
+################################################################################
+# dmap - used to create /etc/vdev_id.conf for 45Drives storage servers
+#
+# Copyright (C) 2020, Josh Boudreau <jboudreau@45drives.com>
+#                     Mark Hooper   <mhooper@45drives.com>
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
+# 
+# TODO: Test on multiple bare metal configurations    
+################################################################################
 
-usage() { # Help
-        cat << EOF
-Usage:	dmap
-		[-m] Creates map but doesnt trigger udev rules
-		[-o] Use Old mapping (Non universal)
-		[-s] Specify chassis size
-		[-q] Quiet Mode
-		[-r] Resets drive map
-		[-h] Displays this message
+# dmap is used to create /etc/vdev_id.conf 
 
-EOF
-        exit 0
-}
-gethba() {
-	if [[ $(lspci | grep $R750) ]];then
-		DISK_CONTROLLER=$R750
-	elif [[ $(lspci | grep $LSI_9201) ]];then
-		DISK_CONTROLLER=$LSI_9201
-	elif [[ $(lspci | grep $LSI_9305) ]];then
-		DISK_CONTROLLER=$LSI_9305
-    elif [[ $(lspci | grep $LSI_9405) ]];then
-        DISK_CONTROLLER=$LSI_9405
-	elif [[ $(dmidecode -t baseboard | grep -i "product name" | cut -d : -f 2 | xargs echo) == "X11SSH-CTF" ]] && [[ ! $(lspci | grep $LSI_9305) ]];then
-		DISK_CONTROLLER=$AV15BASE
-	else
-		echo "No Supported HBA Detected"
-		exit
-	fi
-}
-getsize(){
-	if [[ $(ipmitool fru 2>&1 | grep "Product Part Number") ]];then
-		SIZE=$(ipmitool fru | grep "Product Part Number" | cut -f2 -d ':' | xargs echo)
-		case $SIZE in
-		AV15|av15|15)
-		CHASSIS=15
-		;;
-		Q30|q30|30)
-		CHASSIS=30
-      	;;
-    	F32|f32|32)
-      	CHASSIS=32
-      	;;
-    	S45|s45|45)
-      	CHASSIS=45
-      	;;
-    	S45l|s45l|45l)
-      	CHASSIS=45
-      	;;
-    	XL60|xl60|60)
-      	CHASSIS=60
-      	;;
-    	esac
-  	else
-    		echo "Cant determine Chassis Size automatically"
-    		read -p "Chassis Size? " CHASSIS
- 
-	fi
-}
-checkchassis(){
-	if [ $1 -eq 30 ] || [ $1 -eq 32 ] || [ $1 -eq 45 ] || [ $1 -eq 60 ] || [ $1 -eq 15 ];then
-		:
-	elif [ $1 -eq 40 ];then
-		if [ "$DISK_CONTROLLER" == "$R750" ];then
-			:
-		else
-			echo "Chassis: $1 is only supported for Controller: $R750"
-			exit 0
-		fi
-	elif [ $1 -eq 15 ];then
-		if [ "$DISK_CONTROLLER" == "$R750" ];then
-			echo "Chassis: $1 is not supported for Controller: $R750"
-			exit 0
-		else
-			:
-		fi
-	else
-		echo "$1 is not an available chassis size, (15,30,45,60 or 40(lite))"
-		exit 0
-	fi
-}
-checkroot(){
-	SCRIPT_NAME=$(basename "$0")
-	if [ "$EUID" -ne 0 ];then
-		echo "You must have root privileges to run $SCRIPT_NAME"
-		exit 0
-	fi
-}
+######################### EXAMPLE /etc/vdev_id.conf ############################
+#alias 1-1     /dev/disk/by-path/pci-0000:03:00.0-sas-phy2-lun-0
+#alias 1-2     /dev/disk/by-path/pci-0000:03:00.0-sas-phy3-lun-0
+#alias 1-3     /dev/disk/by-path/pci-0000:03:00.0-sas-phy1-lun-0
+#alias 1-4     /dev/disk/by-path/pci-0000:03:00.0-sas-phy0-lun-0
+#alias 1-5     /dev/disk/by-path/pci-0000:03:00.0-sas-phy6-lun-0
+#alias 1-6     /dev/disk/by-path/pci-0000:03:00.0-sas-phy7-lun-0
+#alias 1-7     /dev/disk/by-path/pci-0000:03:00.0-sas-phy5-lun-0
+#alias 1-8     /dev/disk/by-path/pci-0000:03:00.0-sas-phy4-lun-0
+#alias 1-9     /dev/disk/by-path/pci-0000:03:00.0-sas-phy18-lun-0
+#alias 1-10     /dev/disk/by-path/pci-0000:03:00.0-sas-phy19-lun-0
+#alias 1-11     /dev/disk/by-path/pci-0000:03:00.0-sas-phy17-lun-0
+#alias 1-12     /dev/disk/by-path/pci-0000:03:00.0-sas-phy16-lun-0
+#alias 1-13     /dev/disk/by-path/pci-0000:03:00.0-sas-phy22-lun-0
+#alias 1-14     /dev/disk/by-path/pci-0000:03:00.0-sas-phy23-lun-0
+#alias 1-15     /dev/disk/by-path/pci-0000:03:00.0-sas-phy21-lun-0
+#alias 2-1     /dev/disk/by-path/pci-0000:04:00.0-sas-phy2-lun-0
+#alias 2-2     /dev/disk/by-path/pci-0000:04:00.0-sas-phy3-lun-0
+#alias 2-3     /dev/disk/by-path/pci-0000:04:00.0-sas-phy1-lun-0
+#alias 2-4     /dev/disk/by-path/pci-0000:04:00.0-sas-phy0-lun-0
+#alias 2-5     /dev/disk/by-path/pci-0000:04:00.0-sas-phy6-lun-0
+#alias 2-6     /dev/disk/by-path/pci-0000:04:00.0-sas-phy7-lun-0
+#alias 2-7     /dev/disk/by-path/pci-0000:04:00.0-sas-phy5-lun-0
+#alias 2-8     /dev/disk/by-path/pci-0000:04:00.0-sas-phy4-lun-0
+#alias 2-9     /dev/disk/by-path/pci-0000:04:00.0-sas-phy18-lun-0
+#alias 2-10     /dev/disk/by-path/pci-0000:04:00.0-sas-phy19-lun-0
+#alias 2-11     /dev/disk/by-path/pci-0000:04:00.0-sas-phy17-lun-0
+#alias 2-12     /dev/disk/by-path/pci-0000:04:00.0-sas-phy16-lun-0
+#alias 2-13     /dev/disk/by-path/pci-0000:04:00.0-sas-phy22-lun-0
+#alias 2-14     /dev/disk/by-path/pci-0000:04:00.0-sas-phy23-lun-0
+#alias 2-15     /dev/disk/by-path/pci-0000:04:00.0-sas-phy21-lun-0
 
-R750="0750"
-LSI_9201="2116"
-LSI_9305="3224"
-LSI_9361="3316"
-LSI_9405="3616"
-HBA1000="Adaptec Series 8"
-AV15BASE="3008"
-DISK_CONTROLLER=
-CHASSIS=
-QUIET=no
-RESET_MAP=no
-UDEV_TRIG=yes
-OLD_MAP=no
-COLOR_FLAG=yes
-BIN_DIR=/opt/tools
+###############################################################################
+###############################################################################
 
-while getopts 'c:oms:qrh' OPTION; do
-	case ${OPTION} in
-	c)
-		DISK_CONTROLLER=${OPTARG}
-		;;
-	s)
-		CHASSIS=${OPTARG}
-		;;
-	o)
-		OLD_MAP=yes
-		;;
-	m)
-		UDEV_TRIG=no
-		;;
-	q)
-		QUIET=yes
-		;;
-	r)
-		RESET_MAP=yes
-		;;
-	h)
-		usage
-		;;
-	esac
-done
+import re
+import subprocess
+import os
+import sys
+from optparse import OptionParser
 
-checkroot
-CONFIG_PATH=$ALIAS_CONFIG_PATH
-if [ -z $CONFIG_PATH ];then
-		echo "No alias config path set in profile.d ... Defaulting to /etc"
-        CONFIG_PATH=/etc
-fi
 
-if [ $RESET_MAP == yes ];then
-	rm -f $CONFIG_PATH/vdev_id.conf
-	udevadm trigger
-	udevadm settle
-	echo "Drive Aliasing reset"
-	exit 0
-fi
+g_quiet = False
+g_supported_chassis_sizes = [15,30,32,45,60]
+# a look up table used to ensure that the physical path is assigned in
+# the correct order for each hba card that we use. The keys are 
+# set so that they match the output from lspci.
+g_lut = {
+	"SAS3224": [2,3,1,0,6,7,5,4,18,19,17,16,22,23,21,20] # PCI Card - 9305-16
+	}
 
-if [ -z $CHASSIS ]; then
-	getsize
-fi
-gethba
-checkchassis $CHASSIS
+################################################################################
+# Name: get_controller_types
+# Args: None
+# Desc: This runs lspci and searches for hba cards provided in a 
+#       global dictionary (g_lut), where the key of this dictionary
+#		is the text that needs to be present in our regex search.
+#       A list of the controller types found that match this criteria 
+#       are returned, which includes the PCI lane information and the 
+#       key to be used in the lookup table later on when generating 
+#       the proper order for drives to be ailiased in. (see create_config())  
+################################################################################
+def get_controller_types():
+# lspci - get the controller type, and the order in which cards are installed
+	controllers = []
+	try:
+		lspci_result = subprocess.Popen(["lspci"], stdout=subprocess.PIPE,
+			universal_newlines=True).stdout
+	except OSError:
+		log("Error executing lspci.")
+		sys.exit(1)
+	for line in lspci_result:
+		for key in g_lut.keys():
+			regex = re.search("^(\S+).*{hba}.*$".format(hba=key),line)
+			if regex != None:
+				controllers.append((regex.group(1),key))
+	return controllers
 
-if [ "$DISK_CONTROLLER" == "$R750" ];then
-	$BIN_DIR/mapr750 $CHASSIS $DISK_CONTROLLER $OLD_MAP
-elif [ "$DISK_CONTROLLER" == "$LSI_9201" ];then
-	$BIN_DIR/mapSAS2116 $CHASSIS $DISK_CONTROLLER $OLD_MAP
-elif [[ "$DISK_CONTROLLER" == "$LSI_9305" && ("$CHASSIS" -eq 32) ]];then
-    $BIN_DIR/mapSAS3224_F $CHASSIS $DISK_CONTROLLER
-elif [[ "$DISK_CONTROLLER" == "$LSI_9405" && ("$CHASSIS" -eq 32) ]];then
-    $BIN_DIR/mapSAS3616 $CHASSIS $DISK_CONTROLLER
-elif [ "$DISK_CONTROLLER" == "$LSI_9305" ];then
-	$BIN_DIR/mapSAS3224 $CHASSIS $DISK_CONTROLLER $OLD_MAP
-elif [ "$DISK_CONTROLLER" == "$AV15BASE" ];then
-	$BIN_DIR/mapAV15BASE $CHASSIS $DISK_CONTROLLER
-fi
+###############################################################################
+# Name: get_chassis_size
+# Args: None
+# Desc: performs (ipmitool fru) command and searches for the 45Drives 
+#       product part number. The chassis size (number of drive bays) 
+#       is extracted from this product part number. 
+###############################################################################				
+def get_chassis_size():
+	# ipmitool fru - to get the chassis size (get user to put it in if unsuccessful)
+	chassis_size = 0
+	try:
+		ipmitool_result = subprocess.Popen(["ipmitool","fru"], stdout=subprocess.PIPE,
+			universal_newlines=True).stdout
+	except OSError:
+		return chassis_size
+	for line in ipmitool_result:
+			regex = re.search("^\s+Product Part Number\s+:\s+\w{0,2}(\d{2})\w?$",line)
+			if regex != None:
+				chassis_size = int(regex.group(1))
+				return chassis_size
+	return chassis_size
 
-if [ $UDEV_TRIG == "yes" ];then
-	udevadm trigger
-	udevadm settle
-fi
+###############################################################################
+# Name: get_path_variables
+# Args: None
+# Desc: obtains and returns the path variables required by dmap.
+#		conf_path: coresponds to where the vdev_id.conf file should be stored
+#		dev_path: corresponds to the device path required when generating
+#				  the ailiases found in vdev_id.conf.
+###############################################################################
+def get_path_variables():
+	# get the alias config path, if it fails assume /etc/
+	# get the device path, if it fails assume /dev/
+	conf_path = os.getenv('ALIAS_CONFIG_PATH')
+	if conf_path == None:
+		log("No alias config path set in profile.d ... Defaulting to /etc/")
+		conf_path = "/etc/"
+	if conf_path[-1] != "/":
+		conf_path+="/"	
+	
+	dev_path = os.getenv('ALIAS_DEVICE_PATH')
+	if dev_path == None:
+		log("No alias device path set in profile.d ... Defaulting to /dev/")
+		dev_path = "/dev/"
+	if dev_path[-1] != "/":
+		dev_path+="/"
 
-if [ $QUIET == "yes" ];then
-	:
-else
-	cat $CONFIG_PATH/vdev_id.conf
-fi
+	return conf_path, dev_path
+
+###############################################################################
+# Name: create_config
+# Args: chassis_size, controller_types, dev_path
+# Desc: creates and returns the text that will ultimately be stored 
+#       in vdev_id.conf.
+###############################################################################
+def create_config(chassis_size,controller_types,dev_path):
+	vdev_id_conf = "# This file was created using dmap (/opt/tools/dmap)\n"
+	drives_per_row = 15 if chassis_size%16 != 0 else 16
+	for i in range(chassis_size):
+		row_index = ((i//drives_per_row)+1)
+		card_index = row_index-1
+		bay_index = ((i%drives_per_row)+1)
+		phy_index = bay_index-1
+		line = "alias {row}-{bay}     {dp}disk/by-path/pci-0000:{ct}-sas-phy{phy_num}-lun-0".format(
+			row=row_index,
+			bay=bay_index,
+			dp=dev_path,
+			ct=controller_types[card_index][0],
+			phy_num=g_lut[controller_types[card_index][1]][phy_index]
+			)
+		vdev_id_conf += line + "\n"
+	return vdev_id_conf
+
+###############################################################################
+# Name: check_chassis_size
+# Args: chassis_size, controller_types (a list of detected hba card information)
+# Desc: validates the chassis size provided by either the user, or the 
+#		detected chassis size performed by get_chassis_size().
+#		A list of supported sizes is provided in g_supported_chassis_sizes.
+###############################################################################
+def check_chassis_size(chassis_size,controller_types):
+	if chassis_size < 15:
+		# ERROR: chassis size is less than the minimum (15)
+		log(str(chassis_size) + " is less than the minimum chassis size (15)")
+		return False
+	elif int(chassis_size) not in g_supported_chassis_sizes:
+		# ERROR: chassis size is not a standard chassis size [15,30,32,45,60]
+		log(str(chassis_size) + " is not a valid chassis size " + str(g_supported_chassis_sizes))
+		return False
+	elif chassis_size == 32: 
+		# chassis size of 32 (stornado) supports 32 drive bays (2 rows of 16 SSDs)
+		card_count = chassis_size//16
+		if card_count != controller_types:
+			log(
+				str(chassis_size) + 
+				" is not congruent with the number of hba cards detected {ct}".format(
+					ct=controller_types
+					)
+				)
+			return False
+	elif not chassis_size%15:
+		# chassis size is divisible by 15
+		card_count = chassis_size//15
+		if card_count != controller_types:
+			log(
+				str(chassis_size) +
+				" is not congruent with the number of hba cards detected {ct}".format(
+					ct=controller_types
+					)
+				)
+			return False
+	return True
+
+###############################################################################
+# Name: get_chassis_size_from_user
+# Args: controller_types (a list of tuples corresponding to hba cards found)
+# Desc: called when the user provides an invalid chassis size (-s flag)
+#		or when automatic detection (check_chassis_size() called in main())
+#		is unsuccessful.
+###############################################################################
+def get_chassis_size_from_user(controller_types):
+	chassis_size = 0
+	while chassis_size == 0:
+		result = input("Cannot determine chassis size.\nPlease indicate total number of hard drive bays: ")
+		regex = re.match("\d\d",result)
+		if regex != None:
+			chassis_size = int(regex.group(0))
+			if check_chassis_size(chassis_size,len(controller_types)):
+				log("Chassis size (" + str(chassis_size) + ") applied.")
+				break
+			else:
+				chassis_size = 0	
+		else:
+			log(result, " is not a valid chassis size")
+	return chassis_size
+
+###############################################################################
+# Name: trigger_udev
+# Args: None
+# Desc: runs two commands (udevadm trigger, udevadm settle), will only attempt
+#       the second command it the first command returned a successful result.
+###############################################################################
+def trigger_udev():
+	trigger_successful = False
+	try:
+		trigger_call = subprocess.run(["udevadm","trigger"])
+		if trigger_call.returncode == 0:
+			trigger_successful = True
+	except OSError:
+		log("Error triggering udevadm (udevadm trigger)")
+		sys.exit(1)
+
+	if trigger_successful:
+		try:
+			settle_call = subprocess.run(["udevadm","settle"])
+			if settle_call.returncode != 0:
+				raise OSError()
+		except OSError:
+			log("Error settling udevadm (udevadm settle)")
+			sys.exit(1)			
+
+###############################################################################
+# Name: reset_map
+# Args: config_path
+# Desc: removes the existing vdev_id.conf file located in the directory
+#       provided by config_path. Then udev is triggered, which removes
+#		the drive ailiasing that existed on the machine.
+###############################################################################
+def reset_map(config_path):
+	try:
+		os.remove(config_path + "vdev_id.conf")
+	except OSError:
+		pass
+	trigger_udev()
+	log("Drive Aliasing reset")
+	sys.exit(0)
+
+###############################################################################
+# Name: log
+# Args: message
+# Desc: outputs the message to stdout contingent on the global quiet flag.
+###############################################################################
+def log(message):
+	if not g_quiet:
+		print(message)
+
+###############################################################################
+# Name: check_root
+# Args: None
+# Desc: Ensures that dmap is running as root
+###############################################################################
+def check_root():
+	root_test =	subprocess.run(["ls","/root"],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
+	if root_test:
+		log("dmap must be run with root privileges")
+		sys.exit(root_test)
+
+###############################################################################
+# Name: main (dmap)
+# Args: (see parser)
+# Desc: generates vdev_id.conf
+###############################################################################
+def main():
+	# ensure that script has been run with root privilages
+	check_root()
+	parser = OptionParser()
+	parser.add_option("-m","--no-udev",action="store_false",dest="trigger_udev",default=True,help="Creates map but doesnt trigger udev rules")
+	parser.add_option("-s","--size",action="store",dest="sz",default=None,help="Specify chassis size")
+	parser.add_option("-q","--quiet",action="store_true",dest="quiet",default=False,help="Quiet Mode")
+	parser.add_option("-r","--reset-map",action="store_true",dest="reset_map",default=False,help="Resets the drive map")
+	(options, args) = parser.parse_args()
+
+	# apply the quiet flag to the global variable
+	global g_quiet
+	g_quiet = options.quiet
+
+	# get the path variables required to determine config path and device path
+	conf_path, dev_path = get_path_variables()
+	
+	# erase existing config file and reset map if specified by user (-r)
+	if options.reset_map:
+		reset_map(conf_path)
+
+	# get the ID and controller type as a list of tuples
+	controller_types = get_controller_types()
+	
+	# calculate chassis size, or use provided option argument (-s)
+	chassis_size = get_chassis_size() if not options.sz else int(options.sz)
+	# get the chassis size from user if unable to calculate automatically
+	if not check_chassis_size(chassis_size,len(controller_types)) and not g_quiet:
+		chassis_size = get_chassis_size_from_user(controller_types)
+	elif not chassis_size:
+		sys.exit(1)
+	
+	# generate config file as a string
+	vdev_id_conf = create_config(chassis_size,controller_types,dev_path)
+	
+	# write file to disk
+	f = open(conf_path + "vdev_id.conf","w")
+	f.write(vdev_id_conf)
+	f.close()
+
+	#trigger udev
+	if options.trigger_udev:
+		trigger_udev()
+
+	#print config file to stdout
+	log(vdev_id_conf)
+
+if __name__ == "__main__":
+    main()
