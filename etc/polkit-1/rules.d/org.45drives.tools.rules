@@ -1,9 +1,0 @@
-// Allow any user in the 'smbadmin' group to use lsdev
-// without entering a password.
-
-polkit.addRule(function(action, subject) {
-    if ((action.id == "org.45drives.tools.lsdev") &&
-        subject.isInGroup("smbadmin")) {
-        return polkit.Result.YES;
-    }
-});

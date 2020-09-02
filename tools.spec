@@ -4,7 +4,7 @@
 
 Name:		45drives-tools
 Version:	1.5
-Release:	2%{?dist}
+Release:	1%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -43,7 +43,7 @@ cp -a etc/ %{buildroot}
 cp -a opt/ %{buildroot}
 
 pushd opt/tools/
-    for i in lsdev *map findosd zcreate; do
+    for i in lsdev dmap findosd zcreate; do
         ln -sf /opt/tools/$i %{buildroot}%{_bindir}
     done
 popd
