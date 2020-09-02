@@ -18,7 +18,8 @@
       ```
     - profile.d/tools.sh: (/etc/profile.d/tools.sh)
         ```
-        A script that automatically runs at login to set enviroment varibles required for device aliasing.
+        A script that automatically runs at login. 
+        Sets enviroment varibles required for device aliasing.
         ```
   - Drive Display
     - lsdev: (opt/tools/lsdev)
@@ -40,20 +41,25 @@
   - ZFS Drive Tools
     - zcreate: (/opt/tools/zcreate)
       ```
-      Automatically creates zpools based on system hardware. Also takes input for fine tuned options, use '-h' flag for more options
+      Automatically creates zpools based on system hardware. 
+      Also takes input for fine tuned options. 
+      Use '-h' flag for more options
       ```   
   - Ceph Drive Tools
     - findosd: (/opt/tools/findosd)
       ```
-      Takes osd id as input and outputs device alias. If osd is located on another host output is that hostname
+      Takes osd id as input and outputs device alias. 
+      If osd is located on another host output is that hostname.
       ```
     - generate-osd-vars.sh: (opt/tools/generate-osd-vars.sh) 
       ```
-      Outputs list of devive names and device alias to stdout. Used by ceph-ansible playbook to autogenerate devices varibles
+      Outputs list of devive names and device alias to stdout. 
+      Used by ceph-ansible playbook to autogenerate devices varibles
       ```
     - wipedev (/opt/tools/wipedev)
       ```
-      Wipes the partition table of all drives in system. (excluding server's OS drives)
+      Wipes the partition table of all drives in system. 
+      (excluding server's OS drives).
       ```
   - Polkit rules for use with Cockpit
   
