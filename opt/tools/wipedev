@@ -1,6 +1,6 @@
 #!/bin/bash
 # ---------------------------------------------------------------------------
-# wipedev - wipes the partiotiuon table of drives in system
+# wipedev - wipes the partition table of drives in system
 
 # Copyright 2016, Brett Kelly <bkelly@45drives.com>
 
