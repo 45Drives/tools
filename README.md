@@ -61,7 +61,6 @@
       Wipes the partition table of all drives in system. 
       (excluding server's OS drives).
       ```
-  - Polkit rules for use with Cockpit
   
 ### Installation
 CentOS 7.X
