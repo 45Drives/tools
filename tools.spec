@@ -17,7 +17,7 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root
 
 Requires: ipmitool
 Requires: jq
-Requires: smartmontools > 7.0
+Requires: smartmontools > 7.0ca
 Requires: dmidecode
 Requires: python3
 Requires: pciutils
