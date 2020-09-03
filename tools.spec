@@ -21,7 +21,6 @@ Requires: smartmontools > 7.0
 Requires: dmidecode
 Requires: python3
 Requires: pciutils
-Requires: storcli
 Requires: hdparm
 
 %description
