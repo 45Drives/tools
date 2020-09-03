@@ -71,23 +71,34 @@ CentOS 8.X
 ```sh
 $ dnf install URL
 ```
-Install from git repo...
 
+### RPM BUILD from git repo (requires "rpm-build" and "git" packages (centOS))
+use the provided script (build-v1_5.sh)
 ```sh
-$ cd /opt
-$ git clone https://github.com/45Drives/tools.git
-$ #Install dependancies
-$ yum install ipmitool jq smartmontools dmidecode pciutils python3
+# don't run this if you have a ~/rpmbuild folder that you don't want to lose! 
+$ curl -O https://raw.githubusercontent.com/45Drives/tools/master/build-v1_5.sh
+$ chmod +x build-v1_5.sh
+$ ./build-v1_5.sh 
 ```
-### RPM BUILD
-Assuming rpmbuild enviroment set up already
+alternatively, you can just execute these commands
 ```sh
-$ cd ~/rpmbuild/SOURCES/
-$ curl -LO https://github.com/45Drives/tools/archive/v1.X.tar.gz
-$ tar -zxvf v1.X.tar.gz
-$ mv tools-1.X 45drives-tools-1.X/
-$ cp 45drives-tools-1.X/tools.spec SPECS/tools.spec
-$ tar -zcvf 45drives-tools-1.X.tar.gz 45drives-tools-1.X/
+# don't run this if you have a ~/rpmbuild folder that you don't want to lose! 
+$ mkdir 45drives-temp
+$ cd 45drives-temp
+$ mkdir rpmbuild rpmbuild/RPMS rpmbuild/SOURCES rpmbuild/SPECS rpmbuild/SRPMS rpmbuild/RPMS/noarch
+$ git clone https://github.com/45Drives/tools.git
+$ mkdir 45drives-tools-1.5
+$ cp -r tools/etc 45drives-tools-1.5/etc
+$ cp -r tools/opt 45drives-tools-1.5/opt
+$ tar -zcvf 45drives-tools-1.5.tar.gz 45drives-tools-1.5/
+$ rm -rf 45drives-tools-1.5
+$ mv 45drives-tools-1.5.tar.gz rpmbuild/SOURCES/45drives-tools-1.5.tar.gz
+$ mv tools/tools.spec rpmbuild/SPECS/tools.spec
+$ rm -rf tools
+$ rm -rf ~/rpmbuild
+$ cd ..
+$ cp -r 45drives-temp/rpmbuild ~/rpmbuild
+$ rm -rf 45drives-temp
 $ cd ~/rpmbuild
 $ rpmbuild -ba SPECS/tools.spec
 ```
