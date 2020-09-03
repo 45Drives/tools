@@ -12,7 +12,7 @@ License:	GPL
 URL:		https://github.com/45Drives/tools
 Source0:	%{name}-%{version}.tar.gz
 
-BuildArch:	noarch
+BuildArch:	x86_64
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root
 
 Requires: ipmitool
