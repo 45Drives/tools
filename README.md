@@ -85,7 +85,7 @@ alternatively, you can just execute these commands
 # don't run this if you have a ~/rpmbuild folder that you don't want to lose! 
 $ mkdir 45drives-temp
 $ cd 45drives-temp
-$ mkdir rpmbuild rpmbuild/RPMS rpmbuild/SOURCES rpmbuild/SPECS rpmbuild/SRPMS rpmbuild/RPMS/noarch
+$ mkdir rpmbuild rpmbuild/RPMS rpmbuild/SOURCES rpmbuild/SPECS rpmbuild/SRPMS
 $ git clone https://github.com/45Drives/tools.git
 $ mkdir 45drives-tools-1.5
 $ cp -r tools/etc 45drives-tools-1.5/etc
