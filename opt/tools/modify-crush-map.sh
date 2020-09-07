@@ -70,16 +70,16 @@ cleanup(){
 ## USER INPUT
 PORT_COUNT=3 # Number of Ports/HBA - 1
 while getopts 'H:P:h' OPTION; do
-	case ${OPTION} in
-	H)
-		HBA_COUNT_=${OPTARG}
+    case ${OPTION} in
+    H)
+        HBA_COUNT_=${OPTARG}
         HBA_COUNT=$(($HBA_COUNT_-1))
         re='^[0-3]+$'
         if ! [[ $HBA_COUNT =~ $re ]] ;then
             echo "error: Not a valid HBA count"
             exit 1
         fi
-		;;
+        ;;
     P)
         PORT_COUNT_=${OPTARG}
         PORT_COUNT=$(($PORT_COUNT_-1))
@@ -88,11 +88,11 @@ while getopts 'H:P:h' OPTION; do
             echo "error: Not a valid PORT count"
             exit 1
         fi
-		;;
-	h)
-		usage
-		;;
-	esac
+        ;;
+    h)
+        usage
+        ;;
+    esac
 done
 if [ -z $HBA_COUNT ] ; then
     echo "error: HBA Count required"
