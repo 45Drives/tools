@@ -49,9 +49,8 @@ class table():
 		self.table_lines=[]
 		self.column_width_sum=0
 		idx=self.box_idx
-		
+
 		#place the padding into the strings provided
-		
 		for i in range(len(self.h_txt)):
 			self.h_txt[i] = " "*self.padding + self.h_txt[i] + " "*self.padding
 		

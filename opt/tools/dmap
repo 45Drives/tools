@@ -123,21 +123,18 @@ def get_chassis_size():
 #				  the ailiases found in vdev_id.conf.
 ###############################################################################
 def get_path_variables():
-	# get the alias config path, if it fails assume /etc/
-	# get the device path, if it fails assume /dev/
+	# get the alias config path, if it fails assume /etc
+	# get the device path, if it fails assume /dev
 	conf_path = os.getenv('ALIAS_CONFIG_PATH')
 	if conf_path == None:
-		log("No alias config path set in profile.d ... Defaulting to /etc/")
-		conf_path = "/etc/"
-	if conf_path[-1] != "/":
-		conf_path+="/"	
+		log("No alias config path set in profile.d ... Defaulting to /etc")
+		conf_path = "/etc"	
 	
 	dev_path = os.getenv('ALIAS_DEVICE_PATH')
 	if dev_path == None:
-		log("No alias device path set in profile.d ... Defaulting to /dev/")
-		dev_path = "/dev/"
-	if dev_path[-1] != "/":
-		dev_path+="/"
+		log("No alias device path set in profile.d ... Defaulting to /dev")
+		dev_path = "/dev"
+
 
 	return conf_path, dev_path
 
@@ -155,7 +152,7 @@ def create_config(chassis_size,controller_types,dev_path):
 		card_index = row_index-1
 		bay_index = ((i%drives_per_row)+1)
 		phy_index = bay_index-1
-		line = "alias {row}-{bay}     {dp}disk/by-path/pci-0000:{ct}-sas-phy{phy_num}-lun-0".format(
+		line = "alias {row}-{bay}     {dp}/disk/by-path/pci-0000:{ct}-sas-phy{phy_num}-lun-0".format(
 			row=row_index,
 			bay=bay_index,
 			dp=dev_path,
@@ -393,7 +390,7 @@ def main():
 	vdev_id_conf = create_config(chassis_size,controller_types,dev_path)
 	
 	# write file to disk
-	f = open(conf_path + "vdev_id.conf","w")
+	f = open(conf_path + "/vdev_id.conf","w")
 	f.write(vdev_id_conf)
 	f.close()
 
