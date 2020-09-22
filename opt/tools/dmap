@@ -125,16 +125,14 @@ def get_chassis_size():
 def get_path_variables():
 	# get the alias config path, if it fails assume /etc
 	# get the device path, if it fails assume /dev
+
+
 	conf_path = os.getenv('ALIAS_CONFIG_PATH')
 	if conf_path == None:
 		log("No alias config path set in profile.d ... Defaulting to /etc")
 		conf_path = "/etc"	
-	
-	dev_path = os.getenv('ALIAS_DEVICE_PATH')
-	if dev_path == None:
-		log("No alias device path set in profile.d ... Defaulting to /dev")
-		dev_path = "/dev"
-
+		
+	dev_path = "/dev"
 
 	return conf_path, dev_path
 

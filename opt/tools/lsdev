@@ -246,6 +246,7 @@ def build_server(options):
 		bay["dev-by-path"] = regex.group(3) # third capture group
 		bay["bay-id"] = str(new_row_index) + "-" + str(new_bay_index)
 		# if symlink exists in /dev/disk/by-path/ then bay is occupied
+		link = os.path.islink(bay["dev-by-path"])
 		if os.path.islink(bay["dev-by-path"]):
 			bay["occupied"] = True
 			bay["dev"] = os.path.realpath(bay["dev-by-path"])
