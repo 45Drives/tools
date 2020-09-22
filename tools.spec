@@ -3,7 +3,7 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.5.1
+Version:	1.6
 Release:	1%{?dist}
 Summary:	Server CLI Tools
 
@@ -59,8 +59,8 @@ rm -rf %{buildroot}
 %{_bindir}/*
 
 %changelog
-* Tue Sep 1 2020 Mark Hooper <mhooper@45drives.com> 1.5.1
-- second build 1.5, fixed zfs ailiasing bug
+* Tue Sep 1 2020 Mark Hooper <mhooper@45drives.com> 1.6
+- second build 1.6, fixed zfs ailiasing bug
 * Tue Sep 1 2020 Mark Hooper <mhooper@45drives.com> 1.5
 - First build 1.5, added hdparm dependancy
 * Sat May 30 2020 Brett Kelly <bkelly@45drives.com> 1.3
