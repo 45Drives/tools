@@ -3,7 +3,7 @@ mkdir 45drives-temp
 cd 45drives-temp
 mkdir rpmbuild rpmbuild/RPMS rpmbuild/SOURCES rpmbuild/SPECS rpmbuild/SRPMS
 git clone https://github.com/45Drives/tools.git
-mkdir 45drives-tools-1.5
+mkdir 45drives-tools-1.6
 cp -r tools/etc 45drives-tools-1.6/etc
 cp -r tools/opt 45drives-tools-1.6/opt
 tar -zcvf 45drives-tools-1.5.tar.gz 45drives-tools-1.6/
