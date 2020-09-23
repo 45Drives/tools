@@ -114,12 +114,12 @@ printvars() {
     echo "osd_auto_discovery: false"
     echo "lvm_volumes:" 
     for i in "${BAY[@]}";do
-        echo "  - data: $DEVICE_PATH$i" 
+        echo "  - data: $DEVICE_PATH/$i" 
     done
     echo "" 
     echo "devices:" 
     for i in "${BAY[@]}";do
-        echo "  - $(readlink -f $DEVICE_PATH$i)" 
+        echo "  - $(readlink -f $DEVICE_PATH/$i)" 
     done
     echo ""
 }
