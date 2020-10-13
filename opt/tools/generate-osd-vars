@@ -211,17 +211,17 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH):
     else:
         everythingToGetRidOf += caches
     if badDrives != None:
-        for drive in badDrives:
-            device=subprocess.run(["readlink", DEVICE_PATH+'/'+drive], stdout=subprocess.PIPE, universal_newlines=True).stdout
-            if device != None:
-                device = device.strip()
-                everythingToGetRidOf.append(device)
-            else: 
-                driveName = re.search("cas\d+-\d+", drive)
-                if driveName.group(0) == None:
-                    exit("invalid drive name entered")   
-                #else:
-                    #just keep going, we don't know for sure if the device is valid or not yet
+        for badDrive in badDrives:
+            if subprocess.run(["readlink", DEVICE_PATH+'/'+badDrive],stderr = subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True).returncode == 0:
+                badDevice=subprocess.run(["readlink", DEVICE_PATH+'/'+drive], stdout=subprocess.PIPE, universal_newlines=True).stdout
+                badDevice = badDevice.strip()
+                everythingToGetRidOf.append(badDevice)
+                badDrives.remove(badDrive)
+                badDrives.insert(0, None)   
+        while CASDevices[CASDevices.count(None)-1] == None:
+                    CASDevices.pop(CASDevices.count(None)-1)
+                    if len(CASDevices) == 0:
+                        break
 
     return everythingToGetRidOf
     
@@ -245,8 +245,7 @@ def removeBadDrives(BAYS, everythingToGetRidOf):
         BAYS.pop((BAYS.count(None)-1))
         if len(BAYS) == 0:
             break
-    print("BAYS before dealing with changing the names of core drives and removing them:")
-    print(BAYS)
+
     return BAYS
     
     
@@ -256,29 +255,34 @@ def removeBadDrives(BAYS, everythingToGetRidOf):
 # DESC: renames any cores as the name listed by casadm 
 ################################################################################################################################################################################   
 def dealWithCoreDrives(BAYS, badDrives):
-    for BAY in BAYS:
-        casadmList = subprocess.Popen(["casadm", "-L", "-o", "csv"], stdout=subprocess.PIPE, universal_newlines=True).stdout
-        for line in casadmList:
+    errMess = []
+    cores = []
+    casadmList = subprocess.Popen(["casadm", "-L", "-o", "csv"], stdout=subprocess.PIPE, universal_newlines=True).stdout
+    for line in casadmList:
             core = re.search("^core,.*,/dev/([A-Za-z]+).*,.*,.*,/dev/(cas.*)$", line)
             if core != None :
-                if core.group(1) == BAY[1]:
-                    if (badDrives != None) and (core.group(2) in badDrives):
-                        print("removing:")
-                        print(BAY)
+                cores.append((core.group(2), core.group(1)))
+    for BAY in BAYS:
+        for core in cores:
+                if core[1] == BAY[1]:
+                    if (badDrives != None) and (core[0] in badDrives):
                         BAYS.remove(BAY)
-                        BAYS.insert(0, None)
-                        print("after removing")
-                        print(BAYS)
-                    else: #this is problematic, we could end up here unintentionally if the name of the drive was a cas drive and was not specified correctly
-                        print("replacing:")
-                        print(BAY)
-                        BAYS.insert(BAYS.index(BAY), (core.group(2), BAY[1]))
+                        BAYS.insert(0, None) 
+                        badDrives.remove(core[0])
+                    else: 
+                        BAYS.insert(BAYS.index(BAY), (core[0], BAY[1]))
                         BAYS.remove(BAY)
+                        
+    if (badDrives != None):
+        for badDrive in badDrives:
+                errMess.append(badDrive)
+        sys.exit("invalid argument(s) to the -e option: {es}".format( es = errMess))
+                
     while BAYS[BAYS.count(None)-1] == None:
         BAYS.pop(BAYS.count(None)-1)
         if len(BAYS) == 0:
             break               
-                   
+               
 ##################################################################################################################################################################################
 #   displayVars()
 # ARGS: none
@@ -313,7 +317,7 @@ def main():
     (options, args) = parser.parse_args()
     if options.drive_alias != None:
         badDrives = options.drive_alias.split()
-        #argumentSanityCheck(badDrives, badDrivesArgs)
+        # if there are bad arguments, they are found as the program runs by getting rid of all the good arguments from the badDrives list whenever they are used. If there are any arguments left then we know that they didn't match anything on the server.
     if options.drive_type != None:  
         driveTypes = options.drive_type.split() 
         #argumentSanityCheck(driveTypes, driveTypesArgs)
@@ -330,7 +334,8 @@ def main():
     BAYS = getBAYS(DEVICE_PATH)
     everythingToGetRidOf = getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH)
     removeBadDrives(BAYS, everythingToGetRidOf)
-    dealWithCoreDrives(BAYS, badDrives)
+    if CAS == True:
+        dealWithCoreDrives(BAYS, badDrives)
     displayVars(hbaCards, chassisSize, hybridChassis, BAYS, DEVICE_PATH)
   
 if __name__ == "__main__":
