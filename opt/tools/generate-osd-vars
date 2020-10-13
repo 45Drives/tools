@@ -152,7 +152,6 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH):
     everythingToGetRidOf = []
     # get lists of the core and cache device names
     casadmList = subprocess.Popen(["casadm", "-L", "-o", "csv"], stdout=subprocess.PIPE, universal_newlines=True).stdout
-   
     for line in casadmList:
         cache = re.search("^cache,.*,/dev/([A-Za-z]+).*,.*$", line)
         if cache != None:
@@ -185,11 +184,19 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH):
         
         everythingToGetRidOf = HDDs+SSDs
         
-        if "CAS" in driveTypes:
-        #don't add CAS drives to the remove list, eg if you'd normally concatenate mediaType with caches, don't this time
-        # Need to handle the case of not adding SSD or HDD as arguments but adding CAS as an argument, in which case you still want the cores.
-        # can handle the above case by saying if only CAS was specified, still add the cores. 
-            if len(everythingToGetRidOf) != 0:
+        if len(everythingToGetRidOf) != 0:
+            for device in CASDevices:               
+                for drive in everythingToGetRidOf:
+                    if drive == device:
+                        CASDevices.remove(device)
+                        CASDevices.insert(0, None)
+            while CASDevices[CASDevices.count(None)-1] == None:
+                CASDevices.pop(CASDevices.count(None)-1)
+                if len(CASDevices) == 0:
+                    break
+        everythingToGetRidOf += CASDevices
+                
+        if "CAS" in driveTypes:                       #don't add core drives to the remove list, but do remove caches
                 for drive in everythingToGetRidOf:
                     for core in cores:
                         if drive == core:
@@ -200,21 +207,8 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH):
                     everythingToGetRidOf.pop(everythingToGetRidOf.count(None)-1)
                     if len(everythingToGetRidOf) == 0:
                         break
-            else:
-                # only get rid of drives used for the caches
-                everythingToGetRidOf += caches
-        else:
-            for drive in everythingToGetRidOf:
-                    for device in CASDevices:
-                        if drive == device:
-                            CASDevices.remove(device)
-                            CASDevices.insert(0, None)
-            while CASDevices[CASDevices.count(None)-1] == None:
-                    CASDevices.pop(CASDevices.count(None)-1)
-                    if len(CASDevices) == 0:
-                        break
-            everythingToGetRidOf += CASDevices
-    else:
+
+    else: 
         everythingToGetRidOf += caches
     if len(badDrives) != 0:
         for badDrive in badDrives:
@@ -245,6 +239,8 @@ def removeBadDrives(BAYS, everythingToGetRidOf):
         # and 2) if what comes next doesn't happen then the program breaks.
             for deviceName in everythingToGetRidOf:
                 if deviceName == SLandDEV[1]:
+                    print("removing:", end = " ")
+                    print(SLandDEV)
                     BAYS.remove(SLandDEV)
                     BAYS.insert(0, None)
     
@@ -330,12 +326,12 @@ def displayVars(hbaCards, chassisSize, hybridChassis, BAYS, DEVICE_PATH):
 def argumentSanityCheck(driveTypes):
     badArgs = []
     for driveType in driveTypes:
-        if re.search('(?i)cas', driveType) != None:
-            driveType = "CAS"
-        elif re.search('(?i)hdd', driveType) != None:
-            driveType = "HDD"
-        elif re.search('(?i)ssd', driveType) != None:
-            driveType = "SSD"
+        if re.search('cas', driveType.lower()) != None:
+            driveTypes[driveTypes.index(driveType)] = "CAS"
+        elif re.search('hdd', driveType.lower()) != None:
+            driveTypes[driveTypes.index(driveType)] = "HDD"
+        elif re.search('ssd', driveType.lower()) != None:
+            driveTypes[driveTypes.index(driveType)] = "SSD"
         else:
             badArgs.append(driveType)
     if len(badArgs) != 0:
@@ -357,9 +353,10 @@ def main():
     if options.drive_type != None:  
         driveTypes = options.drive_type.split() 
         if len(driveTypes) == 0:
-            sys.exit("no arguments provided to the -e option")
+            sys.exit("no arguments provided to the -i option")
+        print(driveTypes)
         argumentSanityCheck(driveTypes)
-   
+
     hbas = [ "3224", "3316", "3616", "3008"] #hard coded numbers used to identify HBA cards
     
     pathVariables = get_path_variables()
