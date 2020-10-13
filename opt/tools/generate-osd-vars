@@ -114,7 +114,7 @@ def checkCas():
 
 ##################################################################################################################################################################################
 #   getBAYS(DEVICE_PATH)
-# ARGS: none
+# ARGS: DEVICE_PATH (a path variable needed in order to read the symbolic link of the alias
 # DESC: gets the device name and the symbolic link that points to it. Returns a list containing tuples. Each tuple has a symbolic link and the device (file) that it points to.
 ##################################################################################################################################################################################
 def getBAYS(DEVICE_PATH):
@@ -137,6 +137,12 @@ def getBAYS(DEVICE_PATH):
 # ARGS: driveTypes (a list of the arguments provided for the option -i if specified by the user, an empty list otherwise)
 #       badDrives  (a list of the arguments provided for the option -e if specified by the user, otherwise an empty list)
 #       DEVICE_PATH ( the device path as returned by the getPathVariables function)
+# DESC: Generate a list of device names that are not wanted in the program output.
+#       if the -i option is used, run the lsdev command to find what devices are of the media type specified as an argument for -i
+#       if the -e option is used, run the readlink commmand to find the device names for the aliases specified by the user
+#       if there are no options used, add the drives used as caches to the list of unwanted drives
+#       return a list of all the unwanted drives 
+#
 ##################################################################################################################################################################################  
 def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH):
     caches = []
@@ -210,7 +216,7 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH):
             everythingToGetRidOf += CASDevices
     else:
         everythingToGetRidOf += caches
-    if badDrives != None:
+    if len(badDrives) != 0:
         for badDrive in badDrives:
             if subprocess.run(["readlink", DEVICE_PATH+'/'+badDrive],stderr = subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True).returncode == 0:
                 badDevice=subprocess.run(["readlink", DEVICE_PATH+'/'+drive], stdout=subprocess.PIPE, universal_newlines=True).stdout
@@ -218,10 +224,11 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH):
                 everythingToGetRidOf.append(badDevice)
                 badDrives.remove(badDrive)
                 badDrives.insert(0, None)   
-        while CASDevices[CASDevices.count(None)-1] == None:
-                    CASDevices.pop(CASDevices.count(None)-1)
-                    if len(CASDevices) == 0:
+        while badDrives[badDrives.count(None)-1] == None:
+                    badDrives.pop(badDrives.count(None)-1)
+                    if len(badDrives) == 0:
                         break
+    
 
     return everythingToGetRidOf
     
@@ -252,7 +259,12 @@ def removeBadDrives(BAYS, everythingToGetRidOf):
 ##################################################################################################################################################################################
 #   dealWithCoreDrives(BAYS,badDrives)
 # ARGS: BAYS
-# DESC: renames any cores as the name listed by casadm 
+#    badDrives (the list of arguments from the user which haven't yet been used. all the ones that have been used were removed from the list in getEverythingToGetRidOf) 
+# DESC: gets a list of names for core drives as shown by the casadm command.
+#       Gets rid of any drives that were in the badDrives list as those core drives names
+#       Removes anything that has been used from the badDrives list
+#       Renames any cores as the name listed by casadm 
+#       Remaining names in BadDrives are caught as errors in the user-entered arguments
 ################################################################################################################################################################################   
 def dealWithCoreDrives(BAYS, badDrives):
     errMess = []
@@ -273,7 +285,7 @@ def dealWithCoreDrives(BAYS, badDrives):
                         BAYS.insert(BAYS.index(BAY), (core[0], BAY[1]))
                         BAYS.remove(BAY)
                         
-    if (badDrives != None):
+    if len(badDrives) != 0:
         for badDrive in badDrives:
                 errMess.append(badDrive)
         sys.exit("invalid argument(s) to the -e option: {es}".format( es = errMess))
@@ -284,9 +296,13 @@ def dealWithCoreDrives(BAYS, badDrives):
             break               
                
 ##################################################################################################################################################################################
-#   displayVars()
-# ARGS: none
-# DESC: Displays the variables that have been grouped by all other functions 
+#   displayVars(hbaCards, chassisSize, hybridChassis, BAYS, DEVICE_PATH)
+# ARGS: hbaCards (the list of HBA cards that are used on the machine)
+#    chassisSize (the size of the machine's chassis)
+#    hybridChassis (a boolean which is true if the machine has a hybrid chassis and false otherwise
+#    BAYS (the list of the bays that have a drive in them. The user can specify drives to exclude by alias name and which ones to include by media type)
+#    DEVICE_PATH (a path variable returned by the get_path_variables function)
+#    DESC: Displays the variables that have been grouped by all other functions 
 ##################################################################################################################################################################################
 def displayVars(hbaCards, chassisSize, hybridChassis, BAYS, DEVICE_PATH):
     print("---")
@@ -304,11 +320,31 @@ def displayVars(hbaCards, chassisSize, hybridChassis, BAYS, DEVICE_PATH):
         else:
             print(" - {DP}/{SYMLINK}".format(DP = DEVICE_PATH, SYMLINK = SLandDEV[1]))
     print('\n')
-    	
+    
+    
+ ##################################################################################################################################################################################
+#   argumentSanityCheck(driveTypes)
+# ARGS: driveTypes (the list of arguments for the -i option as specified by the user)
+# DESC: checks that the arguments provided are valid
+##################################################################################################################################################################################   
+def argumentSanityCheck(driveTypes):
+    badArgs = []
+    for driveType in driveTypes:
+        if re.search('(?i)cas', driveType) != None:
+            driveType = "CAS"
+        elif re.search('(?i)hdd', driveType) != None:
+            driveType = "HDD"
+        elif re.search('(?i)ssd', driveType) != None:
+            driveType = "SSD"
+        else:
+            badArgs.append(driveType)
+    if len(badArgs) != 0:
+        sys.exit("invalid argument(s) to the -i option: {ba}".format(ba = badArgs))
+        
 def main():
     #parse the command line for options and arguments. the only option is the -e one right now. the argument is a string of drives to exclude in the listing.
-    badDrives = None  
-    driveTypes = None
+    badDrives = []  
+    driveTypes = []
     badDrivesArgs = []
     driveTypesArgs = []
     parser = OptionParser()
@@ -320,8 +356,10 @@ def main():
         # if there are bad arguments, they are found as the program runs by getting rid of all the good arguments from the badDrives list whenever they are used. If there are any arguments left then we know that they didn't match anything on the server.
     if options.drive_type != None:  
         driveTypes = options.drive_type.split() 
-        #argumentSanityCheck(driveTypes, driveTypesArgs)
-    
+        if len(driveTypes) == 0:
+            sys.exit("no arguments provided to the -e option")
+        argumentSanityCheck(driveTypes)
+   
     hbas = [ "3224", "3316", "3616", "3008"] #hard coded numbers used to identify HBA cards
     
     pathVariables = get_path_variables()
