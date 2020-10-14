@@ -199,7 +199,6 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
                 if len(CASDevices) == 0:
                     break
         everythingToGetRidOf += CASDevices
-        print(everythingToGetRidOf)
                 
         if "CAS" in driveTypes and CAS == True:                       #don't add core drives to the remove list, but do remove caches
             for drive in everythingToGetRidOf:
@@ -225,19 +224,19 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
             badDrives.pop(badDrives.count(None)-1)
             if len(badDrives) == 0:
                 break
-                
-    if len(everythingToGetRidOf) != 0:
-        for device in caches:               
-            for drive in everythingToGetRidOf:
-                if drive == device:
-                    caches.remove(device)
-                    caches.insert(0, None)
-        if len(caches) != 0:
-            while caches[caches.count(None)-1] == None:
-                caches.pop(caches.count(None)-1)
-                if len(caches) == 0:
-                    break
-    everythingToGetRidOf += caches
+    if CAS == True:            
+        if len(everythingToGetRidOf) != 0:
+            for device in caches:               
+                for drive in everythingToGetRidOf:
+                    if drive == device:
+                        caches.remove(device)
+                        caches.insert(0, None)
+            if len(caches) != 0:
+                while caches[caches.count(None)-1] == None:
+                    caches.pop(caches.count(None)-1)
+                    if len(caches) == 0:
+                        break
+        everythingToGetRidOf += caches
     
     return everythingToGetRidOf
     
@@ -254,8 +253,6 @@ def removeBadDrives(BAYS, everythingToGetRidOf):
         # and 2) if what comes next doesn't happen then the program breaks.
             for deviceName in everythingToGetRidOf:
                 if deviceName == SLandDEV[1]:
-                    print("removing:", end = " ")
-                    print(SLandDEV)
                     BAYS.remove(SLandDEV)
                     BAYS.insert(0, None)
     if len(BAYS) != 0:
@@ -332,26 +329,6 @@ def displayVars(hbaCards, chassisSize, hybridChassis, BAYS, DEVICE_PATH):
         else:
             print(" - {DP}/{SYMLINK}".format(DP = DEVICE_PATH, SYMLINK = SLandDEV[1]))
     print('\n')
-    
-    
-##################################################################################################################################################################################
-#   argumentSanityCheck(driveTypes)
-# ARGS: driveTypes (the list of arguments for the -i option as specified by the user)
-# DESC: checks that the arguments provided are valid
-##################################################################################################################################################################################   
-def argumentSanityCheck(driveTypes):
-    badArgs = []
-    for driveType in driveTypes:
-        if re.search('cas', driveType.lower()) != None:
-            driveTypes[driveTypes.index(driveType)] = "CAS"
-        elif re.search('hdd', driveType.lower()) != None:
-            driveTypes[driveTypes.index(driveType)] = "HDD"
-        elif re.search('ssd', driveType.lower()) != None:
-            driveTypes[driveTypes.index(driveType)] = "SSD"
-        else:
-            badArgs.append(driveType)
-    if len(badArgs) != 0:
-        sys.exit("invalid argument(s) to the -i option: {ba}".format(ba = badArgs))
 
 
 ##################################################################################################################################################################################
@@ -361,21 +338,21 @@ def main():
     #parse the command line for options and arguments. the only option is the -e one right now. the argument is a string of drives to exclude in the listing.
     badDrives = []  
     driveTypes = []
-    badDrivesArgs = []
-    driveTypesArgs = []
     parser = OptionParser()
-    parser.add_option("-i", "--include-by-drive-type", action="store", type=str, dest="drive_type", nargs=1, default=None, help="-i: only show the drives of the type lsited as arguments to the '-i' option. valid arguments are HDD, SSD, and CAS.")
-    parser.add_option("-e", "--exclude-by-drive-alias",action="store", type=str, dest="drive_alias", nargs=1, default=None, help="-e: only show the drives that have not been  listed as arguments")    
+    parser.add_option("-e", "--exclude-by-drive-alias",action="store", type=str, dest="drive_alias", nargs=1, default=None, help="-e: only show the drives that have not been  listed as arguments")
+    parser.add_option("-c", "--include-all-cas devices", action="store_true", dest="CAS", default=False, help="-c: show the CAS drives, and drives from other options")
+    parser.add_option("-s", "--include-all-SSDs",action="store_true", dest="SSD", default=False, help="-s: show the SSD drives, and drives from other options")
+    parser.add_option("-H", "--include-all-HDDs",action="store_true", dest="HDD", default=False, help="-h: show the HDD drives, and drives from other options")
     (options, args) = parser.parse_args()
     if options.drive_alias != None:
         badDrives = options.drive_alias.split()
         # if there are bad arguments, they are found as the program runs by getting rid of all the good arguments from the badDrives list whenever they are used. If there are any arguments left then we know that they didn't match anything on the server.
-    if options.drive_type != None:  
-        driveTypes = options.drive_type.split() 
-        if len(driveTypes) == 0:
-            sys.exit("no arguments provided to the -i option")
-        print(driveTypes)
-        argumentSanityCheck(driveTypes)
+    if options.SSD == True: 
+        driveTypes.append("SSD")
+    if options.HDD == True:
+        driveTypes.append("HDD")
+    if options.CAS == True:
+        driveTypes.append("CAS")
 
     hbas = [ "3224", "3316", "3616", "3008"] #hard coded numbers used to identify HBA cards
     
