@@ -164,13 +164,10 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
             core = re.search("^core,.*,/dev/([A-Za-z]+).*,.*$", line)
             if core != None:
                 cores.append(core.group(1))
-        print(everythingToGetRidOf)
         CASDevices = cores+caches
-    else: 
-        print("houston we have a problem")
     
     if len(driveTypes) != 0:
-        # find the symbolic links (aliases) for the devices that match the media type specified on the command line and store them in mediaType
+        # find the symbolic links (aliases) for the devices that match the drive type specified on the command line and store them in lists
         
         if "HDD" in driveTypes:  
             pass
@@ -248,11 +245,20 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
 # DESC: compare the entries in the BAYS and badDrives lists and remove any badDrives from BAYS
 ##################################################################################################################################################################################    
 def removeBadDrives(BAYS, everythingToGetRidOf):
+    coreDevices = []
+    casadmList = subprocess.Popen(["casadm", "-L", "-o", "csv"], stdout=subprocess.PIPE, universal_newlines=True).stdout
+    for line in casadmList:
+            core = re.search("^core,.*,/dev/([A-Za-z]+).*,.*,.*,/dev/(cas.*)$", line)
+            if core != None :
+                coreDevices.append((core.group(1)))
+    
     for SLandDEV in BAYS:
         if len(everythingToGetRidOf) > 0 : #can probably delete this statement because 1) there will always be "something" in everythingToGetRidOf
         # and 2) if what comes next doesn't happen then the program breaks.
             for deviceName in everythingToGetRidOf:
-                if deviceName == SLandDEV[1]:
+                if deviceName in coreDevices:
+                    pass
+                elif deviceName == SLandDEV[1]:
                     BAYS.remove(SLandDEV)
                     BAYS.insert(0, None)
     if len(BAYS) != 0:
@@ -356,9 +362,7 @@ def main():
 
     hbas = [ "3224", "3316", "3616", "3008"] #hard coded numbers used to identify HBA cards
     
-    pathVariables = get_path_variables()
-    DEVICE_PATH = pathVariables[1]
-    CONFIG_PATH = pathVariables[0]
+    CONFIG_PATH, DEVICE_PATH = get_path_variables()
     hbaCards = getHba(hbas)
     chassisSize = getChassis(hbaCards)
     hybridChassis = hybridChassisCheck()
