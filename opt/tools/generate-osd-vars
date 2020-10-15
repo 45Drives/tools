@@ -206,23 +206,19 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
         for badDrive in badDrives:
             if subprocess.run(["readlink", DEVICE_PATH+'/'+badDrive],stderr = subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True).returncode == 0:
                 badDevice=subprocess.run(["readlink", DEVICE_PATH+'/'+badDrive], stdout=subprocess.PIPE, universal_newlines=True).stdout
-                badDevice=badDevice.strip()         # get the device name as found from the Alias (symbolic link)
-                
-                for stuff in coreTuples:
-                    if stuff[1] == badDevice and stuff[0] in badDrives: # find out if the drive is listed in the -e option using both casX-X and the alias from vdev_id.conf (change the naming here to make it clearer)
-                        driveGivenTwice = True                          # don't put the drive that is specified two ways in everythingToGetRidOf
-                if driveGivenTwice == False:
-                    everythingToGetRidOf.append(badDevice)   
-                badDrives.remove(badDrive)
-                badDrives.insert(0, None)
-           
-            else:
-                for stuff in coreTuples:
-                    if stuff[0] == badDrive:
-                        everythingToGetRidOf.append(stuff[1])
-                        badDrives.remove(badDrive)
-                        badDrives.insert(0, None)
-            
+                badDevice=badDevice.strip() 
+                if CAS:# get the device name as found from the Alias (symbolic link)
+                    for stuff in coreTuples:
+                        if stuff[1] == badDevice and stuff[0] in badDrives: # find out if the drive is listed in the -e option using both casX-X and the alias from vdev_id.conf (change the naming here to make it clearer)
+                            driveGivenTwice = True                          # don't put the drive that is specified two ways in everythingToGetRidOf
+                    if driveGivenTwice == False:
+                        everythingToGetRidOf.append(badDevice)   
+                    badDrives.remove(badDrive)
+                    badDrives.insert(0, None)
+                else:
+                    everythingToGetRidOf.append(badDevice) 
+                    badDrives.remove(badDrive)
+                    badDrives.insert(0, None)
         while badDrives[badDrives.count(None)-1] == None:
             badDrives.pop(badDrives.count(None)-1)             # clean up the list by removing the None strings that were put in
             if len(badDrives) == 0:
@@ -271,7 +267,6 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
 def removeBadDrives(BAYS, everythingToGetRidOf, badDrives, CAS):
     errMess = []
     cores = []
-    
     if CAS:
         casadmList = subprocess.Popen(["casadm", "-L", "-o", "csv"], stdout=subprocess.PIPE, universal_newlines=True).stdout
         for line in casadmList:
@@ -286,19 +281,19 @@ def removeBadDrives(BAYS, everythingToGetRidOf, badDrives, CAS):
                         BAYS.remove(BAY)
                         
     for BAY in BAYS:                
-        if len(everythingToGetRidOf) > 0 : #can probably delete this statement because 1) there will always be "something" in everythingToGetRidOf
-                                        # and 2) if what comes next doesn't happen then the program breaks.
-            for deviceName in everythingToGetRidOf:
-                if deviceName == BAY[1]:   
-                    BAYS.remove(BAY)                   #remove items from BAYS that are also in everythingToGetRidOf
-                    BAYS.insert(0, None)
-                   
-            for drive in badDrives:
-                if drive == BAY[0]:         #deal with drives that are excluded by the user using the -e option but had no symbolic links
-                    BAYS.remove(BAY)
-                    BAYS.insert(0, None)
-                    badDrives.remove(drive)
-                    badDrives.insert(0, None)
+        #can probably delete this statement because 1) there will always be "something" in everythingToGetRidOf
+        # and 2) if what comes next doesn't happen then the program breaks.
+        for deviceName in everythingToGetRidOf:
+            if deviceName == BAY[1]: 
+                BAYS.remove(BAY)                   #remove items from BAYS that are also in everythingToGetRidOf
+                BAYS.insert(0, None)
+               
+        for drive in badDrives:
+            if drive == BAY[0]:  #deal with drives that are excluded by the user using the -e option but had no symbolic links
+                BAYS.remove(BAY)        # there is never a problem accesing bays beacuse the lists badDrives and everythingToGetRidOf have no elements in common
+                BAYS.insert(0, None)
+                badDrives.remove(drive)
+                badDrives.insert(0, None)
             
     if len(badDrives) != 0:
         while badDrives[badDrives.count(None)-1] == None:
