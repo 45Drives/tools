@@ -1,7 +1,7 @@
 
 testing "-i: only show the drives of the type lsited as arguments to the '-i' option. valid arguments are HDD, SSD, and CAS." mixing cases is fine, .lower() used to make lower case, then compared with the lowercase of : ssd, hdd, cas.
 
-	COLUMNS = PROGRAM OUTPUT, ROWS = SPECIFIED ARGUMENT
+	COLUMNS = PROGRAM OUTPUT, table headers = SPECIFIED ARGUMENT
 
 drive			listed by casadm -L?	"is it a core?" "is it a cache?"	"is it an SSD?"	"is it an HDD?" | specifying arguments as follows: HDD    SSD   CAS   "HDD SSD CAS"      "HDD SSD"    "HDD CAS"    "SSD CAS" 
 sdb  1-8 (aka cas1-1)		y			y		n			n		y	|				    n      n     y          y                 n            y            y
