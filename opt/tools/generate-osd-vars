@@ -124,11 +124,14 @@ def getBAYS(DEVICE_PATH):
         regex = re.search("^alias\s(\S+)\s", line)                                                              
         if regex != None:
             bay = regex.group(1)
+            
             if subprocess.run(["ls", DEVICE_PATH+"/"+bay],stderr = subprocess.PIPE, stdout = subprocess.PIPE, universal_newlines = True).returncode == 0:
             # if there is a symbolic link in the specified path, check what device it points to. Append the symbolic link and the device to a list.
                 symLinkDestination = subprocess.run(["readlink", DEVICE_PATH+"/"+bay], stdout=subprocess.PIPE, universal_newlines=True).stdout
                 symLinkDestination = symLinkDestination.strip()
                 BAYS.append((bay, symLinkDestination))
+            else:
+                BAYS.append((bay, None))
     return BAYS
 
     
@@ -140,7 +143,7 @@ def getBAYS(DEVICE_PATH):
 # DESC: Generate a list of device names that are not wanted in the program output.
 #       if the -s , -H option is used, run the lsdev command to find what drives are either HDD or SSD
 #       if the -c option is used, run 
-#       if the -e option is used, run the readlink commmand to find the device names for the aliases specified by the user
+#       if the -e option is used, run the readlink command to find the device names for the aliases specified by the user
 #       if there are no options used, add the drives used as caches to the list of unwanted drives
 #       return a list of all the unwanted drives 
 #
@@ -190,17 +193,7 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
         
         everythingToGetRidOf = HDDs+SSDs          # add all drives that the user doesn't want in the output to create a list of everythingToGetRidOf
         
-        if len(everythingToGetRidOf) != 0 and CAS == True: # this block is to make sure no CAS drives show up in the output when -c option is not used
-            for device in CASDevices:                       # CASDevices will be appended to everythingToGetRidOf
-                for drive in everythingToGetRidOf:
-                    if drive == device:
-                        CASDevices.remove(device)     # if CAS drives are already in the list of things to remove, we don't want to add them in twice, so take them out of CASDevices
-                        CASDevices.insert(0, None)
-            while CASDevices[CASDevices.count(None)-1] == None: # clean up the lists by getting rid of the None strings. There should be no other None strings in the list
-                CASDevices.pop(CASDevices.count(None)-1)
-                if len(CASDevices) == 0:
-                    break
-        everythingToGetRidOf += CASDevices              
+        everythingToGetRidOf += CASDevices      # make sure no CAS drives show up in the output when -c option is not used         
                 
         if "CAS" in driveTypes and CAS == True:               #deal with the - c option : if -c option is used, take core drives out of everythingToGetRidOf
             for drive in everythingToGetRidOf:
@@ -208,12 +201,7 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
                     if drive == core:
                         everythingToGetRidOf.remove(drive)
                         everythingToGetRidOf.insert(0, None)
-            if len(everythingToGetRidOf) != 0:
-                while everythingToGetRidOf[everythingToGetRidOf.count(None)-1] == None:
-                    everythingToGetRidOf.pop(everythingToGetRidOf.count(None)-1)   # clean up the lists by getting rid of the None strings. There should be no other None strings in the list
-                    if len(everythingToGetRidOf) == 0:
-                        break
-
+            
     if len(badDrives) != 0: # deal with the -e option
         for badDrive in badDrives:
             if subprocess.run(["readlink", DEVICE_PATH+'/'+badDrive],stderr = subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True).returncode == 0:
@@ -221,31 +209,56 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
                 badDevice=badDevice.strip()         # get the device name as found in from the Alias (symbolic link)
                 for stuff in coreTuples:
                     if stuff[1] == badDevice and stuff[0] in badDrives: # find out if the device is listed in the -e option two times (change the naming here to make it clearer)
-                        driveGivenTwice = True         
+                        driveGivenTwice = True  
                 if driveGivenTwice == False:
-                    everythingToGetRidOf.append(badDevice)   # only add the bad device to getEverythingToGetRidOf if it is listed once in the -e option. The other case is dealt with later
+                    everythingToGetRidOf.append(badDevice)   
                 badDrives.remove(badDrive)
                 badDrives.insert(0, None)
-                driveGivenTwice = False                              #  get rid of this flag
+                driveGivenTwice = False
+            """
+            else:
+                for stuff in coreTuples:
+                    if stuff[0] == badDrive:
+                        everythingToGetRidOf.append(stuff[1])
+                        badDrives.remove(badDrive)
+                        badDrives.insert(0, None)
+            """
         while badDrives[badDrives.count(None)-1] == None:
-            badDrives.pop(badDrives.count(None)-1)             #once again, clean up the list
+            badDrives.pop(badDrives.count(None)-1)             # clean up the list by removing the None strings that were put in
             if len(badDrives) == 0:
                 break  
                 
     if CAS == True:            
-        if len(everythingToGetRidOf) != 0:
-            for device in caches:               
-                for drive in everythingToGetRidOf:   #if there are no options from the user, still need to rid the output of Caches
-                    if drive == device:
-                        caches.remove(device)
-                        caches.insert(0, None)
-            if len(caches) != 0:
-                while caches[caches.count(None)-1] == None:
-                    caches.pop(caches.count(None)-1)
-                    if len(caches) == 0:
-                        break
         everythingToGetRidOf += caches
-    
+        
+    for drive in everythingToGetRidOf:                   #deal with the same drive being in everythingToGetRidOf twice. remove duplicates in the list of badDrives
+        possibleDuplicate=drive
+        originalLength = len(everythingToGetRidOf)
+        while possibleDuplicate in everythingToGetRidOf:
+                everythingToGetRidOf.remove(possibleDuplicate)
+        everythingToGetRidOf.insert(0, possibleDuplicate)
+        while len(everythingToGetRidOf) != originalLength:
+            everythingToGetRidOf.insert(0, None)
+        if len(everythingToGetRidOf) != 0:
+                while everythingToGetRidOf[everythingToGetRidOf.count(None)-1] == None:
+                    everythingToGetRidOf.pop(everythingToGetRidOf.count(None)-1)
+                    if len(everythingToGetRidOf) == 0:
+                        break
+         
+    for drive in badDrives:                   #deal with the same cas device being specified twice by the user. remove duplicates in the list of badDrives
+        possibleDuplicate=drive
+        originalLength = len(badDrives)
+        while possibleDuplicate in badDrives:
+                badDrives.remove(possibleDuplicate)
+        badDrives.insert(0, possibleDuplicate)
+        while len(badDrives) != originalLength:
+            badDrives.insert(0, None)
+        if len(badDrives) != 0:
+                while badDrives[badDrives.count(None)-1] == None:
+                    badDrives.pop(badDrives.count(None)-1)
+                    if len(badDrives) == 0:
+                        break
+                            
     return everythingToGetRidOf
     
     
@@ -255,65 +268,61 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
 #    everythingToGetRidOf ( a list of symbolic links/the BAY alias provided by the person running generate-osd-vars )
 # DESC: compare the entries in the BAYS and badDrives lists and remove any badDrives from BAYS
 ##################################################################################################################################################################################    
-def removeBadDrives(BAYS, everythingToGetRidOf):
-      
-    for SLandDEV in BAYS:
-        if len(everythingToGetRidOf) > 0 : #can probably delete this statement because 1) there will always be "something" in everythingToGetRidOf
-                                           # and 2) if what comes next doesn't happen then the program breaks.
-        
-            for deviceName in everythingToGetRidOf:
-                if deviceName == SLandDEV[1]:
-                    BAYS.remove(SLandDEV)
-                    BAYS.insert(0, None)
-    if len(BAYS) != 0:
-        while BAYS[BAYS.count(None)-1] == None:
-            BAYS.pop((BAYS.count(None)-1))
-            if len(BAYS) == 0:
-                break
-
-    return BAYS
-    
-    
-##################################################################################################################################################################################
-#   dealWithCoreDrives(BAYS,badDrives)
-# ARGS: BAYS
-#    badDrives (the list of arguments from the user which haven't yet been used. all the ones that have been used were removed from the list in getEverythingToGetRidOf) 
-# DESC: gets a list of names for core drives as shown by the casadm command.
-#       Gets rid of any drives that were in the badDrives list as those core drives names
-#       Removes anything that has been used from the badDrives list
-#       Renames any cores as the name listed by casadm 
-#       Remaining names in BadDrives are caught as errors in the user-entered arguments
-################################################################################################################################################################################   
-def dealWithCoreDrives(BAYS, badDrives):
+def removeBadDrives(BAYS, everythingToGetRidOf, badDrives):
     errMess = []
     cores = []
+    
     casadmList = subprocess.Popen(["casadm", "-L", "-o", "csv"], stdout=subprocess.PIPE, universal_newlines=True).stdout
     for line in casadmList:
             core = re.search("^core,.*,/dev/([A-Za-z]+).*,.*,.*,/dev/(cas.*)$", line)
             if core != None :
                 cores.append((core.group(2), core.group(1)))
-                
-    for BAY in BAYS:                                          # this block identifies any drives to be excluded using the name of a cas device such as cas1-1
+      
+    for BAY in BAYS:
         for core in cores:                                                   
                 if core[1] == BAY[1]:
-                    if (badDrives != None) and (core[0] in badDrives):
-                        BAYS.remove(BAY)
-                        BAYS.insert(0, None)                
-                        badDrives.remove(core[0])
-                    else: 
-                        BAYS.insert(BAYS.index(BAY), (core[0], BAY[1]))
-                        BAYS.remove(BAY)
+                    BAYS.insert(BAYS.index(BAY), (core[0], BAY[1])) #change the names of the cores to the "casX-X" format
+                    BAYS.remove(BAY)
+                    
+    for BAY in BAYS:                
+        if len(everythingToGetRidOf) > 0 : #can probably delete this statement because 1) there will always be "something" in everythingToGetRidOf
+                                        # and 2) if what comes next doesn't happen then the program breaks.
+            for deviceName in everythingToGetRidOf:
+                if deviceName == BAY[1]:   
+                    BAYS.remove(BAY)                   #remove items from BAYS that are also in everythingToGetRidOf
+                    BAYS.insert(0, None)
+                   
+            for drive in badDrives:
+                if drive == BAY[0]:         #deal with drives that are excluded by the user and are not "casX-X"
+                    BAYS.remove(BAY)
+                    BAYS.insert(0, None)
+                    badDrives.remove(drive)
+                    badDrives.insert(0, None)
+            
+    if len(badDrives) != 0:
+        while badDrives[badDrives.count(None)-1] == None:
+            badDrives.pop((badDrives.count(None)-1))
+            if len(badDrives) == 0:
+                break
                         
     if len(badDrives) != 0:            # if there is anything left in the list of badDrives that couldn't be used, it must have been typed in wrong, and we should get rid of it
         for badDrive in badDrives:
                 errMess.append(badDrive)      # tell the user what drives weren't able to be used
         sys.exit("invalid argument(s) to the -e option: {es}".format( es = errMess))
-    
+        
+    for BAY in BAYS: 
+        if BAY != None:
+            if BAY[1] == None:
+                BAYS.remove(BAY)                   
+                BAYS.insert(0, None)
+                
     if len(BAYS) != 0:
         while BAYS[BAYS.count(None)-1] == None:
-            BAYS.pop(BAYS.count(None)-1)
+            BAYS.pop((BAYS.count(None)-1))
             if len(BAYS) == 0:
-                break               
+                break
+    return BAYS
+                                            
              
 ##################################################################################################################################################################################
 #   displayVars(hbaCards, chassisSize, hybridChassis, BAYS, DEVICE_PATH)
@@ -374,9 +383,9 @@ def main():
     CAS = checkCas()
     BAYS = getBAYS(DEVICE_PATH)
     everythingToGetRidOf = getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS)
-    removeBadDrives(BAYS, everythingToGetRidOf)
-    if CAS == True:
-      dealWithCoreDrives(BAYS, badDrives)
+    removeBadDrives(BAYS, everythingToGetRidOf, badDrives)
+    #if CAS == True:
+    #  dealWithCoreDrives(BAYS, badDrives)
     displayVars(hbaCards, chassisSize, hybridChassis, BAYS, DEVICE_PATH)
   
 if __name__ == "__main__":
