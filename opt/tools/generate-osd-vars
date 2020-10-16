@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-#show the HBA cards used, the chassis size, if the chassis is a hybrid or not,
-#if CAS is used or not, the devices used, and which devices are cores
-
-
+#
+# this program displays osd variables in yaml
+# using a command line option, the user can choose what specific devices to exclude by the device alias or what drives to include by the type of drive (HDD, CAS, or SSD)
 ###################################################################################################################################################################################
 
 import subprocess
@@ -35,7 +34,7 @@ def get_path_variables():
 ##################################################################################################################################################################################
 #   getHba(hbas)
 # ARGS: hbas ( a list of numbers which identify "plugged in" hba cards listed by the lspci command )
-# DESC: get the number of HBA cards that are "plugged in". The card numbers are "hardwritten" in the main function and passed to getHba(hbas) as a list.
+# DESC: get the number of HBA cards that are "plugged in". 
 ##################################################################################################################################################################################
 def getHba(hbas):
     hbaCards = []
@@ -115,7 +114,7 @@ def checkCas():
 ##################################################################################################################################################################################
 #   getBAYS(DEVICE_PATH)
 # ARGS: DEVICE_PATH (a path variable needed in order to read the symbolic link of the alias
-# DESC: gets the device name and the symbolic link that points to it. Returns a list containing tuples. Each tuple has a symbolic link and the device (file) that it points to.
+# DESC: gets the device name and the symbolic link that points to it. Returns a list containing tuples. Each tuple has a symbolic link and the device that it points to.
 ##################################################################################################################################################################################
 def getBAYS(DEVICE_PATH):
     BAYS = []
@@ -140,6 +139,7 @@ def getBAYS(DEVICE_PATH):
 # ARGS: driveTypes (a list containing strings for the -c, -s , -H options, list entries are empty if options aren't used)
 #       badDrives  (a list of the arguments provided for the option -e if specified by the user, otherwise an empty list)
 #       DEVICE_PATH ( the device path as returned by the getPathVariables function)
+#       CAS (either true if the machine is running open-cas-linux or false otherwise)
 # DESC: Generate a list of device names that are not wanted in the program output.
 #       if the -s , -H option is used, run the lsdev command to find what drives are either HDD or SSD
 #       if the -c option is used, run 
@@ -159,7 +159,7 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
     CASDevices = []
     
     if CAS == True:
-        # get lists of the core and cache device names (device name meaning the place in /dev that the alias (symbolic link points to)
+        # get lists of the core and cache device names. (Device name meaning the target of the symbolic link)
         casadmList = subprocess.Popen(["casadm", "-L", "-o", "csv"], stdout=subprocess.PIPE, universal_newlines=True).stdout
         for line in casadmList:
             cache = re.search("^cache,.*,/dev/([A-Za-z]+).*,.*$", line)
@@ -175,7 +175,7 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
         CASDevices = cores+caches
     
     if len(driveTypes) != 0: 
-        # find the symbolic links (aliases) for the devices that match the drive type specified on the command line and store them in lists
+        # find the device names (the symbolic link's target) for the devices that match the drive type specified on the command line and store them in lists
         
         if "HDD" in driveTypes:  
             pass
@@ -193,7 +193,7 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
         
         everythingToGetRidOf = HDDs+SSDs          # add all drives that the user doesn't want in the output to create a list of everythingToGetRidOf
         
-        everythingToGetRidOf += CASDevices      # make sure no CAS drives show up in the output when -c option is not used         
+        everythingToGetRidOf += CASDevices      # make sure no core or cache drives show up in the output when -c option is not used         
                 
         if "CAS" in driveTypes and CAS == True:               #deal with the - c option : if -c option is used, take core drives out of everythingToGetRidOf
             for drive in everythingToGetRidOf:
@@ -209,9 +209,9 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
                 badDevice=badDevice.strip() 
                 if CAS:# get the device name as found from the Alias (symbolic link)
                     for stuff in coreTuples:
-                        if stuff[1] == badDevice and stuff[0] in badDrives: # find out if the drive is listed in the -e option using both casX-X and the alias from vdev_id.conf (change the naming here to make it clearer)
-                            driveGivenTwice = True                          # don't put the drive that is specified two ways in everythingToGetRidOf
-                    if driveGivenTwice == False:
+                        if stuff[1] == badDevice and stuff[0] in badDrives: # find out if the drive is listed in the -e option using both 'casX-X' and the alias from vdev_id.conf 
+                            driveGivenTwice = True                          # don't put the drive that is specified using both 'casX-X' and the alias from vdev_id.conf in everythingToGetRidOf
+                    if driveGivenTwice == False:                            # if the drive ends up in both lists, the program will try to remove it twice later which will crash the program
                         everythingToGetRidOf.append(badDevice)   
                     badDrives.remove(badDrive)
                     badDrives.insert(0, None)
@@ -227,7 +227,7 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
     if CAS == True:            
         everythingToGetRidOf += caches
         
-    for drive in everythingToGetRidOf:                   #deal with the same drive being in everythingToGetRidOf twice. remove duplicates in the list of everything to get rid of
+    for drive in everythingToGetRidOf:                   #deal with the same drive being in everythingToGetRidOf twice. remove duplicates in the list of everythingToGetRidOf
         possibleDuplicate=drive
         originalLength = len(everythingToGetRidOf)
         while possibleDuplicate in everythingToGetRidOf:
@@ -241,7 +241,7 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
                     if len(everythingToGetRidOf) == 0:
                         break
          
-    for drive in badDrives:                   #deal with the same cas device being specified twice by the user. remove duplicates in the list of badDrives
+    for drive in badDrives:                   #deal with the same 'casX-X' device being specified as an argument twice by the user. remove duplicates in the list of badDrives
         possibleDuplicate=drive
         originalLength = len(badDrives)
         while possibleDuplicate in badDrives:
@@ -259,10 +259,13 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
     
     
 ##################################################################################################################################################################################  
-#   removeBadDrives(BAYS, everythingToGetRidOf)
+#   removeBadDrives(BAYS, everythingToGetRidOf, badDrives, CAS)
 # ARGS: BAYS ( a list of the symbolic links and the devices that they point to, or in the case of a core for machines running open-cas-linux, the device name and the core name) 
-#    everythingToGetRidOf ( a list of symbolic links/the BAY alias provided by the person running generate-osd-vars )
-# DESC: compare the entries in the BAYS and badDrives lists and remove any badDrives from BAYS
+#       everythingToGetRidOf ( a list of device names to not include in the output )
+#       badDrives ( a list of aliases or 'casX-X' names that had no symbolic links so the device name doesn't exist or is unknown, respectively)
+#       CAS (either true if the machine is running open-cas-linux or false otherwise)
+# DESC: compare and remove everythingToGetRidOf and badDrives from BAYS. if there are remaining items in badDrives that were not in BAYS after all items have been compared
+#       then those devices are not listed by casadm -L or vdev_id.conf commands and the program exits with the names of those drives
 ##################################################################################################################################################################################    
 def removeBadDrives(BAYS, everythingToGetRidOf, badDrives, CAS):
     errMess = []
@@ -272,7 +275,7 @@ def removeBadDrives(BAYS, everythingToGetRidOf, badDrives, CAS):
         for line in casadmList:
                 core = re.search("^core,.*,/dev/([A-Za-z]+).*,.*,.*,/dev/(cas.*)$", line)
                 if core != None :
-                    cores.append((core.group(2), core.group(1)))
+                    cores.append((core.group(2), core.group(1))) #get the 'casX-X' names for the core drives so the user input 'casX-X' names can be confirmed  
       
         for BAY in BAYS:
             for core in cores:                                                   
@@ -281,8 +284,7 @@ def removeBadDrives(BAYS, everythingToGetRidOf, badDrives, CAS):
                         BAYS.remove(BAY)
                         
     for BAY in BAYS:                
-        #can probably delete this statement because 1) there will always be "something" in everythingToGetRidOf
-        # and 2) if what comes next doesn't happen then the program breaks.
+        
         for deviceName in everythingToGetRidOf:
             if deviceName == BAY[1]: 
                 BAYS.remove(BAY)                   #remove items from BAYS that are also in everythingToGetRidOf
@@ -290,7 +292,7 @@ def removeBadDrives(BAYS, everythingToGetRidOf, badDrives, CAS):
                
         for drive in badDrives:
             if drive == BAY[0]:  #deal with drives that are excluded by the user using the -e option but had no symbolic links
-                BAYS.remove(BAY)        # there is never a problem accesing bays beacuse the lists badDrives and everythingToGetRidOf have no elements in common
+                BAYS.remove(BAY)        # BAY will never already have been removed from BAYS in the previous loop beacuse the lists badDrives and everythingToGetRidOf have no elements in common
                 BAYS.insert(0, None)
                 badDrives.remove(drive)
                 badDrives.insert(0, None)
@@ -327,7 +329,7 @@ def removeBadDrives(BAYS, everythingToGetRidOf, badDrives, CAS):
 #    hybridChassis (a boolean which is true if the machine has a hybrid chassis and false otherwise
 #    BAYS (the list of the bays that have a drive in them. The user can specify drives to exclude by alias name and which ones to include by media type)
 #    DEVICE_PATH (a path variable returned by the get_path_variables function)
-#    DESC: Displays the variables that have been grouped by all other functions 
+#    DESC: Displays the variables that have been grouped by all other functions in yaml format
 ##################################################################################################################################################################################
 def displayVars(hbaCards, chassisSize, hybridChassis, BAYS, DEVICE_PATH):
     print("---")
