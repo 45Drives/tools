@@ -116,9 +116,9 @@ def checkCas():
 # ARGS: DEVICE_PATH (a path variable needed in order to read the symbolic link of the alias
 # DESC: gets the device name and the symbolic link that points to it. Returns a list containing tuples. Each tuple has a symbolic link and the device that it points to.
 ##################################################################################################################################################################################
-def getBAYS(DEVICE_PATH):
+def getBAYS(DEVICE_PATH, CONFIG_PATH):
     BAYS = []
-    allBays=subprocess.Popen(["cat", "/etc/vdev_id.conf"], stdout = subprocess.PIPE, universal_newlines = True).stdout
+    allBays=subprocess.Popen(["cat", CONFIG_PATH+"/vdev_id.conf"], stdout = subprocess.PIPE, universal_newlines = True).stdout
     for line in allBays:
         regex = re.search("^alias\s(\S+)\s", line)                                                              
         if regex != None:
@@ -379,7 +379,7 @@ def main():
     chassisSize = getChassis(hbaCards)
     hybridChassis = hybridChassisCheck()
     CAS = checkCas()
-    BAYS = getBAYS(DEVICE_PATH)
+    BAYS = getBAYS(DEVICE_PATH, CONFIG_PATH)
     everythingToGetRidOf = getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS)
     removeBadDrives(BAYS, everythingToGetRidOf, badDrives, CAS)
     displayVars(hbaCards, chassisSize, hybridChassis, BAYS, DEVICE_PATH)
