@@ -1,0 +1,233 @@
+#!/usr/bin/env python3
+
+import subprocess
+import re
+import os
+import sys
+from optparse import OptionParser
+
+def get_path_variables():
+    # get the alias config path, if it fails, assume /etc
+    # get the device path, if it fails, assume /dev
+    
+    conf_path = os.getenv('ALIAS_CONFIG_PATH')
+    if conf_path == None:
+        log("No alias config path set in profile.d ... Defaulting to /etc")
+        conf_path = "/etc"
+    dev_path = os.getenv('ALIAS_DEVICE_PATH')
+    if dev_path == None:   
+        log("No device path set in profile.d ... Defaulting to /etc")
+        dev_path = "/dev"
+    
+    return conf_path, dev_path
+
+def getDRIVES(DEVICE_PATH): # Fills array DRIVES with physical slot number, only if there is a drive present (creates array of all drive slots, wheter a is drive present or not)
+    DRIVES = []
+    BAYS_COUNT = 0
+    allDRIVES=subprocess.Popen(["cat", "/etc/zfs/vdev_id.conf"], stdout = subprocess.PIPE, universal_newlines = True).stdout
+    for line in allDRIVES:
+        regex = re.search("^alias\s(\S+)\s", line)
+        if regex != None:
+
+            if subprocess.run(["ls", DEVICE_PATH+"/"+regex.group(1)], stderr = subprocess.PIPE, stdout = subprocess.PIPE, universal_newlines = True).returncode == 0:
+            # if there is a symbolic link in the specified path, check what device it points to. Append the symbolic link and the device to a list.
+                symLinkDestination = subprocess.run(["readlink", DEVICE_PATH+"/"+regex.group(1)], stdout=subprocess.PIPE, universal_newlines=True).stdout
+                symLinkDestination = re.search("^.*/(\S+)$", symLinkDestination)
+                symLinkDestination=symLinkDestination.group(1).strip()
+                DRIVES.append((regex.group(1), symLinkDestination))
+        BAYS_COUNT += 1
+        
+    return BAYS_COUNT, DRIVES
+
+def getDriveTypes(options, DRIVES):
+    HDDs =[]
+    SSDs =[]
+    
+    options.drive_tpyes = options.drive_types.strip()
+    options.drive_types = options.drive_types.lower()
+    print(options.drive_types)
+    if options.drive_types == "hdd":  
+        pass
+    else:
+        lsdev = subprocess.Popen(["lsdev", "-tdn"], stdout=subprocess.PIPE, universal_newlines=True).stdout
+        for line in lsdev:
+            HDDs += re.findall("\d+-\d+\s+\(/dev/([a-z]+),HDD\)", line)  
+            print(HDDs)
+    if options.drive_types == "ssd":
+        pass
+    else:
+        lsdev = subprocess.Popen(["lsdev", "-tdn"], stdout=subprocess.PIPE, universal_newlines=True).stdout
+        for line in lsdev:
+            SSDs += re.findall("\d+-\d+\s+\(/dev/([a-z]+),SSD\)", line) 
+            
+    everythingToGetRidOf = HDDs+SSDs
+    
+    for BAY in DRIVES:
+        for drive in everythingToGetRidOf:
+            if drive == BAY[1]:
+                DRIVES.remove(BAY)
+                DRIVES.insert(0, None)
+    if len(DRIVES) != 0:
+        while DRIVES[DRIVES.count(None)-1] == None:
+            DRIVES.pop(DRIVES.count(None)-1)
+            if len(DRIVES) == 0:
+                break
+    print(DRIVES)
+
+def setvdevcount(DRIVES, BAYS_COUNT): # Starting at default VDEV_COUNT for chassis size, if DRIVE_COUNT is indivisible by VDEV_COUNT, increment VDEV_COUNT by one and keep checking until it is.
+    DRIVE_COUNT = len(DRIVES)
+    VDEV_COUNT=1 
+    if BAYS_COUNT==30:
+        VDEV_COUNT=3
+        
+    if BAYS_COUNT==45:
+        VDEV_COUNT=5
+     
+    if BAYS_COUNT==60:
+        VDEV_COUNT=5
+	
+    while DRIVE_COUNT%VDEV_COUNT != 0:
+        if DRIVE_COUNT%VDEV_COUNT == 0:
+            break
+            VDEV_COUNT=VDEV_COUNT+1
+    return VDEV_COUNT
+
+def autosort(options, VDEV_COUNT, DRIVES, commands, kwargs_for_subprocess): 
+    if subprocess.run(["test", "-e", options.mount_point+"/z.tmp" ], stdout = subprocess.PIPE, universal_newlines = True).stdout == 0:
+        subprocess.run(["rm", "-f", options.mount_point+"/z.tmp"], stdout=subprocess.PIPE, universal_newlines=True)
+    DRIVE_COUNT=len(DRIVES)
+    print(DRIVE_COUNT)
+    drivespVDEV=int(DRIVE_COUNT/VDEV_COUNT)
+    print(drivespVDEV)
+    VDEVS = [options.zpool_name]
+    raid_level = "raidz2"
+    print(VDEV_COUNT)
+    INDEX = 0
+    for j in range(VDEV_COUNT):
+        print("j: {J}".format(J = j))
+        INDEX += j
+        temp_list = [raid_level]
+        for i in range(drivespVDEV):
+            INDEX += i
+            print("INDEX: {I}".format(I = INDEX))
+            temp_list.append(DRIVES[INDEX][1]) 
+        VDEVS+=temp_list  
+    print("commands: {c}".format(c = commands))
+    print("kwargs: {k}".format(k = kwargs_for_subprocess))
+    createpool(commands, VDEVS, kwargs_for_subprocess)    
+    
+def customsort(options, commands, kwargs_for_subprocess): 
+    print("commands: {c}".format(c = commands))
+    if subprocess.run(["test", "-e", options.mount_point+"/z.tmp" ], stdout = subprocess.PIPE, universal_newlines = True).stdout == 0:
+        subprocess.run(["rm", "-f", options.mount_point+"/z.tmp"], stdout=subprocess.PIPE, universal_newlines=True)
+    subprocess.run(["lsdev"], universal_newlines=True)
+    VDEV_COUNT = int(input("number of vdevs: "))
+    options.raid_level = [input("RAID level: ")] 
+    options.zpool_name = input("Pool name: ")
+    
+    i=0
+    VDEVS = [options.zpool_name]
+    while i < VDEV_COUNT:  
+        devices = input("VDEV_{j}: ".format(j = i))
+        devices = devices.split()
+        VDEVS+=options.raid_level+devices
+        i+=1
+    
+    createpool(commands, VDEVS, kwargs_for_subprocess)
+    
+def createpool(commands, VDEVS, kwargs_for_subprocess): # Reads z.tmp file and writes zpool creation command and saves in z.conf
+    
+    print(VDEVS)
+    commandLine = commands+VDEVS
+    subprocess.run(commandLine, **kwargs_for_subprocess)
+  
+def getCommandOptions(options, DRIVES, VDEV_COUNT):
+    kwargs_for_subprocess = { "universal_newlines": True}
+    commands = []
+    if options.force:
+        # add the -f option to commands. 
+        commands.append("-f")
+    if options.quiet == True:
+        # for the subprocess.run([], stdout=subprocess.PIPE) <- use that 
+        kwargs_for_subprocess["stdout"] = "subprocess.PIPE"
+    if options.destroy:
+        #call the createpool function with the command [zpool destroy "zpool_name"]
+        createpool(["zpool", "destroy", "-f", options.zpool_name], [], kwargs_for_subprocess)
+    if options.mount_point != None:
+    #    # change mount_point 
+        commands = commands+["-m", options.mount_point]
+    print(commands)
+    if options.ashift != None:
+        commands.append(options.ashift)   
+    if options.custom == True:
+        #call the customsort function
+        commands = ["zpool", "create"]
+        customsort(options, commands, kwargs_for_subprocess)
+
+    #if options.build:
+        #build the zpool, this might have to be a flag. can just use the value from the options object as the flag
+        #BUILD_FLAG=True
+    if options.drive_types != None:
+        getDriveTypes(options, DRIVES)
+    if options.drive_quantity != 0:
+        DRIVE_COUNT = options.drive_quantity
+    #if -l in args:
+        # change raid_level.  raid_level = options.raid_level so no further action required
+    #if -n in args:
+        # change zpool_name. n.f.a.r. because I can just use the options.zpool.name for the name whenever a name is needed.
+    #if -t in args:
+        # commands.append(options.) i am confused   
+    if options.vdev_quantity != 0:
+        # change the VDEV_COUNT
+        VDEV_COUNT = options.vdev_quantity
+    if options.custom != True and options.destroy == False:
+        commands = ["zpool", "create", "-f"]
+        autosort(options, VDEV_COUNT, DRIVES, commands, kwargs_for_subprocess)
+        
+    if options.debug:
+        print("drive count: {dc} '/n'raid level: {rl} '/n'zpool name: {zpn} '/n'vdev count: {vdc} '/n'driveTypes/vdev: {dpd} '/n'driveTypes array: {da}".format(dc=DRIVE_COUNT, rl=options.raid_level, zpn=options.zpool_name, vdc=VDEV_COUNT, dpd=int(DRIVE_COUNT/VDEV_COUNT), da= options.drive_types))
+
+def main():
+    
+    CONFIG_PATH, DEVICE_PATH = get_path_variables()
+    
+    parser = OptionParser()
+    parser.add_option("-a", "--set-ashift-value", action="store", type=str, dest="ashift", default=None, help="[-a] Set ashift value")
+    parser.add_option("-b", "--build", action="store_true", default=False, dest="build", help="-b: Build Flag. Include to build the array")
+    parser.add_option("-C", "--create-using-drive-type", action="store", type=str, dest="drive_types", default=None, help="[-C] Device class. Only use this type of device. \
+            '\n' Default: Use all drive '\n' Options: hdd, ssd")
+    parser.add_option("-c", "--custom",action="store_true", default=False, dest="custom", help="[-c] Custom Flag. Include for manual pool configuration")
+    parser.add_option("-D", "--destroy", action="store_true", default=False, dest="destroy", help="[-D] Destroys zpool")
+    parser.add_option("-d", "--quantify-driveTypes", action="store", type=int, default=0, dest="drive_quantity", help="[-d] Specify how many driveTypes to use. '\n'      Default is every drive attached to HBA controller")
+    parser.add_option("-f", "--force", action="store_true", default=False, dest="force", help="[-f] Force Flag. Use if bricks are already present on zpool")
+    parser.add_option("-l", "--RAID level", action="store", type=str, default="raidz2", dest="raid_level", help="[-l] Specify RAID level '\n'     Default is raidz2 '\n'    Options: raidz[123], mirror, stripe")
+    parser.add_option("-m", "--mount-point", action="store", type=str, default="/", dest="mount_point", help="[-m] Specify alternate mount point '\n'		Default: /{pool}")
+    parser.add_option("-n", "--name-pool", action="store", type=str, default="pool", dest="zpool_name", help="[-n] Specify zpool name. Defaults to zpool")
+    parser.add_option("-q", "--quiet", action="store_true", default=False, dest="quiet", help="[-q] Quiet Mode")
+    parser.add_option("-t", "--tunable", action="store_false", default=True, dest="tunable", help="[-t] IF flag is present, DO NOT apply default ZFS tuneables")
+    parser.add_option("-v", "--quantify-vdevs", action="store", type=int, default=0, dest="vdev_quantity", help="[-v] Specify number of VDEVs to use")
+    parser.add_option("-z", "--debug", action="store_true", default=False, dest="debug", help="[-z] Debug flag. Prints all varibles&temp files to terminal")
+    #parser.add_option("-h", "--help", action="store_true", default=False, dest="help", help="[-h] Displays this message")
+    (options, args) = parser.parse_args()
+    #to do
+    '''
+    add an object that will have the parts of the subprocess.run() arguments as strings. could be as simple as a list or dictionary. used the list because the list can be passed to the method as is and it will work
+    call some functions to add attributes to the object based on what command line options were used
+    wrapper that calls subprocess.run() 
+    '''
+    
+    (CONFIG_PATH, DEVICE_PATH) = get_path_variables()
+    BAYS_COUNT, DRIVES = getDRIVES(DEVICE_PATH)
+    VDEV_COUNT = setvdevcount(DRIVES, BAYS_COUNT)
+    getCommandOptions(options, DRIVES, VDEV_COUNT)
+    
+if __name__ == "__main__":
+    main()
+	
+
+	
+	
+	
+	
+	
+	

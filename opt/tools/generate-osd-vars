@@ -182,14 +182,14 @@ def getEverythingToGetRidOf(driveTypes, badDrives, DEVICE_PATH, CAS):
         else:
             lsdev = subprocess.Popen(["lsdev", "-tdn"], stdout=subprocess.PIPE, universal_newlines=True).stdout
             for line in lsdev:
-                HDDs += re.findall("\d+-\d+\s+.+/dev/(.+),HDD.", line)          
+                HDDs += re.findall("\d+-\d+\s+\(/dev/([a-z]+),HDD\)", line)         
     
         if "SSD" in driveTypes:
             pass
         else:
             lsdev = subprocess.Popen(["lsdev", "-tdn"], stdout=subprocess.PIPE, universal_newlines=True).stdout
             for line in lsdev:
-                SSDs += re.findall("\d+-\d+\s+.+/dev/(.+),SSD.", line)          
+                SSDs += re.findall("\d+-\d+\s+\(/dev/([a-z]+),SSD\)", line)          
         
         everythingToGetRidOf = HDDs+SSDs          # add all drives that the user doesn't want in the output to create a list of everythingToGetRidOf
         
