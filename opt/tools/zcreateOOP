@@ -26,7 +26,7 @@ g_keywords = {"universal_newlines": True}
 ##############################################################################################################################################################################
 class Functionality_settings: # the hard coded precedence of what operations to carry out
     def __init__(self):
-        self.order = ['-n', '-D', '-c', '-C', '-d', '-v', '-l', '-q', '-f', '-b', '-a', '-m', '-z']
+        self.order = ['-n', '-D', '-c','-C', '-d', '-v', '-l', '-q', '-f', '-b', '-a', '-m', '-z']
     
         self.needed_opts = {
                    '-n': [None], 
@@ -68,105 +68,43 @@ class Functionality_settings: # the hard coded precedence of what operations to 
 #          sysargv: the command line, represented as a list of strings
 ##############################################################################################################################################################################       
     def sortCMD(self, sysargv):
-        userOrder = sysargv.copy()
-        order = self.order
-        j = 1
-        for i in order: #put the options and their arguments in the order that is desired. if the option is invalid, treat it as an argument and let the other option parser handle the error
-            if i in userOrder:
-                placing = sysargv.index(i)
-                n=1                        # index for changing the list item referred to when there are multiple list items to move to the end of the command line
-                m=1                        # index for changing the list item referred to when there are multiple list items to be moved ahead in the command line
-                if placing != j:
-                    if j+n < len(userOrder) and sysargv[j+n] not in order:
-                        while j+n < len(userOrder) and sysargv[j+n] not in order:
-                            n+=1
-                        backOtheLine=sysargv[(j):(j+n)]                         #move an option and its arguments to the end of the line
-                        del sysargv[(j+1):(j+n)]
-                        sysargv[j] = i
-                        sysargv+=backOtheLine
-                        placing -= (n-1)
+        userEntries = sysargv.copy()
+        good_order = self.order
+        _sorted = []
+        for option in good_order: #put the options and their arguments in the order that is desired. if the option is invalid, treat it as an argument and let the other option parser handle the error
+            if option in sysargv:
+                _sorted.append(option)
+                j=1
+                while sysargv.index(option)+j <= len(sysargv)-1:
+                    if sysargv[sysargv.index(option)+j] not in good_order:
+                        _sorted.append(sysargv[sysargv.index(option)+j])
+                        j+=1
                     else:
-                        backOtheLine=sysargv[j] #temporarily store the option that is about to be replaced 
-                        sysargv[j] = i         
-                        sysargv.append(backOtheLine)                            #move the option with no arguments to the end of the line               
-                while placing+m < len(sysargv) and sysargv[placing+m] not in order: # treat anything directly after the option as an argument if it is not in the list "order"
-                    sysargv.insert((j+m), sysargv[placing+m])    # insert the arguments directly following the new position of the option
-                    argIndex=placing+m+1                          
-                    sysargv.pop(argIndex)                        # pop the argument in the old postion off the list
-                    m+=1
-                self.deleteDuplicates(sysargv, j, i)  
-                j+=m  
-                print(sysargv)#get the index of where the next option belongs and store it in j
-        
-        self.destroyCommandLine(sysargv) 
-        
+                        break
+                if j-1 != self.needed_args[option]:
+                    sys.exit("The {o} option requires {i} argument(s), {j} entered".format(o=option, i=self.needed_args[option], j=j-1))
+        sysargv=_sorted
+        self.checkCommandLine(sysargv)
+        sysargv.insert(0, userEntries[0])
+        print(sysargv)
+        return(sysargv)  
+
 ##############################################################################################################################################################################
-#deleteDuplicates function:
-#   function used by sortCMD to get rid of the duplicates in the command line.
-#Arguments:
-#    [j] is the current position within the command line [list representation] that is being "looked at" and thus is not yet sorted
-#    [i] is an option from the 'order' attribute
-#    [sysargv] is a list of strings, representing the command line    
-##############################################################################################################################################################################  
-    def deleteDuplicates(self, sysargv, j, i): #get rid of duplicates of the command (i) that are not located at the index that j has stored
-        for k in range(len(sysargv)):
-            if k != j and sysargv[k] == i: #this works on the assumption that no options should be entered twice as the current choices of options stand
-                sysargv.pop(k)              
-                sysargv.insert(0, None)
-        while None in sysargv and len(sysargv)!=None:
-            sysargv.remove(None)
-            
-##############################################################################################################################################################################
-#destroyCommandLine function:
-#    if there is a "stand_alone" option in the command line, throw out everything else in the command line so that the functions called later have less work to do, 
-#    they can just assume that if the stand_alone option is present, it is the only option present.
+#checkCommandLine function:
+#                           find out if options that need to be used together are present in the command line
 #arguments:
 #          sysargv: a list of strings. The list contains one string for each option and argument entered to the command line by the user
 ###############################################################################################################################################################################    
-    def destroyCommandLine(self, sysargv):
-        the_lone_option = None
-        helpers = []
-        for opt in sysargv:
-            if opt in self.order:
-                the_lone_option = opt #the_lone_option is the option that is being analyzed currently
-                if the_lone_option not in helpers: #if the_lone_option is in helpers already, all of its needed_opts will be, too
-                    if self.needed_opts[the_lone_option][0] != None:
-                        for needed_opt in self.needed_opts[the_lone_option]:
-                            if needed_opt not in sysargv:
-                                sys.exit("option not entered:{no} (needed in order to use {o})".format(no=needed_opt, o=opt))
-                            if needed_opt not in helpers:
-                                helpers.append(needed_opt)       
-                    # find the children: if the stand alone option needs another option to work properly, go and get that. If this new "child" option needs an otion, go and get that. And so on  
-                    helpers_update=helpers.copy()
-                    while len(helpers_update) != 0:
-                        for i in helpers:
-                            if self.needed_opts[i][0] == None:
-                                helpers_update.remove(i)       #get rid of "parents" of the "older generation" that have no children. Kill the spinster aunts!
-                        for i in helpers_update:
-                            for needed_opt in self.needed_opts[i]: 
-                                if needed_opt not in sysargv:
-                                    sys.exit("option not entered:{no} (needed in order to use {o})".format(no=needed_opt, o=opt))    
-                                if needed_opt not in helpers:  #check that two options that are co-dependant do not cause infinite looping
-                                    helpers_update.append(needed_opt)
-                        for i in helpers: #get rid of the 'parents' that are no longer needed to find children
-                            if i in helpers_update:
-                                helpers_update.remove(i)
-                        helpers+=helpers_update
-                        print(helpers)
-                    if the_lone_option not in helpers:
-                        helpers.append(the_lone_option)
-        final_options = helpers
-        print(final_options)  
-        for opt in final_options:
-            for key in final_options:
-                if opt not in self.order:
-                    for i in range(self.needed_args[key]): #find out if the needed options and arguments are present in the command line
-                        if sysargv[sysargv.index(arg)-(i+1)] != key: #determine if arg can be treated as a valid positional argument to a needed option  
-                            if key in self.unallowed_opts[opt]:
-                                sys.exit("option {a} cannot be used with {b} ".format(a=opt, b=key))
-                elif key in self.unallowed_opts[opt]:
-                    sys.exit("option {a} cannot be used with {b} ".format(a=opt, b=key))
-        print(sysargv)
+    def checkCommandLine(self, sysargv):
+        for i in range(len(sysargv)-1):
+            if sysargv[i] in self.order:
+                if self.needed_opts[sysargv[i]][0] != None:
+                    for needed_opt in self.needed_opts[sysargv[i]]:
+                        if needed_opt not in sysargv:
+                            sys.exit("option not entered:{no} (needed in order to use {o})".format(no=needed_opt, o=sysargv[i]))
+                for key in sysargv:  
+                    if key in self.unallowed_opts[sysargv[i]]:
+                        sys.exit("option {a} cannot be used with {b} ".format(a=sysargv[i], b=key))
         
 ##############################################################################################################################################################################
 #Zpool_options class:
@@ -183,16 +121,11 @@ class Zpool_options():
         self.build = False
         self.quiet = False
         self.options = []    
-    def set_ashift(self, option, opt_str, value, parser, *args, **kwargs):
-        for arg in args:
-            print(arg)
-        print("the integer entered by the user was: {v}".format(v=value))
+    def set_ashift(self, option, opt_str, value, parser):
         self.options.extend(["-o", "ashift="+value])        
     def force(self, option, opt_str, value, parser, *args, **kwargs):
-        print("the force option was used.")
         self.options.append("-f")       
     def set_mount_point(self, option, opt_str, value, parser, *args, **kwargs):
-        print("the mount point entered by the user was: {mp}".format(mp=value))
         if os.path.exists(value):
             if os.path.isdir(value):
                 if len(os.listdir(value)) == 0: 
@@ -204,13 +137,11 @@ class Zpool_options():
         else:
             subprocess.run(["mkdir", value], stdout=subprocess.PIPE, universal_newlines=True).stdout
             self.options.extend(["-m", value])
-    def silencer(self, option, opt_str, value, parser, *args, **kwargs):
-        print("the quiet option was entered by the user")    
+    def silencer(self, option, opt_str, value, parser, *args, **kwargs):    
         self.quiet = True
         self.subprocess_keywords["stdout"]=subprocess.PIPE 
     def set_build(self, options, opt_str, value, parser, *args, **kwargs):
         self.build = True
-        print("build attribute set")
         
 ##############################################################################################################################################################################
 #Device class:
@@ -246,11 +177,10 @@ class Zpool_devices:
     def set_drives_count(self, options, opt_str, value, parser):
         if self.drives_count >= value:
             self.drives_count = value
-            print(" the drive quantity will be: {dq}".format(dq=value))
         else:
-            print("not enough drives available for that pool")
             sys.exit("number of available drives is less than desired number of drives")   
     def elim(self, options, opt_str, value, parser): 
+        print("-C has been passed the value: {v}".format(v=value))
         if value.lower() == "ssd":
             for device in self.devices:
                 if device.m_type == "HDD":
@@ -260,8 +190,7 @@ class Zpool_devices:
                 while self.devices[self.devices.count(None)-1] == None:
                     self.devices.pop(self.devices.count(None)-1)
                     if len(self.devices) == 0:
-                        break
-            print("HDDs eliminated")    
+                        break    
         elif value.lower() == "hdd":
             for device in self.devices:
                 if device.m_type == "SSD":
@@ -272,7 +201,6 @@ class Zpool_devices:
                     self.devices.pop(self.devices.count(None)-1)
                     if len(self.devices) == 0:
                         break
-            print("SSDs eliminated")
         else:
             sys.exit("the argument for this option must be either ssd or hdd (non-case sensitive)")
         self.drives_count = len(self.devices)
@@ -288,16 +216,14 @@ class Zpool_settings:
         self.vdev_quantity=1
         self.name="zpool"
         self.raid_level="raidz2"
-    def set_vdev_quantity(self, options, opt_str, value, parser, *args, **kwargs):
-        print("the vdev quantity will be: {vd}".format(vd=value))
+    def set_vdev_quantity(self, options, opt_str, value, parser):
         self.vdev_quantity = value
-    def set_zpool_name(self, options, opt_str, value, parser, *args, **kwargs):
-        print("the zpool name will be: {n}".format(n=value))
+    def set_zpool_name(self, options, opt_str, value, parser):
         self.name = value
-    def set_raid_level(self, options, opt_str, value, parser, *args, **kwargs):
+    def set_raid_level(self, options, opt_str, value, parser):
         self.raid_level = value
-        print("the raid level will be: {r}".format(r=value))
     def destroy(self, options, opt_str, value, parser):
+        print(self.name)
         if subprocess.run(["zpool", "status"], universal_newlines=True,stderr=subprocess.PIPE, stdout=subprocess.PIPE).returncode == 0:
             devs = subprocess.Popen(["zpool", "status"], universal_newlines=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE).stdout
             test_name = None
@@ -306,23 +232,19 @@ class Zpool_settings:
                 if regex != None:
                     test_name=regex.group(1)
                     break
-            if test_name == None:
-                subprocess.run(["zpool", "destroy", self.name], universal_newlines=True).stdout
-            else:
-                print("Destroying {z}, You sure? \nPress any to continue".format(z=self.name), end = ' ')
-                input()
-                choice = input("ALL data will be lost. Continue?(y/N)")
+            if test_name != None:
                 choosing = True
                 while choosing == True:
+                    choice = input("Destroying {z}, You sure? ALL data will be lost. Continue?(y/N)".format(z=self.name))
                     if choice == "y":
                         subprocess.run(["zpool", "destroy", self.name], universal_newlines=True).stdout 
                         choosing = False
                     elif choice == "N":
-                        choosing == False
+                        choosing = False
                     else:
-                        while choice != "y" and choice != "N":
-                            choice = input("Invalid choice: {c}. valid choices are: y/N".format(c=choice))
-
+                        print("invalid option: \"{c}\"".format(c=choice))
+            else:
+                print("cannot open '{n}': no such pool".format(n=self.name))
 ##############################################################################################################################################################################
 # setVdevCount function:
 #                       determine the default number of vdevs for a zpool based on the number of drive bays, and return that number
@@ -464,32 +386,36 @@ def main():
     parser.add_option("-q", "--quiet", action="callback", callback=Zpool_opts.silencer, help="don't show stdout stream. Don't print details")
     parser.add_option("-v", "--set-vdev-quantity", action="callback", type=int, callback=Zpool_sett.set_vdev_quantity, help="set quantity of the vdevs")
     parser.add_option("-z", "--debug", action="store_true", default=False, dest="debug", help="[-z] Debug flag. Prints all varibles&temp files to terminal")
-    sysargv = sys.argv
-    Fsettings.sortCMD(sysargv)
-    (options, args) = parser.parse_args()
-    
-    if options.debug == True:
-        print("    drive count: {dc} \n    raid level: {rl} \n    zpool name: {zpn} \n    vdev count: {vdc} \n    drives/vdev: {dpd}".format(dc=Zpool_dev.drives_count,\
-        rl=Zpool_sett.raid_level, zpn=Zpool_sett.name, vdc=Zpool_sett.vdev_quantity, dpd="coming soon"))
-        print("the list of available drives:")
-        for i in Zpool_dev.devices:
-            print("    {t} {sd} {al}".format(t=i.m_type, sd=i.s_device, al=i.alias))      
-        
-    for key in Zpool_opts.subprocess_keywords:
-        g_keywords[key] = Zpool_opts.subprocess_keywords[key]   
-    if not '-D' in sys.argv and not '-c' in sys.argv:
-        autosort(Zpool_opts, Zpool_dev, Zpool_sett)
-    for i in Zpool_opts.options:
-        g_commandLine.append(i)
+    sys.argv = Fsettings.sortCMD(sys.argv)
+
+    try:
+        (options, args) = parser.parse_args()
+        if options.debug == True:
+            print("    drive count: {dc} \n    raid level: {rl} \n    zpool name: {zpn} \n    vdev count: {vdc} \n    drives/vdev: {dpd}".format(dc=Zpool_dev.drives_count,\
+            rl=Zpool_sett.raid_level, zpn=Zpool_sett.name, vdc=Zpool_sett.vdev_quantity, dpd=int(Zpool_dev.drives_count/Zpool_sett.vdev_quantity)))
+            print("the list of available drives:")
+            for i in Zpool_dev.devices:
+                print("    {t} {sd} {al}".format(t=i.m_type, sd=i.s_device, al=i.alias))
+
+                
+        for key in Zpool_opts.subprocess_keywords:
+            g_keywords[key] = Zpool_opts.subprocess_keywords[key]   
+        if not '-D' in sys.argv and not '-c' in sys.argv:
+            autosort(Zpool_opts, Zpool_dev, Zpool_sett)
+        for i in Zpool_opts.options:
+            g_commandLine.append(i)
+
             
-    if Zpool_opts.quiet == False and '-D' not in sys.argv:
-        for command in g_commandLine:
-            print(command, end = ' ')
-        print(' ')
-    if Zpool_opts.build == True or '-c' in sys.argv:
-        subprocess.run(g_commandLine, **g_keywords).stdout    
-    if Zpool_opts.build != True and '-D' not in sys.argv and '-c' not in sys.argv:
-        print("Use -b flag to build the above pool\nUse -h flag for more options")
-       
+        if Zpool_opts.quiet == False and '-D' not in sys.argv:
+            for command in g_commandLine:
+                print(command, end = ' ')
+            print(' ')
+        if Zpool_opts.build == True or '-c' in sys.argv:
+            subprocess.run(g_commandLine, **g_keywords).stdout    
+        if Zpool_opts.build != True and '-D' not in sys.argv and '-c' not in sys.argv:
+            print("Use -b flag to build the above pool\nUse -h flag for more options")
+    except KeyboardInterrupt:
+        sys.exit('\n') 
+        
 if __name__ == "__main__":
     main()
