@@ -14,19 +14,16 @@ g_keywords = {"universal_newlines": True}
 #    The 'order' attribute is the order in which any entered command line arguments will be called. 
 #    The 'needed_opts' attribute lists the options that are NEEDED for each option to work, or else the program breaks down 
 #    The 'needed_args' attribute lists how many arguments are expected for each option
-#    The 'stand_alone_opts' attribute lists arguments, which, if entered by the user, are the only options ultimately used, throwing everything else on the command line out
-#    Options present in 'order' and 'stand_alone_opts' should be listed in the same order, i.e. -D takes precedence over -c so if they are both on the command line, only -D 
-#    will be used
+#    The 'unallowed_opts' attribute is a dictionary containing a list for each argument. The list is all the arguments which can't be used with the dictonary key.
 #    
-#    The idea is that the behaviour of the script can be changed with minimal headaches
+#    The idea is that the behaviour of the script can be changed easily
 #    class methods:
 #                   sortCMD
-#                   deleteDuplicates
-#                   destroyCommandLine
+#                   checkCommandLine
 ##############################################################################################################################################################################
 class Functionality_settings: # the hard coded precedence of what operations to carry out
     def __init__(self):
-        self.order = ['-n', '-D', '-c','-C', '-d', '-v', '-l', '-q', '-f', '-b', '-a', '-m', '-z']
+        self.order = ['-n', '-D', '-c','-C', '-d', '-v', '-l', '-q', '-f', '-b', '-a', '-m', '-z', '-h']
     
         self.needed_opts = {
                    '-n': [None], 
@@ -41,10 +38,11 @@ class Functionality_settings: # the hard coded precedence of what operations to 
                    '-b': [None], 
                    '-a': [None], 
                    '-m': [None], 
-                   '-z': [None]
+                   '-z': [None],
+                   '-h': [None]
                    }
                    
-        self.needed_args =  {'-n': 1, '-D': 0, '-c': 0, '-C': 1, '-d': 1, '-v': 1, '-l': 1, '-q': 0, '-f': 0, '-b': 0, '-a': 1, '-m': 1, '-z': 0}   
+        self.needed_args =  {'-n': 1, '-D': 0, '-c': 0, '-C': 1, '-d': 1, '-v': 1, '-l': 1, '-q': 0, '-f': 0, '-b': 0, '-a': 1, '-m': 1, '-z': 0, '-h': 0}   
         self.unallowed_opts = {
                    '-n': ['-c'], 
                    '-D': ['-c', '-C', '-d', '-v', '-l', '-q', '-f', '-b', '-a', '-m', '-z'], 
@@ -58,25 +56,28 @@ class Functionality_settings: # the hard coded precedence of what operations to 
                    '-b': ['-D', '-c'], 
                    '-a': ['-D'], 
                    '-m': ['-D'], 
-                   '-z': ['-D']
+                   '-z': ['-D'],
+                   '-h': []
                    }
         
 ##############################################################################################################################################################################
-#sortCMD function:
-#    reorder the arguments in sys.argv (passed to the function as sysargv) according to the order given by the 'order' attribute
+#sortCMD: Functionality_settings class method:
+#    reorder the arguments in sys.argv (passed to the function as sysargv) according to the order given by the 'order' attribute.
+#    put the options and their arguments in the order that is desired. if the option is invalid, treat it as an argument and let the other option parser handle the error
 #Arguments:
 #          sysargv: the command line, represented as a list of strings
+#          self: the Functionality_settings object itself
 ##############################################################################################################################################################################       
     def sortCMD(self, sysargv):
         userEntries = sysargv.copy()
         good_order = self.order
         _sorted = []
-        for option in good_order: #put the options and their arguments in the order that is desired. if the option is invalid, treat it as an argument and let the other option parser handle the error
-            if option in sysargv:
-                _sorted.append(option)
+        for option in good_order: 
+            if option in sysargv:         
+                _sorted.append(option) #fill the resulting array, "_sorted" with the options that have the highest precedence first
                 j=1
                 while sysargv.index(option)+j < len(sysargv):
-                    if sysargv[sysargv.index(option)+j] not in good_order:
+                    if sysargv[sysargv.index(option)+j] not in good_order: #if the string on the command line is not in the "good_order" array, then group it with the previous valid option as an argument
                         _sorted.append(sysargv[sysargv.index(option)+j])
                         j+=1
                     else:
@@ -90,10 +91,11 @@ class Functionality_settings: # the hard coded precedence of what operations to 
         return(sysargv)  
 
 ##############################################################################################################################################################################
-#checkCommandLine function:
+#checkCommandLine: Functionality_settings class method:
 #                           find out if options that need to be used together are present in the command line
 #arguments:
 #          sysargv: a list of strings. The list contains one string for each option and argument entered to the command line by the user
+#          self: the Functionality_settings object itself
 ###############################################################################################################################################################################    
     def checkCommandLine(self, sysargv):
         for opt in sysargv:
@@ -114,6 +116,22 @@ class Functionality_settings: # the hard coded precedence of what operations to 
 #               quiet: a flag used to determine where the stdout and stderr will be sent, and whether or not to print the command that will build the zpool
 #               options: the list of options that will be put directly into the "zpool create" command to build the pool
 #               subprocess_keywords: keyword arguments for the subprocess method which is called to run the "zpool create" command
+#
+#  class methods: 
+#               set_ashift
+#               force
+#               set_mount_point
+#               silencer
+#               set_build
+# 
+#  arguments for class methods:
+#                               all the methods are callbacks for command line options and have these arguments in common:
+#                               self: refers to the Zpool_options class itself
+#                               option: an Option instance which calls the callback. It is a string with the name of the option as added using add_option in main()
+#                               opt_str: The option string on the command line that triggers the callback
+#                               value: the value of the argument for the option. if there is no argument, value is None
+#                               parser: the OptionParser object that has been instantiated in main()
+#                                
 ##############################################################################################################################################################################
 class Zpool_options():
     def __init__(self):
@@ -123,9 +141,9 @@ class Zpool_options():
         self.options = []    
     def set_ashift(self, option, opt_str, value, parser): #set the ashift for the zpool.
         self.options.extend(["-o", "ashift="+value])        
-    def force(self, option, opt_str, value, parser, *args, **kwargs):
+    def force(self, option, opt_str, value, parser, *args, **kwargs): #force an action, such as creating a pool with devices of different sizes
         self.options.append("-f")       
-    def set_mount_point(self, option, opt_str, value, parser, *args, **kwargs):
+    def set_mount_point(self, option, opt_str, value, parser, *args, **kwargs): # set the mount point for a pool that is being built
         if os.path.exists(value):
             if os.path.isdir(value):
                 if len(os.listdir(value)) == 0: 
@@ -137,17 +155,17 @@ class Zpool_options():
         else:
             subprocess.run(["mkdir", value], stdout=subprocess.PIPE, universal_newlines=True).stdout
             self.options.extend(["-m", value])
-    def silencer(self, option, opt_str, value, parser, *args, **kwargs):    
+    def silencer(self, option, opt_str, value, parser, *args, **kwargs):   #set the quiet option, the underlying commands to the needed subprocess will not be printed to the screen
         self.quiet = True
         self.subprocess_keywords["stdout"]=subprocess.PIPE 
-    def set_build(self, options, opt_str, value, parser, *args, **kwargs):
+    def set_build(self, options, opt_str, value, parser, *args, **kwargs): #set the build attribute for a zpool. If not set, the user will see the command that would have built a pool 
         self.build = True
         
 ##############################################################################################################################################################################
 #Device class:
-#    m_type: the media type a given storage device
-#    s_device: the name of the storage device as named by the OS (sda, sdbm sd[a-z], etc)
-#    alias: the alias for a storage device as given by the dmap or hmap script.       
+#    m_type: the media type of a drive
+#    s_device: the name of the disk (sda, sdbm sd[a-z], etc)
+#    alias: the numbered alias for a storage device (1-1, 1-2 etc).       
 ##############################################################################################################################################################################   
 class Device:
     def __init__(self, mediaType, storageDevice, aliasName):
@@ -158,13 +176,31 @@ class Device:
 ##############################################################################################################################################################################
 #Zpool_qualities class:
 #                    This class's attributes are qualities of the zpool to be built, or destroyed
-#   
-#    devices: a list of device objects (of the Device class) that are in use by the server
-#    drives_count: the number of drives that are in use by the server and are available to the pool that is being built. The user can make less pools available to the pool by
-#                  entering a list of device names that is equal to or less than the amount of drives not in use by any other pool.                        
-#    vdev_quantity: the number of vdevs that the user wants to have in the pool that is being built
-#    name: the name that the user wants for the pool that is being built or destroyed
-#    raid_level: the RAID level that the user wants for every vdev in the zpool that is being built        
+#    devices: a list of device objects (of the Device class) that are in use.
+#    drives_count: The number of drives that are in use for the pool that is being built.                        
+#    vdev_quantity: The number of vdevs that the user wants to have in the pool that is being built.
+#    name: The name that the user wants for the pool that is being built or destroyed.
+#    raid_level: The RAID level that the user wants for every vdev in the zpool that is being built.  
+#
+# class methods:
+#       callbacks:
+#           set_vdev_quantity
+#           set_zpool_name
+#           set_raid_level
+#           destroy
+#           set_drives_count
+#           elim
+#
+#       not callbacks:
+#           get_drives_count
+#           customsort
+#
+#  arguments for class methods that are callbacks:
+#                               self: refers to the Zpool_options class itself
+#                               option: an Option instance which calls the callback. It is a string with the name of the option as added using add_option in main()
+#                               opt_str: The option string on the command line that triggers the callback
+#                               value: the value of the argument for the option. if there is no argument, value is None
+#                               parser: the OptionParser object that has been instantiated in main()    
 ##############################################################################################################################################################################          
 class Zpool_qualities:
     def __init__(self, dev): 
@@ -179,13 +215,13 @@ class Zpool_qualities:
         self.vdev_quantity=1
         self.name="zpool"
         self.raid_level="raidz2"
-    def set_vdev_quantity(self, options, opt_str, value, parser):
+    def set_vdev_quantity(self, option, opt_str, value, parser): #set the quantity of vdevs for the pool
         self.vdev_quantity = value
-    def set_zpool_name(self, options, opt_str, value, parser):
+    def set_zpool_name(self, option, opt_str, value, parser): #set the name of the pool
         self.name = value
-    def set_raid_level(self, options, opt_str, value, parser):
+    def set_raid_level(self, option, opt_str, value, parser): # set the raid level of the pool
         self.raid_level = value
-    def destroy(self, options, opt_str, value, parser):
+    def destroy(self, option, opt_str, value, parser): #destroy a pool, specified by the self.name attribute.
         if subprocess.run(["zpool", "status"], universal_newlines=True,stderr=subprocess.PIPE, stdout=subprocess.PIPE).returncode == 0:
             devs = subprocess.Popen(["zpool", "status"], universal_newlines=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE).stdout
             test_name = None
@@ -208,20 +244,13 @@ class Zpool_qualities:
             else:
                 print("cannot open '{n}': no such pool".format(n=self.name))  
         
-    def set_drives_count(self, options, opt_str, value, parser):
+    def set_drives_count(self, option, opt_str, value, parser): # set the number of drives that are going to be used to build a pool
         if self.drives_count >= value:
             self.drives_count = value
         else:
             sys.exit("number of available drives is less than desired number of drives")  
-    def get_drives_count(self):
-        devs = subprocess.Popen(["zpool", "status"], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
-        for line in devs:
-            regex = re.search("^\s+([a-zA-Z]+).+$", line)
-            for device in self.devices:
-                if regex != None and regex.group(1) != None and regex.group(1) == device.s_device:
-                    self.devices.remove(device)
-        return len(self.devices)
-    def elim(self, options, opt_str, value, parser): 
+    
+    def elim(self, option, opt_str, value, parser):  #eliminate all the drives of a specific media type, either HDD or SSD
         if value.lower() == "ssd":
             for device in self.devices:
                 if device.m_type == "HDD":
@@ -245,9 +274,24 @@ class Zpool_qualities:
         else:
             sys.exit("the argument for this option must be either ssd or hdd (non-case sensitive)")
         self.drives_count = len(self.devices)
+        
+#############################################################################################################################################################################
+# get_drives_count:  Zpool_qualities class method:
+#           get the drives_count as a list of remaining drives after creating a pool
+#Arguments:
+#           self: the Zpool_qualities object itself
+#############################################################################################################################################################################        
+        def get_drives_count(self): 
+            devs = subprocess.Popen(["zpool", "status"], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
+            for line in devs:
+                regex = re.search("^\s+([a-zA-Z]+).+$", line)
+                for device in self.devices:
+                    if regex != None and regex.group(1) != None and regex.group(1) == device.s_device:
+                        self.devices.remove(device)
+        return len(self.devices)
 
 ##############################################################################################################################################################################
-#customsort function:
+#customsort: Zpool_qualities class method:
 #           sort available drives into new vdevs based on input prompted from the user, then create a pool from those vdevs
 #Arguments:
 #           options: an object containing the arguments entered for all options. attributes containing these values are named after the options themselves.
@@ -275,6 +319,7 @@ class Zpool_qualities:
             i+=1
         makeCommandLine(VDEVS)
         self.drives_count = drives_count
+        
 ##############################################################################################################################################################################
 # setVdevCount function:
 #                       determine the default number of vdevs for a zpool based on the number of drive bays, and return that number
@@ -383,7 +428,7 @@ def main():
     parser.add_option("-c", "--custom", action="callback", callback=Zpool_q.customsort, help="[-c] Custom Flag. Include for manual pool configuration")
     parser.add_option("-D", "--destroy", action="callback", callback=Zpool_q.destroy, help="destroy zpool")
     parser.add_option("-d", "--set-drives_count", action="callback", type=int, callback=Zpool_q.set_drives_count, help="set quantity of drives to use")
-    parser.add_option("-f", "--force", action="callback", callback=Zpool_opts.force, help="force action")
+    parser.add_option("-f", "--force", action="callback", callback=Zpool_opts.force, help="force an action such as building a pool")
     parser.add_option("-l", "--RAID level", action="callback", type=str, callback=Zpool_q.set_raid_level, help="[-l] Specify RAID level '\n'     Default is raidz2 '\n'      Options: raidz[123], mirror, stripe")
     parser.add_option("-m", "--set-mount-point", action="callback", type=str, callback=Zpool_opts.set_mount_point, help="set mount point")
     parser.add_option("-n", "--name-pool", action="callback", type=str, callback=Zpool_q.set_zpool_name, help="[-n] Specify zpool name. Defaults to zpool")
@@ -393,8 +438,7 @@ def main():
     sys.argv = Fsettings.sortCMD(sys.argv)
 
     try:
-        (options, args) = parser.parse_args()
-                
+        (options, args) = parser.parse_args()      
         for key in Zpool_opts.subprocess_keywords:
             g_keywords[key] = Zpool_opts.subprocess_keywords[key]   
         if not '-D' in sys.argv and not '-c' in sys.argv:
