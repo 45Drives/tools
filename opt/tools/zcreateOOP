@@ -281,13 +281,13 @@ class Zpool_qualities:
 #Arguments:
 #           self: the Zpool_qualities object itself
 #############################################################################################################################################################################        
-        def get_drives_count(self): 
-            devs = subprocess.Popen(["zpool", "status"], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
-            for line in devs:
-                regex = re.search("^\s+([a-zA-Z]+).+$", line)
-                for device in self.devices:
-                    if regex != None and regex.group(1) != None and regex.group(1) == device.s_device:
-                        self.devices.remove(device)
+    def get_drives_count(self): 
+        devs = subprocess.Popen(["zpool", "status"], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
+        for line in devs:
+            regex = re.search("^\s+([a-zA-Z]+).+$", line)
+            for device in self.devices:
+                if regex != None and regex.group(1) != None and regex.group(1) == device.s_device:
+                    self.devices.remove(device)
         return len(self.devices)
 
 ##############################################################################################################################################################################
@@ -389,7 +389,7 @@ def autosort(Zpool_opts, Zpool_q):
         for j in range(Zpool_q.vdev_quantity):
             temp_list = [Zpool_q.raid_level]
             for i in range(drivespVDEV):
-                temp_list.append(Zpool_q.devices[index].s_device) 
+                temp_list.append(Zpool_q.devices[index].alias) 
                 index += 1
             VDEVS+=temp_list 
         g_commandLine.append("create")
