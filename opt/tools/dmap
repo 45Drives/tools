@@ -126,7 +126,6 @@ def get_path_variables():
 	# get the alias config path, if it fails assume /etc
 	# get the device path, if it fails assume /dev
 
-
 	conf_path = os.getenv('ALIAS_CONFIG_PATH')
 	if conf_path == None:
 		log("No alias config path set in profile.d ... Defaulting to /etc")

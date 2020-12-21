@@ -1,0 +1,279 @@
+#!/usr/bin/env python3
+########################################################################################
+# server_identifier
+# This script can be run on standard 45Drives storage servers to determine the system 
+# model by gathering hardware infromation.
+########################################################################################
+import subprocess
+import re
+
+g_product_lut_idx = {
+	"MOBO_MODEL":	0,
+	"24I_COUNT":	1,
+	"16I_COUNT":	2,
+	"CHASSIS_SIZE": 3,
+	"GRID_STYLE":	4
+}
+
+g_product_lut = {
+	"Storinator-H16-Q30-Enhanced-AMD":	["H11SSL-i"  ,1,1,"Q30" ,"H16"],
+	"Storinator-H16-S45-Enhanced-AMD":	["H11SSL-i"  ,1,2,"S45" ,"H16"],
+	"Storinator-H16-XL60-Enhanced-AMD":	["H11SSL-i"  ,1,3,"XL60","H16"],
+	"Storinator-H32-Q30-Enhanced-AMD":	["H11SSL-i"  ,2,0,"Q30" ,"H32"],
+	"Storinator-H32-S45-Enhanced-AMD":	["H11SSL-i"  ,2,1,"S45" ,"H32"],
+	"Storinator-H32-XL60-Enhanced-AMD":	["H11SSL-i"  ,2,2,"XL60","H32"],
+	"Storinator-AV15-Turbo":			["X11DPL-i"  ,0,1,"AV15","STORINATOR"],
+	"Storinator-Q30-Turbo":				["X11DPL-i"  ,0,2,"Q30" ,"STORINATOR"],
+	"Storinator-S45-Turbo":				["X11DPL-i"  ,0,3,"S45" ,"STORINATOR"],
+	"Storinator-XL60-Turbo":			["X11DPL-i"  ,0,4,"XL60","STORINATOR"],
+	"Stornado-AV15-Turbo":				["X11DPL-i"  ,0,2,"AV15","STORNADO"],
+	"Storinator-H16-Q30-Turbo":			["X11DPL-i"  ,1,1,"Q30" ,"H16"],
+	"Storinator-H16-S45-Turbo":			["X11DPL-i"  ,1,2,"S45" ,"H16"],
+	"Storinator-H16-XL60-Turbo":		["X11DPL-i"  ,1,3,"XL60","H16"],
+	"Storinator-H32-Q30-Turbo":			["X11DPL-i"  ,2,0,"Q30" ,"H32"],
+	"Storinator-H32-S45-Turbo":			["X11DPL-i"  ,2,1,"S45" ,"H32"],
+	"Storinator-H32-XL60-Turbo":		["X11DPL-i"  ,2,2,"XL60","H32"],
+	"Storinator-AV15-Enhanced":			["X11SPL-F"  ,0,1,"AV15","STORINATOR"],
+	"Storinator-Q30-Enhanced":			["X11SPL-F"  ,0,2,"Q30" ,"STORINATOR"],
+	"Storinator-S45-Enhanced":			["X11SPL-F"  ,0,3,"S45" ,"STORINATOR"],
+	"Storinator-XL60-Enhanced":			["X11SPL-F"  ,0,4,"XL60","STORINATOR"],
+	"Stornado-AV15-Enhanced":			["X11SPL-F"  ,0,2,"AV15","STORINATOR"],
+	"Storinator-H16-Q30-Enhanced":		["X11SPL-F"  ,1,1,"Q30" ,"H16"],
+	"Storinator-H16-S45-Enhanced":		["X11SPL-F"  ,1,2,"S45" ,"H16"],
+	"Storinator-H16-XL60-Enhanced":		["X11SPL-F"  ,1,3,"XL60","H16"],
+	"Storinator-H32-Q30-Enhanced":		["X11SPL-F"  ,2,0,"Q30" ,"H32"],
+	"Storinator-H32-S45-Enhanced":		["X11SPL-F"  ,2,1,"S45" ,"H32"],
+	"Storinator-H32-XL60-Enhanced":		["X11SPL-F"  ,2,2,"XL60","H32"],
+	"Storinator-AV15-Base":				["X11SSH-CTF",0,0,"AV15","AV15-BASE"],
+	"Storinator-Q30-Base":				["X11SSH-CTF",0,2,"Q30" ,"STORINATOR"],
+	"Storinator-S45-Base":				["X11SSM-F"  ,0,3,"S45" ,"STORINATOR"]
+}
+
+def motherboard():
+	# search through the output of the command "dmidecode -t 2" for motherboard information
+	# example output:
+		# # dmidecode 3.2
+		# Getting SMBIOS data from sysfs.
+		# SMBIOS 3.2.1 present.
+		# # SMBIOS implementations newer than version 3.2.0 are not
+		# # fully supported by this version of dmidecode.
+		
+		# Handle 0x0002, DMI type 2, 15 bytes
+		# Base Board Information
+		#         Manufacturer: Supermicro
+		#         Product Name: X11SPL-F
+		#         Version: 1.01
+		#         Serial Number: ZM18AS011320
+		#         Asset Tag: To be filled by O.E.M.
+		#         Features:
+		#                 Board is a hosting board
+		#                 Board is replaceable
+		#         Location In Chassis: To be filled by O.E.M.
+		#         Chassis Handle: 0x0003
+		#         Type: Motherboard
+		#         Contained Object Handles: 0
+
+	mobo_dict = {
+	"Manufacturer":"?",
+	"Product Name":"?",
+	"Serial Number":"?"
+	}
+
+	mobo = []
+
+	try:
+		dmi_result = subprocess.Popen(["dmidecode","-t","2"],stdout=subprocess.PIPE,universal_newlines=True).stdout
+	except:
+		print("ERROR: dmidecode is not installed")
+		exit(1)
+	for line in dmi_result:
+		for field in mobo_dict.keys():
+			regex = re.search("^\s({fld}):\s+(.*)".format(fld=field),line)
+			if regex != None:
+					mobo_dict[regex.group(1)] = regex.group(2)
+	
+	mobo.append(mobo_dict)
+	return mobo
+
+def hba():
+	# determine the model and count of hba cards present in the system
+	# by parsing the output of /opt/tools/storcli64 show.
+	# example output:
+		# CLI Version = 007.1017.0000.0000 May 10, 2019
+		# Operating system = Linux 4.18.0-240.1.1.el8_3.x86_64
+		# Status Code = 0
+		# Status = Success
+		# Description = None
+		# 
+		# Number of Controllers = 2
+		# Host Name = hoop.45lab.com
+		# Operating System  = Linux 4.18.0-240.1.1.el8_3.x86_64
+		# StoreLib IT Version = 07.1100.0200.0100
+		# StoreLib IR3 Version = 16.06-0
+		# 
+		# IT System Overview :
+		# ==================
+		# 
+		# ----------------------------------------------------------------------------
+		# Ctl Model         AdapterType   VendId DevId SubVendId SubDevId PCI Address 
+		# ----------------------------------------------------------------------------
+		#   0 HBA 9405W-16i   SAS3616(B0) 0x1000  0xD1    0x1000   0x3080 00:17:00:00 
+		#   1 HBA 9405W-16i   SAS3616(B0) 0x1000  0xD1    0x1000   0x3080 00:65:00:00 
+		# ----------------------------------------------------------------------------
+	hba_count = 0
+	hba = []
+	try:
+		storcli_result = subprocess.Popen(["/opt/tools/storcli64","show"],stdout=subprocess.PIPE,universal_newlines=True).stdout
+	except:
+		print("ERROR: storcli is not installed")
+		exit(1)
+	for line in storcli_result:
+		regex = re.search("Number of Controllers = (\d)",line)
+		if regex != None:
+			hba_count = int(regex.group(1))
+			break
+
+	hba_models = {
+		"SAS9305-16i":16,
+		"SAS9305-24i":24,
+		"HBA 9405W-16i":16
+	}
+
+	hba_dict = {
+		"Model":"?",
+		"Adapter":"?",
+		"Bus Address":"?",
+		"Drive Connections":0
+	}
+
+	hybrid_flag = False
+
+	if hba_count != 0:
+		for line in storcli_result:
+			for model in hba_models.keys():
+				# Model AdapterType VendId DevId SubVendId SubDevId PCIAddress 	
+				regex = re.search("({fld})\s+(\w+).*(00:\w\w:\w\w:\w\w)\s+$".format(fld=model),line)
+				if regex != None:
+					hba_dict["Model"] = regex.group(1)
+					hba_dict["Adapter"] = regex.group(2)
+					hba_dict["Bus Address"] = "00" + regex.group(3)
+					hba_dict["Bus Address"] = hba_dict["Bus Address"][:-3] + ".0"
+					hba_dict["Drive Connections"] = hba_models[model]
+					if hba_dict["Drive Connections"] == 24:
+						hybrid_flag = True
+					hba.append(hba_dict.copy())
+	return hba, hybrid_flag
+
+def serial_check():
+	#### OLD SERIAL ######################################
+	# FRU Device Description : Builtin FRU Device (ID 0)
+	# Chassis Type          : Unspecified
+	# Chassis Part Number   : N/A
+	# Chassis Serial        : N/A
+	# Board Mfg Date        : Tue Dec  1 05:04:00 2020
+	# Board Mfg             : Supermicro
+	# Board Product         : X11SPL-F
+	# Board Serial          : 1238383213
+	# Board Part Number     : N/A
+	# Product Manufacturer  : 45Drives
+	# Product Name          : Storinator
+	# Product Part Number   : S45
+	# Product Version       : 5.0
+	# Product Serial        : 1234-1
+	# Product Asset Tag     : N/A
+
+	#### NEW SERIAL #####################################
+	# FRU Device Description : Builtin FRU Device (ID 0)
+	# Chassis Type          : Rack Mount Chassis
+	# Chassis Part Number   : AV15
+	# Chassis Serial        : 13371337-1
+	# Board Mfg Date        : Tue Dec  1 05:04:00 2020
+	# Board Mfg             : Supermicro
+	# Board Product         : X11SPL-F
+	# Board Serial          : ZM18AS011320
+	# Board Part Number     : X11SPL-F
+	# Product Manufacturer  : 45Drives
+	# Product Name          : Stornado-AV15-Enhanced
+	# Product Part Number   : AV15
+	# Product Version       : (Enhanced)
+	# Product Serial        : 13371337-1
+	# Product Asset Tag     : IPMIPASSWD
+	serial_fields = [
+		"Chassis Type",
+		"Chassis Part Number",
+		"Chassis Serial",
+		"Board Mfg Date",
+		"Board Mfg",
+		"Board Product",
+		"Board Serial",
+		"Board Part Number",
+		"Product Manufacturer",
+		"Product Name",
+		"Product Part Number",
+		"Product Version",
+		"Product Serial",
+		"Product Asset Tag"
+	]
+
+	serial_result = {}
+
+	try:
+		ipmi_result = subprocess.Popen(["ipmitool","fru"],stdout=subprocess.PIPE,universal_newlines=True).stdout
+	except:
+		print("ERROR: ipmitool is not installed")
+		exit(1)
+	for line in ipmi_result:
+		for field in serial_fields:
+			regex = re.search("({fld})\s+:\s+(\S+)".format(fld=field),line)
+			if regex != None:
+				serial_result[regex.group(1)] = regex.group(2)
+	return serial_result
+
+def determine_model(mobo_model_str,hba_dict_lst,chassis_size_str):
+	hba_16i_count = 0
+	hba_24i_count = 0
+
+	model = "?"
+	for card in hba_dict_lst:
+		if card["Drive Connections"] == 16:
+			hba_16i_count += 1
+		elif card["Drive Connections"] == 24:
+			hba_24i_count += 1
+
+	for sys_type in g_product_lut.keys():
+		if (g_product_lut[sys_type][g_product_lut_idx["MOBO_MODEL"]] == mobo_model_str and
+			g_product_lut[sys_type][g_product_lut_idx["24I_COUNT"]] == hba_24i_count and
+			g_product_lut[sys_type][g_product_lut_idx["16I_COUNT"]] == hba_16i_count and
+			g_product_lut[sys_type][g_product_lut_idx["CHASSIS_SIZE"]] == chassis_size_str):
+				model = sys_type
+	return model
+
+def main():
+	server = {
+		"motherboard":"?",
+		"hba":"?",
+		"hybrid":False,
+		"serial":"?",
+		"model":"?"
+	}
+
+	# Check to see if motherboard has been programmed using updated serialization script
+	old_serial = False
+	serial_result = serial_check()
+	for field in serial_result.keys():
+		if serial_result[field] == "N/A":
+			old_serial = True
+
+	server["motherboard"] = motherboard()
+	server["hba"], server["hybrid"] = hba()
+	server["serial"] = serial_result["Product Serial"].upper()
+
+	if old_serial == True:
+		server["model"] = determine_model(server["motherboard"][0]["Product Name"],server["hba"],server["serial"])
+	else:
+		server["model"] = serial_result["Product Name"]
+
+	print(server)
+
+if __name__ == "__main__":
+    main()
