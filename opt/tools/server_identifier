@@ -6,13 +6,17 @@
 ########################################################################################
 import subprocess
 import re
+import json
+import os.path
+import os
+from datetime import datetime
 
 g_product_lut_idx = {
 	"MOBO_MODEL":	0,
 	"24I_COUNT":	1,
 	"16I_COUNT":	2,
 	"CHASSIS_SIZE": 3,
-	"GRID_STYLE":	4
+	"ALIAS_STYLE":	4
 }
 
 g_product_lut = {
@@ -37,7 +41,7 @@ g_product_lut = {
 	"Storinator-Q30-Enhanced":			["X11SPL-F"  ,0,2,"Q30" ,"STORINATOR"],
 	"Storinator-S45-Enhanced":			["X11SPL-F"  ,0,3,"S45" ,"STORINATOR"],
 	"Storinator-XL60-Enhanced":			["X11SPL-F"  ,0,4,"XL60","STORINATOR"],
-	"Stornado-AV15-Enhanced":			["X11SPL-F"  ,0,2,"AV15","STORINATOR"],
+	"Stornado-AV15-Enhanced":			["X11SPL-F"  ,0,2,"AV15","STORNADO"],
 	"Storinator-H16-Q30-Enhanced":		["X11SPL-F"  ,1,1,"Q30" ,"H16"],
 	"Storinator-H16-S45-Enhanced":		["X11SPL-F"  ,1,2,"S45" ,"H16"],
 	"Storinator-H16-XL60-Enhanced":		["X11SPL-F"  ,1,3,"XL60","H16"],
@@ -46,7 +50,8 @@ g_product_lut = {
 	"Storinator-H32-XL60-Enhanced":		["X11SPL-F"  ,2,2,"XL60","H32"],
 	"Storinator-AV15-Base":				["X11SSH-CTF",0,0,"AV15","AV15-BASE"],
 	"Storinator-Q30-Base":				["X11SSH-CTF",0,2,"Q30" ,"STORINATOR"],
-	"Storinator-S45-Base":				["X11SSM-F"  ,0,3,"S45" ,"STORINATOR"]
+	"Storinator-S45-Base":				["X11SSM-F"  ,0,3,"S45" ,"STORINATOR"],
+	"Storinator":						["?",0,0,"?","STORINATOR"]
 }
 
 def motherboard():
@@ -162,6 +167,33 @@ def hba():
 					if hba_dict["Drive Connections"] == 24:
 						hybrid_flag = True
 					hba.append(hba_dict.copy())
+		
+		slots = []
+		addresses = []
+		try:
+			dmidecode_result = subprocess.Popen(["dmidecode","-t","9"],stdout=subprocess.PIPE,universal_newlines=True).stdout
+		except:
+			print("ERROR: dmidecode not installed")
+			exit(1)
+		for line in dmidecode_result:
+			regex_id = re.search("ID:\s+(\d)",line)
+			if regex_id != None:
+				slots.append(int(regex_id.group(1)))
+			regex_bus_address = re.search("Bus Address:\s+(\S+)",line)
+			if regex_bus_address != None:
+				addresses.append(regex_bus_address.group(1))
+
+		if len(slots) == len(addresses):
+			for i in range(0,len(addresses)):
+				for card in hba:
+					if card["Bus Address"] == addresses[i]:
+						card["PCI Slot"] = slots[i]
+
+		#sort the final list of hba cards by the Bus Address field. This ensures that
+		#the order in which they are stored resembles the lspci output. which has
+		#worked reliably in the past.
+		hba = sorted(hba, key=lambda k: k['Bus Address']) 
+
 	return hba, hybrid_flag
 
 def serial_check():
@@ -246,16 +278,66 @@ def determine_model(mobo_model_str,hba_dict_lst,chassis_size_str):
 			g_product_lut[sys_type][g_product_lut_idx["16I_COUNT"]] == hba_16i_count and
 			g_product_lut[sys_type][g_product_lut_idx["CHASSIS_SIZE"]] == chassis_size_str):
 				model = sys_type
+
+	if model == "?":
+		print("!!! Automatic Identification failed. Server Model assigned as Storinator (default) !!!")
+		model = "Storinator"
 	return model
+
+def update_json_file(server,scan_time):
+	old_file = None
+	old_server = None
+	json_dir = "/opt/tools/server_info"
+
+	#make a directory to store the server info files
+	if not os.path.isdir(json_dir):
+		print("Server Info Directory Created:  ("+json_dir+")")
+		os.mkdir(json_dir)
+
+	# load the existing server_info.json file in as a json object.
+	if os.path.exists(json_dir+"/server_info.json") and os.path.isfile(json_dir+"/server_info.json"):
+		old_file = open(json_dir+"/server_info.json","r")
+		old_server = json.load(old_file)
+		old_file.close()
+	
+	if old_server != None:
+		# json object loaded in successfully
+		if old_server != server:
+			# the hardware configuration has changed since last time
+			# back up the existing server_info_file
+			backup_file = open(json_dir+"/server_info_backup_"+scan_time+".json","w")
+			backup_file.write(json.dumps(old_server,indent=4))
+			backup_file.close()
+
+			print("!!! Hardware configuration has changed since last scan, created backup in ("+json_dir+"/server_info_backup_"+scan_time+".json) !!!")
+			
+			new_file = open(json_dir+"/server_info.json","w")
+			new_file.write(json.dumps(server,indent=4))
+			new_file.close()
+	else:
+		# this is the first time that this script was run on the system.
+		new_file = open(json_dir+"/server_info.json","w")
+		new_file.write(json.dumps(server,indent=4))
+		new_file.close()
+		print("Server Info File Created:  ("+json_dir+"/server_info.json)")
+
+
 
 def main():
 	server = {
-		"motherboard":"?",
-		"hba":"?",
-		"hybrid":False,
-		"serial":"?",
-		"model":"?"
+		"Motherboard":"?",
+		"HBA":"?",
+		"Hybrid":False,
+		"Serial":"?",
+		"Model":"?",
+		"Alias Style":"?",
+		"Chassis Size":"?"
 	}
+	
+	# set the last scan time
+	current_day = datetime.today()
+	current_time = datetime.now()
+	scan_time = current_day.strftime("%Y_%m_%d_") + current_time.strftime("%H_%M")
 
 	# Check to see if motherboard has been programmed using updated serialization script
 	old_serial = False
@@ -263,17 +345,21 @@ def main():
 	for field in serial_result.keys():
 		if serial_result[field] == "N/A":
 			old_serial = True
+			break
 
-	server["motherboard"] = motherboard()
-	server["hba"], server["hybrid"] = hba()
-	server["serial"] = serial_result["Product Serial"].upper()
+	server["Motherboard"] = motherboard()
+	server["HBA"], server["Hybrid"] = hba()
+	server["Serial"] = serial_result["Product Serial"].upper()
+	server["Chassis Size"] = serial_result["Product Part Number"].upper()
 
 	if old_serial == True:
-		server["model"] = determine_model(server["motherboard"][0]["Product Name"],server["hba"],server["serial"])
+		server["Model"] = determine_model(server["Motherboard"][0]["Product Name"],server["HBA"],server["Chassis Size"])
 	else:
-		server["model"] = serial_result["Product Name"]
+		server["Model"] = serial_result["Product Name"]
 
-	print(server)
+	server["Alias Style"] = g_product_lut[server["Model"]][g_product_lut_idx["ALIAS_STYLE"]]
+	update_json_file(server,scan_time)
+	exit(0)
 
 if __name__ == "__main__":
     main()

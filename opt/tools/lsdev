@@ -291,6 +291,9 @@ def get_controller():
 	elif re.search("3224",string,re.MULTILINE) != None:
 		controller = "LSI 9305-16i"
 		drv_arg = "mpt3sas"
+	elif re.search("3616",string,re.MULTILINE) != None:
+		controller = "LSI 9405W-16i"
+		drv_arg = "mpt3sas"
 	elif len(server["rows"]) == 1:
 		controller = "AV15 Base"
 		drv_arg = "mpt3sas"
