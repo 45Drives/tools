@@ -350,7 +350,7 @@ def get_server_info():
 	if return_code == 0:
 		# we should expect that there is a file that we can parse in
 		# /opt/tools/server_info/server_info.json
-		server = json.load(open("/opt/tools/server_info/server_info.json","r"))
+		server = json.load(open("/etc/server_info/server_info.json","r"))
 		return server
 
 
@@ -423,11 +423,18 @@ def create_vdev_id(server):
 		for i in range(0,len(server["HBA"])):
 			count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
 			for j in range(0,count):
-				vdev_id_str += (
-					"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
-						i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
+				if(j>=15 and server["Alias Style"] == "H32" and i==len(alias_template[server["Alias Style"]][server["Chassis Size"]])-2):
+					vdev_id_str += (
+						"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
+							i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j+1]
+							)
 						)
-					)
+				else:	
+					vdev_id_str += (
+						"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
+							i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
+							)
+						)
 	else:
 		# we are using the AV15-BASE ailiasing scheme.
 		pass

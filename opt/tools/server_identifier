@@ -287,7 +287,7 @@ def determine_model(mobo_model_str,hba_dict_lst,chassis_size_str):
 def update_json_file(server,scan_time):
 	old_file = None
 	old_server = None
-	json_dir = "/opt/tools/server_info"
+	json_dir = "/etc/server_info"
 
 	#make a directory to store the server info files
 	if not os.path.isdir(json_dir):
