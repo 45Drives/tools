@@ -313,11 +313,13 @@ def update_json_file(server,scan_time):
 			
 			new_file = open(json_dir+"/server_info.json","w")
 			new_file.write(json.dumps(server,indent=4))
+			new_file.write("\n")
 			new_file.close()
 	else:
 		# this is the first time that this script was run on the system.
 		new_file = open(json_dir+"/server_info.json","w")
 		new_file.write(json.dumps(server,indent=4))
+		new_file.write("\n")
 		new_file.close()
 		print("Server Info File Created:  ("+json_dir+"/server_info.json)")
 
