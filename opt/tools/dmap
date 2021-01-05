@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-################################################################################
+###############################################################################
 # dmap - used to create /etc/vdev_id.conf for 45Drives storage servers
 #
 # Copyright (C) 2020, Josh Boudreau <jboudreau@45drives.com>
@@ -9,43 +9,6 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 # 
-# TODO: Test on multiple bare metal configurations    
-################################################################################
-
-# dmap is used to create /etc/vdev_id.conf 
-
-######################### EXAMPLE /etc/vdev_id.conf ############################
-#alias 1-1     /dev/disk/by-path/pci-0000:03:00.0-sas-phy2-lun-0
-#alias 1-2     /dev/disk/by-path/pci-0000:03:00.0-sas-phy3-lun-0
-#alias 1-3     /dev/disk/by-path/pci-0000:03:00.0-sas-phy1-lun-0
-#alias 1-4     /dev/disk/by-path/pci-0000:03:00.0-sas-phy0-lun-0
-#alias 1-5     /dev/disk/by-path/pci-0000:03:00.0-sas-phy6-lun-0
-#alias 1-6     /dev/disk/by-path/pci-0000:03:00.0-sas-phy7-lun-0
-#alias 1-7     /dev/disk/by-path/pci-0000:03:00.0-sas-phy5-lun-0
-#alias 1-8     /dev/disk/by-path/pci-0000:03:00.0-sas-phy4-lun-0
-#alias 1-9     /dev/disk/by-path/pci-0000:03:00.0-sas-phy18-lun-0
-#alias 1-10     /dev/disk/by-path/pci-0000:03:00.0-sas-phy19-lun-0
-#alias 1-11     /dev/disk/by-path/pci-0000:03:00.0-sas-phy17-lun-0
-#alias 1-12     /dev/disk/by-path/pci-0000:03:00.0-sas-phy16-lun-0
-#alias 1-13     /dev/disk/by-path/pci-0000:03:00.0-sas-phy22-lun-0
-#alias 1-14     /dev/disk/by-path/pci-0000:03:00.0-sas-phy23-lun-0
-#alias 1-15     /dev/disk/by-path/pci-0000:03:00.0-sas-phy21-lun-0
-#alias 2-1     /dev/disk/by-path/pci-0000:04:00.0-sas-phy2-lun-0
-#alias 2-2     /dev/disk/by-path/pci-0000:04:00.0-sas-phy3-lun-0
-#alias 2-3     /dev/disk/by-path/pci-0000:04:00.0-sas-phy1-lun-0
-#alias 2-4     /dev/disk/by-path/pci-0000:04:00.0-sas-phy0-lun-0
-#alias 2-5     /dev/disk/by-path/pci-0000:04:00.0-sas-phy6-lun-0
-#alias 2-6     /dev/disk/by-path/pci-0000:04:00.0-sas-phy7-lun-0
-#alias 2-7     /dev/disk/by-path/pci-0000:04:00.0-sas-phy5-lun-0
-#alias 2-8     /dev/disk/by-path/pci-0000:04:00.0-sas-phy4-lun-0
-#alias 2-9     /dev/disk/by-path/pci-0000:04:00.0-sas-phy18-lun-0
-#alias 2-10     /dev/disk/by-path/pci-0000:04:00.0-sas-phy19-lun-0
-#alias 2-11     /dev/disk/by-path/pci-0000:04:00.0-sas-phy17-lun-0
-#alias 2-12     /dev/disk/by-path/pci-0000:04:00.0-sas-phy16-lun-0
-#alias 2-13     /dev/disk/by-path/pci-0000:04:00.0-sas-phy22-lun-0
-#alias 2-14     /dev/disk/by-path/pci-0000:04:00.0-sas-phy23-lun-0
-#alias 2-15     /dev/disk/by-path/pci-0000:04:00.0-sas-phy21-lun-0
-
 ###############################################################################
 ###############################################################################
 
@@ -228,35 +191,44 @@ def get_server_info():
 # Args: server (dict)
 #    Example of a server dict:
 #    {
-#        "Motherboard": [
-#            {
-#                "Manufacturer": "Supermicro",
-#                "Product Name": "X11SPL-F",
-#                "Serial Number": "ZM18AS011320"
-#            }
-#        ],
+#        "Motherboard": {
+#            "Manufacturer": "Supermicro",
+#            "Product Name": "X11SPL-F",
+#            "Serial Number": "ZM18AS011320"
+#        },
 #        "HBA": [
 #            {
-#                "Model": "HBA 9405W-16i",
-#                "Adapter": "SAS3616",
+#                "Model": "SAS9305-16i",
+#                "Adapter": "SAS3224",
 #                "Bus Address": "0000:17:00.0",
 #                "Drive Connections": 16,
+#                "Kernel Driver": "mpt3sas",
+#                "PCI Slot": 5
+#            },
+#            {
+#                "Model": "SAS9305-24i",
+#                "Adapter": "SAS3224",
+#                "Bus Address": "0000:18:00.0",
+#                "Drive Connections": 24,
+#                "Kernel Driver": "mpt3sas",
 #                "PCI Slot": 4
 #            },
 #            {
-#                "Model": "HBA 9405W-16i",
-#                "Adapter": "SAS3616",
+#                "Model": "SAS9305-24i",
+#                "Adapter": "SAS3224",
 #                "Bus Address": "0000:65:00.0",
-#                "Drive Connections": 16,
+#                "Drive Connections": 24,
+#                "Kernel Driver": "mpt3sas",
 #                "PCI Slot": 6
 #            }
 #        ],
-#        "Hybrid": false,
-#        "Serial": "12341234-1-1",
-#        "Model": "Stornado-AV15-Enhanced",
-#        "Alias Style": "STORNADO",
-#        "Chassis Size": "AV15"
-#    }     
+#        "Hybrid": true,
+#        "Serial": "13371337-1-1",
+#        "Model": "Storinator-H32-S45-Enhanced",
+#        "Alias Style": "H32",
+#        "Chassis Size": "S45"
+#    }
+#    
 # Desc: Using the server dict, we can alias all drives in the appropriate 
 #       order based on the system information. The server dict is read in 
 #       from /etc/server_info/server_info.json. The phy_order dict is used 

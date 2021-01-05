@@ -97,8 +97,7 @@ def motherboard():
 			if regex != None:
 					mobo_dict[regex.group(1)] = regex.group(2)
 	
-	mobo.append(mobo_dict)
-	return mobo
+	return mobo_dict
 
 def hba():
 	# determine the model and count of hba cards present in the system
@@ -144,11 +143,18 @@ def hba():
 		"HBA 9405W-16i":16
 	}
 
+	hba_drivers = {
+		"SAS9305-16i":"mpt3sas",
+		"SAS9305-24i":"mpt3sas",
+		"HBA 9405W-16i":"mpt3sas"
+	}
+
 	hba_dict = {
 		"Model":"?",
 		"Adapter":"?",
 		"Bus Address":"?",
-		"Drive Connections":0
+		"Drive Connections":0,
+		"Kernel Driver":"?"
 	}
 
 	hybrid_flag = False
@@ -164,6 +170,7 @@ def hba():
 					hba_dict["Bus Address"] = "00" + regex.group(3)
 					hba_dict["Bus Address"] = hba_dict["Bus Address"][:-3] + ".0"
 					hba_dict["Drive Connections"] = hba_models[model]
+					hba_dict["Kernel Driver"] = hba_drivers[model]
 					if hba_dict["Drive Connections"] == 24:
 						hybrid_flag = True
 					hba.append(hba_dict.copy())
@@ -355,7 +362,7 @@ def main():
 	server["Chassis Size"] = serial_result["Product Part Number"].upper()
 
 	if old_serial == True:
-		server["Model"] = determine_model(server["Motherboard"][0]["Product Name"],server["HBA"],server["Chassis Size"])
+		server["Model"] = determine_model(server["Motherboard"]["Product Name"],server["HBA"],server["Chassis Size"])
 	else:
 		server["Model"] = serial_result["Product Name"]
 
