@@ -169,6 +169,7 @@ def hba():
 					hba_dict["Adapter"] = regex.group(2)
 					hba_dict["Bus Address"] = regex.group(3)
 					hba_dict["Bus Address"] = hba_dict["Bus Address"][:-3] + ".0"
+					print("BUS ADDRESS: ",hba_dict["Bus Address"])
 					hba_dict["Drive Connections"] = hba_models[model]
 					hba_dict["Kernel Driver"] = hba_drivers[model]
 					if hba_dict["Drive Connections"] == 24:
@@ -188,14 +189,14 @@ def hba():
 				slots.append(int(regex_id.group(1)))
 			regex_bus_address = re.search("Bus Address:\s+(\S+)",line)
 			if regex_bus_address != None:
+				print("dmidecode bus addresses: ",regex_bus_address.group(1))
 				addresses.append(regex_bus_address.group(1))
 
-		if len(slots) == len(addresses):
-			for i in range(0,len(addresses)):
-				for card in hba:
-					if card["Bus Address"] in addresses[i]:
-						card["PCI Slot"] = slots[i]
-						card["Bus Address"] = addresses[i]
+		for i in range(0,len(addresses)):
+			for card in hba:
+				if card["Bus Address"] in addresses[i] and i < len(slots):
+					card["PCI Slot"] = slots[i]
+					card["Bus Address"] = addresses[i]
 
 		#sort the final list of hba cards by the Bus Address field. This ensures that
 		#the order in which they are stored resembles the lspci output. which has
