@@ -11,6 +11,7 @@
 #
 # TODO:
 # - re-tune lsosd (low priority)
+# - Adjust the output to accomodate hybrid systems.
 ################################################################################
 
 import json
@@ -82,17 +83,25 @@ def smartctl(drive):
 	drive["capacity"] = output["user_capacity"]["bytes"] if "user_capacity" in output.keys() else "?"
 	drive["firm-ver"] = output["firmware_version"] if "firmware_version" in output.keys() else "?"
 	drive["rotation-rate"] = output["rotation_rate"] if "rotation_rate" in output.keys() else "?"
-	for attr in output["ata_smart_attributes"]["table"]:
-		if attr["name"] == "Start_Stop_Count":
-			drive["start-stop-count"] = attr["raw"]["string"]
-		elif attr["name"] == "Power_Cycle_Count":
-			drive["power-cycle-count"] = attr["raw"]["string"]
-		elif attr["name"] == "Temperature_Celsius":
-			drive["temp-c"] = attr["raw"]["string"].split()[0] + u"\u2103"
-		elif attr["name"] == "Current_Pending_Sector":
-			drive["current-pending-sector"] = attr["raw"]["string"]
-		elif attr["name"] == "Offline_Uncorrectable":
-			drive["offline-uncorrectable"] = attr["raw"]["string"]
+	if "ata_smart_attributes" in output.keys():
+		for attr in output["ata_smart_attributes"]["table"]:
+			if attr["name"] == "Start_Stop_Count":
+				drive["start-stop-count"] = attr["raw"]["string"]
+			elif attr["name"] == "Power_Cycle_Count":
+				drive["power-cycle-count"] = attr["raw"]["string"]
+			elif attr["name"] == "Temperature_Celsius":
+				drive["temp-c"] = attr["raw"]["string"].split()[0] + u"\u2103"
+			elif attr["name"] == "Current_Pending_Sector":
+				drive["current-pending-sector"] = attr["raw"]["string"]
+			elif attr["name"] == "Offline_Uncorrectable":
+				drive["offline-uncorrectable"] = attr["raw"]["string"]
+	else:
+		drive["start-stop-count"] = "?"
+		drive["power-cycle-count"] = "?"
+		drive["temp-c"] = "?"
+		drive["current-pending-sector"] = "?"
+		drive["start-stop-count"] = "?"
+		drive["offline-uncorrectable"] = "?"
 	drive["power-on-time"] = output["power_on_time"]["hours"] if "power_on_time" in output.keys() else "?"
 	drive["health"] = "OK" if output["smart_status"]["passed"] else "POOR"
 
@@ -201,6 +210,44 @@ def build_server(options):
 	call_hdparm = hdparm_needed(options) # grab model num and serial from lslk (get_model_serial())
 	# model_serial = get_model_serial() if call_lsblk else {}
 	server = [[]]; # server[row][bay]
+		# load the existing server_info.json file in as a json object.
+	json_dir = "/etc/server_info"
+	server_obj = None
+	if not os.path.exists(json_dir+"/server_info.json") or not os.path.isfile(json_dir+"/server_info.json"):
+		print("Unable to determine server model. Run 'dmap'")
+		exit(1)
+	server_info_file = open(json_dir+"/server_info.json","r")
+	server_obj = json.load(server_info_file)
+	server_info_file.close()
+	
+	alias_template = {
+		"H16":{
+			"Q30":[15,23],
+			"S45":[15,15,23],
+			"XL60":[15,15,15,23]
+		},
+		"H32":{
+			"Q30":[15,32],
+			"S45":[15,15,32],
+			"XL60":[15,15,15,32]
+		},
+		"STORINATOR":{
+			"AV15":[15],
+			"Q30":[15,15],
+			"S45":[15,15,15],
+			"XL60":[15,15,15]	
+		},
+		"STORNADO":{
+			"AV15":[32]
+		},
+		"AV15-BASE":{
+			"AV15":[15]
+		}
+	}
+	CURRENT_ROW = 0
+	DRIVE_COUNT = 0
+
+
 	CONFIG_PATH = "/etc/zfs" if os.path.isfile("/etc/zfs/vdev_id.conf") else "/etc"
 	try:
 		vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
@@ -216,12 +263,14 @@ def build_server(options):
 		regex = re.search("^alias\s+(\d{1,2})-(\d{1,2})\s+(.*)$",line)
 		if regex == None:
 			continue
-		new_row_index = int(regex.group(1))
-		new_bay_index = int(regex.group(2))
+		CARD = int(regex.group(1))
+		DRIVE = int(regex.group(2))
+		DRIVE_COUNT += 1
 		# new row
-		if new_row_index > row_index:
-			row_index = new_row_index
-			server.append([]); # insert new row
+		if DRIVE_COUNT > alias_template[server_obj["Alias Style"]][server_obj["Chassis Size"]][CURRENT_ROW]:
+			DRIVE_COUNT = 1
+			CURRENT_ROW += 1
+			server.append([])
 		# process bay
 		bay = {
 			"dev-by-path": "",
@@ -244,7 +293,7 @@ def build_server(options):
 			"health": ""
 		}
 		bay["dev-by-path"] = regex.group(3) # third capture group
-		bay["bay-id"] = str(new_row_index) + "-" + str(new_bay_index)
+		bay["bay-id"] = str(CARD) + "-" + str(DRIVE)
 		# if symlink exists in /dev/disk/by-path/ then bay is occupied
 		link = os.path.islink(bay["dev-by-path"])
 		if os.path.islink(bay["dev-by-path"]):
@@ -262,7 +311,7 @@ def build_server(options):
 				#bay["model-name"] = ms[model_serial_ind.MODEL]
 				#bay["serial"] = ms[model_serial_ind.SERIAL]
 		# insert copy of bay
-		server[row_index-1].append(bay.copy());
+		server[CURRENT_ROW].append(bay.copy());
 	vdev_id.close()
 	return server
 
@@ -274,43 +323,58 @@ def build_server(options):
 # returns: (controller name, driver version)
 ################################################################################
 def get_controller():
-	try:
-		stream = subprocess.Popen("lspci", stdout=subprocess.PIPE,
-				universal_newlines=True).stdout
-	except OSError:
-		print("Error executing lspci.")
-		exit(1)
-	string = stream.read()
-	controller = "?"
-	drv_vers = "?"
-	drv_arg = ""
-	
-	if re.search("2116",string,re.MULTILINE) != None:
-		controller = "LSI 9201-16i"
-		drv_arg = "mpt2sas"
-	elif re.search("3224",string,re.MULTILINE) != None:
-		controller = "LSI 9305-16i"
-		drv_arg = "mpt3sas"
-	elif len(server["rows"]) == 1:
-		controller = "AV15 Base"
-		drv_arg = "mpt3sas"
+	controllers = []
+	driver_args = []
+	driver_versions = []
+
+	controller_names = "?"
+	driver_version_names = "?"
+
+	# load the existing server_info.json file in as a json object.
+	json_dir = "/etc/server_info"
+	server_obj = None
+	if os.path.exists(json_dir+"/server_info.json") and os.path.isfile(json_dir+"/server_info.json"):
+		server_info_file = open(json_dir+"/server_info.json","r")
+		server_obj = json.load(server_info_file)
+		server_info_file.close()
+		
+		if server_obj["Alias Style"] != "AV15-BASE":
+			# This is a server with HBA cards
+			for hba in server_obj["HBA"]:
+				if hba["Model"] not in controllers:
+					controllers.append(hba["Model"])
+					driver_args.append(hba["Kernel Driver"])
+
+		else:
+			# this is an AV15 Base Model
+			controllers = ["AV15-Base"]
+			driver_args = ["mpt3sas"]
+
+		#run modinfo command to obtain the drive version for each unique controller type
+		for drv_arg in driver_args:
+			try:
+				drv_stream = subprocess.Popen(["modinfo", drv_arg], stdout=subprocess.PIPE,
+						universal_newlines=True).stdout
+			except OSError:
+				print("Error executing modinfo.")
+				exit(1)
+			
+			for line in drv_stream:
+				regex = re.search("^version:\s+(\d.*)$",line)
+				if regex != None:
+					driver_versions.append(regex.group(1))
+					break
+		# update the controller and driver version strings with the relevant information
+		if len(controllers) != 0 and len(driver_versions) != 0:
+			controller_names = ", ".join(controllers)
+			driver_version_names = ", ".join(driver_versions)
+
+
 	else:
-		return "?","?"
-	
-	#run modinfo command to obtain the drive version
-	try:
-		drv_stream = subprocess.Popen(["modinfo", drv_arg], stdout=subprocess.PIPE,
-				universal_newlines=True).stdout
-	except OSError:
-		print("Error executing modinfo.")
+		print("Unable to determine disk controller. Run 'dmap'")
 		exit(1)
-	
-	for line in drv_stream:
-		regex = re.search("^version:\s+(\d.*)$",line)
-		if regex != None:
-			drv_vers = regex.group(1)
-			break
-	return controller, drv_vers
+
+	return controller_names, driver_version_names
 
 ################################################################################
 # function name: disk_type
@@ -378,7 +442,7 @@ def choose_output(bay, options, osd):
 ################################################################################
 def choose_output_header(options):
 	if no_output_flags(options):
-		return "ID Dev"
+		return "Dev"
 	output = []
 	if options.outputDev:
 		output.append("Dev")
@@ -396,7 +460,7 @@ def choose_output_header(options):
 		output.append("Temp C")
 	if options.outputOSD:
 		output.append("OSD")
-	return "ID " + ",".join(output)
+	return ",".join(output)
 
 ################################################################################
 # function name: print_bays
@@ -432,13 +496,13 @@ def print_bays(server, options, osd):
 	
 	header_text = [
 		"Storinator Disk Info",
-		"Disk Controller: " + server["meta"]["disk-controller"],
-		"Driver version: " + server["meta"]["driver-version"]
+		"Disk Controller(s): " + server["meta"]["disk-controller"],
+		"Driver version(s): " + server["meta"]["driver-version"]
 	]
 	
 	col_headers = []
 	for row in reversed(range(len(server["rows"]))):
-		h_txt = ("Row " + str(row + 1) + " (" + choose_output_header(options)) + ")"
+		h_txt = ("Row " + str(row + 1) + " ID (" + choose_output_header(options)) + ")"
 		col_headers.append(h_txt)
 	
 	table_print(ansi = options.colour, c_count = len(print_array), c_txt = print_array, c_labels = col_headers, h_txt = header_text, padding = 1)
