@@ -72,6 +72,8 @@ def format_bytes(size_bytes):
 def main():
 	parser = OptionParser()
 	(options, args) = parser.parse_args()
+	if len(args) == 0:
+		args = ["."]
 	for arg in args:
 		display_attributes(arg)
 
