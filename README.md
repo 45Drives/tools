@@ -65,20 +65,20 @@
 ### Installation
 CentOS 7.X
 ```sh
-$ yum install URL
+$ yum install http://images.45drives.com/ceph/rpm/el7/x86_64/45drives-tools-1.7-1.el7.x86_64.rpm
 ```
 CentOS 8.X
 ```sh
-$ dnf install URL
+$ dnf install http://images.45drives.com/ceph/rpm/el8/x86_64/45drives-tools-1.7-1.el8.x86_64.rpm
 ```
 
 ### RPM BUILD from git repo (requires "rpm-build" and "git" packages (centOS))
-use the provided script (build-v1_6.sh)
+use the provided script (build-v1_7.sh)
 ```sh
 # don't run this if you have a ~/rpmbuild folder that you don't want to lose! 
-$ curl -O https://raw.githubusercontent.com/45Drives/tools/master/build-v1_6.sh
-$ chmod +x build-v1_6.sh
-$ ./build-v1_6.sh 
+$ curl -O https://raw.githubusercontent.com/45Drives/tools/master/build-v1_7.sh
+$ chmod +x build-v1_7.sh
+$ ./build-v1_7.sh 
 ```
 alternatively, you can just execute these commands
 ```sh
@@ -87,12 +87,12 @@ $ mkdir 45drives-temp
 $ cd 45drives-temp
 $ mkdir rpmbuild rpmbuild/RPMS rpmbuild/SOURCES rpmbuild/SPECS rpmbuild/SRPMS
 $ git clone https://github.com/45Drives/tools.git
-$ mkdir 45drives-tools-1.6
-$ cp -r tools/etc 45drives-tools-1.6/etc
-$ cp -r tools/opt 45drives-tools-1.6/opt
-$ tar -zcvf 45drives-tools-1.6.tar.gz 45drives-tools-1.6/
-$ rm -rf 45drives-tools-1.6
-$ mv 45drives-tools-1.6.tar.gz rpmbuild/SOURCES/45drives-tools-1.6.tar.gz
+$ mkdir 45drives-tools-1.7
+$ cp -r tools/etc 45drives-tools-1.7/etc
+$ cp -r tools/opt 45drives-tools-1.7/opt
+$ tar -zcvf 45drives-tools-1.7.tar.gz 45drives-tools-1.7/
+$ rm -rf 45drives-tools-1.7
+$ mv 45drives-tools-1.7.tar.gz rpmbuild/SOURCES/45drives-tools-1.7.tar.gz
 $ mv tools/tools.spec rpmbuild/SPECS/tools.spec
 $ rm -rf tools
 $ rm -rf ~/rpmbuild
