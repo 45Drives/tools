@@ -163,11 +163,11 @@ def hba():
 		for line in storcli_result:
 			for model in hba_models.keys():
 				# Model AdapterType VendId DevId SubVendId SubDevId PCIAddress 	
-				regex = re.search("({fld})\s+(\w+).*(00:\w\w:\w\w:\w\w)\s+$".format(fld=model),line)
+				regex = re.search("({fld})\s+(\w+).*\w\w:(\w\w:\w\w:\w\w)\s+$".format(fld=model),line)
 				if regex != None:
 					hba_dict["Model"] = regex.group(1)
 					hba_dict["Adapter"] = regex.group(2)
-					hba_dict["Bus Address"] = "00" + regex.group(3)
+					hba_dict["Bus Address"] = regex.group(3)
 					hba_dict["Bus Address"] = hba_dict["Bus Address"][:-3] + ".0"
 					hba_dict["Drive Connections"] = hba_models[model]
 					hba_dict["Kernel Driver"] = hba_drivers[model]
@@ -193,8 +193,9 @@ def hba():
 		if len(slots) == len(addresses):
 			for i in range(0,len(addresses)):
 				for card in hba:
-					if card["Bus Address"] == addresses[i]:
+					if card["Bus Address"] in addresses[i]:
 						card["PCI Slot"] = slots[i]
+						card["Bus Address"] = addresses[i]
 
 		#sort the final list of hba cards by the Bus Address field. This ensures that
 		#the order in which they are stored resembles the lspci output. which has
@@ -367,6 +368,9 @@ def main():
 		server["Model"] = serial_result["Product Name"]
 
 	server["Alias Style"] = g_product_lut[server["Model"]][g_product_lut_idx["ALIAS_STYLE"]]
+	if serial_result["Product Part Number"].upper() == "F32":
+		server["Alias Style"] = "STORNADO"
+		server["Chassis Size"] = "AV15"
 	update_json_file(server,scan_time)
 	exit(0)
 
