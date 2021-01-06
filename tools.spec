@@ -3,7 +3,7 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.6
+Version:	1.7
 Release:	1%{?dist}
 Summary:	Server CLI Tools
 
@@ -59,6 +59,10 @@ rm -rf %{buildroot}
 %{_bindir}/*
 
 %changelog
+* Wed Jan 6 2021 Mark Hooper <mhooper@45drives.com> 1.7
+- added hmap functionality into dmap.
+- updated lsdev to display drives based on their physical location within the server.
+- created server_identifier script, which can identify the 45Drives product type and store that information in /etc/server_info/server_info.json.
 * Tue Sep 1 2020 Mark Hooper <mhooper@45drives.com> 1.6
 - second build 1.6, fixed zfs ailiasing bug
 * Tue Sep 1 2020 Mark Hooper <mhooper@45drives.com> 1.5
