@@ -179,7 +179,10 @@ def get_server_info():
 	except:
 		print("dmap failed to get server information")
 		sys.exit(1)
-	if return_code == 0:
+	if return_code != 0:
+		print("dmap failed to get server information")
+		sys.exit(1)
+	else:
 		# we should expect that there is a file that we can parse in
 		# /opt/tools/server_info/server_info.json
 		server = json.load(open("/etc/server_info/server_info.json","r"))
@@ -270,10 +273,13 @@ def create_vdev_id(server):
 		},
 		"AV15-BASE":{
 			"AV15":[0]
+		},
+		"?":{
+			"?":[0]
 		}
 	}
 
-	vdev_id_str = "# This file was generated using dmap v1.7 (/opt/tools/dmap).\n"
+	vdev_id_str = "# This file was generated using dmap v1.8 (/opt/tools/dmap).\n"
 	if len(server["HBA"]) > 0:
 		# we have hba cards to inspect/alias
 		for i in range(0,len(server["HBA"])):
@@ -294,9 +300,13 @@ def create_vdev_id(server):
 							i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
 							)
 						)
-	else:
+	elif server["Alias Style"] == "AV15-BASE":
 		# we are using the AV15-BASE ailiasing scheme.
 		vdev_id_str += alias_av15_base()
+	elif server["Alias Style"] == "?":
+		# we don't know what kind of server this is. Likely a vm
+		vdev_id_str += "# unable to map drives for unknown hardware configuration"
+
 	return vdev_id_str
 
 ###############################################################################
@@ -386,6 +396,9 @@ def main():
 		trigger_udev()
 
 	#print config file to stdout
+	log("--------------------------------------------------------------------------------")
+	log(conf_path + "/vdev_id.conf:")
+	log("--------------------------------------------------------------------------------")
 	log(vdev_id_conf)
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ import json
 import os.path
 import os
 from datetime import datetime
+import sys
 
 g_product_lut_idx = {
 	"MOBO_MODEL":	0,
@@ -18,6 +19,8 @@ g_product_lut_idx = {
 	"CHASSIS_SIZE": 3,
 	"ALIAS_STYLE":	4
 }
+
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60"]
 
 g_product_lut = {
 	"Storinator-H16-Q30-Enhanced-AMD":	["H11SSL-i"  ,1,1,"Q30" ,"H16"],
@@ -51,7 +54,8 @@ g_product_lut = {
 	"Storinator-AV15-Base":				["X11SSH-CTF",0,0,"AV15","AV15-BASE"],
 	"Storinator-Q30-Base":				["X11SSH-CTF",0,2,"Q30" ,"STORINATOR"],
 	"Storinator-S45-Base":				["X11SSM-F"  ,0,3,"S45" ,"STORINATOR"],
-	"Storinator":						["?",0,0,"?","STORINATOR"]
+	"Storinator":						["?",0,0,"?","STORINATOR"],
+	"?":								["?",0,0,"?","?"]
 }
 
 def motherboard():
@@ -254,13 +258,37 @@ def serial_check():
 		"Product Asset Tag"
 	]
 
-	serial_result = {}
+	serial_result = {
+		"Chassis Type":"?",
+		"Chassis Part Number":"?",
+		"Chassis Serial":"?",
+		"Board Mfg Date":"?",
+		"Board Mfg":"?",
+		"Board Product":"?",
+		"Board Serial":"?",
+		"Board Part Number":"?",
+		"Product Manufacturer":"?",
+		"Product Name":"?",
+		"Product Part Number":"?",
+		"Product Version":"?",
+		"Product Serial":"?",
+		"Product Asset Tag":"?"
+	}
 
 	try:
-		ipmi_result = subprocess.Popen(["ipmitool","fru"],stdout=subprocess.PIPE,universal_newlines=True).stdout
+		ipmi_test = subprocess.run(["ipmitool","fru"],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
 	except:
 		print("ERROR: ipmitool is not installed")
 		exit(1)
+	
+	if ipmi_test:
+		# ipmitool fru command has returned a standard error. This can happen on a virtual machine
+		print("/opt/tools/server_identifier: ipmitool fru command failed.")
+		print("/opt/tools/server_identifier: !! WARNING !! Cannot determine server type automatically using non-standard hardware.")
+		return serial_result
+
+	
+	ipmi_result = subprocess.Popen(["ipmitool","fru"],stdout=subprocess.PIPE,universal_newlines=True).stdout
 	for line in ipmi_result:
 		for field in serial_fields:
 			regex = re.search("({fld})\s+:\s+(\S+)".format(fld=field),line)
@@ -287,8 +315,8 @@ def determine_model(mobo_model_str,hba_dict_lst,chassis_size_str):
 				model = sys_type
 
 	if model == "?":
-		print("!!! Automatic Identification failed. Server Model assigned as Storinator (default) !!!")
-		model = "Storinator"
+		print("/opt/tools/server_identifier: !! WARNING !! Automatic Identification failed. ")
+
 	return model
 
 def update_json_file(server,scan_time):
@@ -298,78 +326,197 @@ def update_json_file(server,scan_time):
 
 	#make a directory to store the server info files
 	if not os.path.isdir(json_dir):
-		print("Server Info Directory Created:  ("+json_dir+")")
+		print("/opt/tools/server_identifier: Server Info Directory Created:  ("+json_dir+")")
 		os.mkdir(json_dir)
 
 	# load the existing server_info.json file in as a json object.
 	if os.path.exists(json_dir+"/server_info.json") and os.path.isfile(json_dir+"/server_info.json"):
 		old_file = open(json_dir+"/server_info.json","r")
-		old_server = json.load(old_file)
+		try:
+			old_server = json.load(old_file)
+		except Exception as e:
+			print("/opt/tools/server_identifier: Overwriting "+json_dir+"server_info.json with scan results.")
+			old_server = None
 		old_file.close()
-	
+
 	if old_server != None:
 		# json object loaded in successfully
-		if old_server != server:
+		if "Edit Mode" not in old_server.keys():
+			old_server["Edit Mode"] = False
+
+		if old_server != server and server["Model"] != "?" and not old_server["Edit Mode"]:
 			# the hardware configuration has changed since last time
 			# back up the existing server_info_file
 			backup_file = open(json_dir+"/server_info_backup_"+scan_time+".json","w")
 			backup_file.write(json.dumps(old_server,indent=4))
 			backup_file.close()
 
-			print("!!! Hardware configuration has changed since last scan, created backup in ("+json_dir+"/server_info_backup_"+scan_time+".json) !!!")
+			print("/opt/tools/server_identifier: Hardware configuration has changed since last scan.")
+			print("                              A backup has been created in ("+json_dir+"/server_info_backup_"+scan_time+".json)")
 			
 			new_file = open(json_dir+"/server_info.json","w")
 			new_file.write(json.dumps(server,indent=4))
 			new_file.write("\n")
 			new_file.close()
-	else:
-		# this is the first time that this script was run on the system.
+			print("--------------------------------------------------------------------------------")
+			print(json_dir+"/server_info_backup_"+scan_time+".json)")
+			print("--------------------------------------------------------------------------------")
+			print(json.dumps(old_server,indent=4))
+			print("--------------------------------------------------------------------------------")
+			print(json_dir+"/server_info.json:")
+			print("--------------------------------------------------------------------------------")
+			print(json.dumps(server,indent=4))
+
+		elif old_server != server and old_server["Edit Mode"]:
+			print("/opt/tools/server_identifier: Hardware configuration has changed since last scan.")
+			print("                              \"Edit Mode\" is enabled. ("+json_dir+"/server_info.json)")
+			print("                              Results of this scan will not be saved.")
+
+		if old_server["Edit Mode"]:
+			print("--------------------------------------------------------------------------------")
+			print(json_dir+"/server_info.json:")
+			print("--------------------------------------------------------------------------------")
+			print(json.dumps(old_server,indent=4))
+			print("--------------------------------------------------------------------------------")
+			print("Scan Results: (\"Edit Mode\":true i.e. server_info.json will not be modified)")
+			print("--------------------------------------------------------------------------------")
+			print(json.dumps(server,indent=4))
+		else:
+			print("--------------------------------------------------------------------------------")
+			print("Scan Results: ")
+			print("--------------------------------------------------------------------------------")
+			print(json.dumps(server,indent=4))
+
+
+	elif server["Model"] != "?":
+		# this is the first time that this script was run on the system successfully
 		new_file = open(json_dir+"/server_info.json","w")
 		new_file.write(json.dumps(server,indent=4))
 		new_file.write("\n")
 		new_file.close()
-		print("Server Info File Created:  ("+json_dir+"/server_info.json)")
+		print("/opt/tools/server_identifier: Server Info File Created:  ("+json_dir+"/server_info.json)")
+		print("--------------------------------------------------------------------------------")
+		print(json_dir+"/server_info.json:")
+		print("--------------------------------------------------------------------------------")
+		print(json.dumps(server,indent=4))
+	
+	else:
+		# this was unsuccessful. Write the info file for the first time to store the result.
+		print("/opt/tools/server_identifier: Placeholder Server Info File Created:  ("+json_dir+"/server_info.json)")
+		new_file = open(json_dir+"/server_info.json","w")
+		new_file.write(json.dumps(server,indent=4))
+		new_file.write("\n")
+		new_file.close()
+		print("--------------------------------------------------------------------------------")
+		print(json_dir+"/server_info.json:")
+		print("--------------------------------------------------------------------------------")
+		print(json.dumps(server,indent=4))
 
+	if server["Model"] == "?":
+		print("/opt/tools/server_identifier: !! WARNING !!")
+		print("                              Unable to determine server model automatically.")
+		print("                              Server Info File Path:  ("+json_dir+"/server_info.json)")
+		print("                              You can edit the server_info file manually and run dmap again if using non-standard hardware.")
+		print("                              If using standard 45Drives server hardware. Serialization should be performed before running dmap.")
+
+def vm_check(mobo_dict):
+	return (mobo_dict["Manufacturer"] == "?" and mobo_dict["Product Name"] == "?" and mobo_dict["Serial Number"] == "?")
+
+def old_serial(serial_result):
+	for field in serial_result.keys():
+		if serial_result[field] == "N/A":
+			return True
+	return False
+
+def vm_passthrough(server):
+	server["Model"] = "Storinator"
+	server["Chassis Size"] = g_chassis_sizes[len(server["HBA"])]
+	print("/opt/tools/server_identifier: Virtual Machine with HBA Pass Through Detected.")
+	print("                              Setting Model to \"Storinator\", and Chassis Size to \"{c}\"".format(c=server["Chassis Size"]))
+	try:
+		lspci_result = subprocess.Popen(["lspci"],stdout=subprocess.PIPE,universal_newlines=True, stderr=subprocess.PIPE).stdout
+	except:
+		print("ERROR: lspci command failed")
+		exit(1)
+	for hba_card in server["HBA"]:
+		for line in lspci_result:
+			regex = re.search("^({addr}).*{adap}".format(addr=hba_card["Bus Address"],adap=hba_card["Adapter"]),line)
+			if regex != None:
+				hba_card["Bus Address"] = "0000:" + regex.group(1)
+
+def edit_mode_check():
+	old_file = None
+	old_server = None
+	json_dir = "/etc/server_info"
+
+	#make a directory to store the server info files
+	if not os.path.isdir(json_dir):
+		print("/opt/tools/server_identifier: Server Info Directory Created:  ("+json_dir+")")
+		os.mkdir(json_dir)
+
+	# load the existing server_info.json file in as a json object.
+	if os.path.exists(json_dir+"/server_info.json") and os.path.isfile(json_dir+"/server_info.json"):
+		old_file = open(json_dir+"/server_info.json","r")
+		try:
+			old_server = json.load(old_file)
+		except Exception as e:
+			print("/opt/tools/server_identifier: Error loading data from " + json_dir + "/server_info.json")
+			print("Error Message: ",e)
+			if input("/opt/tools/server_identifier: Would you like to overwrite existing file with new scan results? (y/n):") == "n":
+				print("/opt/tools/server_identifier: Make the necessary adjustments to "+ json_dir + "/server_info.json and try again.")
+				old_file.close()
+				sys.exit(1)
+			old_server = None
+		old_file.close()
+
+	if old_server != None:
+		# json object loaded in successfully
+		if "Edit Mode" not in old_server.keys():
+			old_server["Edit Mode"] = False
+		return old_server["Edit Mode"]
+	return False
 
 
 def main():
 	server = {
 		"Motherboard":"?",
-		"HBA":"?",
+		"HBA":[],
 		"Hybrid":False,
 		"Serial":"?",
 		"Model":"?",
 		"Alias Style":"?",
-		"Chassis Size":"?"
+		"Chassis Size":"?",
+		"VM":False,
+		"Edit Mode":False
 	}
-	
-	# set the last scan time
+	# get current time
 	current_day = datetime.today()
 	current_time = datetime.now()
 	scan_time = current_day.strftime("%Y_%m_%d_") + current_time.strftime("%H_%M")
-
-	# Check to see if motherboard has been programmed using updated serialization script
-	old_serial = False
-	serial_result = serial_check()
-	for field in serial_result.keys():
-		if serial_result[field] == "N/A":
-			old_serial = True
-			break
-
+	server["Edit Mode"] = edit_mode_check()
+	serial_result = {}
+	
 	server["Motherboard"] = motherboard()
 	server["HBA"], server["Hybrid"] = hba()
-	server["Serial"] = serial_result["Product Serial"].upper()
-	server["Chassis Size"] = serial_result["Product Part Number"].upper()
+	server["VM"] = vm_check(server["Motherboard"])
+	if not server["VM"]:
+		serial_result = serial_check()
+		server["Serial"] = serial_result["Product Serial"].upper()
+		server["Chassis Size"] = serial_result["Product Part Number"].upper()
+		server["Model"] = determine_model(server["Motherboard"]["Product Name"],server["HBA"],server["Chassis Size"]) if old_serial(serial_result) else serial_result["Product Name"]
 
-	if old_serial == True:
-		server["Model"] = determine_model(server["Motherboard"]["Product Name"],server["HBA"],server["Chassis Size"])
-	else:
-		server["Model"] = serial_result["Product Name"]
+	if server["Model"] == "?":
+		if len(server["HBA"]) > 0 and server["VM"]:
+			vm_passthrough(server) 			# VM with hba pass through detected, update server accordingly
 
 	server["Alias Style"] = g_product_lut[server["Model"]][g_product_lut_idx["ALIAS_STYLE"]]
-	if serial_result["Product Part Number"].upper() == "F32":
-		server["Alias Style"] = "STORNADO"
-		server["Chassis Size"] = "AV15"
+	
+	# This is added to use only a single chassis size for the Stornado
+	if "Product Part Number" in serial_result.keys():
+		if serial_result["Product Part Number"].upper() == "F32":
+			server["Alias Style"] = "STORNADO"
+			server["Chassis Size"] = "AV15"
+
 	update_json_file(server,scan_time)
 	exit(0)
 
