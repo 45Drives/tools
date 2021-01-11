@@ -4,7 +4,7 @@
 
 Name:		45drives-tools
 Version:	1.7
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -59,6 +59,10 @@ rm -rf %{buildroot}
 %{_bindir}/*
 
 %changelog
+* Mon Jan 11 2021 Mark Hooper <mhooper@45drives.com> 1.7-2
+- fixed bus address bug in dmap encountered with X11DPL-i motherboards.
+- made adjustments to server_identifier script to deal with VMs and VMs with HBA passthroughs.
+- added an "Edit Mode" flag in /etc/server_info/server_info.json to allow for manual edits to this file to be used in dmap.
 * Wed Jan 6 2021 Mark Hooper <mhooper@45drives.com> 1.7
 - added hmap functionality into dmap.
 - updated lsdev to display drives based on their physical location within the server.
