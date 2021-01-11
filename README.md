@@ -65,11 +65,11 @@
 ### Installation
 CentOS 7.X
 ```sh
-$ yum install http://images.45drives.com/ceph/rpm/el7/x86_64/45drives-tools-1.7-1.el7.x86_64.rpm
+$ yum install http://images.45drives.com/ceph/rpm/el7/x86_64/45drives-tools-1.7-2.el7.x86_64.rpm
 ```
 CentOS 8.X
 ```sh
-$ dnf install http://images.45drives.com/ceph/rpm/el8/x86_64/45drives-tools-1.7-1.el8.x86_64.rpm
+$ dnf install http://images.45drives.com/ceph/rpm/el8/x86_64/45drives-tools-1.7-2.el8.x86_64.rpm
 ```
 
 ### RPM BUILD from git repo (requires "rpm-build" and "git" packages (centOS))
