@@ -4,7 +4,7 @@
 
 Name:		45drives-tools
 Version:	1.7
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -42,7 +42,7 @@ cp -a etc/ %{buildroot}
 cp -a opt/ %{buildroot}
 
 pushd opt/tools/
-    for i in lsdev dmap findosd zcreate; do
+    for i in lsdev dmap findosd zcreate cephfs-dir-stats; do
         ln -sf /opt/tools/$i %{buildroot}%{_bindir}
     done
 popd
@@ -59,6 +59,8 @@ rm -rf %{buildroot}
 %{_bindir}/*
 
 %changelog
+* Tue Jan 12 2021 Mark Hooper <mhooper@45drives.com> 1.7-3
+- fixed ALIAS_DEVICE_PATH bug in /etc/profile.d/tools.sh
 * Mon Jan 11 2021 Mark Hooper <mhooper@45drives.com> 1.7-2
 - fixed bus address bug in dmap encountered with X11DPL-i motherboards.
 - made adjustments to server_identifier script to deal with VMs and VMs with HBA passthroughs.
