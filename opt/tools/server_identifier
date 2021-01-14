@@ -315,7 +315,11 @@ def determine_model(mobo_model_str,hba_dict_lst,chassis_size_str):
 				model = sys_type
 
 	if model == "?":
+		if mobo_model_str != "?":
+			print("/opt/tools/server_identifier: !! WARNING !! " + mobo_model_str + " Motherboard is not supported for Automatic Identification.")
 		print("/opt/tools/server_identifier: !! WARNING !! Automatic Identification failed. ")
+		print("/opt/tools/server_identifier: Setting Model to \"Storinator\"(Generic)")
+		model = "Storinator"
 
 	return model
 

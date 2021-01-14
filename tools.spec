@@ -4,7 +4,7 @@
 
 Name:		45drives-tools
 Version:	1.7
-Release:	3%{?dist}
+Release:	4%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -59,6 +59,9 @@ rm -rf %{buildroot}
 %{_bindir}/*
 
 %changelog
+* Thu Jan 14 2021 Mark Hooper <mhooper@45drives.com> 1.7-4
+- Addressed autodetect behavior for previous gen motherboards in server_identifier.
+- Added verbose messages to address any inconsistencies encountered due to manual edits of /etc/server_info/server_info.json.
 * Tue Jan 12 2021 Mark Hooper <mhooper@45drives.com> 1.7-3
 - fixed ALIAS_DEVICE_PATH bug in /etc/profile.d/tools.sh
 * Mon Jan 11 2021 Mark Hooper <mhooper@45drives.com> 1.7-2
