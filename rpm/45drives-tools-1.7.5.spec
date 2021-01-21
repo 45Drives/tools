@@ -3,8 +3,8 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.7
-Release:	4%{?dist}
+Version:	1.7.5
+Release:	1%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -41,24 +41,31 @@ mkdir -p %{buildroot}%{_bindir}
 cp -a etc/ %{buildroot}
 cp -a opt/ %{buildroot}
 
-pushd opt/tools/
+pushd opt/45drives/tools/
     for i in lsdev dmap findosd zcreate cephfs-dir-stats; do
-        ln -sf /opt/tools/$i %{buildroot}%{_bindir}
+        ln -sf /opt/45drives/tools/$i %{buildroot}%{_bindir}
     done
 popd
+
+ln -sf /opt/45drives/tools /opt/tools
 
 %clean
 rm -rf %{buildroot}
 
 %files
-%dir /opt/tools
+%dir /opt/45drives/tools
 %dir /etc/profile.d
+%dir /etc/45drives/server_info
 %defattr(-,root,root,-)
-/opt/tools/*
-/etc/profile.d/tools.sh
+/opt/45drives/tools/*
+/etc/profile.d/45drives-tools.sh
 %{_bindir}/*
 
 %changelog
+* Thu Jan 21 2021 Mark Hooper <mhooper@45drives.com> 1.7.5-1
+- Made changes to the directory structure of the script locations (/opt/tools/ -> /opt/45drives/tools).
+- Updated the symbolic links to preserve backwards compatability for this directory change.
+- Changed the location of the server_info.json file created by server_identifier (/etc/server_info/server_info.json -> /etc/45drives/server_info/server_info.json)
 * Thu Jan 14 2021 Mark Hooper <mhooper@45drives.com> 1.7-4
 - Addressed autodetect behavior for previous gen motherboards in server_identifier.
 - Added verbose messages to address any inconsistencies encountered due to manual edits of /etc/server_info/server_info.json.

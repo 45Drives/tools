@@ -13,14 +13,14 @@ esac
 mkdir 45drives-temp
 cd 45drives-temp
 mkdir rpmbuild rpmbuild/RPMS rpmbuild/SOURCES rpmbuild/SPECS rpmbuild/SRPMS
-git clone https://github.com/45Drives/tools.git
-mkdir 45drives-tools-1.7
-cp -r tools/etc 45drives-tools-1.7/etc
-cp -r tools/opt 45drives-tools-1.7/opt
-tar -zcvf 45drives-tools-1.7.tar.gz 45drives-tools-1.7/
-rm -rf 45drives-tools-1.7
-mv 45drives-tools-1.7.tar.gz rpmbuild/SOURCES/45drives-tools-1.7.tar.gz
-mv tools/tools.spec rpmbuild/SPECS/tools.spec
+git clone --branch 1.7.5 https://github.com/45Drives/tools.git
+mkdir 45drives-tools-1.7.5
+cp -r tools/src/fakeroot/etc 45drives-tools-1.7.5/etc
+cp -r tools/src/fakeroot/opt 45drives-tools-1.7.5/opt
+tar -zcvf 45drives-tools-1.7.5.tar.gz 45drives-tools-1.7.5/
+rm -rf 45drives-tools-1.7.5
+mv 45drives-tools-1.7.5.tar.gz rpmbuild/SOURCES/45drives-tools-1.7.5.tar.gz
+mv tools/rpm/tools.spec rpmbuild/SPECS/tools.spec
 rm -rf tools
 rm -rf ~/rpmbuild
 cd ..

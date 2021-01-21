@@ -167,15 +167,15 @@ def verify_vdev():
 ###############################################################################
 # Name: get_server_info
 # Args: none
-# Desc: Returns a dict read from /etc/server_info/server_info.json. This file
-#       is created by another python script /opt/tools/server_identifier. 
+# Desc: Returns a dict read from /etc/45drives/server_info/server_info.json. This file
+#       is created by another python script /opt/45drives/tools/server_identifier. 
 #       which automatically determines which 45Drives server is present. 
 #       and provides us with the necessary data structure tol automatically
 #       alias any server we make (see create_vdev_id())
 ###############################################################################
 def get_server_info():
 	try:
-		return_code = subprocess.run(["/opt/tools/server_identifier"]).returncode
+		return_code = subprocess.run(["/opt/45drives/tools/server_identifier"]).returncode
 	except:
 		print("dmap failed to get server information")
 		sys.exit(1)
@@ -184,8 +184,8 @@ def get_server_info():
 		sys.exit(1)
 	else:
 		# we should expect that there is a file that we can parse in
-		# /opt/tools/server_info/server_info.json
-		server = json.load(open("/etc/server_info/server_info.json","r"))
+		# /opt/45drives/tools/server_info/server_info.json
+		server = json.load(open("/etc/45drives/server_info/server_info.json","r"))
 		return server
 
 
@@ -234,9 +234,9 @@ def get_server_info():
 #    
 # Desc: Using the server dict, we can alias all drives in the appropriate 
 #       order based on the system information. The server dict is read in 
-#       from /etc/server_info/server_info.json. The phy_order dict is used 
+#       from /etc/45drives/server_info/server_info.json. The phy_order dict is used 
 #       to assign the appropriate physical address. The keys correspond to 
-#       those provided by the "/opt/tools/storcli64 show" command. 
+#       those provided by the "/opt/45drives/tools/storcli64 show" command. 
 #       The "Alias Style" key us used to reference the alias_template dict,
 #       and the chassis size key stored in the 
 #       alias_template[server["Alias Style"]] dict, will give us an array of 
@@ -281,20 +281,20 @@ def create_vdev_id(server):
 
 	# Make sure that the user didn't make any manual edits that can throw dmap.
 	if server["Alias Style"] not in alias_template.keys():
-			print("/opt/tools/dmap: !! ERROR !! Invalid Alias Style set in /etc/server_info/server_info.json")
+			print("/opt/45drives/tools/dmap: !! ERROR !! Invalid Alias Style set in /etc/45drives/server_info/server_info.json")
 			print("                 Valid Options are: ", alias_template.keys())
 			print("                 You can manually edit this file by setting \"Edit Mode\": true")
-			print("                 in /etc/server_info/server_info.json along with any other parameters")
+			print("                 in /etc/45drives/server_info/server_info.json along with any other parameters")
 			sys.exit(1)
 	elif server["Chassis Size"] not in alias_template[server["Alias Style"]].keys():
-			print("/opt/tools/dmap: !! ERROR !! Invalid Chassis Size and Alias Style combination set in /etc/server_info/server_info.json")
+			print("/opt/45drives/tools/dmap: !! ERROR !! Invalid Chassis Size and Alias Style combination set in /etc/45drives/server_info/server_info.json")
 			print("                 Valid Chassis Size Options for " + server["Alias Style"] + " are: ", alias_template[server["Alias Style"]].keys())
 			print("                 You can manually edit this file by setting \"Edit Mode\": true")
-			print("                 in /etc/server_info/server_info.json along with any other parameters")
+			print("                 in /etc/45drives/server_info/server_info.json along with any other parameters")
 			sys.exit(1)
 
 	# We have a valid combination of alias styles and chassis sizes.
-	vdev_id_str = "# This file was generated using dmap v1.8 (/opt/tools/dmap).\n"
+	vdev_id_str = "# This file was generated using dmap v1.8 (/opt/45drives/tools/dmap).\n"
 	if len(server["HBA"]) > 0:
 		# we have hba cards to inspect/alias
 		for i in range(0,len(server["HBA"])):

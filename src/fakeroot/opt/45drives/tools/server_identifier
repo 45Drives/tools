@@ -105,7 +105,7 @@ def motherboard():
 
 def hba():
 	# determine the model and count of hba cards present in the system
-	# by parsing the output of /opt/tools/storcli64 show.
+	# by parsing the output of /opt/45drives/tools/storcli64 show.
 	# example output:
 		# CLI Version = 007.1017.0000.0000 May 10, 2019
 		# Operating system = Linux 4.18.0-240.1.1.el8_3.x86_64
@@ -131,7 +131,7 @@ def hba():
 	hba_count = 0
 	hba = []
 	try:
-		storcli_result = subprocess.Popen(["/opt/tools/storcli64","show"],stdout=subprocess.PIPE,universal_newlines=True).stdout
+		storcli_result = subprocess.Popen(["/opt/45drives/tools/storcli64","show"],stdout=subprocess.PIPE,universal_newlines=True).stdout
 	except:
 		print("ERROR: storcli is not installed")
 		exit(1)
@@ -283,8 +283,8 @@ def serial_check():
 	
 	if ipmi_test:
 		# ipmitool fru command has returned a standard error. This can happen on a virtual machine
-		print("/opt/tools/server_identifier: ipmitool fru command failed.")
-		print("/opt/tools/server_identifier: !! WARNING !! Cannot determine server type automatically using non-standard hardware.")
+		print("/opt/45drives/tools/server_identifier: ipmitool fru command failed.")
+		print("/opt/45drives/tools/server_identifier: !! WARNING !! Cannot determine server type automatically using non-standard hardware.")
 		return serial_result
 
 	
@@ -316,9 +316,9 @@ def determine_model(mobo_model_str,hba_dict_lst,chassis_size_str):
 
 	if model == "?":
 		if mobo_model_str != "?":
-			print("/opt/tools/server_identifier: !! WARNING !! " + mobo_model_str + " Motherboard is not supported for Automatic Identification.")
-		print("/opt/tools/server_identifier: !! WARNING !! Automatic Identification failed. ")
-		print("/opt/tools/server_identifier: Setting Model to \"Storinator\"(Generic)")
+			print("/opt/45drives/tools/server_identifier: !! WARNING !! " + mobo_model_str + " Motherboard is not supported for Automatic Identification.")
+		print("/opt/45drives/tools/server_identifier: !! WARNING !! Automatic Identification failed. ")
+		print("/opt/45drives/tools/server_identifier: Setting Model to \"Storinator\"(Generic)")
 		model = "Storinator"
 
 	return model
@@ -326,11 +326,11 @@ def determine_model(mobo_model_str,hba_dict_lst,chassis_size_str):
 def update_json_file(server,scan_time):
 	old_file = None
 	old_server = None
-	json_dir = "/etc/server_info"
+	json_dir = "/etc/45drives/server_info"
 
 	#make a directory to store the server info files
 	if not os.path.isdir(json_dir):
-		print("/opt/tools/server_identifier: Server Info Directory Created:  ("+json_dir+")")
+		print("/opt/45drives/tools/server_identifier: Server Info Directory Created:  ("+json_dir+")")
 		os.mkdir(json_dir)
 
 	# load the existing server_info.json file in as a json object.
@@ -339,7 +339,7 @@ def update_json_file(server,scan_time):
 		try:
 			old_server = json.load(old_file)
 		except Exception as e:
-			print("/opt/tools/server_identifier: Overwriting "+json_dir+"server_info.json with scan results.")
+			print("/opt/45drives/tools/server_identifier: Overwriting "+json_dir+"server_info.json with scan results.")
 			old_server = None
 		old_file.close()
 
@@ -355,7 +355,7 @@ def update_json_file(server,scan_time):
 			backup_file.write(json.dumps(old_server,indent=4))
 			backup_file.close()
 
-			print("/opt/tools/server_identifier: Hardware configuration has changed since last scan.")
+			print("/opt/45drives/tools/server_identifier: Hardware configuration has changed since last scan.")
 			print("                              A backup has been created in ("+json_dir+"/server_info_backup_"+scan_time+".json)")
 			
 			new_file = open(json_dir+"/server_info.json","w")
@@ -372,7 +372,7 @@ def update_json_file(server,scan_time):
 			print(json.dumps(server,indent=4))
 
 		elif old_server != server and old_server["Edit Mode"]:
-			print("/opt/tools/server_identifier: Hardware configuration has changed since last scan.")
+			print("/opt/45drives/tools/server_identifier: Hardware configuration has changed since last scan.")
 			print("                              \"Edit Mode\" is enabled. ("+json_dir+"/server_info.json)")
 			print("                              Results of this scan will not be saved.")
 
@@ -398,7 +398,7 @@ def update_json_file(server,scan_time):
 		new_file.write(json.dumps(server,indent=4))
 		new_file.write("\n")
 		new_file.close()
-		print("/opt/tools/server_identifier: Server Info File Created:  ("+json_dir+"/server_info.json)")
+		print("/opt/45drives/tools/server_identifier: Server Info File Created:  ("+json_dir+"/server_info.json)")
 		print("--------------------------------------------------------------------------------")
 		print(json_dir+"/server_info.json:")
 		print("--------------------------------------------------------------------------------")
@@ -406,7 +406,7 @@ def update_json_file(server,scan_time):
 	
 	else:
 		# this was unsuccessful. Write the info file for the first time to store the result.
-		print("/opt/tools/server_identifier: Placeholder Server Info File Created:  ("+json_dir+"/server_info.json)")
+		print("/opt/45drives/tools/server_identifier: Placeholder Server Info File Created:  ("+json_dir+"/server_info.json)")
 		new_file = open(json_dir+"/server_info.json","w")
 		new_file.write(json.dumps(server,indent=4))
 		new_file.write("\n")
@@ -417,7 +417,7 @@ def update_json_file(server,scan_time):
 		print(json.dumps(server,indent=4))
 
 	if server["Model"] == "?":
-		print("/opt/tools/server_identifier: !! WARNING !!")
+		print("/opt/45drives/tools/server_identifier: !! WARNING !!")
 		print("                              Unable to determine server model automatically.")
 		print("                              Server Info File Path:  ("+json_dir+"/server_info.json)")
 		print("                              You can edit the server_info file manually and run dmap again if using non-standard hardware.")
@@ -435,7 +435,7 @@ def old_serial(serial_result):
 def vm_passthrough(server):
 	server["Model"] = "Storinator"
 	server["Chassis Size"] = g_chassis_sizes[len(server["HBA"])]
-	print("/opt/tools/server_identifier: Virtual Machine with HBA Pass Through Detected.")
+	print("/opt/45drives/tools/server_identifier: Virtual Machine with HBA Pass Through Detected.")
 	print("                              Setting Model to \"Storinator\", and Chassis Size to \"{c}\"".format(c=server["Chassis Size"]))
 	try:
 		lspci_result = subprocess.Popen(["lspci"],stdout=subprocess.PIPE,universal_newlines=True, stderr=subprocess.PIPE).stdout
@@ -451,11 +451,11 @@ def vm_passthrough(server):
 def edit_mode_check():
 	old_file = None
 	old_server = None
-	json_dir = "/etc/server_info"
+	json_dir = "/etc/45drives/server_info"
 
 	#make a directory to store the server info files
 	if not os.path.isdir(json_dir):
-		print("/opt/tools/server_identifier: Server Info Directory Created:  ("+json_dir+")")
+		print("/opt/45drives/tools/server_identifier: Server Info Directory Created:  ("+json_dir+")")
 		os.mkdir(json_dir)
 
 	# load the existing server_info.json file in as a json object.
@@ -464,10 +464,10 @@ def edit_mode_check():
 		try:
 			old_server = json.load(old_file)
 		except Exception as e:
-			print("/opt/tools/server_identifier: Error loading data from " + json_dir + "/server_info.json")
+			print("/opt/45drives/tools/server_identifier: Error loading data from " + json_dir + "/server_info.json")
 			print("Error Message: ",e)
-			if input("/opt/tools/server_identifier: Would you like to overwrite existing file with new scan results? (y/n):") == "n":
-				print("/opt/tools/server_identifier: Make the necessary adjustments to "+ json_dir + "/server_info.json and try again.")
+			if input("/opt/45drives/tools/server_identifier: Would you like to overwrite existing file with new scan results? (y/n):") == "n":
+				print("/opt/45drives/tools/server_identifier: Make the necessary adjustments to "+ json_dir + "/server_info.json and try again.")
 				old_file.close()
 				sys.exit(1)
 			old_server = None
