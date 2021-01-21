@@ -20,11 +20,11 @@ cp -r tools/src/fakeroot/opt 45drives-tools-1.7.5/opt
 tar -zcvf 45drives-tools-1.7.5.tar.gz 45drives-tools-1.7.5/
 rm -rf 45drives-tools-1.7.5
 mv 45drives-tools-1.7.5.tar.gz rpmbuild/SOURCES/45drives-tools-1.7.5.tar.gz
-mv tools/rpm/tools.spec rpmbuild/SPECS/tools.spec
+mv tools/rpm/45drives-tools-1.7.5.spec rpmbuild/SPECS/45drives-tools-1.7.5.spec
 rm -rf tools
 rm -rf ~/rpmbuild
 cd ..
 cp -r 45drives-temp/rpmbuild ~/rpmbuild
 rm -rf 45drives-temp
 cd ~/rpmbuild
-rpmbuild -ba SPECS/tools.spec
+rpmbuild -ba SPECS/45drives-tools-1.7.5.spec

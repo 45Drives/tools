@@ -65,18 +65,18 @@
 ### Installation
 CentOS 7.X
 ```sh
-$ yum install http://images.45drives.com/stable/CentOS/el7/x86_64/45drives-tools-1.7.5-1.el7.x86_64.rpm
+yum install http://images.45drives.com/stable/CentOS/el7/x86_64/45drives-tools-1.7.5-1.el7.x86_64.rpm
 ```
 CentOS 8.X
 ```sh
-$ dnf install http://images.45drives.com/ceph/rpm/el8/x86_64/45drives-tools-1.7-4.el8.x86_64.rpm
+dnf install http://images.45drives.com/ceph/rpm/el8/x86_64/45drives-tools-1.7-4.el8.x86_64.rpm
 ```
 
 ### RPM BUILD from git repo (requires "rpm-build" and "git" packages (centOS))
 use the provided script (45drives-tools-rpm-1.7.5.sh)
 ```sh
 # don't run this if you have a ~/rpmbuild folder that you don't want to lose! 
-$ curl -O https://raw.githubusercontent.com/45Drives/tools/1.7.5/45drives-tools-rpm-1.7.5.sh
-$ chmod +x 45drives-tools-rpm-1.7.5.sh
-$ ./45drives-tools-rpm-1.7.5.sh 
+curl -O https://raw.githubusercontent.com/45Drives/tools/1.7.5/rpm/45drives-tools-rpm-1.7.5.sh
+chmod +x 45drives-tools-rpm-1.7.5.sh
+./45drives-tools-rpm-1.7.5.sh 
 ```
