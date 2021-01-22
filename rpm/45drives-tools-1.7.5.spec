@@ -41,6 +41,7 @@ mkdir -p %{buildroot}%{_bindir}
 cp -a etc/ %{buildroot}
 cp -a opt/ %{buildroot}
 mkdir -p %{buildroot}/etc/45drives/server_info
+echo %{version} > %{buildroot}/etc/45drives/server_info/tools_version
 
 pushd opt/45drives/tools/
     for i in lsdev dmap findosd zcreate cephfs-dir-stats server_identifier; do
@@ -59,6 +60,7 @@ rm -rf %{buildroot}
 /opt/45drives/tools/*
 /opt/tools
 /etc/profile.d/45drives-tools.sh
+/etc/45drives/server_info/*
 %{_bindir}/*
 
 %changelog
