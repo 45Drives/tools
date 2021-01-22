@@ -60,7 +60,7 @@ rm -rf %{buildroot}
 /opt/45drives/tools/*
 /opt/tools
 /etc/profile.d/45drives-tools.sh
-/etc/45drives/server_info/*
+/etc/45drives/server_info/
 %{_bindir}/*
 
 %changelog
