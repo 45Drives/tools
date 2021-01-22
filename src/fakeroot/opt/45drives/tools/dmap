@@ -282,15 +282,15 @@ def create_vdev_id(server):
 	# Make sure that the user didn't make any manual edits that can throw dmap.
 	if server["Alias Style"] not in alias_template.keys():
 			print("/opt/45drives/tools/dmap: !! ERROR !! Invalid Alias Style set in /etc/45drives/server_info/server_info.json")
-			print("                 Valid Options are: ", alias_template.keys())
-			print("                 You can manually edit this file by setting \"Edit Mode\": true")
-			print("                 in /etc/45drives/server_info/server_info.json along with any other parameters")
+			print("                          Valid Options are: ", alias_template.keys())
+			print("                          You can manually edit this file by setting \"Edit Mode\": true")
+			print("                          in /etc/45drives/server_info/server_info.json along with any other parameters")
 			sys.exit(1)
 	elif server["Chassis Size"] not in alias_template[server["Alias Style"]].keys():
 			print("/opt/45drives/tools/dmap: !! ERROR !! Invalid Chassis Size and Alias Style combination set in /etc/45drives/server_info/server_info.json")
-			print("                 Valid Chassis Size Options for " + server["Alias Style"] + " are: ", alias_template[server["Alias Style"]].keys())
-			print("                 You can manually edit this file by setting \"Edit Mode\": true")
-			print("                 in /etc/45drives/server_info/server_info.json along with any other parameters")
+			print("                          Valid Chassis Size Options for " + server["Alias Style"] + " are: ", alias_template[server["Alias Style"]].keys())
+			print("                          You can manually edit this file by setting \"Edit Mode\": true")
+			print("                          in /etc/45drives/server_info/server_info.json along with any other parameters")
 			sys.exit(1)
 
 	# We have a valid combination of alias styles and chassis sizes.
@@ -320,7 +320,7 @@ def create_vdev_id(server):
 		vdev_id_str += alias_av15_base()
 	elif server["Alias Style"] == "?":
 		# we don't know what kind of server this is. Likely a vm
-		vdev_id_str += "# unable to map drives for unknown hardware configuration"
+		vdev_id_str = None
 
 	return vdev_id_str
 
@@ -400,6 +400,13 @@ def main():
 
 	server = get_server_info()
 	vdev_id_conf = create_vdev_id(server)
+
+	if vdev_id_conf == None:
+		# we don't want to create the vdev_id.conf file or trigger udev
+		log("/opt/tools/45drives/dmap:     Unable to determine hardware configuration, drive mapping (modifications to /etc/vdev_id.conf) skipped. ")
+		if options.trigger_udev:
+			log("/opt/tools/45drives/dmap:     Unable to determine hardware configuration, udevadm trigger skipped. ")
+		sys.exit(0)
 
 	# write file to disk
 	f = open(conf_path + "/vdev_id.conf","w")
