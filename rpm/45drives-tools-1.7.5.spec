@@ -63,6 +63,11 @@ rm -rf %{buildroot}
 %ghost /etc/45drives/server_info/*
 %{_bindir}/*
 
+%postun
+rm -rf /etc/45drives/server_info
+rmdir /etc/45drives > /dev/null 2>&1
+rmdir /opt/45drives > /dev/null 2>&1
+
 %changelog
 * Thu Jan 21 2021 Mark Hooper <mhooper@45drives.com> 1.7.5-1
 - Made changes to the directory structure of the script locations (/opt/tools/ -> /opt/45drives/tools).
