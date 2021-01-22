@@ -331,7 +331,7 @@ def update_json_file(server,scan_time):
 	#make a directory to store the server info files
 	if not os.path.isdir(json_dir):
 		print("/opt/45drives/tools/server_identifier: Server Info Directory Created:  ("+json_dir+")")
-		os.mkdir(json_dir)
+		os.makedirs(json_dir)
 
 	# load the existing server_info.json file in as a json object.
 	if os.path.exists(json_dir+"/server_info.json") and os.path.isfile(json_dir+"/server_info.json"):
@@ -456,7 +456,7 @@ def edit_mode_check():
 	#make a directory to store the server info files
 	if not os.path.isdir(json_dir):
 		print("/opt/45drives/tools/server_identifier: Server Info Directory Created:  ("+json_dir+")")
-		os.mkdir(json_dir)
+		os.makedirs(json_dir)
 
 	# load the existing server_info.json file in as a json object.
 	if os.path.exists(json_dir+"/server_info.json") and os.path.isfile(json_dir+"/server_info.json"):
