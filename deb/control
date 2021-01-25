@@ -1,0 +1,8 @@
+Package: 45drives-tools
+Version: 1.7.5-1
+Section: base
+Priority: optional
+Architecture: x86_64
+Depends: ipmitool, jq, smartmontools (>= 7.0 ), dmidecode, python3, pciutils, hdparm
+Maintainer: Mark Hooper <mhooper@45drives.com>
+Description: 45Drives server cli tools
