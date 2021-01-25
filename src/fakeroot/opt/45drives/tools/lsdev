@@ -211,7 +211,7 @@ def build_server(options):
 	# model_serial = get_model_serial() if call_lsblk else {}
 	server = [[]]; # server[row][bay]
 		# load the existing server_info.json file in as a json object.
-	json_dir = "/etc/server_info"
+	json_dir = "/etc/45drives/server_info"
 	server_obj = None
 	if not os.path.exists(json_dir+"/server_info.json") or not os.path.isfile(json_dir+"/server_info.json"):
 		print("Unable to determine server model. Run 'dmap'")
@@ -331,7 +331,7 @@ def get_controller():
 	driver_version_names = "?"
 
 	# load the existing server_info.json file in as a json object.
-	json_dir = "/etc/server_info"
+	json_dir = "/etc/45drives/server_info"
 	server_obj = None
 	if os.path.exists(json_dir+"/server_info.json") and os.path.isfile(json_dir+"/server_info.json"):
 		server_info_file = open(json_dir+"/server_info.json","r")
