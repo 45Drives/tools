@@ -67,6 +67,7 @@ rm -rf %{buildroot}
 rm -rf /etc/45drives/server_info
 rmdir /etc/45drives > /dev/null 2>&1 || true
 rmdir /opt/45drives > /dev/null 2>&1 || true
+rm -rf /opt/45drives/tools
 
 %changelog
 * Thu Jan 21 2021 Mark Hooper <mhooper@45drives.com> 1.7.5-1
