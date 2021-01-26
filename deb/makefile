@@ -9,7 +9,7 @@ install:
 	mkdir -p  $(DESTDIR)
 	mkdir -p $(DESTDIR)$(bindir)
 	cp -a etc/ $(DESTDIR)
-	cp -a etc/ $(DESTDIR)
+	cp -a opt/ $(DESTDIR)
 	mkdir -p $(DESTDIR)/etc/45drives/server_info
 	echo $(version) > $(DESTDIR)/etc/45drives/server_info/tools_version
 	cd opt/45drives/tools/
