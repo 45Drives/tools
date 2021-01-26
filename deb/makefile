@@ -10,7 +10,7 @@ install:
 	mkdir -p $(DESTDIR)$(bindir)
 	cp -a etc/ $(DESTDIR)
 	cp -a etc/ $(DESTDIR)
-	mkdir -p $(DESTDIR)/etc/45drives/server_info/tools_version
+	mkdir -p $(DESTDIR)/etc/45drives/server_info
 	echo $(version) > $(DESTDIR)/etc/45drives/server_info/tools_version
 	pushd opt/45drives/tools/
 		for i in lsdev dmap findosd zcreate cephfs-dir-stats server_identifier;
