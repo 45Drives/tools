@@ -14,7 +14,7 @@ install:
 	echo $(version) > $(DESTDIR)/etc/45drives/server_info/tools_version
 	cd opt/45drives/tools/
 		for i in lsdev dmap findosd zcreate cephfs-dir-stats server_identifier;
-			do
+		do
 			ln -sf /opt/45drives/tools/$i $(DESTDIR)$(bindir)
 		done
 	cd -
