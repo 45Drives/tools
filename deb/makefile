@@ -12,12 +12,12 @@ install:
 	cp -a etc/ $(DESTDIR)
 	mkdir -p $(DESTDIR)/etc/45drives/server_info
 	echo $(version) > $(DESTDIR)/etc/45drives/server_info/tools_version
-	pushd opt/45drives/tools/
+	cd opt/45drives/tools/
 		for i in lsdev dmap findosd zcreate cephfs-dir-stats server_identifier;
 			do
 			ln -sf /opt/45drives/tools/$i $(DESTDIR)$(bindir)
 		done
-	popd
+	cd -
 
 clean:
 	rm -rf $(DESTDIR)
