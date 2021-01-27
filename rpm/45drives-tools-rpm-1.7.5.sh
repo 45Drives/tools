@@ -13,7 +13,7 @@ esac
 mkdir 45drives-temp
 cd 45drives-temp
 mkdir rpmbuild rpmbuild/RPMS rpmbuild/SOURCES rpmbuild/SPECS rpmbuild/SRPMS
-git clone --branch 1.7.5 https://github.com/45Drives/tools.git
+git clone https://github.com/45Drives/tools.git
 mkdir 45drives-tools-1.7.5
 cp -r tools/src/fakeroot/etc 45drives-tools-1.7.5/etc
 cp -r tools/src/fakeroot/opt 45drives-tools-1.7.5/opt
