@@ -3,6 +3,7 @@
 ### Supported OS
   - CentOS 7.X
   - CentOS 8.X
+  - Ubuntu 20.04.1 (45drives-tools version >= 1.7.5)
 
 ### Contents
   - Drive Aliasing
@@ -63,42 +64,36 @@
       ```
   
 ### Installation
-CentOS 7.X
+####CentOS 7.X
 ```sh
-$ yum install http://images.45drives.com/ceph/rpm/el7/x86_64/45drives-tools-1.7-4.el7.x86_64.rpm
+yum install http://images.45drives.com/stable/CentOS/el7/x86_64/45drives-tools-1.7.5-1.el7.x86_64.rpm
 ```
-CentOS 8.X
+####CentOS 8.X
 ```sh
-$ dnf install http://images.45drives.com/ceph/rpm/el8/x86_64/45drives-tools-1.7-4.el8.x86_64.rpm
+dnf install http://images.45drives.com/ceph/rpm/el8/x86_64/45drives-tools-1.7-4.el8.x86_64.rpm
 ```
 
-### RPM BUILD from git repo (requires "rpm-build" and "git" packages (centOS))
-use the provided script (build-v1_7.sh)
-```sh
-# don't run this if you have a ~/rpmbuild folder that you don't want to lose! 
-$ curl -O https://raw.githubusercontent.com/45Drives/tools/master/build-v1_7.sh
-$ chmod +x build-v1_7.sh
-$ ./build-v1_7.sh 
+####Ubuntu
+Download the latest .deb package from the [releases page](https://github.com/45Drives/cockpit-hardware/releases).
+Then install using apt:
 ```
-alternatively, you can just execute these commands
-```sh
-# don't run this if you have a ~/rpmbuild folder that you don't want to lose! 
-$ mkdir 45drives-temp
-$ cd 45drives-temp
-$ mkdir rpmbuild rpmbuild/RPMS rpmbuild/SOURCES rpmbuild/SPECS rpmbuild/SRPMS
-$ git clone https://github.com/45Drives/tools.git
-$ mkdir 45drives-tools-1.7
-$ cp -r tools/etc 45drives-tools-1.7/etc
-$ cp -r tools/opt 45drives-tools-1.7/opt
-$ tar -zcvf 45drives-tools-1.7.tar.gz 45drives-tools-1.7/
-$ rm -rf 45drives-tools-1.7
-$ mv 45drives-tools-1.7.tar.gz rpmbuild/SOURCES/45drives-tools-1.7.tar.gz
-$ mv tools/tools.spec rpmbuild/SPECS/tools.spec
-$ rm -rf tools
-$ rm -rf ~/rpmbuild
-$ cd ..
-$ cp -r 45drives-temp/rpmbuild ~/rpmbuild
-$ rm -rf 45drives-temp
-$ cd ~/rpmbuild
-$ rpmbuild -ba SPECS/tools.spec
+[admin@server ~]# sudo apt install /path/to/downloaded/DEB/package/
+```
+
+####.deb package from source
+requires git, dpkg, curl. This [script](https://raw.githubusercontent.com/45Drives/tools/1.7.5/deb/45drives-tools-deb-1.7.5.sh) will build the .deb package for you using dpkg-deb.
+```
+[admin@server ~]# curl -LO https://raw.githubusercontent.com/45Drives/tools/1.7.5/deb/45drives-tools-deb-1.7.5.sh
+[admin@server ~]# chmod +x 45drives-tools-deb-1.7.5.sh
+[admin@server ~]# ./45drives-tools-deb-1.7.5.sh
+[admin@server ~]# sudo apt install ./45drives-tools_1.7.5-1.deb
+```
+
+####.rpm package from source
+requires git, rpm-build, curl. 
+```
+[admin@server ~]# curl -LO https://raw.githubusercontent.com/45Drives/tools/1.7.5/rpm/45drives-tools-rpm-1.7.5.sh
+[admin@server ~]# chmod +x 45drives-tools-rpm-1.7.5.sh
+[admin@server ~]# ./45drives-tools-rpm-1.7.5.sh
+[admin@server ~]# yum install ~/rpmbuild/RPMS/x86_64/45drives-tools-1.7.5-1.el7.x86_64.rpm
 ```
