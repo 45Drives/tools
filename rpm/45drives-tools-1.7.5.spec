@@ -4,7 +4,7 @@
 
 Name:		45drives-tools
 Version:	1.7.5
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -14,6 +14,8 @@ Source0:	%{name}-%{version}.tar.gz
 
 BuildArch:	x86_64
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root
+
+Conflicts: 45drives-tools < %{version}
 
 Requires: ipmitool
 Requires: jq
@@ -70,6 +72,8 @@ rm -rf /opt/45drives/tools
 rmdir /opt/45drives > /dev/null 2>&1 || true
 
 %changelog
+* Wed Jan 27 2021 Mark Hooper <mhooper@45drives.com> 1.7.5-2
+- added conflicts to spec file to ensure proper upgrade path.
 * Thu Jan 21 2021 Mark Hooper <mhooper@45drives.com> 1.7.5-1
 - Made changes to the directory structure of the script locations (/opt/tools/ -> /opt/45drives/tools).
 - Updated the symbolic links to preserve backwards compatability for this directory change.
