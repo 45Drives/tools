@@ -15,8 +15,6 @@ Source0:	%{name}-%{version}.tar.gz
 BuildArch:	x86_64
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root
 
-Conflicts: 45drives-tools < %{version}
-
 Requires: ipmitool
 Requires: jq
 Requires: smartmontools > 7.0
@@ -26,8 +24,8 @@ Requires: pciutils
 Requires: hdparm
 
 Obsoletes:	%{name} <= %{version}
-Provides:	%{name} = %{version}
-Conflicts:	%{name}.1.7-4
+Provides:	%{name} = %{version}-%{release}
+Conflicts:	%{name}-1.7-4
 
 %description
 45Drives server cli tools
