@@ -3,8 +3,8 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.7.5
-Release:	2%{?dist}
+Version:	1.8.0
+Release:	1%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -25,7 +25,7 @@ Requires: hdparm
 
 Obsoletes:	%{name} <= %{version}
 Provides:	%{name} = %{version}-%{release}
-Conflicts:	%{name}-1.7-4
+Conflicts:	%{name}-1.7
 
 %description
 45Drives server cli tools
@@ -75,6 +75,9 @@ rmdir /opt/45drives > /dev/null 2>&1 || true
 rm -rf /opt/tools
 
 %changelog
+* Thu Jan 28 2021 Mark Hooper <mhooper@45drives.com> 1.8.0-1
+- removed problematic symlink (/opt/tools) -> (/opt/45drives/tools) causing migration issues.
+- This will serve as the baseline for tools going forward to be compatible with Ubuntu and Centos7
 * Wed Jan 27 2021 Mark Hooper <mhooper@45drives.com> 1.7.5-2
 - added conflicts to spec file to ensure proper upgrade path.
 * Thu Jan 21 2021 Mark Hooper <mhooper@45drives.com> 1.7.5-1
