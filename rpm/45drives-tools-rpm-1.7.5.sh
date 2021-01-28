@@ -17,6 +17,7 @@ git clone https://github.com/45Drives/tools.git
 mkdir 45drives-tools-1.7.5
 cp -r tools/src/fakeroot/etc 45drives-tools-1.7.5/etc
 cp -r tools/src/fakeroot/opt 45drives-tools-1.7.5/opt
+rm 45drives-tools-1.7.5/opt/tools
 tar -zcvf 45drives-tools-1.7.5.tar.gz 45drives-tools-1.7.5/
 rm -rf 45drives-tools-1.7.5
 mv 45drives-tools-1.7.5.tar.gz rpmbuild/SOURCES/45drives-tools-1.7.5.tar.gz

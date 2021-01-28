@@ -44,7 +44,6 @@ mkdir -p %{buildroot}%{_bindir}
 # in builddir
 cp -a etc/ %{buildroot}
 cp -a opt/ %{buildroot}
-rm opt/tools
 mkdir -p %{buildroot}/etc/45drives/server_info
 echo %{version} > %{buildroot}/etc/45drives/server_info/tools_version
 
