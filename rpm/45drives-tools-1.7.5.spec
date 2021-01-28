@@ -44,6 +44,7 @@ mkdir -p %{buildroot}%{_bindir}
 # in builddir
 cp -a etc/ %{buildroot}
 cp -a opt/ %{buildroot}
+rm opt/tools
 mkdir -p %{buildroot}/etc/45drives/server_info
 echo %{version} > %{buildroot}/etc/45drives/server_info/tools_version
 
@@ -62,10 +63,12 @@ rm -rf %{buildroot}
 %dir /etc/45drives/server_info
 %defattr(-,root,root,-)
 /opt/45drives/tools/*
-/opt/tools
 /etc/profile.d/45drives-tools.sh
 %ghost /etc/45drives/server_info/*
 %{_bindir}/*
+
+%post
+ln -sf /opt/tools /opt/45drives/tools
 
 %postun
 rm -rf /etc/45drives/server_info
