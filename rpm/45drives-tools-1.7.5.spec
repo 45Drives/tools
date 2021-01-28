@@ -68,7 +68,7 @@ rm -rf %{buildroot}
 
 %post
 rm -rf /opt/tools
-ln -sf /opt/tools /opt/45drives/tools
+ln -sf /opt/45drives/tools /opt/tools
 
 %postun
 rm -rf /etc/45drives/server_info
