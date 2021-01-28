@@ -23,7 +23,9 @@ Requires: python3
 Requires: pciutils
 Requires: hdparm
 
-Conflicts: 45drives-tools < %{version}
+Obsoletes:	%{name} <= %{version}
+Provides:	%{name} = %{version}
+Conflicts:	%{name}.1.7-4
 
 %description
 45Drives server cli tools
