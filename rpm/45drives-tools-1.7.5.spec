@@ -66,9 +66,6 @@ rm -rf %{buildroot}
 %ghost /etc/45drives/server_info/*
 %{_bindir}/*
 
-%post
-rm -rf /opt/tools
-ln -sf /opt/45drives/tools /opt/tools
 
 %postun
 rm -rf /etc/45drives/server_info
