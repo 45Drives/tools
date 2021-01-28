@@ -67,6 +67,7 @@ rm -rf %{buildroot}
 %{_bindir}/*
 
 %post
+rm -rf /opt/tools
 ln -sf /opt/tools /opt/45drives/tools
 
 %postun
