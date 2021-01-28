@@ -66,11 +66,11 @@
 ### Installation
 #### CentOS 7.X
 ```sh
-yum install http://images.45drives.com/stable/CentOS/el7/x86_64/45drives-tools-1.7.5-1.el7.x86_64.rpm
+yum install http://images.45drives.com/stable/CentOS/el7/x86_64/45drives-tools-1.8.0-1.el7.x86_64.rpm
 ```
 #### CentOS 8.X
 ```sh
-dnf install http://images.45drives.com/ceph/rpm/el8/x86_64/45drives-tools-1.7-4.el8.x86_64.rpm
+dnf install http://images.45drives.com/ceph/rpm/el8/x86_64/45drives-tools-1.8.0-1.el8.x86_64.rpm
 ```
 
 #### Ubuntu
@@ -83,17 +83,17 @@ Then install using apt:
 #### .deb package from source
 requires git, dpkg, curl. This [script](https://raw.githubusercontent.com/45Drives/tools/1.7.5/deb/45drives-tools-deb-1.7.5.sh) will build the .deb package for you using dpkg-deb.
 ```
-[admin@server ~]# curl -LO https://raw.githubusercontent.com/45Drives/tools/1.7.5/deb/45drives-tools-deb-1.7.5.sh
-[admin@server ~]# chmod +x 45drives-tools-deb-1.7.5.sh
-[admin@server ~]# ./45drives-tools-deb-1.7.5.sh
-[admin@server ~]# sudo apt install ./45drives-tools_1.7.5-1.deb
+[admin@server ~]# curl -LO https://raw.githubusercontent.com/45Drives/tools/1.8.0/deb/45drives-tools-deb-1.8.0.sh
+[admin@server ~]# chmod +x 45drives-tools-deb-1.8.0.sh
+[admin@server ~]# ./45drives-tools-deb-1.8.0.sh
+[admin@server ~]# sudo apt install ./45drives-tools_1.8.0-1.deb
 ```
 
 #### .rpm package from source
 requires git, rpm-build, curl. 
 ```
-[admin@server ~]# curl -LO https://raw.githubusercontent.com/45Drives/tools/1.7.5/rpm/45drives-tools-rpm-1.7.5.sh
-[admin@server ~]# chmod +x 45drives-tools-rpm-1.7.5.sh
-[admin@server ~]# ./45drives-tools-rpm-1.7.5.sh
-[admin@server ~]# yum install ~/rpmbuild/RPMS/x86_64/45drives-tools-1.7.5-1.el7.x86_64.rpm
+[admin@server ~]# curl -LO https://raw.githubusercontent.com/45Drives/tools/1.7.5/rpm/45drives-tools-rpm-1.8.0.sh
+[admin@server ~]# chmod +x 45drives-tools-rpm-1.8.0.sh
+[admin@server ~]# ./45drives-tools-rpm-1.8.0.sh
+[admin@server ~]# yum install ~/rpmbuild/RPMS/x86_64/45drives-tools-1.8.0-1.el7.x86_64.rpm
 ```
