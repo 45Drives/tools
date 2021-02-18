@@ -26,22 +26,18 @@ g_quiet = False
 ###############################################################################
 # Name: get_path_variables
 # Args: None
-# Desc: obtains and returns the path variables required by dmap.
-#		conf_path: coresponds to where the vdev_id.conf file should be stored
-#		dev_path: corresponds to the device path required when generating
-#				  the ailiases found in vdev_id.conf.
+# Desc: Updated in tools 1.8.1, conf_path = /etc, dev_path =/dev. dmap will 
+#       now always replace /usr/lib/udev/vdev_id AND 
+#       /usr/lib/udev/rules.d/69-vdev.rules with those provided 
+#       in /opt/45drives/tools/. This will ensure that our udev rules are
+#       applied over all others. In the case where zfs is installed AFTER
+#       dmap is run initially, it will overwrite our versions of vdev_id and 
+#       69-vdev.rules, which will make zfs look for the config file in 
+#       /etc/zfs/vdev_id.conf which will not be there.
 ###############################################################################
 def get_path_variables():
-	# get the alias config path, if it fails assume /etc
-	# get the device path, if it fails assume /dev
-
-	conf_path = os.getenv('ALIAS_CONFIG_PATH')
-	if conf_path == None:
-		log("No alias config path set in profile.d ... Defaulting to /etc")
-		conf_path = "/etc"	
-		
+	conf_path = "/etc"	
 	dev_path = "/dev"
-
 	return conf_path, dev_path
 
 
@@ -53,6 +49,7 @@ def get_path_variables():
 ###############################################################################
 def trigger_udev():
 	trigger_successful = False
+	log("Triggering udev rules")
 	try:
 		trigger_call = subprocess.run(["udevadm","trigger"])
 		if trigger_call.returncode == 0:
@@ -119,37 +116,50 @@ def check_root():
 #
 ###############################################################################
 def verify_vdev():
-	VDEV_ID="https://raw.githubusercontent.com/45Drives/udev/master/vdev_id"
 	rules_path="/usr/lib/udev/rules.d/69-vdev.rules"
 	script_path="/usr/lib/udev/vdev_id"
+	rules_copy_path="/opt/45drives/tools/69-vdev.rules"
+	script_copy_path="/opt/45drives/tools/vdev_id"
 
-	rules_test = os.path.exists(rules_path)
-	script_test = os.path.exists(script_path)
-	script_x_test = os.access(script_path,os.X_OK) if script_test else False
+	rules_copy_test = os.path.exists(rules_copy_path)
+	script_copy_test = os.path.exists(script_copy_path)
 
-	if rules_test and script_test and script_x_test:
-		return True
-	else:
-		log("valid vdev configuration not found. Resolving...")
-	
-	if not rules_test:
-		log(rules_path +" not found: downloading...")
+	# Download the required scripts if they are not present in /opt/45drives/tools
+	if not rules_copy_test:
+		log("cannot find " + rules_copy_path)
+		log("Attempting to download required file: 69-vdev.rules")
 		rules_repo="https://raw.githubusercontent.com/45Drives/udev/master/69-vdev.rules"
-		rv=subprocess.run(["curl","-o",rules_path,rules_repo],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
+		rv=subprocess.run(["curl","-o",rules_copy_path,rules_repo],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
 		if rv:
 			log("error downloading 69-vdev.rules from " + rules_repo)
 		else:
-			rules_test = os.path.exists(rules_path)
-	
-	if not script_test:
-		log(script_path +" not found: downloading...")
+			rules_copy_test = os.path.exists(rules_copy_path)
+
+	if not script_copy_test:
+		log("cannot find " + script_copy_path)
+		log("Attempting to download required file: vdev_id")
 		script_repo="https://raw.githubusercontent.com/45Drives/udev/master/vdev_id"
-		rv=subprocess.run(["curl","-o",script_path,script_repo],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
+		rv=subprocess.run(["curl","-o",script_copy_path,script_repo],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
 		if rv:
 			log("error downloading vdev_id from " + script_repo)
 		else:
-			script_test = os.path.exists(script_path)
+			script_copy_test = os.path.exists(script_copy_path)
 
+	# Copy the scripts from /opt/45drives/tools to their proper locations
+	rv=subprocess.run(["/usr/bin/cp","-f",rules_copy_path,rules_path],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
+	if rv:
+		log("error replacing " + rules_path)
+	else:
+		rules_test = os.path.exists(rules_path)
+
+	rv=subprocess.run(["/usr/bin/cp","-f",script_copy_path,script_path],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
+	if rv:
+		log("error replacing " + script_path)
+	else:
+		script_test = os.path.exists(script_path)
+		script_x_test = os.access(script_path,os.X_OK) if script_test else False
+
+	# make the script executable if it is not already executable. 
 	if not script_x_test:
 		if script_test:
 			rv=subprocess.run(["chmod","+x",script_path],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
@@ -157,7 +167,6 @@ def verify_vdev():
 				log("error making " + script_path + " executable")
 			else:
 				script_x_test = os.access(script_path,os.X_OK)
-
 		else:
 			log("cannot locate " + script_path)
 
