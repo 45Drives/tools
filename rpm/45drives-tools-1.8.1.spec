@@ -58,7 +58,6 @@ rm -rf %{buildroot}
 
 %files
 %dir /opt/45drives/tools
-%dir /etc/profile.d
 %dir /etc/45drives/server_info
 %defattr(-,root,root,-)
 /opt/45drives/tools/*

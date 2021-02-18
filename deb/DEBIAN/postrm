@@ -4,9 +4,9 @@ rmdir /etc/45drives > /dev/null 2>&1 || true
 rm -rf /opt/45drives/tools
 rmdir /opt/45drives > /dev/null 2>&1 || true
 mkdir -p /opt
-rm /usr/bin/cephfs-dir-stats
-rm /usr/bin/dmap
-rm /usr/bin/findosd
-rm /usr/bin/lsdev
-rm /usr/bin/server_identifier
-rm /usr/bin/zcreate
+rm -f /usr/bin/cephfs-dir-stats
+rm -f /usr/bin/dmap
+rm -f /usr/bin/findosd
+rm -f /usr/bin/lsdev
+rm -f /usr/bin/server_identifier
+rm -f /usr/bin/zcreate
