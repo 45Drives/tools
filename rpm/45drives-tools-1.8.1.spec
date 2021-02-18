@@ -3,7 +3,7 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.8.0
+Version:	1.8.1
 Release:	1%{?dist}
 Summary:	Server CLI Tools
 
@@ -58,11 +58,9 @@ rm -rf %{buildroot}
 
 %files
 %dir /opt/45drives/tools
-%dir /etc/profile.d
 %dir /etc/45drives/server_info
 %defattr(-,root,root,-)
 /opt/45drives/tools/*
-/etc/profile.d/45drives-tools.sh
 %ghost /etc/45drives/server_info/*
 %{_bindir}/*
 
@@ -75,6 +73,10 @@ rmdir /opt/45drives > /dev/null 2>&1 || true
 rm -rf /opt/tools
 
 %changelog
+* Thu Jan 28 2021 Mark Hooper <mhooper@45drives.com> 1.8.1-1
+- Modified dmap to automatically place required udev files (69-vdev.rules and vdev_id) in /usr/lib/udev.
+- Removed /etc/profile.d/45drives-tools.sh as ALIAS_CONFIG_PATH and ALIAS_DEVICE_PATH are no longer needed.
+- This will serve as the baseline for tools going forward to be compatible with Ubuntu and Centos7
 * Thu Jan 28 2021 Mark Hooper <mhooper@45drives.com> 1.8.0-1
 - removed problematic symlink (/opt/tools) -> (/opt/45drives/tools) causing migration issues.
 - This will serve as the baseline for tools going forward to be compatible with Ubuntu and Centos7
