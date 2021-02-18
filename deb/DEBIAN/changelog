@@ -1,3 +1,10 @@
+45drives-tools (1.8.2-1) focal; urgency=medium
+
+  * Always uses /etc/vdev_id.conf instead of checking for /etc/zfs/vdev_id.conf.
+  * Added functionality for Storinator M4 and Storinator C8 output.
+
+ -- Josh Boudreau <jboudreau@45drives.com>  Thu, 18 Feb 2021 15:58:00 -0400
+
 45drives-tools (1.8.1-1) focal; urgency=medium
 
   * Updated Release of 45drives-tools for Ubuntu 20.04.1 LTS Focal Fossa
