@@ -1,2 +1,5 @@
 # ignore the __pycache__ folder
 **/__pycache__
+
+.kdev4/
+*.kdev4
