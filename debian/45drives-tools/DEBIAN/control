@@ -1,8 +1,8 @@
 Package: 45drives-tools
-Version: 1.8.2-4
+Version: 1.8.2-3
 Architecture: amd64
 Maintainer: 45Drives <bkelly@45drives.com>
-Installed-Size: 7338
+Installed-Size: 7249
 Section: utils
 Priority: optional
 Homepage: https://github.com/45Drives/tools

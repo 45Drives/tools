@@ -1,14 +1,8 @@
-45drives-tools (1.8.2-4) focal; urgency=medium
-
-  * One more update 
-
- -- 45Drives <bkelly@45drives.com>  Fri, 19 Feb 2021 20:01:51 +0000
-
 45drives-tools (1.8.2-3) focal; urgency=medium
 
-  * Test for update 
+  * Use dh_link instead of static symlinks 
 
- -- 45Drives <bkelly@45drives.com>  Fri, 19 Feb 2021 19:54:37 +0000
+ -- 45Drives <bkelly@45drives.com>  Fri, 19 Feb 2021 20:54:53 +0000
 
 45drives-tools (1.8.2-2) focal; urgency=medium
 
