@@ -1,9 +1,0 @@
-Package: 45drives-tools
-Version: 1.8.2-1
-Section: utils
-Priority: optional
-Architecture: amd64
-Depends: ipmitool, jq, smartmontools (>= 7.0 ), dmidecode, python3, pciutils, hdparm
-Maintainer: Mark Hooper <mhooper@45drives.com>
-Description: 45Drives server cli tools
- A bundle of useful command line tools for managing your 45drives servers.

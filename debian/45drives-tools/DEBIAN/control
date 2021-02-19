@@ -1,0 +1,10 @@
+Package: 45drives-tools
+Version: 1.8.2-4
+Architecture: amd64
+Maintainer: 45Drives <bkelly@45drives.com>
+Installed-Size: 7338
+Section: utils
+Priority: optional
+Homepage: https://github.com/45Drives/tools
+Description: 45Drives server cli tools
+ A bundle of useful command line tools for managing your 45drives servers

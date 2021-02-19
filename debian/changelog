@@ -1,0 +1,33 @@
+45drives-tools (1.8.2-4) focal; urgency=medium
+
+  * One more update 
+
+ -- 45Drives <bkelly@45drives.com>  Fri, 19 Feb 2021 20:01:51 +0000
+
+45drives-tools (1.8.2-3) focal; urgency=medium
+
+  * Test for update 
+
+ -- 45Drives <bkelly@45drives.com>  Fri, 19 Feb 2021 19:54:37 +0000
+
+45drives-tools (1.8.2-2) focal; urgency=medium
+
+  * Added Makefile
+  * Reorganize debian build directory 
+
+ -- 45Drives <bkelly@45drives.com>  Fri, 19 Feb 2021 19:41:40 +0000
+
+45drives-tools (1.8.2-1) focal; urgency=medium
+
+  * Always uses /etc/vdev_id.conf instead of checking for /etc/zfs/vdev_id.conf.
+  * Added functionality for Storinator M4 and Storinator C8 output.
+
+ -- Josh Boudreau <jboudreau@45drives.com>  Thu, 18 Feb 2021 15:58:00 -0400
+
+45drives-tools (1.8.1-1) focal; urgency=medium
+
+  * Updated Release of 45drives-tools for Ubuntu 20.04.1 LTS Focal Fossa
+  * dmap now places the required udev rules files and scripts in /usr/lib/udev/
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 18 Feb 2021 10:20:32 +0000
+
