@@ -81,12 +81,10 @@ Then install using apt:
 ```
 
 #### .deb package from source
-requires git, dpkg, curl. This [script](https://raw.githubusercontent.com/45Drives/tools/1.7.5/deb/45drives-tools-deb-1.7.5.sh) will build the .deb package for you using dpkg-deb.
+requires user to update changelog when prompted
 ```
-[admin@server ~]# curl -LO https://raw.githubusercontent.com/45Drives/tools/1.8.0/deb/45drives-tools-deb-1.8.0.sh
-[admin@server ~]# chmod +x 45drives-tools-deb-1.8.0.sh
-[admin@server ~]# ./45drives-tools-deb-1.8.0.sh
-[admin@server ~]# sudo apt install ./45drives-tools_1.8.0-1.deb
+[admin@server ~]# git clone https://github.com/45Drives/tools.git
+[admin@server ~]# sh build-debs.sh
 ```
 
 #### .rpm package from source
