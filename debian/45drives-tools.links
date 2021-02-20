@@ -1,6 +1,0 @@
-/opt/45drives/tools/cephfs-dir-stats /usr/bin/cephfs-dir-stats
-/opt/45drives/tools/dmap /usr/bin/dmap
-/opt/45drives/tools/findosd /usr/bin/findosd
-/opt/45drives/tools/lsdev /usr/bin/lsdev
-/opt/45drives/tools/server_identifier /usr/bin/server_identifier
-/opt/45drives/tools/zcreate /usr/bin/zcreate
