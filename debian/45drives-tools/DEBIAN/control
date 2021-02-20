@@ -1,8 +1,9 @@
 Package: 45drives-tools
-Version: 1.8.2-3
+Version: 1.8.2-4
 Architecture: amd64
 Maintainer: 45Drives <bkelly@45drives.com>
-Installed-Size: 7249
+Installed-Size: 7338
+Depends: ipmitool, jq, smartmontools (>= 7.0), dmidecode, python3, pciutils, hdparm
 Section: utils
 Priority: optional
 Homepage: https://github.com/45Drives/tools

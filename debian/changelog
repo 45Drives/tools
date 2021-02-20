@@ -1,8 +1,14 @@
+45drives-tools (1.8.2-4) focal; urgency=medium
+
+  * fixed broken syminks 
+
+ -- 45Drives <bkelly@45drives.com>  Sat, 20 Feb 2021 23:04:51 +0000
+
 45drives-tools (1.8.2-3) focal; urgency=medium
 
-  * Use dh_link instead of static symlinks 
+  * Added missing dependancies 
 
- -- 45Drives <bkelly@45drives.com>  Fri, 19 Feb 2021 20:54:53 +0000
+ -- 45Drives <bkelly@45drives.com>  Sat, 20 Feb 2021 20:20:31 +0000
 
 45drives-tools (1.8.2-2) focal; urgency=medium
 
