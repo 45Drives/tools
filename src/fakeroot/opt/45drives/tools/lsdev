@@ -237,7 +237,7 @@ def build_server(options):
 			"S45":[15,15,15],
 			"XL60":[15,15,15,15],
 			"C8":[4,4],
-			"M4":[4]
+			"MI4":[4]
 		},
 		"STORNADO":{
 			"AV15":[32]
@@ -339,17 +339,21 @@ def get_controller():
 		server_obj = json.load(server_info_file)
 		server_info_file.close()
 		
-		if server_obj["Alias Style"] != "AV15-BASE":
+		if server_obj["Alias Style"] != "AV15-BASE" and server_obj["Chassis Size"] != "MI4":
 			# This is a server with HBA cards
 			for hba in server_obj["HBA"]:
 				if hba["Model"] not in controllers:
 					controllers.append(hba["Model"])
 					driver_args.append(hba["Kernel Driver"])
 		
-		else:
+		elif server_obj["Alias Style"] == "AV15-BASE":
 			# this is an AV15 Base Model
 			controllers = ["AV15-Base"]
 			driver_args = ["mpt3sas"]
+
+		elif server_obj["Chassis Size"] == "MI4":
+			controllers = ["Intel SATA Controller (ahci)"]
+			driver_args = ["ahci"]
 		
 		#run modinfo command to obtain the drive version for each unique controller type
 		for drv_arg in driver_args:
@@ -522,7 +526,7 @@ def print_bays(server, options, osd):
 # receives: server dictionary ({rows: [], meta: {}}), options, Ceph OSD LUT
 # does: prints table representing server with output based on
 #       options and choose_output() call, with rows going across
-#       for use with M4 and C8 chassis
+#       for use with MI4 and C8 chassis
 # returns: nothing
 # DEPRECATED: to be replaced with generic table formatting function
 ################################################################################
@@ -647,7 +651,7 @@ def main():
 		print(json.dumps(server, indent = 4))
 	elif(
 		server_info["Alias Style"] == "STORINATOR" and 
-		(server_info["Chassis Size"] == "C8" or server_info["Chassis Size"] == "M4")):
+		(server_info["Chassis Size"] == "C8" or server_info["Chassis Size"] == "MI4")):
 		print_bays_front(server, options, osd)
 	else:
 		print_bays(server, options, osd)
