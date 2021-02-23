@@ -1,0 +1,14 @@
+Source: 45drives-tools
+Section: utils
+Priority: optional
+Maintainer: 45Drives <bkelly@45drives.com>
+Build-Depends: debhelper-compat (= 12)
+Standards-Version: 4.4.1
+Homepage: https://github.com/45Drives/tools
+
+Package: 45drives-tools
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ipmitool, jq, smartmontools (>= 7.0 ), dmidecode, python3, pciutils, hdparm
+Description: 45Drives server cli tools
+ A bundle of useful command line tools for managing your 45drives servers
+

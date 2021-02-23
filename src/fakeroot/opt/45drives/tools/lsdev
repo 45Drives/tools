@@ -235,7 +235,9 @@ def build_server(options):
 			"AV15":[15],
 			"Q30":[15,15],
 			"S45":[15,15,15],
-			"XL60":[15,15,15,15]	
+			"XL60":[15,15,15,15],
+			"C8":[4,4],
+			"M4":[4]
 		},
 		"STORNADO":{
 			"AV15":[32]
@@ -246,9 +248,8 @@ def build_server(options):
 	}
 	CURRENT_ROW = 0
 	DRIVE_COUNT = 0
-
-
-	CONFIG_PATH = "/etc/zfs" if os.path.isfile("/etc/zfs/vdev_id.conf") else "/etc"
+	
+	CONFIG_PATH = "/etc"
 	try:
 		vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
 	except IOError:
@@ -313,7 +314,7 @@ def build_server(options):
 		# insert copy of bay
 		server[CURRENT_ROW].append(bay.copy());
 	vdev_id.close()
-	return server
+	return server, server_obj
 
 ################################################################################
 # function name: get_controller
@@ -326,10 +327,10 @@ def get_controller():
 	controllers = []
 	driver_args = []
 	driver_versions = []
-
+	
 	controller_names = "?"
 	driver_version_names = "?"
-
+	
 	# load the existing server_info.json file in as a json object.
 	json_dir = "/etc/45drives/server_info"
 	server_obj = None
@@ -344,12 +345,12 @@ def get_controller():
 				if hba["Model"] not in controllers:
 					controllers.append(hba["Model"])
 					driver_args.append(hba["Kernel Driver"])
-
+		
 		else:
 			# this is an AV15 Base Model
 			controllers = ["AV15-Base"]
 			driver_args = ["mpt3sas"]
-
+		
 		#run modinfo command to obtain the drive version for each unique controller type
 		for drv_arg in driver_args:
 			try:
@@ -368,8 +369,6 @@ def get_controller():
 		if len(controllers) != 0 and len(driver_versions) != 0:
 			controller_names = ", ".join(controllers)
 			driver_version_names = ", ".join(driver_versions)
-
-
 	else:
 		print("Unable to determine disk controller. Run 'dmap'")
 		exit(1)
@@ -519,6 +518,63 @@ def print_bays(server, options, osd):
 		print("    Empty " + "  * Occupied (no partitions) " + " ** Occupied (1 or more partitions)")
 
 ################################################################################
+# function name: print_bays_front
+# receives: server dictionary ({rows: [], meta: {}}), options, Ceph OSD LUT
+# does: prints table representing server with output based on
+#       options and choose_output() call, with rows going across
+#       for use with M4 and C8 chassis
+# returns: nothing
+# DEPRECATED: to be replaced with generic table formatting function
+################################################################################
+def print_bays_front(server, options, osd):
+	print_array = []
+	
+	for i in range(len(server["rows"][0])):
+		print_array.append([None]*len(server["rows"]))
+		for j in reversed(range(len(server["rows"]))):
+			bay = server["rows"][j][i]
+			cell_string = "{txt:<4} (".format(txt=bay["bay-id"]) + choose_output(bay, options, osd) + ")"
+			colour = ""
+			if options.colour:
+				if bay["occupied"] == False:
+					colour = "GREY"
+				elif bay["partitions"] == 0:
+					colour = "GREEN"
+				elif bay["partitions"] > 0:
+					colour = "LGREEN"
+			else:
+				if bay["occupied"] and bay["partitions"] == 0:
+					cell_string = " * " + cell_string
+				elif bay["occupied"] and bay["partitions"] > 0:
+					cell_string = "** " + cell_string
+				else:
+					cell_string = "   " + cell_string
+			print_array[i][j] = (cell_string, colour)
+	
+	header_text = [
+		"Storinator Disk Info",
+		"Disk Controller(s): " + server["meta"]["disk-controller"],
+		"Driver version(s): " + server["meta"]["driver-version"]
+	]
+	
+	col_headers = []
+	for row in range(len(server["rows"][0])):
+		h_txt = (" ID (" + choose_output_header(options)) + ")"
+		col_headers.append(h_txt)
+	
+	table_print(ansi = options.colour, c_count = len(print_array), c_txt = print_array, c_labels = col_headers, h_txt = header_text, padding = 1)
+	
+	# legend
+	print(" Legend:")
+	if options.colour:
+		print(ANSI_colours.GREY + " Empty " +
+				ANSI_colours.GREEN + " Occupied (no partitions) " +
+				ANSI_colours.LGREEN + " Occupied (1 or more partitions)" +
+				ANSI_colours.END)
+	else:
+		print("    Empty " + "  * Occupied (no partitions) " + " ** Occupied (1 or more partitions)")
+
+################################################################################
 # function name: format_bytes
 # receives: integer value in bytes
 # does: formats size_bytes in SI base units
@@ -565,8 +621,10 @@ def main():
 			default=False, help="Output OSD name - Ceph only")
 	(options, args) = parser.parse_args()
 	
+	(rows, server_info) = build_server(options)
+	
 	server = {
-		"rows": build_server(options),
+		"rows": rows,
 		"meta": {
 			"disk-controller": "",
 			"driver-version": ""
@@ -579,7 +637,7 @@ def main():
 		if check_ceph():
 			osd = get_osd_dict()
 		else:
-			log("-o --ceph-osd can only be used with Ceph.")
+			print("-o --ceph-osd can only be used with Ceph.")
 	
 	#get server information
 	server["meta"]["disk-controller"], server["meta"]["driver-version"] = get_controller()
@@ -587,6 +645,10 @@ def main():
 	#print relevant information based on command line arguments
 	if(options.json):
 		print(json.dumps(server, indent = 4))
+	elif(
+		server_info["Alias Style"] == "STORINATOR" and 
+		(server_info["Chassis Size"] == "C8" or server_info["Chassis Size"] == "M4")):
+		print_bays_front(server, options, osd)
 	else:
 		print_bays(server, options, osd)
 	exit(0)

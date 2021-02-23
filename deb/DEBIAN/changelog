@@ -1,6 +1,0 @@
-45drives-tools (1.8.1-1) focal; urgency=medium
-
-  * Updated Release of 45drives-tools for Ubuntu 20.04.1 LTS Focal Fossa
-  * dmap now places the required udev rules files and scripts in /usr/lib/udev/
-
- -- Mark Hooper <mhooper@45drives.com>  Thu, 18 Feb 2021 10:20:32 +0000
