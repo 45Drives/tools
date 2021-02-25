@@ -26,8 +26,8 @@ if [ $checkout != 0 ]; then
 	exit 1
 fi
 mkdir 45drives-tools-$ver
-cp -r tools/src/fakeroot/etc 45drives-tools-1.8.2/etc
-cp -r tools/src/fakeroot/opt 45drives-tools-1.8.2/opt
+cp -r tools/src/fakeroot/etc 45drives-tools-$ver/etc
+cp -r tools/src/fakeroot/opt 45drives-tools-$ver/opt
 tar -zcvf 45drives-tools-$ver.tar.gz 45drives-tools-$ver/
 rm -rf 45drives-tools-$ver
 mv 45drives-tools-$ver.tar.gz rpmbuild/SOURCES/45drives-tools-$ver.tar.gz
