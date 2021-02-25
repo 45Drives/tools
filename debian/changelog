@@ -1,9 +1,9 @@
 45drives-tools (1.8.3-1) focal; urgency=medium
 
   * updated /usr/lib/udev/rules.d/69-vdev.rules
-  * added support for C8 and Mi4 Servers in dmap and lsdev.
+  * added support for C8 and Mi4 Servers in dmap and lsdev
 
- -- 45Drives <mhooper@45drives.com> Thu, 25 Feb 2021 15:00:51 +0000
+ -- 45Drives <mhooper@45drives.com>  Thu, 25 Feb 2021 15:00:51 +0000
 
 45drives-tools (1.8.2-4) focal; urgency=medium
 
