@@ -3,7 +3,7 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.8.1
+Version:	1.8.3
 Release:	1%{?dist}
 Summary:	Server CLI Tools
 
@@ -65,14 +65,14 @@ rm -rf %{buildroot}
 %{_bindir}/*
 
 
-%postun
-rm -rf /etc/45drives/server_info
-rmdir /etc/45drives > /dev/null 2>&1 || true
-rm -rf /opt/45drives/tools
-rmdir /opt/45drives > /dev/null 2>&1 || true
-rm -rf /opt/tools
 
 %changelog
+* Thu Feb 25 2021 Mark Hooper <mhooper@45drives.com> 1.8.3-1
+- added missing newline character to rules script.
+- modified postrm behavior, as updating the package was deleting files required by new package. 
+* Thu Jan 28 2021 Mark Hooper <mhooper@45drives.com> 1.8.2-1
+- fixed bug in lsdev when it looks in /etc/zfs for vdev_id.conf, now always looks for /etc/vdev_id.conf.
+- Added lsdev support for future Storinator M4 and C8 Models.
 * Thu Jan 28 2021 Mark Hooper <mhooper@45drives.com> 1.8.1-1
 - Modified dmap to automatically place required udev files (69-vdev.rules and vdev_id) in /usr/lib/udev.
 - Removed /etc/profile.d/45drives-tools.sh as ALIAS_CONFIG_PATH and ALIAS_DEVICE_PATH are no longer needed.
