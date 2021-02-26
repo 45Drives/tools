@@ -199,44 +199,31 @@ def get_server_info():
 # Name: create_vdev_id
 # Args: server (dict)
 #    Example of a server dict:
-#    {
-#        "Motherboard": {
-#            "Manufacturer": "Supermicro",
-#            "Product Name": "X11SPL-F",
-#            "Serial Number": "ZM18AS011320"
-#        },
-#        "HBA": [
-#            {
-#                "Model": "SAS9305-16i",
-#                "Adapter": "SAS3224",
-#                "Bus Address": "0000:17:00.0",
-#                "Drive Connections": 16,
-#                "Kernel Driver": "mpt3sas",
-#                "PCI Slot": 5
-#            },
-#            {
-#                "Model": "SAS9305-24i",
-#                "Adapter": "SAS3224",
-#                "Bus Address": "0000:18:00.0",
-#                "Drive Connections": 24,
-#                "Kernel Driver": "mpt3sas",
-#                "PCI Slot": 4
-#            },
-#            {
-#                "Model": "SAS9305-24i",
-#                "Adapter": "SAS3224",
-#                "Bus Address": "0000:65:00.0",
-#                "Drive Connections": 24,
-#                "Kernel Driver": "mpt3sas",
-#                "PCI Slot": 6
-#            }
-#        ],
-#        "Hybrid": true,
-#        "Serial": "13371337-1-1",
-#        "Model": "Storinator-H32-S45-Enhanced",
-#        "Alias Style": "H32",
-#        "Chassis Size": "S45"
-#    }
+#{
+#    "Motherboard": {
+#        "Manufacturer": "Supermicro",
+#        "Product Name": "X11DPL-i",
+#        "Serial Number": "WM19AS004505"
+#    },
+#    "HBA": [
+#        {
+#            "Model": "SAS9305-16i",
+#            "Adapter": "SAS3224",
+#            "Bus Address": "0000:d8:00.0",
+#            "Drive Connections": 16,
+#            "Kernel Driver": "mpt3sas",
+#            "PCI Slot": 3
+#        }
+#    ],
+#    "Hybrid": false,
+#    "Serial": "13371337-13-37",
+#    "Model": "Storinator-C8-Turbo",
+#    "Alias Style": "STORINATOR",
+#    "Chassis Size": "C8",
+#    "VM": false,
+#    "Edit Mode": false
+#}
+#
 #    
 # Desc: Using the server dict, we can alias all drives in the appropriate 
 #       order based on the system information. The server dict is read in 
@@ -271,7 +258,9 @@ def create_vdev_id(server):
 			"Q30":[15,15],
 			"S45":[15,15,15],
 			"XL60":[15,15,15],
-			"F32":[16,16]	
+			"F32":[16,16],
+			"C8":[8],
+			"MI4":[0]
 		},
 		"STORNADO":{
 			"AV15":[16,16],
@@ -301,7 +290,7 @@ def create_vdev_id(server):
 
 	# We have a valid combination of alias styles and chassis sizes.
 	vdev_id_str = "# This file was generated using dmap v1.8 (/opt/45drives/tools/dmap).\n"
-	if len(server["HBA"]) > 0:
+	if len(server["HBA"]) > 0 and server["Chassis Size"] != "C8":
 		# we have hba cards to inspect/alias
 		for i in range(0,len(server["HBA"])):
 			count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
@@ -321,6 +310,19 @@ def create_vdev_id(server):
 							i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
 							)
 						)
+	elif len(server["HBA"]) > 0:
+		# we have a C8 server, order needs to be 1-1, 1-2, 1-3, 1-4,       2-1,2-2,2-3,2-4
+		for i in range(0,len(server["HBA"])):
+			count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
+			for j in range(0,count):
+					# The default case for ailiasing hba cards.
+					vdev_id_str += (
+						"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
+							i=1+(j//4),j=(j%4)+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
+							)
+						)
+	elif server["Chassis Size"] == "MI4" and server["Alias Style"] == "STORINATOR":
+		vdev_id_str += alias_mi4(server["Model"])
 	elif server["Alias Style"] == "AV15-BASE":
 		# we are using the AV15-BASE ailiasing scheme.
 		vdev_id_str += alias_av15_base()
@@ -333,7 +335,7 @@ def create_vdev_id(server):
 ###############################################################################
 # Name: alias_av15_base
 # Args: none
-# Desc: returns a string to to place within vdev_id.conf that will
+# Desc: returns a string to place within vdev_id.conf that will
 #       alias drives in an av15 base model. The av15 base model does not 
 #       use any hba cards. It instead uses two on board SAS connectors (1-1 to 1-8)
 #       and 7 sata connectors (1-9 to 1-15). Using the output of lspci, we 
@@ -370,6 +372,40 @@ def alias_av15_base():
 			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}\n".format(drive=i+9,addr=bus_address_sata,i=i+1)
 	else:
 		log("Error aliasing AV15-BASE")
+		sys.exit(1)
+	return vdev_id_str
+
+###############################################################################
+# Name: alias_mi4
+# Args: model
+# Desc: The mi4 servers do not use HBA cards and must alias the on-board sata
+#       ports. These ports start at ISATA-2 as the boot drives are using 
+#       ISATA-0 and ISATA-1. This means that we need 1-1 to use "...-ata-3".
+###############################################################################
+def alias_mi4(model):
+	vdev_id_str = ""
+	bus_address_sata = None
+
+	try:
+		lspci_result = subprocess.Popen(["lspci"], stdout=subprocess.PIPE,
+			universal_newlines=True).stdout
+	except OSError:
+		log("Error executing lspci.")
+		sys.exit(1)
+
+	for line in lspci_result:
+		regex_sata = re.search("(\w\w:\w\w.\w).*Intel.*\sSATA Controller",line)
+		if regex_sata != None:
+			bus_address_sata = "0000:"+regex_sata.group(1)
+		if bus_address_sata != None:
+			break
+
+	if bus_address_sata != None:
+		for i in range(0,4):
+			#alias the drives connected to the on board sata sata connectors
+			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}\n".format(drive=i+1,addr=bus_address_sata,i=i+3)
+	else:
+		log("Error aliasing " + model)
 		sys.exit(1)
 	return vdev_id_str
 
