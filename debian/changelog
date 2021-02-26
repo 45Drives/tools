@@ -1,3 +1,9 @@
+45drives-tools (1.8.3-3focal) focal; urgency=medium
+
+  * updated package name to match 45Drives naming conventions.
+
+ -- 45Drives <mhooper@45drives.com>  Fri, 26 Feb 2021 15:38:51 +0000
+
 45drives-tools (1.8.3-1) focal; urgency=medium
 
   * updated /usr/lib/udev/rules.d/69-vdev.rules
