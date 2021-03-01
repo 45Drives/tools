@@ -3,7 +3,7 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.8.3
+Version:	1.8.4
 Release:	1%{?dist}
 Summary:	Server CLI Tools
 
@@ -67,6 +67,8 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Mar 1 2021 Mark Hooper <mhooper@45drives.com> 1.8.4-1
+- Added missing integer to XL60 array, causing dmap faults in non-autodetectable units.
 * Thu Feb 25 2021 Mark Hooper <mhooper@45drives.com> 1.8.3-1
 - added missing newline character to rules script.
 - modified postrm behavior, as updating the package was deleting files required by new package. 
