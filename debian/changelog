@@ -1,3 +1,9 @@
+45drives-tools (1.8.4-1focal) focal; urgency=medium
+
+  * Added missing integer to XL60 array, causing dmap faults in non-autodetectable units.
+
+ -- 45Drives <mhooper@45drives.com>  Mon, 1 Mar 2021 09:38:51 +0000
+
 45drives-tools (1.8.3-3focal) focal; urgency=medium
 
   * updated package name to match 45Drives naming conventions.
