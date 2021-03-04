@@ -57,6 +57,7 @@ g_product_lut = {
 	"Storinator-S45-Enhanced":			["X11SPL-F"  ,0,3,"S45" ,"STORINATOR"],
 	"Storinator-S45-Turbo":				["X11DPL-i"  ,0,3,"S45" ,"STORINATOR"],
 	"Storinator-XL60-Enhanced":			["X11SPL-F"  ,0,4,"XL60","STORINATOR"],
+	"Storinator-XL60-Enhanced-AMD":		["H11SSL-i"  ,0,4,"XL60","STORINATOR"],
 	"Storinator-XL60-Turbo":			["X11DPL-i"  ,0,4,"XL60","STORINATOR"],
 	"Stornado-AV15-Enhanced":			["X11SPL-F"  ,0,2,"AV15","STORNADO"],
 	"Stornado-AV15-Turbo":				["X11DPL-i"  ,0,2,"AV15","STORNADO"],
