@@ -4,7 +4,7 @@
 
 Name:		45drives-tools
 Version:	1.8.5
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -60,6 +60,7 @@ rm -rf %{buildroot}
 %dir /opt/45drives/tools
 %dir /etc/45drives/server_info
 %defattr(-,root,root,-)
+/etc/45drives/server_info/*
 /opt/45drives/tools/*
 %ghost /etc/45drives/server_info/*
 %{_bindir}/*
@@ -67,6 +68,8 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Mar 8 2021 Mark Hooper <mhooper@45drives.com> 1.8.5-3
+- Added /etc/45drives/server_info/* to the files directive in spec file. 
 * Mon Mar 8 2021 Mark Hooper <mhooper@45drives.com> 1.8.5-2
 - Updated the tools version file in /etc/45drives/server_info/tools_version to 1.8.5.
 * Mon Mar 8 2021 Mark Hooper <mhooper@45drives.com> 1.8.5-1
