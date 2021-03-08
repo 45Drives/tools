@@ -4,7 +4,7 @@
 
 Name:		45drives-tools
 Version:	1.8.5
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -67,6 +67,8 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Mar 8 2021 Mark Hooper <mhooper@45drives.com> 1.8.5-2
+- Updated the tools version file in /etc/45drives/server_info/tools_version to 1.8.5.
 * Mon Mar 8 2021 Mark Hooper <mhooper@45drives.com> 1.8.5-1
 - Added missing key-value pairs for server_identifier for Enhanced-AMD servers.
 * Mon Mar 1 2021 Mark Hooper <mhooper@45drives.com> 1.8.4-2
