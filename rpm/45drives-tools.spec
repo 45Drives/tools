@@ -3,8 +3,8 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.8.4
-Release:	2%{?dist}
+Version:	1.8.5
+Release:	1%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -67,6 +67,8 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Mar 8 2021 Mark Hooper <mhooper@45drives.com> 1.8.5-1
+- Added missing key-value pairs for server_identifier for Enhanced-AMD servers.
 * Mon Mar 1 2021 Mark Hooper <mhooper@45drives.com> 1.8.4-2
 - Added missing key-value pair to server_identifier for Storinator-XL60-Enhanced-AMD.
 * Mon Mar 1 2021 Mark Hooper <mhooper@45drives.com> 1.8.4-1
