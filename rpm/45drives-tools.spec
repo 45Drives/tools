@@ -3,8 +3,8 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.8.5
-Release:	3%{?dist}
+Version:	1.8.6
+Release:	1%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -23,7 +23,7 @@ Requires: python3
 Requires: pciutils
 Requires: hdparm
 
-Obsoletes:	%{name} <= %{version}
+
 Provides:	%{name} = %{version}-%{release}
 Conflicts:	%{name}-1.7
 
@@ -45,7 +45,6 @@ mkdir -p %{buildroot}%{_bindir}
 cp -a etc/ %{buildroot}
 cp -a opt/ %{buildroot}
 mkdir -p %{buildroot}/etc/45drives/server_info
-echo %{version} > %{buildroot}/etc/45drives/server_info/tools_version
 
 pushd opt/45drives/tools/
     for i in lsdev dmap findosd zcreate cephfs-dir-stats server_identifier; do
@@ -60,14 +59,18 @@ rm -rf %{buildroot}
 %dir /opt/45drives/tools
 %dir /etc/45drives/server_info
 %defattr(-,root,root,-)
-/etc/45drives/server_info/*
+/etc/45drives/server_info/tools_version
 /opt/45drives/tools/*
-%ghost /etc/45drives/server_info/*
 %{_bindir}/*
 
 
 
 %changelog
+* Mon Mar 8 2021 Mark Hooper <mhooper@45drives.com> 1.8.6-1
+- tools_version file is now being created properly.
+- updating version to 1.8.6 to rectify improper use of obsoletes statement. 
+* Mon Mar 8 2021 Mark Hooper <mhooper@45drives.com> 1.8.5-4
+- tools_version file is still not being created, removed the echo statement from spec file. 
 * Mon Mar 8 2021 Mark Hooper <mhooper@45drives.com> 1.8.5-3
 - Added /etc/45drives/server_info/* to the files directive in spec file. 
 * Mon Mar 8 2021 Mark Hooper <mhooper@45drives.com> 1.8.5-2
