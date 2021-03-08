@@ -12,3 +12,6 @@ debian/45drives-tools.postrm.debhelper
 debian/debhelper-build-stamp
 debian/files
 debian/.debhelper
+
+# docker builds
+dist

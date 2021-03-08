@@ -1,3 +1,28 @@
+45drives-tools (1.8.6-1focal) focal; urgency=medium
+
+  * Increased version to 1.8.6-1 to match tools version for all other distributions.
+  * Updated the tools version file in /etc/45drives/server_info/tools_version to 1.8.6.
+
+ -- 45Drives <mhooper@45drives.com>  Mon, 8 Mar 2021 11:32:51 +0000
+
+45drives-tools (1.8.5-2focal) focal; urgency=medium
+
+  * Updated the tools version file in /etc/45drives/server_info/tools_version to 1.8.5.
+
+ -- 45Drives <mhooper@45drives.com>  Mon, 8 Mar 2021 11:32:51 +0000
+
+45drives-tools (1.8.5-1focal) focal; urgency=medium
+
+  * Added missing key-value pairs for server_identifier for Enhanced-AMD servers.
+
+ -- 45Drives <mhooper@45drives.com>  Mon, 8 Mar 2021 10:49:51 +0000
+
+45drives-tools (1.8.4-2focal) focal; urgency=medium
+
+  * Added missing key-value pair to server_identifier for Storinator-XL60-Enhanced-AMD.
+
+ -- 45Drives <mhooper@45drives.com>  Thu, 4 Mar 2021 14:30:51 +0000
+
 45drives-tools (1.8.4-1focal) focal; urgency=medium
 
   * Added missing integer to XL60 array, causing dmap faults in non-autodetectable units.
