@@ -9,12 +9,9 @@
 # (at your option) any later version.############
 
 # ALIAS CONFIG ENV VARIBLES
-DEVICE_PATH=$ALIAS_DEVICE_PATH
-CONFIG_PATH=$ALIAS_CONFIG_PATH
-if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
-        DEVICE_PATH=/dev
-	    CONFIG_PATH=/etc
-fi
+DEVICE_PATH=/dev/disk/by-vdev
+CONFIG_PATH=/etc
+
 LSI_9305="3224"
 LSI_9361="3316"
 LSI_9405="3616"
@@ -112,15 +109,18 @@ printvars() {
     echo "chassis_size: $CHASSIS_SIZE"
     echo "hybrid_chassis: $HYBRID_CHASSIS"
     echo "osd_auto_discovery: false"
-    echo "lvm_volumes:" 
-    for i in "${BAY[@]}";do
-        echo "  - data: $DEVICE_PATH/$i" 
-    done
+#    echo "lvm_volumes:" 
+#    for i in "${BAY[@]}";do
+#        echo "  - data: $DEVICE_PATH/$i" 
+#    done
     echo "" 
     echo "devices:" 
     for i in "${BAY[@]}";do
-        echo "  - $(readlink -f $DEVICE_PATH/$i)" 
+        echo "  - $DEVICE_PATH/$i" 
     done
+    echo ""
+    echo "#dedicated_devices:"
+    echo "#  - /dev/"    
     echo ""
 }
 
