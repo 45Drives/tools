@@ -91,7 +91,7 @@ getchassis() {
     fi
 }
 checkcas(){
-if rpm -qa | grep -q open-cas-linux ; then
+if command -v casadm > /dev/null 2>&1 ; then
     cascheck=$(casadm -L)
     if [ "$cascheck" == "No caches running" ] ; then
         CAS="false"

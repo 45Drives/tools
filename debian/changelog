@@ -1,3 +1,10 @@
+45drives-tools (1.8.7-1focal) focal; urgency=medium
+
+  * Updated generate-osd-vars to support dedicated db in OSD
+  * Replaced open-cas check with a OS agnostic one
+
+ -- 45Drives <bkelly@45drives.com>  Mon, 22 Mar 2021 2:36:51 +0000
+
 45drives-tools (1.8.6-1focal) focal; urgency=medium
 
   * Increased version to 1.8.6-1 to match tools version for all other distributions.
