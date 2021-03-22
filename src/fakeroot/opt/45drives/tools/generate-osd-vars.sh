@@ -81,14 +81,6 @@ getchassis() {
             exit 1
     	;;
         esac
-
-    HYBRID_CHECK=$(/opt/MegaRAID/storcli/storcli64 show all  2>/dev/null| grep 24i | wc -l)
-
-    if [ $HYBRID_CHECK -ne 0 ];then
-        HYBRID_CHASSIS="true"
-    else
-        HYBRID_CHASSIS="false"
-    fi
 }
 checkcas(){
 if command -v casadm > /dev/null 2>&1 ; then
@@ -107,7 +99,6 @@ printvars() {
     ## PRINT
     echo "---" 
     echo "chassis_size: $CHASSIS_SIZE"
-    echo "hybrid_chassis: $HYBRID_CHASSIS"
     echo "osd_auto_discovery: false"
 #    echo "lvm_volumes:" 
 #    for i in "${BAY[@]}";do
