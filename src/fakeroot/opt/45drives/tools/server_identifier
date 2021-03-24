@@ -493,6 +493,24 @@ def edit_mode_check():
 		return old_server["Edit Mode"]
 	return False
 
+def get_os():
+	os_release_path = "/etc/os-release"
+	os_release_fields = {
+		"NAME":"?",
+		"VERSION_ID":"?"
+		}
+	if os.path.isfile(os_release_path):
+		os_release_file = open(os_release_path,"r")
+		os_release_lines = os_release_file.read().splitlines()
+		os_release_file.close()
+		for line in os_release_lines:
+			for field in os_release_fields.keys():
+				regex = re.search("^({fld})=".format(fld=field) + '\"(.+?)\"',line)
+				if regex != None:
+					os_release_fields[regex.group(1)] = regex.group(2)
+
+	return os_release_fields["NAME"],os_release_fields["VERSION_ID"]
+
 
 def main():
 	server = {
@@ -504,7 +522,9 @@ def main():
 		"Alias Style":"?",
 		"Chassis Size":"?",
 		"VM":False,
-		"Edit Mode":False
+		"Edit Mode":False,
+		"OS NAME": "?",
+		"OS VERSION_ID": "?"
 	}
 	# get current time
 	current_day = datetime.today()
@@ -534,6 +554,8 @@ def main():
 			server["Alias Style"] = "STORNADO"
 			server["Chassis Size"] = "AV15"
 
+	# get OS NAME and OS VERSION_ID
+	server["OS NAME"], server["OS VERSION_ID"] = get_os()
 	update_json_file(server,scan_time)
 	exit(0)
 

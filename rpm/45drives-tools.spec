@@ -3,7 +3,7 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.8.6
+Version:	1.8.8
 Release:	1%{?dist}
 Summary:	Server CLI Tools
 
@@ -66,6 +66,14 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Mar 24 2021 Mark Hooper <mhooper@45drives.com> 1.8.8-1
+- server_identifier now stores the OS NAME and OS VERSION_ID.
+- dmap will append the ".0" for all ailias paths /dev/disk/by-path/... if server has CentOS 7 installed.
+- dmap also will reload udev rules before triggering them.
+- Updated the tools version file in /etc/45drives/server_info/tools_version to 1.8.8
+* Mon Mar 22 2021 Brett Kelly <bkelly@45drives.com> 1.8.7-1
+- Updated generate-osd-vars to support dedicated db in OSD
+- Replaced open-cas check with a OS agnostic one
 * Mon Mar 8 2021 Mark Hooper <mhooper@45drives.com> 1.8.6-1
 - tools_version file is now being created properly.
 - updating version to 1.8.6 to rectify improper use of obsoletes statement. 
