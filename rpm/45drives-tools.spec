@@ -3,11 +3,7 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-<<<<<<< HEAD
 Version:	1.8.8
-=======
-Version:	1.8.7
->>>>>>> master
 Release:	1%{?dist}
 Summary:	Server CLI Tools
 
