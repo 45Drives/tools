@@ -3,7 +3,11 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
+<<<<<<< HEAD
 Version:	1.8.8
+=======
+Version:	1.8.7
+>>>>>>> master
 Release:	1%{?dist}
 Summary:	Server CLI Tools
 
@@ -74,6 +78,8 @@ rm -rf %{buildroot}
 * Mon Mar 22 2021 Brett Kelly <bkelly@45drives.com> 1.8.7-1
 - Updated generate-osd-vars to support dedicated db in OSD
 - Replaced open-cas check with a OS agnostic one
+* Fri Mar 19 2021 Brett Kelly <bkelly@45drives.com> 1.8.7-1
+- generate-osd-vars.sh now supports dedicated db devices for ceph clusters
 * Mon Mar 8 2021 Mark Hooper <mhooper@45drives.com> 1.8.6-1
 - tools_version file is now being created properly.
 - updating version to 1.8.6 to rectify improper use of obsoletes statement. 

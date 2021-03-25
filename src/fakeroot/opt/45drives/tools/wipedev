@@ -27,13 +27,8 @@ checkroot(){
 }
 
 ALL_FLAG=0
-DEVICE_PATH=$ALIAS_DEVICE_PATH
-CONFIG_PATH=$ALIAS_CONFIG_PATH
-if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
-        echo "No alias device or config path set in profile.d ... Defaulting to /etc, and /dev"
-        DEVICE_PATH=/dev
-		CONFIG_PATH=/etc
-fi
+DEVICE_PATH=/dev/disk/by-vdev
+CONFIG_PATH=/etc
 checkroot
 while getopts 'ad:' OPTION;do
 	case ${OPTION} in
@@ -57,7 +52,7 @@ if [ $# -eq 0 ];then
 fi
 
 if [ $ALL_FLAG -eq 1 ];then
-	BAYS=$((cat $CONFIG_PATH/vdev_id.conf| awk "NR>2" | wc -l) 2>/dev/null)
+	BAYS=$((cat $CONFIG_PATH/vdev_id.conf| awk "NR>1" | wc -l) 2>/dev/null)
 	i=0
 	j=3
 	## LOOP THROUGH BAYS

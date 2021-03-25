@@ -9,12 +9,9 @@
 # (at your option) any later version.############
 
 # ALIAS CONFIG ENV VARIBLES
-DEVICE_PATH=$ALIAS_DEVICE_PATH
-CONFIG_PATH=$ALIAS_CONFIG_PATH
-if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
-        DEVICE_PATH=/dev
-	    CONFIG_PATH=/etc
-fi
+DEVICE_PATH=/dev/disk/by-vdev
+CONFIG_PATH=/etc
+
 LSI_9305="3224"
 LSI_9361="3316"
 LSI_9405="3616"
@@ -84,17 +81,9 @@ getchassis() {
             exit 1
     	;;
         esac
-
-    HYBRID_CHECK=$(/opt/MegaRAID/storcli/storcli64 show all  2>/dev/null| grep 24i | wc -l)
-
-    if [ $HYBRID_CHECK -ne 0 ];then
-        HYBRID_CHASSIS="true"
-    else
-        HYBRID_CHASSIS="false"
-    fi
 }
 checkcas(){
-if rpm -qa | grep -q open-cas-linux ; then
+if command -v casadm > /dev/null 2>&1 ; then
     cascheck=$(casadm -L)
     if [ "$cascheck" == "No caches running" ] ; then
         CAS="false"
@@ -110,17 +99,19 @@ printvars() {
     ## PRINT
     echo "---" 
     echo "chassis_size: $CHASSIS_SIZE"
-    echo "hybrid_chassis: $HYBRID_CHASSIS"
     echo "osd_auto_discovery: false"
-    echo "lvm_volumes:" 
-    for i in "${BAY[@]}";do
-        echo "  - data: $DEVICE_PATH/$i" 
-    done
+#    echo "lvm_volumes:" 
+#    for i in "${BAY[@]}";do
+#        echo "  - data: $DEVICE_PATH/$i" 
+#    done
     echo "" 
     echo "devices:" 
     for i in "${BAY[@]}";do
-        echo "  - $(readlink -f $DEVICE_PATH/$i)" 
+        echo "  - $DEVICE_PATH/$i" 
     done
+    echo ""
+    echo "#dedicated_devices:"
+    echo "#  - /dev/"    
     echo ""
 }
 
