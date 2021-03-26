@@ -1,3 +1,9 @@
+45drives-tools (1.8.9-1focal) focal; urgency=medium
+
+  * dmap will use 68-vdev.rules and vdev_id_45drives script for udev rules instead of those provided/named by zfs.
+
+ -- 45Drives <mhooper@45drives.com>  Fri, 26 Mar 2021 14:46:51 +0000
+
 45drives-tools (1.8.8-1focal) focal; urgency=medium
 
   * server_identifier now stores the OS NAME and OS VERSION_ID.
