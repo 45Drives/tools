@@ -27,19 +27,30 @@ g_quiet = False
 # Name: get_path_variables
 # Args: None
 # Desc: Updated in tools 1.8.1, conf_path = /etc, dev_path =/dev. dmap will 
-#       now always replace /usr/lib/udev/vdev_id AND 
-#       /usr/lib/udev/rules.d/69-vdev.rules with those provided 
+#       now always replace /usr/lib/udev/vdev_id_45drives AND 
+#       /usr/lib/udev/rules.d/68-vdev.rules with those provided 
 #       in /opt/45drives/tools/. This will ensure that our udev rules are
-#       applied over all others. In the case where zfs is installed AFTER
-#       dmap is run initially, it will overwrite our versions of vdev_id and 
-#       69-vdev.rules, which will make zfs look for the config file in 
-#       /etc/zfs/vdev_id.conf which will not be there.
+#       applied.
 ###############################################################################
 def get_path_variables():
 	conf_path = "/etc"	
 	dev_path = "/dev"
 	return conf_path, dev_path
 
+
+###############################################################################
+# Name: reload_udev
+# Args: None
+# Desc: runs "udevadm control --reload-rules"
+###############################################################################
+def reload_udev():
+	reload_successful = False
+	log("Reloading udev rules")
+	try:
+		reload_call = subprocess.run(["udevadm","control","--reload-rules"])
+	except OSError:
+		log("Error reloading udev rules (udevadm control --reload-rules)")
+		sys.exit(1)
 
 ###############################################################################
 # Name: trigger_udev
@@ -106,17 +117,17 @@ def check_root():
 ###############################################################################
 # Name: verify_vdev
 # Args: None
-# Desc: replaces /usr/lib/udev/rules.d/69-vdev.rules and /usr/lib/udev/vdev_id
+# Desc: replaces /usr/lib/udev/rules.d/68-vdev.rules and /usr/lib/udev/vdev_id_45drives
 #       with the versions stored in /opt/45drives/tools/ This will ensure
-#       that if the user installs zfs AFTER running dmap that we still have the
-#       required udev rules in place as zfs will overwrite these when installed.
+#       that if the user installs/updates zfs AFTER running dmap that we still have the
+#       required udev rules in place.
 #
 ###############################################################################
 def verify_vdev():
-	rules_path="/usr/lib/udev/rules.d/69-vdev.rules"
-	script_path="/usr/lib/udev/vdev_id"
-	rules_copy_path="/opt/45drives/tools/69-vdev.rules"
-	script_copy_path="/opt/45drives/tools/vdev_id"
+	rules_path="/usr/lib/udev/rules.d/68-vdev.rules"
+	script_path="/usr/lib/udev/vdev_id_45drives"
+	rules_copy_path="/opt/45drives/tools/68-vdev.rules"
+	script_copy_path="/opt/45drives/tools/vdev_id_45drives"
 
 	rules_copy_test = os.path.exists(rules_copy_path)
 	script_copy_test = os.path.exists(script_copy_path)
@@ -124,21 +135,21 @@ def verify_vdev():
 	# Download the required scripts if they are not present in /opt/45drives/tools
 	if not rules_copy_test:
 		log("cannot find " + rules_copy_path)
-		log("Attempting to download required file: 69-vdev.rules")
-		rules_repo="https://raw.githubusercontent.com/45Drives/tools/1.8.1/src/fakeroot/opt/45drives/tools/69-vdev.rules"
+		log("Attempting to download required file: 68-vdev.rules")
+		rules_repo="http://images.45drives.com/udev/68-vdev.rules"
 		rv=subprocess.run(["curl","-o",rules_copy_path,rules_repo],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
 		if rv:
-			log("error downloading 69-vdev.rules from " + rules_repo)
+			log("error downloading 68-vdev.rules from " + rules_repo)
 		else:
 			rules_copy_test = os.path.exists(rules_copy_path)
 
 	if not script_copy_test:
 		log("cannot find " + script_copy_path)
-		log("Attempting to download required file: vdev_id")
-		script_repo="https://raw.githubusercontent.com/45Drives/tools/1.8.1/src/fakeroot/opt/45drives/tools/vdev_id"
+		log("Attempting to download required file: vdev_id_45drives")
+		script_repo="http://images.45drives.com/udev/vdev_id_45drives"
 		rv=subprocess.run(["curl","-o",script_copy_path,script_repo],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
 		if rv:
-			log("error downloading vdev_id from " + script_repo)
+			log("error downloading vdev_id_45drives from " + script_repo)
 		else:
 			script_copy_test = os.path.exists(script_copy_path)
 
@@ -322,10 +333,10 @@ def create_vdev_id(server):
 							)
 						)
 	elif server["Chassis Size"] == "MI4" and server["Alias Style"] == "STORINATOR":
-		vdev_id_str += alias_mi4(server["Model"])
+		vdev_id_str += alias_mi4(server["Model"],server["OS NAME"],server["OS VERSION_ID"])
 	elif server["Alias Style"] == "AV15-BASE":
 		# we are using the AV15-BASE ailiasing scheme.
-		vdev_id_str += alias_av15_base()
+		vdev_id_str += alias_av15_base(server["OS NAME"],server["OS VERSION_ID"])
 	elif server["Alias Style"] == "?":
 		# we don't know what kind of server this is. Likely a vm
 		vdev_id_str = None
@@ -342,10 +353,15 @@ def create_vdev_id(server):
 #       obtain the required bus addresses and generate the appropriate 
 #       lines within the vdev_id.conf string. 
 ###############################################################################
-def alias_av15_base():
+def alias_av15_base(os_name,os_version_id):
 	vdev_id_str = ""
 	bus_address_sata = None
 	bus_address_sas = None
+	ata_suffix = ""
+
+	if os_name == "CentOS Linux" and os_version_id == "7":
+		ata_suffix = ".0"
+
 	try:
 		lspci_result = subprocess.Popen(["lspci"], stdout=subprocess.PIPE,
 			universal_newlines=True).stdout
@@ -369,7 +385,7 @@ def alias_av15_base():
 			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-sas-phy{i}-lun-0\n".format(drive=i+1,addr=bus_address_sas,i=i)
 		for i in range(0,7):
 			#alias the drives connected to the on board sata sata connectors
-			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}\n".format(drive=i+9,addr=bus_address_sata,i=i+1)
+			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(drive=i+9,addr=bus_address_sata,i=i+1,s=ata_suffix)
 	else:
 		log("Error aliasing AV15-BASE")
 		sys.exit(1)
@@ -382,9 +398,13 @@ def alias_av15_base():
 #       ports. These ports start at ISATA-2 as the boot drives are using 
 #       ISATA-0 and ISATA-1. This means that we need 1-1 to use "...-ata-3".
 ###############################################################################
-def alias_mi4(model):
+def alias_mi4(model,os_name,os_version_id):
 	vdev_id_str = ""
 	bus_address_sata = None
+
+	ata_suffix = ""
+	if os_name == "CentOS Linux" and os_version_id == "7":
+		ata_suffix = ".0"
 
 	try:
 		lspci_result = subprocess.Popen(["lspci"], stdout=subprocess.PIPE,
@@ -403,7 +423,7 @@ def alias_mi4(model):
 	if bus_address_sata != None:
 		for i in range(0,4):
 			#alias the drives connected to the on board sata sata connectors
-			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}\n".format(drive=i+1,addr=bus_address_sata,i=i+3)
+			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(drive=i+1,addr=bus_address_sata,i=i+3,s=ata_suffix)
 	else:
 		log("Error aliasing " + model)
 		sys.exit(1)
@@ -457,6 +477,7 @@ def main():
 
 	#trigger udev
 	if options.trigger_udev:
+		reload_udev()
 		trigger_udev()
 
 	#print config file to stdout
