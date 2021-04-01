@@ -31,6 +31,25 @@ g_product_lut = {
 	"Storinator-C8-Enhanced":			["X11SPL-F"  ,0,1,"C8"  ,"STORINATOR"],
 	"Storinator-C8-Enhanced-AMD":		["H11SSL-i"  ,0,1,"C8"  ,"STORINATOR"],
 	"Storinator-C8-Turbo":				["X11DPL-i"  ,0,1,"C8"  ,"STORINATOR"],
+
+	"Storinator-H8-AV15-Enhanced":		["X11SPL-F"  ,0,1,"AV15","STORINATOR"],
+	"Storinator-H8-AV15-Enhanced-AMD":	["H11SSL-i"  ,0,1,"AV15","STORINATOR"],
+	"Storinator-H8-AV15-Turbo":			["X11DPL-i"  ,0,1,"AV15","STORINATOR"],
+
+	"Storinator-H8-Q30-Base":			["X11SSM-F"  ,0,1,"Q30","STORINATOR"],
+	"Storinator-H8-Q30-Enhanced":		["X11SPL-F"  ,0,1,"Q30","STORINATOR"],
+	"Storinator-H8-Q30-Enhanced-AMD":	["H11SSL-i"  ,0,1,"Q30","STORINATOR"],
+	"Storinator-H8-Q30-Turbo":			["X11DPL-i"  ,0,1,"Q30","STORINATOR"],
+
+	"Storinator-H8-S45-Base":			["X11SSM-F"  ,0,1,"S45","STORINATOR"],
+	"Storinator-H8-S45-Enhanced":		["X11SPL-F"  ,0,1,"S45","STORINATOR"],
+	"Storinator-H8-S45-Enhanced-AMD":	["H11SSL-i"  ,0,1,"S45","STORINATOR"],
+	"Storinator-H8-S45-Turbo":			["X11DPL-i"  ,0,1,"S45","STORINATOR"],
+
+	"Storinator-H8-XL60-Enhanced":		["X11SPL-F"  ,0,1,"XL60","STORINATOR"],
+	"Storinator-H8-XL60-Enhanced-AMD":	["H11SSL-i"  ,0,1,"XL60","STORINATOR"],
+	"Storinator-H8-XL60-Turbo":			["X11DPL-i"  ,0,1,"XL60","STORINATOR"],
+
 	"Storinator-H16-Q30-Enhanced":		["X11SPL-F"  ,1,1,"Q30" ,"H16"],
 	"Storinator-H16-Q30-Enhanced-AMD":	["H11SSL-i"  ,1,1,"Q30" ,"H16"],
 	"Storinator-H16-Q30-Turbo":			["X11DPL-i"  ,1,1,"Q30" ,"H16"],
@@ -40,6 +59,7 @@ g_product_lut = {
 	"Storinator-H16-XL60-Enhanced":		["X11SPL-F"  ,1,3,"XL60","H16"],
 	"Storinator-H16-XL60-Enhanced-AMD":	["H11SSL-i"  ,1,3,"XL60","H16"],
 	"Storinator-H16-XL60-Turbo":		["X11DPL-i"  ,1,3,"XL60","H16"],
+
 	"Storinator-H32-Q30-Enhanced":		["X11SPL-F"  ,2,0,"Q30" ,"H32"],
 	"Storinator-H32-Q30-Enhanced-AMD":	["H11SSL-i"  ,2,0,"Q30" ,"H32"],
 	"Storinator-H32-Q30-Turbo":			["X11DPL-i"  ,2,0,"Q30" ,"H32"],
@@ -49,21 +69,26 @@ g_product_lut = {
 	"Storinator-H32-XL60-Enhanced":		["X11SPL-F"  ,2,2,"XL60","H32"],
 	"Storinator-H32-XL60-Enhanced-AMD":	["H11SSL-i"  ,2,2,"XL60","H32"],
 	"Storinator-H32-XL60-Turbo":		["X11DPL-i"  ,2,2,"XL60","H32"],
+
 	"Storinator-MI4-Base":				["X11SSM-F"  ,0,0,"MI4"  ,"STORINATOR"],
 	"Storinator-MI4-Enhanced":			["X11SPL-F"  ,0,0,"MI4"  ,"STORINATOR"],
 	"Storinator-MI4-Enhanced-AMD":		["H11SSL-i"  ,0,0,"MI4"  ,"STORINATOR"],
 	"Storinator-MI4-Turbo":				["X11DPL-i"  ,0,0,"MI4"  ,"STORINATOR"],
-	"Storinator-Q30-Base":				["X11SSH-CTF",0,2,"Q30" ,"STORINATOR"],
+
+	"Storinator-Q30-Base":				["X11SSM-F"  ,0,2,"Q30" ,"STORINATOR"],
 	"Storinator-Q30-Enhanced":			["X11SPL-F"  ,0,2,"Q30" ,"STORINATOR"],
 	"Storinator-Q30-Enhanced-AMD":		["H11SSL-i"  ,0,2,"Q30" ,"STORINATOR"],
 	"Storinator-Q30-Turbo":				["X11DPL-i"  ,0,2,"Q30" ,"STORINATOR"],
+
 	"Storinator-S45-Base":				["X11SSM-F"  ,0,3,"S45" ,"STORINATOR"],
 	"Storinator-S45-Enhanced":			["X11SPL-F"  ,0,3,"S45" ,"STORINATOR"],
 	"Storinator-S45-Enhanced-AMD":		["H11SSL-i"  ,0,3,"S45" ,"STORINATOR"],
 	"Storinator-S45-Turbo":				["X11DPL-i"  ,0,3,"S45" ,"STORINATOR"],
+
 	"Storinator-XL60-Enhanced":			["X11SPL-F"  ,0,4,"XL60","STORINATOR"],
 	"Storinator-XL60-Enhanced-AMD":		["H11SSL-i"  ,0,4,"XL60","STORINATOR"],
 	"Storinator-XL60-Turbo":			["X11DPL-i"  ,0,4,"XL60","STORINATOR"],
+
 	"Stornado-AV15-Enhanced":			["X11SPL-F"  ,0,2,"AV15","STORNADO"],
 	"Stornado-AV15-Enhanced-AMD":		["H11SSL-i"  ,0,2,"AV15","STORNADO"],
 	"Stornado-AV15-Turbo":				["X11DPL-i"  ,0,2,"AV15","STORNADO"],

@@ -1,3 +1,9 @@
+45drives-tools (1.8.10-1focal) focal; urgency=medium
+
+  * updated server_identifier to detect Storinator-H8 Models.
+
+ -- 45Drives <mhooper@45drives.com>  Thu, 1 Apr 2021 11:04:51 +0000
+
 45drives-tools (1.8.9-1focal) focal; urgency=medium
 
   * dmap will use 68-vdev.rules and vdev_id_45drives script for udev rules instead of those provided/named by zfs.
