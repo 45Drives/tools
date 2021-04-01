@@ -3,7 +3,7 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.8.9
+Version:	1.8.10
 Release:	1%{?dist}
 Summary:	Server CLI Tools
 
@@ -66,6 +66,8 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu Apr 1 2021 Mark Hooper <mhooper@45drives.com> 1.8.10-1
+- updated server_identifier to detect Storinator-H8 Models.
 * Fri Mar 26 2021 Mark Hooper <mhooper@45drives.com> 1.8.9-1
 - dmap will use 68-vdev.rules and vdev_id_45drives script for udev rules instead of those provided/named by zfs.
 * Wed Mar 24 2021 Mark Hooper <mhooper@45drives.com> 1.8.8-1
