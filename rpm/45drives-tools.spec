@@ -3,7 +3,7 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.8.10
+Version:	1.9.0
 Release:	1%{?dist}
 Summary:	Server CLI Tools
 
@@ -66,6 +66,8 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu Apr 16 2021 Mark Hooper <mhooper@45drives.com> 1.9.0-1
+- updated the way in which AV15 Base drives 1-9 thru 1-15 are ailiased based on on-board sata wiring.
 * Thu Apr 1 2021 Mark Hooper <mhooper@45drives.com> 1.8.10-1
 - updated server_identifier to detect Storinator-H8 Models.
 * Fri Mar 26 2021 Mark Hooper <mhooper@45drives.com> 1.8.9-1

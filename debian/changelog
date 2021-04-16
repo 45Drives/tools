@@ -1,3 +1,9 @@
+45drives-tools (1.9.0-1focal) focal; urgency=medium
+
+  * updated the way in which AV15 Base drives 1-9 thru 1-15 are ailiased based on on-board sata wiring.
+
+ -- 45Drives <mhooper@45drives.com>  Thu, 1 Apr 2021 11:04:51 +0000
+
 45drives-tools (1.8.10-1focal) focal; urgency=medium
 
   * updated server_identifier to detect Storinator-H8 Models.

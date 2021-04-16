@@ -385,7 +385,7 @@ def alias_av15_base(os_name,os_version_id):
 			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-sas-phy{i}-lun-0\n".format(drive=i+1,addr=bus_address_sas,i=i)
 		for i in range(0,7):
 			#alias the drives connected to the on board sata sata connectors
-			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(drive=i+9,addr=bus_address_sata,i=i+1,s=ata_suffix)
+			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(drive=i+9,addr=bus_address_sata,i=i+2,s=ata_suffix)
 	else:
 		log("Error aliasing AV15-BASE")
 		sys.exit(1)
