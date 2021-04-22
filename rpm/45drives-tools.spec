@@ -4,7 +4,7 @@
 
 Name:		45drives-tools
 Version:	1.9.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -66,7 +66,9 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Thu Apr 16 2021 Mark Hooper <mhooper@45drives.com> 1.9.0-1
+* Fri Apr 16 2021 Mark Hooper <mhooper@45drives.com> 1.9.0-2
+- modified vdev_id.conf comment to reflect version 1.9.0-2.
+* Fri Apr 16 2021 Mark Hooper <mhooper@45drives.com> 1.9.0-1
 - updated the way in which AV15 Base drives 1-9 thru 1-15 are ailiased based on on-board sata wiring.
 * Thu Apr 1 2021 Mark Hooper <mhooper@45drives.com> 1.8.10-1
 - updated server_identifier to detect Storinator-H8 Models.

@@ -300,7 +300,7 @@ def create_vdev_id(server):
 			sys.exit(1)
 
 	# We have a valid combination of alias styles and chassis sizes.
-	vdev_id_str = "# This file was generated using dmap v1.8 (/opt/45drives/tools/dmap).\n"
+	vdev_id_str = "# This file was generated using dmap v1.9.0 (/opt/45drives/tools/dmap).\n"
 	if len(server["HBA"]) > 0 and server["Chassis Size"] != "C8":
 		# we have hba cards to inspect/alias
 		for i in range(0,len(server["HBA"])):

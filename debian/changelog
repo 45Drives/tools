@@ -1,3 +1,9 @@
+45drives-tools (1.9.0-2focal) focal; urgency=medium
+
+  * modified vdev_id.conf comment to reflect version 1.9.0-2.
+
+ -- 45Drives <mhooper@45drives.com>  Fri, 16 Apr 2021 1:20:00 +0000
+
 45drives-tools (1.9.0-1focal) focal; urgency=medium
 
   * updated the way in which AV15 Base drives 1-9 thru 1-15 are ailiased based on on-board sata wiring.
