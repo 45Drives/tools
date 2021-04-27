@@ -9,9 +9,6 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# TODO:
-# - re-tune lsosd (low priority)
-# - Adjust the output to accomodate hybrid systems.
 ################################################################################
 
 import json
@@ -244,6 +241,9 @@ def build_server(options):
 		},
 		"AV15-BASE":{
 			"AV15":[15]
+		},
+		"SSG-6048R-E1CR24H":{
+			"SSG-6048R-E1CR24H":[4,4,4,4,4,4]
 		}
 	}
 	CURRENT_ROW = 0
@@ -652,6 +652,8 @@ def main():
 	elif(
 		server_info["Alias Style"] == "STORINATOR" and 
 		(server_info["Chassis Size"] == "C8" or server_info["Chassis Size"] == "MI4")):
+		print_bays_front(server, options, osd)
+	elif(server_info["Alias Style"] == "SSG-6048R-E1CR24H" and server_info["Chassis Size"] == "SSG-6048R-E1CR24H"):
 		print_bays_front(server, options, osd)
 	else:
 		print_bays(server, options, osd)

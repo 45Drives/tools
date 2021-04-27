@@ -3,8 +3,8 @@
 %define        __os_install_post %{_dbpath}/brp-compress
 
 Name:		45drives-tools
-Version:	1.8.10
-Release:	1%{?dist}
+Version:	1.9.1
+Release:	2%{?dist}
 Summary:	Server CLI Tools
 
 Group:		Development/Tools
@@ -66,6 +66,14 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Tue Apr 27 2021 Mark Hooper <mhooper@45drives.com> 1.9.1-2
+- Adjusted lsdev and dmap to handle Supermicro SSG-6048R-E1CR24H drive ailiasing.
+- /etc/45drives/server_info/server_info.json must be manually edited to handle this style of ailiasing.
+- modified version file and comment string in vdev_id.conf.
+* Fri Apr 16 2021 Mark Hooper <mhooper@45drives.com> 1.9.0-2
+- modified vdev_id.conf comment to reflect version 1.9.0-2.
+* Fri Apr 16 2021 Mark Hooper <mhooper@45drives.com> 1.9.0-1
+- updated the way in which AV15 Base drives 1-9 thru 1-15 are ailiased based on on-board sata wiring.
 * Thu Apr 1 2021 Mark Hooper <mhooper@45drives.com> 1.8.10-1
 - updated server_identifier to detect Storinator-H8 Models.
 * Fri Mar 26 2021 Mark Hooper <mhooper@45drives.com> 1.8.9-1
