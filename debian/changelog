@@ -1,3 +1,16 @@
+45drives-tools (1.9.1-2focal) focal; urgency=medium
+
+  * modified version file and comment string in vdev_id.conf.
+
+ -- 45Drives <mhooper@45drives.com>  Thu, 22 Apr 2021 3:22:00 +0000
+
+45drives-tools (1.9.1-1focal) focal; urgency=medium
+
+  * Adjusted lsdev and dmap to handle Supermicro SSG-6048R-E1CR24H drive ailiasing.
+  * /etc/45drives/server_info/server_info.json must be manually edited to handle this style of ailiasing.
+
+ -- 45Drives <mhooper@45drives.com>  Thu, 22 Apr 2021 3:22:00 +0000
+
 45drives-tools (1.9.0-2focal) focal; urgency=medium
 
   * modified vdev_id.conf comment to reflect version 1.9.0-2.
