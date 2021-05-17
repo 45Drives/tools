@@ -3,27 +3,90 @@
 # MUST BE RUN FROM OSD HOST WHERE OSD IS LOCATED
 # IF OSD HOST IS NOT THIS HOST EXIT
 
-if ! rpm -q ceph-osd >/dev/null 2>&1;then
+help(){
+        cat << EOF
+Usage:	findosd -i <osd_id> -t [block_type] -n [name_style]
+	[-i] OSD id number
+	[-t] Type of OSD device, db,block or both. Defaults to both
+	[-n] Output naming style, device or lvm. Defaults to device
+	[-h] Displays this message
+EOF
+        exit 0
+}
+debug(){
+	echo OSD_ID:$OSD_ID
+	echo TYPE:$TYPE
+	echo NAME:$NAME
+	echo OSD_FSID:$OSD_FSID
+	echo OSD_HOST:$OSD_HOST
+	echo OSD_BLOCK_VOLID:$OSD_BLOCK_VOLID
+	echo OSD_DB_VOLID:$OSD_DB_VOLID
+}
+getblockvolid(){
+	local OSD_FSID=$1
+	local OSD_VOLID_JSON=$(ceph-volume lvm list --format json)
+	local OSD_VOLID=$(echo $OSD_VOLID_JSON | jq -r --arg type "$TYPE" '.[] | .[] | select(.tags["ceph.type"]=="block") | .tags["ceph.type"] + ":" + .tags["ceph.osd_fsid"] + ":" + .vg_name' | grep $OSD_FSID | cut -d : -f 3)
+	echo "$OSD_VOLID"
+}
+getdbvolid(){
+	local OSD_FSID=$1
+	local OSD_VOLID_JSON=$(ceph-volume lvm list --format json)
+	local OSD_VOLID=$(echo $OSD_VOLID_JSON | jq -r --arg type "$TYPE" '.[] | .[] | select(.tags["ceph.type"]=="db") | .tags["ceph.type"] + ":" + .tags["ceph.osd_fsid"] + ":" + .vg_name' | grep $OSD_FSID | cut -d : -f 3)
+	echo "$OSD_VOLID"
+}
+
+## INPUTS
+
+DEVICE_PATH=/dev/disk/by/vdev
+CONFIG_PATH=/etc/
+DEBUG_FLAG=0
+
+while getopts i:t:n:hd flag
+do
+    case "${flag}" in
+        i) 	OSD_ID=${OPTARG};;
+        t) 	TYPE=${OPTARG}
+			if [ $TYPE != "db" ] && [ $TYPE != "block" ] && [ $TYPE != "both" ];then
+            	echo "Type (-t) can only be: 'db', 'block' or 'both'"
+            	exit 1
+        	fi
+			;;
+        n) 	NAME=${OPTARG}
+			if [ $NAME != "device" ] && [ $NAME != "lvm" ];then
+            	echo "Name (-n) can only be: 'device' or 'lvm'"
+            	exit 1
+        	fi
+			;;
+		h) help ;;
+		d) DEBUG_FLAG=1 ;;
+    esac
+done
+
+## CHECKS
+
+if [ -z $OSD_ID ];then
+	echo "OSD ID required (-i <int>). See findosd -h for more info"
+	exit 1
+fi
+if [ -z $TYPE ];then
+	TYPE="both"
+fi
+if [ -z $NAME ];then
+	NAME="device"
+fi	
+if ! command -v ceph-volume >/dev/null 2>&1;then
 	echo "ceph-osd (ceph-volume) is not installed"
 	exit 1
 fi
-
-DEVICE_PATH=$ALIAS_DEVICE_PATH
-CONFIG_PATH=$ALIAS_CONFIG_PATH
-if [ -z $DEVICE_PATH ] || [ -z $CONFIG_PATH ];then
-        echo "No alias device or config path set in profile.d ... Defaulting to /etc, and /dev"
-        DEVICE_PATH=/dev
-		CONFIG_PATH=/etc
+if ! command -v jq >/dev/null 2>&1;then
+	echo "jq is not installed"
+	exit 1
 fi
 
-OSD_ID=$1
-if [ $# -eq 0 ];then
-        echo "OSD ID required <int>"
-        exit 1
-fi
-rpm -q jq >/dev/null  || yum install jq -y
+## MAIN
+
 OSD_FSID=$(ceph osd find $OSD_ID 2>/dev/null | jq -r '.osd_fsid')
-OSD_HOST=$(ceph osd find $OSD_ID | jq -r '.host')
+OSD_HOST=$(ceph osd find $OSD_ID 2>/dev/null | jq -r '.host')
 if [ "$OSD_HOST" == "null" ];then
 	OSD_HOST=$(ceph osd find $OSD_ID | jq -r '.crush_location.host')
 else
@@ -33,21 +96,37 @@ else
 	fi
 fi
 
-OSD_VOLID=$(ceph-volume lvm list --format json | jq -r '.[] |.[].tags["ceph.osd_fsid"] + ":" + .[].vg_name' | grep $(ceph osd find $OSD_ID | jq -r '.osd_fsid') | cut -d : -f 2 | cut -d / -f 3)
-OSD_DEVID=$(pvs --noheadings -o pv_name,vg_name | grep $OSD_VOLID | awk '{print $1}')
+# Get Volume Group ID's
+if [ "$TYPE" == "block" ];then
+	OSD_BLOCK_VOLID="$(getblockvolid $OSD_FSID)"
+	OSD_BLOCK_DEVID=$(pvs --noheadings -o pv_name,vg_name | grep $OSD_BLOCK_VOLID | awk '{print $1}')
+elif [ "$TYPE" == "db" ];then
+	OSD_DB_VOLID="$(getdbvolid $OSD_FSID)"
+	OSD_DB_VOLID="$(pvs --noheadings -o pv_name,vg_name | grep $OSD_DB_VOLID | awk '{print $1}')"
+elif [ "$TYPE" == "both" ];then
+	OSD_BLOCK_VOLID="$(getblockvolid $OSD_FSID)"
+	OSD_DB_VOLID="$(getdbvolid $OSD_FSID)"
+	OSD_BLOCK_DEVID=$(pvs --noheadings -o pv_name,vg_name | grep $OSD_BLOCK_VOLID | awk '{print $1}')
+	OSD_DB_VOLID="$(pvs --noheadings -o pv_name,vg_name | grep $OSD_DB_VOLID | awk '{print $1}')"
+fi
 
-IFS=$'\n' 
-j=0
-for i in $(cat $CONFIG_PATH/vdev_id.conf); do
-	bay=$(echo $i | grep alias | awk '{print $2}')
-	if [ ! -z "$bay" ];then 
-		BAY[$j]=$bay
-	fi
-	let j=j+1
-done
-for i in "${BAY[@]}";do
-	#echo "$(readlink -f /dev/$i) $OSD_DEVID "
-	if [ "$(readlink -f /dev/$i)" == "$OSD_DEVID" ];then
-		echo $i
-	fi
-done
+
+# IFS=$'\n' 
+# j=0
+# for i in $(cat $CONFIG_PATH/vdev_id.conf); do
+# 	bay=$(echo $i | grep alias | awk '{print $2}')
+# 	if [ ! -z "$bay" ];then 
+# 		BAY[$j]=$bay
+# 	fi
+# 	let j=j+1
+# done
+# for i in "${BAY[@]}";do
+# 	#echo "$(readlink -f /dev/$i) $OSD_DEVID "
+# 	if [ "$(readlink -f /dev/$i)" == "$OSD_DEVID" ];then
+# 		echo $i
+# 	fi
+# done
+
+if [ $DEBUG_FLAG -eq 1 ];then
+	debug
+fi
