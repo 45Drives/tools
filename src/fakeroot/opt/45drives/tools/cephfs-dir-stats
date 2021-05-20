@@ -7,67 +7,88 @@ import math
 from optparse import OptionParser
 
 ###############################################################################
-# Name: dump_attributes
-# Args: path to directory
-# Desc: executes getfattr to dump ceph attributes and returns as dictionary
+# Name: dir_attributes
+# Args: path to directory, command to run
+# Desc: executes getfattr to retrive ceph dir attribute and returns as dictionary
 ###############################################################################
 
 
-def dump_attributes(path, comands):
+def dir_attributes(path, type, command):
     attrs = {}
     try:
         child = subprocess.Popen(
-            ["getfattr", "-n", "ceph.dir." + comands, path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            ["getfattr", "-n", "ceph." + type + "." + command, path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        output_string, err = child.communicate()
     except OSError:
         print("Error executing getfattr. Is xattr installed?")
         sys.exit(1)
     if child.wait() != 0:
-        print("Error executing getfattr. Is xattr installed?")
-        sys.exit(1)
-    output_string = child.stdout.read()
+        if err.find("No such attribute") != -1:
+            return {}
+        else:
+            print("Error executing getfattr. Is xattr installed?")
+            sys.exit(1)
+            # return {}
     fields = re.findall(
-        r"^ceph\.dir\.([^=]+)=\"([^\"]+)\"$", output_string, re.MULTILINE)
+        r"^ceph\.[dir|quota]+\.([^=]+)=\"([^\"]+)\"$", output_string, re.MULTILINE)
     if len(fields) == 0:
         print(f'No ceph xattrs, is {path} in a ceph filesystem?')
         sys.exit(1)
-    for field in fields:
-        if field[0] != "rctime":
-            attrs[field[0]] = field[1]
+    attrs[fields[0][0]] = fields[0][1]
     return attrs
 
 
-def run_all_commands(path):
+###############################################################################
+# Name: run_dir_commands
+# Args: path to directory
+# Desc: calls dir_attributes and quota_attrivutes multiple times each with a different command
+# Retu: Returns the outputs of all commands in a dictionary
+###############################################################################
+
+
+def run_dir_commands(path):
     outputs = {}
-    commandList = ["entries", "files",
-                   "rbytes", "rctime", "rentries", "rfiles", "rsubdirs", "subdirs", "layout"]
-    for comands in commandList:
-        outputs.update(dump_attributes(path, comands))
+    dirList = ["entries", "files", "rbytes", "rentries",
+               "rfiles", "rsubdirs", "subdirs", "layout.pool"]
+    quotaList = ["max_files", "max_bytes"]
+    for items in dirList:
+        outputs.update(dir_attributes(path, "dir", items))
+    for items in quotaList:
+        outputs.update(dir_attributes(path, "quota", items))
     return outputs
 
 ###############################################################################
 # Name: display_attributes
 # Args: path to directory
-# Desc: calls dump_attributes and prints output
+# Desc: calls run_dir_commands and prints output
 ###############################################################################
 
 
 def display_attributes(path):
     print(path, ":")
-    attrs = run_all_commands(path)
+    attrs = run_dir_commands(path)
     if "rbytes" in attrs.keys():
         attrs["rbytes"] = format_bytes(int(attrs["rbytes"]))
+    if "max_bytes" in attrs.keys():
+        attrs["max_bytes"] = format_bytes(int(attrs["max_bytes"]))
     max_width = len(
         max(attrs.values(), key=lambda x: len(x.split(" ")[0])).split(" ")[0])
     print("Files:                 ", "{0:>{1}}".format(
-        attrs["files"], max_width) if "files" in attrs.keys() else "?")
+        attrs["files"], max_width) if "files" in attrs.keys() else "N/A")
     print("Directories:           ", "{0:>{1}}".format(
-        attrs["subdirs"], max_width) if "subdirs" in attrs.keys() else "?")
+        attrs["subdirs"], max_width) if "subdirs" in attrs.keys() else "N/A")
     print("Recursive Files:       ", "{0:>{1}}".format(
-        attrs["rfiles"], max_width) if "rfiles" in attrs.keys() else "?")
+        attrs["rfiles"], max_width) if "rfiles" in attrs.keys() else "N/A")
     print("Recursive Directories: ", "{0:>{1}}".format(
-        attrs["rsubdirs"], max_width) if "rsubdirs" in attrs.keys() else "?")
+        attrs["rsubdirs"], max_width) if "rsubdirs" in attrs.keys() else "N/A")
     print("Total Size:            ", "{0:>{1}}".format(attrs["rbytes"].split(" ")[
-          0], max_width) + " " + attrs["rbytes"].split(" ")[1] if "rbytes" in attrs.keys() else "?")
+          0], max_width) + " " + attrs["rbytes"].split(" ")[1] if "rbytes" in attrs.keys() else "N/A")
+    print("Layout Pool:           ", "{0:>{1}}".format(
+        attrs["layout.pool"], max_width) if "layout.pool" in attrs.keys() else "N/A")
+    print("Max Files:             ", "{0:>{1}}".format(
+        attrs["max_files"], max_width) if "max_files" in attrs.keys() else "        N/A")
+    print("Max Bytes:                 ", "{0:>{1}}".format(
+        attrs["max_bytes"], max_width) if "max_bytes" in attrs.keys() else "    N/A")
     print()
 
 ################################################################################
