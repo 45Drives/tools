@@ -6,12 +6,12 @@
 *.kate-swp
 
 # deb packaging
-debian/45drives-tools
-debian/45drives-tools.substvars
-debian/45drives-tools.postrm.debhelper
-debian/debhelper-build-stamp
-debian/files
-debian/.debhelper
+ubuntu*/45drives-tools
+ubuntu*/45drives-tools.substvars
+ubuntu*/45drives-tools.postrm.debhelper
+ubuntu*/debhelper-build-stamp
+ubuntu*/files
+ubuntu*/.debhelper
 
 # docker builds
 dist
