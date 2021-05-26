@@ -24,7 +24,7 @@ make clean
 mkdir -p dist/ubuntu
 
 # mirror current directory to working directory in container, and mirror dist/ubuntu to .. for deb output
-docker run -u $(id -u):$(id -g) -w /home/deb/build -it -v$(pwd):/home/deb/build -v$(pwd)/dist/ubuntu:/home/deb --rm $PACKAGE_NAME-ubuntu-builder-ubuntu20 dpkg-buildpackage -us -uc -b
+docker run -u $(id -u):$(id -g) -w /home/deb/build -it -v$(pwd):/home/deb/build -v$(pwd)/ubuntu20:/home/deb/build/debian  -v$(pwd)/dist/ubuntu:/home/deb --rm $PACKAGE_NAME-ubuntu-builder-ubuntu20 dpkg-buildpackage -us -uc -b
 res=$?
 if [ $res -ne 0 ]; then
 	echo "Packaging failed."
