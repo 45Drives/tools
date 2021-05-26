@@ -14,7 +14,7 @@ get_lv_uuid(){
 }
 
 if [ $# -eq 0 ] || [ -z $BLOCK_DEVICE ] || [ -z $DB_DEVICE ] ; then
-    echo "Incorret number of arguments provided"
+    echo "Incorrect number of arguments provided"
     help
 fi
 
