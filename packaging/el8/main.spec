@@ -52,6 +52,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-4
+- updated makefile
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-3
 - updated makefile
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-2
