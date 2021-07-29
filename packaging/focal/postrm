@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [ "$1" == "remove" ] || [ "$1" == "purge" ]; then
     rm -rf /opt/45drives/tools
     rm -rf /etc/45drives/server_info

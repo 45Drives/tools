@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.0-8
+## 45drives-tools 2.0.0-9
 
-* modified search for tools version in rules file (focal)
+* set postrm script to use bash (focal)
