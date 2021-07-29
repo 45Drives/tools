@@ -52,6 +52,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-2
+- updated makefile
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-1
 - configured autopackaging for 45drives-tools on rocky and ubuntu
 - updated uninstall process to remove all files associated with 45drives-tools

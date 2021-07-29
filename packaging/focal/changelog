@@ -1,3 +1,9 @@
+45drives-tools (2.0.0-2focal) focal; urgency=medium
+
+  * updated makefile
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 07:26:17 -0300
+
 45drives-tools (2.0.0-1focal) focal; urgency=medium
 
   * configured autopackaging for 45drives-tools on rocky and ubuntu
