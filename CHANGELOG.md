@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.0-9
+## 45drives-tools 2.0.0-10
 
-* set postrm script to use bash (focal)
+* modified sed command in rules

@@ -13,7 +13,7 @@
 # package maintainers to append LDFLAGS
 #export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 
-export TOOLS_VERSION := $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ':' | sed "s/([0-9]+\.[0-9]+\.[0-9]+-[0-9]+).*/\1/")
+export TOOLS_VERSION := $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ':' | sed "s/^\([^a-zA-Z]\+\).*$/\1/")
 
 %:
 	dh $@
