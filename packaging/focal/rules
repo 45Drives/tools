@@ -18,7 +18,7 @@ export TOOLS_VERSION := $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f
 
 %:
 	dh $@
-	CHANGELOG_OUTPUT="$(shell dpkg-parsechangelog | tr \n #)"; echo $$CHANGELOG_OUTPUT
+	echo "$(shell dpkg-parsechangelog | tr \n #)"
 
 
 # dh_make generated override targets
