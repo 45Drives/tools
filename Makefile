@@ -5,7 +5,7 @@ install:
 	mkdir -p $(DESTDIR)/etc/45drives/server_info
 	mkdir -p $(DESTDIR)/usr/bin
 	cp -a src/fakeroot/opt/45drives/tools/* $(DESTDIR)/opt/45drives/tools
-ifdef ($(TOOLS_VERSION))
+ifdef $(TOOLS_VERSION)
 	echo $(TOOLS_VERSION) > $(DESTDIR)/etc/45drives/server_info/tools_version
 endif
 	ln -sf /opt/45drives/tools/cephfs-dir-stats $(DESTDIR)/usr/bin/cephfs-dir-stats
