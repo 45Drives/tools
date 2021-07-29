@@ -205,6 +205,15 @@ def get_server_info():
 		server = json.load(open("/etc/45drives/server_info/server_info.json","r"))
 		return server
 
+def get_version():
+	version_file_path = "/etc/45drives/server_info/tools_version"
+	if not os.path.exists(version_file_path):
+		return ""
+	else:
+		f = open(version_file_path, "r")
+        version = f.readline()
+        f.close()
+		return version.strip()
 
 ###############################################################################
 # Name: create_vdev_id
@@ -304,7 +313,8 @@ def create_vdev_id(server):
 			sys.exit(1)
 
 	# We have a valid combination of alias styles and chassis sizes.
-	vdev_id_str = "# This file was generated using dmap v1.9.1 (/opt/45drives/tools/dmap).\n"
+	version = get_version()
+	vdev_id_str = "# This file was generated using dmap {v} (/opt/45drives/tools/dmap).\n".format(v=version)
 	if len(server["HBA"]) > 0 and server["Chassis Size"] != "C8" and server["Chassis Size"] != "SSG-6048R-E1CR24H":
 		# we have hba cards to inspect/alias
 		for i in range(0,len(server["HBA"])):

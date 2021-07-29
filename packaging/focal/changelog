@@ -1,0 +1,8 @@
+45drives-tools (2.0.0-1focal) focal; urgency=medium
+
+  * configured autopackaging for 45drives-tools on rocky and ubuntu
+  * updated uninstall process to remove all files associated with 45drives-tools
+  * updated makefile
+  * dmap outputs full version in vdev_id.conf
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 06:52:26 -0300

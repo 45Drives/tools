@@ -5,13 +5,15 @@ install:
 	mkdir -p $(DESTDIR)/etc/45drives/server_info
 	mkdir -p $(DESTDIR)/usr/bin
 	cp -a src/fakeroot/opt/45drives/tools/* $(DESTDIR)/opt/45drives/tools
-	cp -a src/fakeroot/etc/45drives/server_info/tools_version $(DESTDIR)/etc/45drives/server_info/tools_version
-	cp -a src/fakeroot/usr/bin/cephfs-dir-stats $(DESTDIR)/usr/bin/cephfs-dir-stats
-	cp -a src/fakeroot/usr/bin/dmap $(DESTDIR)/usr/bin/dmap
-	cp -a src/fakeroot/usr/bin/findosd $(DESTDIR)/usr/bin/findosd
-	cp -a src/fakeroot/usr/bin/lsdev $(DESTDIR)/usr/bin/lsdev
-	cp -a src/fakeroot/usr/bin/server_identifier $(DESTDIR)/usr/bin/server_identifier
-	cp -a src/fakeroot/usr/bin/zcreate $(DESTDIR)/usr/bin/zcreate
+ifdef($(TOOLS_VERSION))
+	echo $(TOOLS_VERSION) > $(DESTDIR)/etc/45drives/server_info/tools_version
+endif
+	ln -sf /opt/45drives/tools/cephfs-dir-stats $(DESTDIR)/usr/bin/cephfs-dir-stats
+	ln -sf /opt/45drives/tools/dmap $(DESTDIR)/usr/bin/dmap
+	ln -sf /opt/45drives/tools/findosd $(DESTDIR)/usr/bin/findosd
+	ln -sf /opt/45drives/tools/lsdev $(DESTDIR)/usr/bin/lsdev
+	ln -sf /opt/45drives/tools/server_identifier $(DESTDIR)/usr/bin/server_identifier
+	ln -sf /opt/45drives/tools/zcreate $(DESTDIR)/usr/bin/zcreate
 
 uninstall:
 	rm -rf $(DESTDIR)/etc/45drives/server_info
