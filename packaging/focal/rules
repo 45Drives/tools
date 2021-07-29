@@ -15,8 +15,10 @@
 
 export TOOLS_VERSION := $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ':' | sed "s/^\([^a-zA-Z]\+\).*$/\1/")
 
+
 %:
 	dh $@
+	CHANGELOG_OUTPUT="$(shell dpkg-parsechangelog)"; echo $$CHANGELOG_OUTPUT
 
 
 # dh_make generated override targets

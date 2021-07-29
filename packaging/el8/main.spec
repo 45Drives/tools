@@ -54,6 +54,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-11
+- checking output of sed command
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-10
 - modified sed command in rules
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-9
