@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.0-5
+## 45drives-tools 2.0.0-6
 
-* changed architecture and spec file
+* added ignore debug flag in spec file
