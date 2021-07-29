@@ -4,15 +4,15 @@
     "title": "45drives-tools",
     "prerelease": true,
     "version": "2.0.0",
-    "buildVersion": "4",
+    "buildVersion": "5",
     "author": "Mark Hooper <mhooper@45drives.com>",
     "url": "https://github.com/45Drives/tools",
     "category": "utils",
     "priority": "optional",
     "licence": "GPL-3.0+",
     "architecture": {
-        "deb": "all",
-        "el": "noarch"
+        "deb": "amd64",
+        "el": "x86_64"
     },
     "description": {
         "long": "cli tools for 45Drives server products",
@@ -56,7 +56,7 @@
     "changelog": {
         "urgency": "medium",
         "version": "2.0.0",
-        "buildVersion": "4",
+        "buildVersion": "5",
         "ignore": [],
         "date": null,
         "packager": "Mark Hooper <mhooper@45drives.com>",

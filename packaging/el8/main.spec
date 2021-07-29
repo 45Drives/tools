@@ -23,7 +23,7 @@ Conflicts:	%{name}-1.7
 %build
 
 %install
-make DESTDIR=%{buildroot} TOOLS_VERSION="%{version}-%{release}" install
+make DESTDIR=%{buildroot} TOOLS_VERSION="%{version}-::package_build_version::" install
 
 %postun
 if [ $1 == 0 ];then
@@ -52,6 +52,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-5
+- changed architecture and spec file
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-4
 - updated makefile
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-3

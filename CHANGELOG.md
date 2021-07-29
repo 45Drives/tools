@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.0-4
+## 45drives-tools 2.0.0-5
 
-* updated makefile
+* changed architecture and spec file
