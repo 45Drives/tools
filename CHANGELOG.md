@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.1-1
+## 45drives-tools 2.0.1-2
 
-* made deb and rpm tools_version file congruent
+* added el7 packaging

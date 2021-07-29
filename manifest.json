@@ -4,7 +4,7 @@
     "title": "45drives-tools",
     "prerelease": true,
     "version": "2.0.1",
-    "buildVersion": "1",
+    "buildVersion": "2",
     "author": "Mark Hooper <mhooper@45drives.com>",
     "url": "https://github.com/45Drives/tools",
     "category": "utils",
@@ -51,12 +51,17 @@
             "image": "rocky-el8-builder",
             "codeName": "el8",
             "type": "el"
+        },
+        {
+            "image": "centos-el7-builder",
+            "codeName": "el7",
+            "type": "el"
         }
     ],
     "changelog": {
         "urgency": "medium",
         "version": "2.0.1",
-        "buildVersion": "1",
+        "buildVersion": "2",
         "ignore": [],
         "date": null,
         "packager": "Mark Hooper <mhooper@45drives.com>",
