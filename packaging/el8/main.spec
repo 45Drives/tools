@@ -54,6 +54,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.1-1
+- made deb and rpm tools_version file congruent
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-14
 - checking output of sed command
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-13

@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.0-14
+## 45drives-tools 2.0.1-1
 
-* checking output of sed command
+* made deb and rpm tools_version file congruent
