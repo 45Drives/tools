@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.0-6
+## 45drives-tools 2.0.0-7
 
-* added ignore debug flag in spec file
+* fixed indentation in dmap

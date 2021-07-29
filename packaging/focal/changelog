@@ -1,3 +1,9 @@
+45drives-tools (2.0.0-7focal) focal; urgency=medium
+
+  * fixed indentation in dmap
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 08:21:27 -0300
+
 45drives-tools (2.0.0-6focal) focal; urgency=medium
 
   * added ignore debug flag in spec file

@@ -211,8 +211,8 @@ def get_version():
 		return ""
 	else:
 		f = open(version_file_path, "r")
-        version = f.readline()
-        f.close()
+		version = f.readline()
+		f.close()
 		return version.strip()
 
 ###############################################################################
@@ -512,4 +512,4 @@ def main():
 	log(vdev_id_conf)
 
 if __name__ == "__main__":
-    main()
+	main()
