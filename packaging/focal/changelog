@@ -1,3 +1,9 @@
+45drives-tools (2.0.0-8focal) focal; urgency=medium
+
+  * modified search for tools version in rules file (focal)
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 09:09:39 -0300
+
 45drives-tools (2.0.0-7focal) focal; urgency=medium
 
   * fixed indentation in dmap

@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.0-7
+## 45drives-tools 2.0.0-8
 
-* fixed indentation in dmap
+* modified search for tools version in rules file (focal)

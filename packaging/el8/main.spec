@@ -54,6 +54,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-8
+- modified search for tools version in rules file (focal)
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-7
 - fixed indentation in dmap
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.0-6
