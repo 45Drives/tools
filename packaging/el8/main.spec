@@ -54,6 +54,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Aug 05 2021 Mark Hooper <mhooper@45drives.com> 2.0.1-3
+- testing el7 gpg signing
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.1-2
 - added el7 packaging
 * Thu Jul 29 2021 Mark Hooper <mhooper@45drives.com> 2.0.1-1

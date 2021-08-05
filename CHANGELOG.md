@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.1-2
+## 45drives-tools 2.0.1-3
 
-* added el7 packaging
+* testing el7 gpg signing

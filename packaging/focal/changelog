@@ -1,3 +1,9 @@
+45drives-tools (2.0.1-3focal) focal; urgency=medium
+
+  * testing el7 gpg signing
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 05 Aug 2021 08:20:23 -0300
+
 45drives-tools (2.0.1-2focal) focal; urgency=medium
 
   * added el7 packaging
