@@ -1,3 +1,9 @@
+45drives-tools (2.0.2-1focal) focal; urgency=medium
+
+  * added signed el7 packaging and put this version on 45drives-stable
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 05 Aug 2021 08:28:41 -0300
+
 45drives-tools (2.0.1-3focal) focal; urgency=medium
 
   * testing el7 gpg signing
