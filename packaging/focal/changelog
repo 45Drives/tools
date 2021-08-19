@@ -1,3 +1,10 @@
+45drives-tools (2.0.2-2focal) focal; urgency=medium
+
+  * added new product keys for Bronze, Silver and Gold Intel CPUs using X11SPL-F
+    Motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 19 Aug 2021 10:50:14 -0300
+
 45drives-tools (2.0.2-1focal) focal; urgency=medium
 
   * added signed el7 packaging and put this version on 45drives-stable
