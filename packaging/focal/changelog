@@ -1,3 +1,9 @@
+45drives-tools (2.0.2-4focal) focal; urgency=medium
+
+  * updated el8 package signature
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 19 Aug 2021 12:20:23 -0300
+
 45drives-tools (2.0.2-3focal) focal; urgency=medium
 
   * updated el8 package signature

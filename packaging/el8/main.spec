@@ -54,6 +54,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Aug 19 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-4
+- updated el8 package signature
 * Thu Aug 19 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-3
 - updated el8 package signature
 * Thu Aug 19 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-2
