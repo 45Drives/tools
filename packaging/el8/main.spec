@@ -54,6 +54,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Aug 19 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-3
+- updated el8 package signature
 * Thu Aug 19 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-2
 - added new product keys for Bronze, Silver and Gold Intel CPUs using X11SPL-F Motherboards
 * Thu Aug 05 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-1

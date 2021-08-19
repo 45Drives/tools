@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.2-2
+## 45drives-tools 2.0.2-3
 
-* added new product keys for Bronze, Silver and Gold Intel CPUs using X11SPL-F Motherboards
+* updated el8 package signature
