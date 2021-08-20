@@ -47,13 +47,27 @@ def count_partitions(path):
 	return len(re.findall(blk_name + "\d{1,2}",partitions.read(),re.MULTILINE))
 
 ################################################################################
+# function name: only_flag_is_json
+# receives: options from CLI flags
+# does: returns true if --json is set by itself
+# returns: returns true if --json is set by itself
+################################################################################
+def only_flag_is_json(options):
+	if options.json:
+		for key, value in options.__dict__.items():
+			if value and key not in ['json', 'colour']:
+				return False
+		return True
+	return False
+
+################################################################################
 # function name: smartctl_needed
 # receives: options from CLI flags
 # does: check if smartctl() needs to be called
 # returns: True if smartctl() needs to be called, else False
 ################################################################################
 def smartctl_needed(options):
-	return options.json or options.outputHealth or options.outputTemp
+	return options.outputHealth or options.outputTemp or only_flag_is_json(options)
 
 ################################################################################
 # function name: smartctl
@@ -624,7 +638,7 @@ def main():
 	parser.add_option("-o", "--ceph-osd", action="store_true", dest="outputOSD",
 			default=False, help="Output OSD name - Ceph only")
 	(options, args) = parser.parse_args()
-	
+
 	(rows, server_info) = build_server(options)
 	
 	server = {
