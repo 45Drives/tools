@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.2-4
+## 45drives-tools 2.0.2-5
 
-* updated el8 package signature
+* Modified --json option in lsdev
