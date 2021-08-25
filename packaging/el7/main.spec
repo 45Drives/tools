@@ -1,4 +1,5 @@
 %global debug_package %{nil}
+%define _build_id_links none
 
 Name: ::package_name::
 Version: ::package_version::
