@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.2-5
+## 45drives-tools 2.0.2-6
 
-* Modified --json option in lsdev
+* removed build id links in .spec files

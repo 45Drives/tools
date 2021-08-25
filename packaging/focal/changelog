@@ -1,3 +1,9 @@
+45drives-tools (2.0.2-6focal) focal; urgency=medium
+
+  * removed build id links in .spec files
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 25 Aug 2021 09:53:56 -0300
+
 45drives-tools (2.0.2-5focal) focal; urgency=medium
 
   * Modified --json option in lsdev

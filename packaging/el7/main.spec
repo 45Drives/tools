@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Aug 25 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-6
+- removed build id links in .spec files
 * Fri Aug 20 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-5
 - Modified --json option in lsdev
 * Thu Aug 19 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-4
