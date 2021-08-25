@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Fri Aug 20 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-5
+- Modified --json option in lsdev
 * Thu Aug 19 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-4
 - updated el8 package signature
 * Thu Aug 19 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-3
