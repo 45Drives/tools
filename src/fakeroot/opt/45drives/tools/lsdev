@@ -332,7 +332,8 @@ def build_server(options):
 			"current-pending-sector": "",
 			"offline-uncorrectable": "",
 			"power-on-time": "",
-			"health": ""
+			"health": "",
+			"disk_type":""
 		}
 		bay["dev-by-path"] = regex.group(3) # third capture group
 		bay["bay-id"] = str(CARD) + "-" + str(DRIVE)
@@ -341,6 +342,8 @@ def build_server(options):
 			bay["occupied"] = True
 			bay["dev"] = os.path.realpath(bay["dev-by-path"])
 			bay["partitions"] = count_partitions(bay["dev"])
+			if options.outputType or only_flag_is_json(options):
+				bay["disk_type"] = disk_type(bay["dev"])
 			if call_smartctl:
 				smartctl(bay) # get metadata
 				if EXIT_CODE == 0:

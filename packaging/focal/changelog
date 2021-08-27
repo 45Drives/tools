@@ -1,3 +1,9 @@
+45drives-tools (2.0.2-8focal) focal; urgency=medium
+
+  * added disk type to json output
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 27 Aug 2021 08:31:30 -0300
+
 45drives-tools (2.0.2-7focal) focal; urgency=medium
 
   * added -c option to lsdev for displaying drive capacity
