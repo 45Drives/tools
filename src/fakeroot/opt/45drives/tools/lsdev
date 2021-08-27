@@ -205,6 +205,30 @@ def get_osd_dict():
 	return osds
 
 ################################################################################
+# function name: get_capacity_dict
+# receives: nothing
+# does: executes lsblk, parses output into dict relating device name to capacity
+# returns: dictionary of dev name : capacity in bytes
+################################################################################
+def get_capacity_dict():
+	capacities = {}
+	try:
+		child = subprocess.Popen(
+			["lsblk","--raw","--noheadings","--output","NAME,SIZE","--bytes","--nodeps"],
+			stdout=subprocess.PIPE,universal_newlines=True
+		)
+	except OSError:
+		print("Error executing lsblk. Is it installed?")
+		exit(1)
+	if child.wait() != 0:
+		print("Error executing lsblk.")
+		exit(child.returncode)
+	for line in child.stdout:
+		[name, capacity] = line.split(' ')
+		capacities["/dev/" + name] = int(capacity)
+	return capacities
+
+################################################################################
 # function name: build_server
 # receives: CLI options
 # does: checks if smartctl or get_model_serial need to be called,
@@ -219,8 +243,11 @@ def get_osd_dict():
 def build_server(options):
 	call_smartctl = smartctl_needed(options)
 	call_hdparm = hdparm_needed(options) # grab model num and serial from lslk (get_model_serial())
+	capacity_lut = None
+	if options.outputCapacity:
+		capacity_lut = get_capacity_dict()
 	# model_serial = get_model_serial() if call_lsblk else {}
-	server = [[]]; # server[row][bay]
+	server = [[]] # server[row][bay]
 		# load the existing server_info.json file in as a json object.
 	json_dir = "/etc/45drives/server_info"
 	server_obj = None
@@ -310,7 +337,6 @@ def build_server(options):
 		bay["dev-by-path"] = regex.group(3) # third capture group
 		bay["bay-id"] = str(CARD) + "-" + str(DRIVE)
 		# if symlink exists in /dev/disk/by-path/ then bay is occupied
-		link = os.path.islink(bay["dev-by-path"])
 		if os.path.islink(bay["dev-by-path"]):
 			bay["occupied"] = True
 			bay["dev"] = os.path.realpath(bay["dev-by-path"])
@@ -319,6 +345,8 @@ def build_server(options):
 				smartctl(bay) # get metadata
 				if EXIT_CODE == 0:
 					bay["capacity"] = format_bytes(bay["capacity"])
+			elif options.outputCapacity and bay["dev"] in capacity_lut:
+				bay["capacity"] = format_bytes(capacity_lut[bay["dev"]])
 			if call_hdparm:
 				bay["model-name"], bay["serial"], bay["firm-ver"] = get_model_serial_firmware(bay["dev"])
 				#key = bay["dev"]
@@ -326,7 +354,7 @@ def build_server(options):
 				#bay["model-name"] = ms[model_serial_ind.MODEL]
 				#bay["serial"] = ms[model_serial_ind.SERIAL]
 		# insert copy of bay
-		server[CURRENT_ROW].append(bay.copy());
+		server[CURRENT_ROW].append(bay.copy())
 	vdev_id.close()
 	return server, server_obj
 
@@ -421,7 +449,7 @@ def no_output_flags(options):
 	return (not options.outputHealth and not options.outputModel
 			and not options.outputType and not options.outputSerial
 			and not options.outputTemp and not options.outputFirm
-			and not options.outputOSD)
+			and not options.outputOSD and not options.outputCapacity)
 
 ################################################################################
 # function name: choose_output
@@ -449,6 +477,8 @@ def choose_output(bay, options, osd):
 		output.append(bay["temp-c"].rstrip() if bay["temp-c"] else "-")
 	if options.outputOSD:
 		output.append(osd[bay["dev"]] if bay["dev"] in osd.keys() else "-")
+	if options.outputCapacity:
+		output.append(bay["capacity"].rstrip() if bay["capacity"] else "-")
 	return ",".join(output)
 
 ################################################################################
@@ -477,6 +507,8 @@ def choose_output_header(options):
 		output.append("Temp C")
 	if options.outputOSD:
 		output.append("OSD")
+	if options.outputCapacity:
+		output.append("Capacity")
 	return ",".join(output)
 
 ################################################################################
@@ -637,6 +669,8 @@ def main():
 			default=False, help="Output firmware version")
 	parser.add_option("-o", "--ceph-osd", action="store_true", dest="outputOSD",
 			default=False, help="Output OSD name - Ceph only")
+	parser.add_option("-c", "--capacity", action="store_true", dest="outputCapacity",
+			default=False, help="Output device capacity")
 	(options, args) = parser.parse_args()
 
 	(rows, server_info) = build_server(options)
