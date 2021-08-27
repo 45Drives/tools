@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Fri Aug 27 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-7
+- added -c option to lsdev for displaying drive capacity
 * Wed Aug 25 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-6
 - removed build id links in .spec files
 * Fri Aug 20 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-5

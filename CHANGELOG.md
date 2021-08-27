@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.2-6
+## 45drives-tools 2.0.2-7
 
-* removed build id links in .spec files
+* added -c option to lsdev for displaying drive capacity
