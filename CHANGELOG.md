@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.2-11
+## 45drives-tools 2.0.2-12
 
-* third build for Ubuntu Bionic
+* override dh_dwz make target

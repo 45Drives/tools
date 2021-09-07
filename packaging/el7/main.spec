@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Tue Sep 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-12
+- override dh_dwz make target
 * Tue Sep 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-11
 - third build for Ubuntu Bionic
 * Tue Sep 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-10

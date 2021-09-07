@@ -1,3 +1,9 @@
+45drives-tools (2.0.2-12bionic) bionic; urgency=medium
+
+  * override dh_dwz make target
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 07 Sep 2021 10:44:17 -0300
+
 45drives-tools (2.0.2-11bionic) bionic; urgency=medium
 
   * third build for Ubuntu Bionic
