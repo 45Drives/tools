@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.2-9
+## 45drives-tools 2.0.2-10
 
-* added autopackaging for Ubuntu bionic
+* second build for Ubuntu bionic
