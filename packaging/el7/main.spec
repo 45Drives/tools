@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Tue Sep 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-13
+- exported DEB_BUILD_OPTIONS to append nostrip
 * Tue Sep 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-12
 - override dh_dwz make target
 * Tue Sep 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-11
