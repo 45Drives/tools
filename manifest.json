@@ -4,7 +4,7 @@
     "title": "45drives-tools",
     "prerelease": false,
     "version": "2.0.2",
-    "buildVersion": "8",
+    "buildVersion": "9",
     "author": "Mark Hooper <mhooper@45drives.com>",
     "url": "https://github.com/45Drives/tools",
     "category": "utils",
@@ -48,6 +48,11 @@
             "type": "deb"
         },
         {
+            "image": "ubuntu-bionic-builder",
+            "codeName": "bionic",
+            "type": "deb"
+        },
+        {
             "image": "rocky-el8-builder",
             "codeName": "el8",
             "type": "el"
@@ -61,7 +66,7 @@
     "changelog": {
         "urgency": "medium",
         "version": "2.0.2",
-        "buildVersion": "8",
+        "buildVersion": "9",
         "ignore": [],
         "date": null,
         "packager": "Mark Hooper <mhooper@45drives.com>",

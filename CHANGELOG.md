@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.2-8
+## 45drives-tools 2.0.2-9
 
-* added disk type to json output
+* added autopackaging for Ubuntu bionic

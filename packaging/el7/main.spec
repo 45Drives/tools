@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Tue Sep 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-9
+- added autopackaging for Ubuntu bionic
 * Fri Aug 27 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-8
 - added disk type to json output
 * Fri Aug 27 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-7

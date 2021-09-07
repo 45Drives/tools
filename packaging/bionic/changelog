@@ -1,0 +1,5 @@
+45drives-tools (2.0.2-9bionic) bionic; urgency=medium
+
+  * added autopackaging for Ubuntu bionic
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 07 Sep 2021 07:37:14 -0300
