@@ -124,6 +124,7 @@ def check_root():
 #
 ###############################################################################
 def verify_vdev():
+	udev_dir="/udr/lib/udev"
 	rules_path="/usr/lib/udev/rules.d/68-vdev.rules"
 	script_path="/usr/lib/udev/vdev_id_45drives"
 	rules_copy_path="/opt/45drives/tools/68-vdev.rules"
@@ -153,20 +154,32 @@ def verify_vdev():
 		else:
 			script_copy_test = os.path.exists(script_copy_path)
 
-	# Copy the scripts from /opt/45drives/tools to their proper locations
-	rv=subprocess.run(["/usr/bin/cp","-f",rules_copy_path,rules_path],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
-	if rv:
-		log("error replacing " + rules_path)
-	else:
-		rules_test = os.path.exists(rules_path)
+	# check for location of udev rules folder.
+	if not os.path.exists(udev_dir):
+		log("can't find " + udev_dir)
+		udev_dir = "/lib/udev"
+		log("trying " + udev_dir + " instead.")
+		if os.path.exists(udev_dir):
+			rules_path="/lib/udev/rules.d/68-vdev.rules"
+			script_path="/lib/udev/vdev_id_45drives"
+		else:
+			log("unable to locate proper udev rules folder")
+			sys.exit(1)
 
-	rv=subprocess.run(["/usr/bin/cp","-f",script_copy_path,script_path],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
+
+	# Copy the scripts from /opt/45drives/tools to their proper locations
+	rv=subprocess.run(["cp","-f",rules_copy_path,rules_path],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
+	if rv:
+		log("error replacing " + rules_path)	
+
+	rv=subprocess.run(["cp","-f",script_copy_path,script_path],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
 	if rv:
 		log("error replacing " + script_path)
-	else:
-		script_test = os.path.exists(script_path)
-		script_x_test = os.access(script_path,os.X_OK) if script_test else False
 
+	rules_test = os.path.exists(rules_path)
+	script_test = os.path.exists(script_path)
+	script_x_test = os.access(script_path,os.X_OK) if script_test else False
+	
 	# make the script executable if it is not already executable. 
 	if not script_x_test:
 		if script_test:
