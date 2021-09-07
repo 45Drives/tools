@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Tue Sep 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-1
+- created a package for 45drives-tools for Ubuntu (bionic)
 * Tue Sep 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-13
 - exported DEB_BUILD_OPTIONS to append nostrip
 * Tue Sep 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.2-12

@@ -1,3 +1,9 @@
+45drives-tools (2.0.3-1bionic) bionic; urgency=medium
+
+  * created a package for 45drives-tools for Ubuntu (bionic)
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 07 Sep 2021 11:13:34 -0300
+
 45drives-tools (2.0.2-13bionic) bionic; urgency=medium
 
   * exported DEB_BUILD_OPTIONS to append nostrip

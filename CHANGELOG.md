@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.2-13
+## 45drives-tools 2.0.3-1
 
-* exported DEB_BUILD_OPTIONS to append nostrip
+* created a package for 45drives-tools for Ubuntu (bionic)
