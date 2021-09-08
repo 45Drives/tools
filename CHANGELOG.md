@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.3-7
+## 45drives-tools 2.0.3-8
 
-* adding preferences file to bionic install
+* pushing an update to auto build
