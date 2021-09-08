@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.3-9
+## 45drives-tools 2.0.3-10
 
-* removed the preinst script for bionic and reverted postrm
+* added packaging for Ubuntu bionic

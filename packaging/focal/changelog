@@ -1,3 +1,9 @@
+45drives-tools (2.0.3-10focal) focal; urgency=medium
+
+  * added packaging for Ubuntu bionic
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Sep 2021 09:55:39 -0300
+
 45drives-tools (2.0.3-9focal) focal; urgency=medium
 
   * removed the preinst script for bionic and reverted postrm
