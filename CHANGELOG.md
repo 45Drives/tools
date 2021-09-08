@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.3-6
+## 45drives-tools 2.0.3-7
 
-* trying to get specific dependency for smartmontools
+* adding preferences file to bionic install

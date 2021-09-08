@@ -1,3 +1,9 @@
+45drives-tools (2.0.3-7focal) focal; urgency=medium
+
+  * adding preferences file to bionic install
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Sep 2021 08:29:34 -0300
+
 45drives-tools (2.0.3-6focal) focal; urgency=medium
 
   * trying to get specific dependency for smartmontools

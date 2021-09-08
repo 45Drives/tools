@@ -11,4 +11,7 @@ if [ "$1" == "remove" ] || [ "$1" == "purge" ]; then
 	rm -f /usr/bin/zcreate
     rmdir /etc/45drives --ignore-fail-on-non-empty
     rmdir /opt/45drives --ignore-fail-on-non-empty
+
+	PREF_FILE=/etc/apt/preferences.d/90-tools-deps
+	rm "$PERF_FILE"
 fi
