@@ -8,5 +8,5 @@ Homepage: ::package_url::
 
 Package: ::package_name::
 Architecture: ::package_architecture_deb::
-Depends: ipmitool,jq,smartmontools (7.0-0ubuntu1~ubuntu18.04.1),dmidecode,python3,pciutils,hdparm,udev
+Depends: ipmitool,jq,smartmontools(=7.0-0ubuntu1~ubuntu18.04.1),dmidecode,python3,pciutils,hdparm,udev
 Description: ::package_description_short::
