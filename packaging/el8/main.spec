@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Sep 08 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-4
+- changed format of Depends in bionic control file
 * Wed Sep 08 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-3
 - updated bionic dependencies to require smartmontools from bionic-backports
 * Tue Sep 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-2

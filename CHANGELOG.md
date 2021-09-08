@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.3-3
+## 45drives-tools 2.0.3-4
 
-* updated bionic dependencies to require smartmontools from bionic-backports
+* changed format of Depends in bionic control file
