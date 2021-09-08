@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.3-4
+## 45drives-tools 2.0.3-5
 
-* changed format of Depends in bionic control file
+* added dep smartmontools (7.0-0ubuntu1~ubuntu18.04.1)

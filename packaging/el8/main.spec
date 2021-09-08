@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Sep 08 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-5
+- added dep smartmontools (7.0-0ubuntu1~ubuntu18.04.1)
 * Wed Sep 08 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-4
 - changed format of Depends in bionic control file
 * Wed Sep 08 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-3
