@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.3-8
+## 45drives-tools 2.0.3-9
 
-* pushing an update to auto build
+* removed the preinst script for bionic and reverted postrm

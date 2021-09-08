@@ -1,4 +1,0 @@
-#!/bin/bash
-
-PREF_FILE=/etc/apt/preferences.d/90-tools-deps
-printf '%s\n%s\n%s\n' 'Package: smartmontools' 'release a=bionic-backports' 'Pin-Priority: 500' > "$PERF_FILE"

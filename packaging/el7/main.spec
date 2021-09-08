@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Sep 08 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-9
+- removed the preinst script for bionic and reverted postrm
 * Wed Sep 08 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-8
 - pushing an update to auto build
 * Wed Sep 08 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-7
