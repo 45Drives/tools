@@ -1,5 +1,3 @@
-## 45drives-tools 2.0.3-2
+## 45drives-tools 2.0.3-3
 
-* updated dmap to look to rules files in /bin/udev if /usr/bin/udev is not found
-* added udev as a dependency
-* removed hard path of /usr/bin/cp from dmap
+* updated bionic dependencies to require smartmontools from bionic-backports

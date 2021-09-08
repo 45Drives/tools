@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Sep 08 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-3
+- updated bionic dependencies to require smartmontools from bionic-backports
 * Tue Sep 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-2
 - updated dmap to look to rules files in /bin/udev if /usr/bin/udev is not found
 - added udev as a dependency

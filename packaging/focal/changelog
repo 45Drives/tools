@@ -1,3 +1,9 @@
+45drives-tools (2.0.3-3focal) focal; urgency=medium
+
+  * updated bionic dependencies to require smartmontools from bionic-backports
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Sep 2021 06:15:39 -0300
+
 45drives-tools (2.0.3-2focal) focal; urgency=medium
 
   * updated dmap to look to rules files in /bin/udev if /usr/bin/udev is not found
