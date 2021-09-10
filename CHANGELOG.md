@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.3-10
+## 45drives-tools 2.0.3-11
 
-* added packaging for Ubuntu bionic
+* fixed typo in dmap udev path from last patch

@@ -124,7 +124,7 @@ def check_root():
 #
 ###############################################################################
 def verify_vdev():
-	udev_dir="/udr/lib/udev"
+	udev_dir="/usr/lib/udev"
 	rules_path="/usr/lib/udev/rules.d/68-vdev.rules"
 	script_path="/usr/lib/udev/vdev_id_45drives"
 	rules_copy_path="/opt/45drives/tools/68-vdev.rules"
