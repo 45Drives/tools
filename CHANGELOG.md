@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.3-11
+## 45drives-tools 2.0.3-12
 
-* fixed typo in dmap udev path from last patch
+* removed systemd-udev dependency

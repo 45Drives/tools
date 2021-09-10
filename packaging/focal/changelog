@@ -1,3 +1,9 @@
+45drives-tools (2.0.3-12focal) focal; urgency=medium
+
+  * removed systemd-udev dependency
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 10 Sep 2021 08:55:42 -0300
+
 45drives-tools (2.0.3-11focal) focal; urgency=medium
 
   * fixed typo in dmap udev path from last patch

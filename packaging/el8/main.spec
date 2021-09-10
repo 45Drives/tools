@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Fri Sep 10 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-12
+- removed systemd-udev dependency
 * Fri Sep 10 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-11
 - fixed typo in dmap udev path from last patch
 * Wed Sep 08 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-10

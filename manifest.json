@@ -4,7 +4,7 @@
     "title": "45drives-tools",
     "prerelease": false,
     "version": "2.0.3",
-    "buildVersion": "11",
+    "buildVersion": "12",
     "author": "Mark Hooper <mhooper@45drives.com>",
     "url": "https://github.com/45Drives/tools",
     "category": "utils",
@@ -39,8 +39,7 @@
             "dmidecode",
             "python3",
             "pciutils",
-            "hdparm",
-            "systemd-udev"
+            "hdparm"
         ]
     },
     "releases": [
@@ -68,7 +67,7 @@
     "changelog": {
         "urgency": "medium",
         "version": "2.0.3",
-        "buildVersion": "11",
+        "buildVersion": "12",
         "ignore": [],
         "date": null,
         "packager": "Mark Hooper <mhooper@45drives.com>",
