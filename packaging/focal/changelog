@@ -1,3 +1,9 @@
+45drives-tools (2.0.4-1focal) focal; urgency=medium
+
+  * simplified generate-osd-vars.sh to be hardware agnostic
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 07 Oct 2021 10:24:54 -0300
+
 45drives-tools (2.0.3-12focal) focal; urgency=medium
 
   * removed systemd-udev dependency

@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Oct 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.4-1
+- simplified generate-osd-vars.sh to be hardware agnostic
 * Fri Sep 10 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-12
 - removed systemd-udev dependency
 * Fri Sep 10 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-11

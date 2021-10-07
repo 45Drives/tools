@@ -43,45 +43,8 @@ getdrives() {
 	    let j=j+1
     done
 }
-gethba() {
-	if [[ $(lspci | grep $LSI_9305) ]];then
-		DISK_CONTROLLER=$LSI_9305
-    elif [[ $(lspci | grep $LSI_9405) ]];then
-        DISK_CONTROLLER=$LSI_9405
-    elif [[ $(lspci | grep $LSI_9405) ]];then
-        DISK_CONTROLLER=$LSI_9361
-	elif [[ $(dmidecode -t baseboard | grep -i "product name" | cut -d : -f 2 | xargs echo) == "X11SSH-CTF" ]] && [[ ! $(lspci | grep $LSI_9305) ]];then
-		DISK_CONTROLLER=$AV15BASE
-	else
-		echo "No Supported HBA Detected"
-		exit 1
-	fi
-}
-getchassis() {
-    CARD_COUNT=$(lspci | grep $DISK_CONTROLLER | wc -l)
-    case $CARD_COUNT in
-		0)
-		    echo "No Supported HBA Detected"
-            exit 1
-		;;
-		1)
-            CHASSIS_SIZE=15
-      	;;
-    	2)
-      	    CHASSIS_SIZE=30
-      	;;
-    	3)
-            CHASSIS_SIZE=45
-      	;;
-    	4)
-      	    CHASSIS_SIZE=60
-      	;;
-        *)
-            echo "No Supported HBA Detected"
-            exit 1
-    	;;
-        esac
-}
+
+
 checkcas(){
 if command -v casadm > /dev/null 2>&1 ; then
     cascheck=$(casadm -L)
@@ -98,7 +61,7 @@ fi
 printvars() {
     ## PRINT
     echo "---" 
-    echo "chassis_size: $CHASSIS_SIZE"
+    #echo "chassis_size: $CHASSIS_SIZE"
     echo "osd_auto_discovery: false"
 #    echo "lvm_volumes:" 
 #    for i in "${BAY[@]}";do
@@ -115,8 +78,6 @@ printvars() {
     echo ""
 }
 
-gethba
-getchassis
 checkcas
 if [ -s $CONFIG_PATH/vdev_id.conf ]; then
     getdrives

@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.3-12
+## 45drives-tools 2.0.4-1
 
-* removed systemd-udev dependency
+* simplified generate-osd-vars.sh to be hardware agnostic
