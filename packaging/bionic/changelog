@@ -1,3 +1,10 @@
+45drives-tools (2.0.4-2bionic) bionic; urgency=medium
+
+  * updated server_identifier to ensure that bus addresses for HBA cards provided
+    by dmidecode are present in /sys/bus/pci/devices
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 13 Oct 2021 10:31:32 -0300
+
 45drives-tools (2.0.4-1bionic) bionic; urgency=medium
 
   * simplified generate-osd-vars.sh to be hardware agnostic

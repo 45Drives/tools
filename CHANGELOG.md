@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.4-1
+## 45drives-tools 2.0.4-2
 
-* simplified generate-osd-vars.sh to be hardware agnostic
+* updated server_identifier to ensure that bus addresses for HBA cards provided by dmidecode are present in /sys/bus/pci/devices

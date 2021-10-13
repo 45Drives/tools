@@ -55,6 +55,9 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Oct 13 2021 Mark Hooper <mhooper@45drives.com> 2.0.4-2
+- updated server_identifier to ensure that bus addresses for HBA cards provided by
+  dmidecode are present in /sys/bus/pci/devices
 * Thu Oct 07 2021 Mark Hooper <mhooper@45drives.com> 2.0.4-1
 - simplified generate-osd-vars.sh to be hardware agnostic
 * Fri Sep 10 2021 Mark Hooper <mhooper@45drives.com> 2.0.3-12
