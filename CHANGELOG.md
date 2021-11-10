@@ -1,3 +1,4 @@
-## 45drives-tools 2.0.4-2
+## 45drives-tools 2.0.4-3
 
-* updated server_identifier to ensure that bus addresses for HBA cards provided by dmidecode are present in /sys/bus/pci/devices
+* updated server_identifier to store the controller id of hba cards
+* updated lsdev to be able to read temperatures from SAS drives using smartctl

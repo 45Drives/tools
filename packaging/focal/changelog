@@ -1,3 +1,10 @@
+45drives-tools (2.0.4-3focal) focal; urgency=medium
+
+  * updated server_identifier to store the controller id of hba cards
+  * updated lsdev to be able to read temperatures from SAS drives using smartctl
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 10 Nov 2021 09:09:21 -0400
+
 45drives-tools (2.0.4-2focal) focal; urgency=medium
 
   * updated server_identifier to ensure that bus addresses for HBA cards provided
