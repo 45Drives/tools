@@ -248,14 +248,15 @@ def hba():
 		for line in storcli_result:
 			for model in hba_models.keys():
 				# Model AdapterType VendId DevId SubVendId SubDevId PCIAddress 	
-				regex = re.search("({fld})\s+(\w+).*\w\w:(\w\w:\w\w:\w\w)\s+$".format(fld=model),line)
+				regex = re.search("(\d)\s+({fld})\s+(\w+).*\w\w:(\w\w:\w\w:\w\w)\s+$".format(fld=model),line)
 				if regex != None:
-					hba_dict["Model"] = regex.group(1)
-					hba_dict["Adapter"] = regex.group(2)
-					hba_dict["Bus Address"] = regex.group(3)
+					hba_dict["Model"] = regex.group(2)
+					hba_dict["Adapter"] = regex.group(3)
+					hba_dict["Bus Address"] = regex.group(4)
 					hba_dict["Bus Address"] = hba_dict["Bus Address"][:-3] + ".0"
 					hba_dict["Drive Connections"] = hba_models[model]
 					hba_dict["Kernel Driver"] = hba_drivers[model]
+					hba_dict["Ctl"] = int(regex.group(1))
 					if hba_dict["Drive Connections"] == 24:
 						hybrid_flag = True
 					hba.append(hba_dict.copy())

@@ -109,7 +109,7 @@ def smartctl(drive):
 	else:
 		drive["start-stop-count"] = "?"
 		drive["power-cycle-count"] = "?"
-		drive["temp-c"] = "?"
+		drive["temp-c"] = (str(output["temperature"]["current"]) + u"\u2103") if ("temperature" in output.keys() and "current" in output["temperature"].keys()) else "?"
 		drive["current-pending-sector"] = "?"
 		drive["start-stop-count"] = "?"
 		drive["offline-uncorrectable"] = "?"
