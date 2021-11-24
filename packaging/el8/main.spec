@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Nov 24 2021 Joshua Boudreau <jboudreau@45drives.com> 2.0.5-1
+- Fixed bug in wipedev where `wipedev -a` skipped slot 1-1
 * Wed Nov 10 2021 Mark Hooper <mhooper@45drives.com> 2.0.4-3
 - updated server_identifier to store the controller id of hba cards
 - updated lsdev to be able to read temperatures from SAS drives using smartctl
