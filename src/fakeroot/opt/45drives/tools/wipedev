@@ -54,7 +54,7 @@ fi
 if [ $ALL_FLAG -eq 1 ];then
 	BAYS=$((cat $CONFIG_PATH/vdev_id.conf| awk "NR>1" | wc -l) 2>/dev/null)
 	i=0
-	j=3
+	j=2
 	## LOOP THROUGH BAYS
 	while [ "$i" -lt $BAYS ];do
 		bay=$(cat $CONFIG_PATH/vdev_id.conf | awk -v j=$j 'NR==j{print $2}')
