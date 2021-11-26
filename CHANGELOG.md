@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.5-1
+## 45drives-tools 2.0.5-2
 
-* Fixed bug in wipedev where `wipedev -a` skipped slot 1-1
+* added -d command line argument to generate-osd-vars.sh

@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Fri Nov 26 2021 Mark Hooper <mhooper@45drives.com> 2.0.5-2
+- added -d command line argument to generate-osd-vars.sh
 * Wed Nov 24 2021 Joshua Boudreau <jboudreau@45drives.com> 2.0.5-1
 - Fixed bug in wipedev where `wipedev -a` skipped slot 1-1
 * Wed Nov 10 2021 Mark Hooper <mhooper@45drives.com> 2.0.4-3
