@@ -7,48 +7,49 @@ import math
 from optparse import OptionParser
 
 ###############################################################################
-# Name: dump_attributes
+# Name: get_attribute
 # Args: path to directory
-# Desc: executes getfattr to dump ceph attributes and returns as dictionary
+# Desc: executes getfattr to get ceph attribute and returns as string
 ###############################################################################
-def dump_attributes(path):
-	attrs = {}
+def get_attribute(path, attribute):
 	try:
-		child = subprocess.Popen(["getfattr", "-d", "-m", "-", path],
+		child = subprocess.Popen(["getfattr", "-n", attribute, path],
 			stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 	except OSError:
 		print("Error executing getfattr. Is xattr installed?")
 		sys.exit(1)
 	if child.wait() != 0:
-		print("Error executing getfattr. Is xattr installed?")
-		sys.exit(1)
+		return "?"
 	output_string = child.stdout.read()
-	fields = re.findall(r"^ceph\.dir\.([^=]+)=\"([^\"]+)\"$", output_string, re.MULTILINE)
-	if len(fields) == 0:
-		print(f'No ceph xattrs, is {path} in a ceph filesystem?')
-		sys.exit(1)
-	for field in fields:
-		if field[0] != "rctime":
-			attrs[field[0]] = field[1]
-	return attrs
+	attribute_re = attribute.replace(".", "\.")
+	search = re.search(f"^{attribute_re}=\"([^\"]+)\"$", output_string, re.MULTILINE)
+	if search:
+		return search.group(1)
+	return "?"
 
 ###############################################################################
 # Name: display_attributes
-# Args: path to directory
-# Desc: calls dump_attributes and prints output
+# Args: path to directory, bool for human readble
+# Desc: calls get_attribute for each attribute and prints output
 ###############################################################################
-def display_attributes(path):
+def display_attributes(path, human_readable):
+	attributes = [
+		("Entries", "ceph.dir.entries", False),
+		("Files", "ceph.dir.files", False),
+		("Directories", "ceph.dir.subdirs", False),
+		("Recursive Entries", "ceph.dir.rentries", False),
+		("Recursive Files", "ceph.dir.rfiles", False),
+		("Recursive Directories", "ceph.dir.rsubdirs", False),
+		("Total Size", "ceph.dir.rbytes", True),
+		("File Quota", "ceph.quota.max_files", False),
+		("Size Quota", "ceph.quota.max_bytes", True)
+	]
 	print(path, ":")
-	attrs = dump_attributes(path)
-	if "rbytes" in attrs.keys():
-		attrs["rbytes"] = format_bytes(int(attrs["rbytes"]))
-	max_width = len(max(attrs.values(), key=lambda x: len(x.split(" ")[0])).split(" ")[0])
-	print("Files:                 ", "{0:>{1}}".format(attrs["files"], max_width) if "files" in attrs.keys() else "?")
-	print("Directories:           ", "{0:>{1}}".format(attrs["subdirs"], max_width) if "subdirs" in attrs.keys() else "?")
-	print("Recursive Files:       ", "{0:>{1}}".format(attrs["rfiles"], max_width) if "rfiles" in attrs.keys() else "?")
-	print("Recursive Directories: ", "{0:>{1}}".format(attrs["rsubdirs"], max_width) if "rsubdirs" in attrs.keys() else "?")
-	print("Total Size:            ", "{0:>{1}}".format(attrs["rbytes"].split(" ")[0], max_width) + " " + attrs["rbytes"].split(" ")[1] if "rbytes" in attrs.keys() else "?")
-	print()
+	for attr in attributes:
+		value = get_attribute(path, attr[1])
+		if attr[2] and human_readable:
+			value = format_bytes(int(value))
+		print((attr[0] + ":").ljust(24), value)
 
 ################################################################################
 # Name: format_bytes
@@ -71,11 +72,12 @@ def format_bytes(size_bytes):
 ###############################################################################
 def main():
 	parser = OptionParser()
+	parser.add_option("-H", "--human-readable", dest="human_readable", default=False, help="format bytes to human readble")
 	(options, args) = parser.parse_args()
 	if len(args) == 0:
 		args = ["."]
 	for arg in args:
-		display_attributes(arg)
+		display_attributes(arg, options.human_readable)
 
 if __name__ == "__main__":
 	main()
