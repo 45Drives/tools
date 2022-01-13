@@ -84,10 +84,30 @@ def smartctl(drive):
 	except OSError:
 		print("Error executing smartctl. Is it installed?")
 		exit(1)
-	if child.wait() != 0:
-		EXIT_CODE = child.returncode
+
+	try:
+		outs, errs = child.communicate(timeout=5)
+	except subprocess.TimeoutExpired:
+		drive["model-family"] = "smartctl timed out"
+		drive["model-name"] = "smartctl timed out"
+		drive["serial"] = "smartctl timed out"
+		drive["capacity"] = "smartctl timed out"
+		drive["firm-ver"] = "smartctl timed out"
+		drive["rotation-rate"] = 1 if drive["disk_type"] == "HDD" else 0
+		drive["start-stop-count"] = "smartctl timed out"
+		drive["power-cycle-count"] = "smartctl timed out"
+		drive["temp-c"] = "smartctl timed out"
+		drive["current-pending-sector"] = "smartctl timed out"
+		drive["start-stop-count"] = "smartctl timed out"
+		drive["offline-uncorrectable"] = "smartctl timed out"
+		drive["power-on-time"] = "smartctl timed out"
+		drive["health"] = "POOR"
+		child.kill()
+		outs, errs = child.communicate()
+		EXIT_CODE = 1
 		return
-	output = json.loads(child.stdout.read())
+
+	output = json.loads(outs)
 	drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
 	drive["model-name"] = output["model_name"] if "model_name" in output.keys() else "?"
 	drive["serial"] = output["serial_number"] if "serial_number" in output.keys() else "?"
@@ -352,10 +372,6 @@ def build_server(options):
 				bay["capacity"] = format_bytes(capacity_lut[bay["dev"]])
 			if call_hdparm:
 				bay["model-name"], bay["serial"], bay["firm-ver"] = get_model_serial_firmware(bay["dev"])
-				#key = bay["dev"]
-				#ms = model_serial[key] if key in model_serial.keys() else ("-", "-")
-				#bay["model-name"] = ms[model_serial_ind.MODEL]
-				#bay["serial"] = ms[model_serial_ind.SERIAL]
 		# insert copy of bay
 		server[CURRENT_ROW].append(bay.copy())
 	vdev_id.close()
