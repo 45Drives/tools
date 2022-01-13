@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Jan 13 2022 Mark Hooper <mhooper@45drives.com> 2.0.5-3
+- bugfix for lsdev when invoking smartctl
 * Fri Nov 26 2021 Mark Hooper <mhooper@45drives.com> 2.0.5-2
 - added -d command line argument to generate-osd-vars.sh
 * Wed Nov 24 2021 Joshua Boudreau <jboudreau@45drives.com> 2.0.5-1
