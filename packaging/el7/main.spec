@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Mon Jan 24 2022 Mark Hooper <mhooper@45drives.com> 2.0.5-4
+- bugfix for missing smart_status key in lsdev
 * Thu Jan 13 2022 Mark Hooper <mhooper@45drives.com> 2.0.5-3
 - bugfix for lsdev when invoking smartctl
 * Fri Nov 26 2021 Mark Hooper <mhooper@45drives.com> 2.0.5-2

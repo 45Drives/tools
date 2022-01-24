@@ -1,3 +1,9 @@
+45drives-tools (2.0.5-4focal) focal; urgency=medium
+
+  * bugfix for missing smart_status key in lsdev
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 24 Jan 2022 09:29:03 -0400
+
 45drives-tools (2.0.5-3focal) focal; urgency=medium
 
   * bugfix for lsdev when invoking smartctl

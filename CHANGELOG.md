@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.5-3
+## 45drives-tools 2.0.5-4
 
-* bugfix for lsdev when invoking smartctl
+* bugfix for missing smart_status key in lsdev
