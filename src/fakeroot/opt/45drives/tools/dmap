@@ -300,6 +300,9 @@ def create_vdev_id(server):
 			"AV15":[16,16],
 			"F32":[16,16]
 		},
+		"2USTORNADO":{
+			"2U":[16,16]
+		},
 		"AV15-BASE":{
 			"AV15":[0]
 		},

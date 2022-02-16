@@ -298,7 +298,11 @@ def build_server(options):
 			"MI4":[4]
 		},
 		"STORNADO":{
-			"AV15":[32]
+			"AV15":[32],
+			"F32":[32]
+		},
+		"2USTORNADO":{
+			"2U":[32]
 		},
 		"AV15-BASE":{
 			"AV15":[15]
@@ -536,9 +540,8 @@ def choose_output_header(options):
 # does: prints table representing server with output based on
 #       options and choose_output() call
 # returns: nothing
-# DEPRECATED: to be replaced with generic table formatting function
 ################################################################################
-def print_bays(server, options, osd):
+def print_bays(server, options, osd, server_info):
 	print_array = []
 	
 	for row in reversed(server["rows"]):
@@ -576,7 +579,8 @@ def print_bays(server, options, osd):
 	table_print(ansi = options.colour, c_count = len(print_array), c_txt = print_array, c_labels = col_headers, h_txt = header_text, padding = 1)
 	
 	# legend
-	print(" <-- motherboard | front plate -->")
+	if "Alias Style" in server_info.keys() and server_info["Alias Style"] != "2USTORNADO":
+		print(" <-- motherboard | front plate -->")
 	print(" Legend:")
 	if options.colour:
 		print(ANSI_colours.GREY + " Empty " +
@@ -593,9 +597,8 @@ def print_bays(server, options, osd):
 #       options and choose_output() call, with rows going across
 #       for use with MI4 and C8 chassis
 # returns: nothing
-# DEPRECATED: to be replaced with generic table formatting function
 ################################################################################
-def print_bays_front(server, options, osd):
+def print_bays_front(server, options, osd, server_info):
 	print_array = []
 	
 	for i in range(len(server["rows"][0])):
@@ -719,11 +722,11 @@ def main():
 	elif(
 		server_info["Alias Style"] == "STORINATOR" and 
 		(server_info["Chassis Size"] == "C8" or server_info["Chassis Size"] == "MI4")):
-		print_bays_front(server, options, osd)
+		print_bays_front(server, options, osd, server_info)
 	elif(server_info["Alias Style"] == "SSG-6048R-E1CR24H" and server_info["Chassis Size"] == "SSG-6048R-E1CR24H"):
-		print_bays_front(server, options, osd)
+		print_bays_front(server, options, osd, server_info)
 	else:
-		print_bays(server, options, osd)
+		print_bays(server, options, osd, server_info)
 	exit(0)
 
 if __name__ == "__main__":

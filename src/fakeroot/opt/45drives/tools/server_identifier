@@ -135,6 +135,12 @@ g_product_lut = {
 	"Stornado-AV15-Enhanced-AMD":		["H11SSL-i"  ,0,2,"AV15","STORNADO"],
 	"Stornado-AV15-Turbo":				["X11DPL-i"  ,0,2,"AV15","STORNADO"],
 	"Stornado-AV15-Turbo-G":			["X11SPL-F"  ,0,2,"AV15","STORNADO"],
+
+	"Stornado-2U-Base-B":				["X11SPL-F"  ,0,2,"2U","2USTORNADO"],
+	"Stornado-2U-Enhanced-AMD":			["X11SPL-F"  ,0,2,"2U","2USTORNADO"],
+	"Stornado-2U-Enhanced-S":			["X11SPL-F"  ,0,2,"2U","2USTORNADO"],
+	"Stornado-2U-Turbo-G":				["X11SPL-F"  ,0,2,"2U","2USTORNADO"],
+
 	"Storinator":						["?",0,0,"?","STORINATOR"],
 	"?":								["?",0,0,"?","?"]
 }
