@@ -1,3 +1,9 @@
+45drives-tools (2.0.6-1bionic) bionic; urgency=medium
+
+  * added support for 2U Stornado
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 16 Feb 2022 10:15:13 -0400
+
 45drives-tools (2.0.5-4bionic) bionic; urgency=medium
 
   * bugfix for missing smart_status key in lsdev

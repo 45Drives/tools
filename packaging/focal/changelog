@@ -1,3 +1,9 @@
+45drives-tools (2.0.6-1focal) focal; urgency=medium
+
+  * added support for 2U Stornado
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 16 Feb 2022 10:15:13 -0400
+
 45drives-tools (2.0.5-4focal) focal; urgency=medium
 
   * bugfix for missing smart_status key in lsdev

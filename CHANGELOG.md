@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.5-4
+## 45drives-tools 2.0.6-1
 
-* bugfix for missing smart_status key in lsdev
+* added support for 2U Stornado
