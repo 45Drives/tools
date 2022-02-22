@@ -306,6 +306,11 @@ def create_vdev_id(server):
 		"AV15-BASE":{
 			"AV15":[0]
 		},
+		"DESTROYINATOR":{
+			"Q30":[15,8],
+			"S45":[15,15,8],
+			"XL60":[15,15,15,8]
+		},
 		"SSG-6048R-E1CR24H":{
 			"SSG-6048R-E1CR24H":[24]
 		},
@@ -331,7 +336,7 @@ def create_vdev_id(server):
 	# We have a valid combination of alias styles and chassis sizes.
 	version = get_version()
 	vdev_id_str = "# This file was generated using dmap {v} (/opt/45drives/tools/dmap).\n".format(v=version)
-	if len(server["HBA"]) > 0 and server["Chassis Size"] != "C8" and server["Chassis Size"] != "SSG-6048R-E1CR24H":
+	if len(server["HBA"]) > 0 and server["Chassis Size"] != "C8" and server["Chassis Size"] != "SSG-6048R-E1CR24H" and server["Alias Style"] != "DESTROYINATOR":
 		# we have hba cards to inspect/alias
 		for i in range(0,len(server["HBA"])):
 			count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
@@ -378,10 +383,54 @@ def create_vdev_id(server):
 	elif server["Alias Style"] == "AV15-BASE":
 		# we are using the AV15-BASE ailiasing scheme.
 		vdev_id_str += alias_av15_base(server["OS NAME"],server["OS VERSION_ID"])
+	elif server["Alias Style"] == "DESTROYINATOR":
+		# we are using the DESTROYINATOR ailiasing scheme.
+		vdev_id_str += alias_destroyinator(server,alias_template,phy_order)
 	elif server["Alias Style"] == "?":
 		# we don't know what kind of server this is. Likely a vm
 		vdev_id_str = None
 
+	return vdev_id_str
+
+
+def alias_destroyinator(server,alias_template,phy_order):
+	vdev_id_str = ""
+	bus_address_sata = None
+	bus_address_sas = None
+	ata_suffix = ""
+	for i in range(0,len(server["HBA"])):
+		count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
+		for j in range(0,count):
+			# The default case for ailiasing hba cards.
+			vdev_id_str += (
+				"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
+					i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
+					)
+				)
+	if server["OS NAME"] == "CentOS Linux" and server["OS VERSION_ID"] == "7":
+		ata_suffix = ".0"
+
+	try:
+		lspci_result = subprocess.Popen(["lspci"], stdout=subprocess.PIPE,
+			universal_newlines=True).stdout
+	except OSError:
+		log("Error executing lspci.")
+		sys.exit(1)
+
+	for line in lspci_result:
+		regex_sata = re.search("(\w\w:\w\w.\w).*Intel.*SATA Controller",line)
+		if regex_sata != None:
+			bus_address_sata = "0000:"+regex_sata.group(1)
+		if bus_address_sata != None:
+			break
+
+	if bus_address_sata != None :
+		for i in range(0,7):
+			#alias the drives connected to the on board sata sata connectors
+			vdev_id_str += "alias {final_row}-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(final_row=len(server["HBA"]),drive=i+9,addr=bus_address_sata,i=i+2,s=ata_suffix)
+	else:
+		log("Error aliasing DESTROYINATOR")
+		sys.exit(1)
 	return vdev_id_str
 
 ###############################################################################

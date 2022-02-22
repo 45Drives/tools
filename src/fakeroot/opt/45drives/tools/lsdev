@@ -307,6 +307,11 @@ def build_server(options):
 		"AV15-BASE":{
 			"AV15":[15]
 		},
+		"DESTROYINATOR":{
+			"Q30":[15,15],
+			"S45":[15,15,15],
+			"XL60":[15,15,15,15]
+		},
 		"SSG-6048R-E1CR24H":{
 			"SSG-6048R-E1CR24H":[4,4,4,4,4,4]
 		}
@@ -472,7 +477,8 @@ def no_output_flags(options):
 	return (not options.outputHealth and not options.outputModel
 			and not options.outputType and not options.outputSerial
 			and not options.outputTemp and not options.outputFirm
-			and not options.outputOSD and not options.outputCapacity)
+			and not options.outputOSD and not options.outputCapacity
+			and not options.outputPath)
 
 ################################################################################
 # function name: choose_output
@@ -486,6 +492,8 @@ def choose_output(bay, options, osd):
 	output = []
 	if options.outputDev:
 		output.append(bay["dev"].rstrip() if bay["dev"] else "-")
+	if options.outputPath:
+		output.append(bay["dev-by-path"].rstrip() if bay["dev-by-path"] else "-")
 	if options.outputModel:
 		output.append(bay["model-name"].rstrip() if bay["model-name"] else "-")
 	if options.outputSerial:
@@ -516,6 +524,8 @@ def choose_output_header(options):
 	output = []
 	if options.outputDev:
 		output.append("Dev")
+	if options.outputPath:
+		output.append("Path")
 	if options.outputModel:
 		output.append("Model")
 	if options.outputSerial:
@@ -693,6 +703,8 @@ def main():
 			default=False, help="Output OSD name - Ceph only")
 	parser.add_option("-c", "--capacity", action="store_true", dest="outputCapacity",
 			default=False, help="Output device capacity")
+	parser.add_option("-p", "--path", action="store_true", dest="outputPath",
+			default=False, help="Output device path")
 	(options, args) = parser.parse_args()
 
 	(rows, server_info) = build_server(options)
