@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Feb 23 2022 Mark Hooper <mhooper@45drives.com> 2.0.6-2
+- added support for Destroyinator servers in dmap, server_identifier and lsdev
 * Wed Feb 16 2022 Mark Hooper <mhooper@45drives.com> 2.0.6-1
 - added support for 2U Stornado
 * Mon Jan 24 2022 Mark Hooper <mhooper@45drives.com> 2.0.5-4

@@ -1,3 +1,9 @@
+45drives-tools (2.0.6-2bionic) bionic; urgency=medium
+
+  * added support for Destroyinator servers in dmap, server_identifier and lsdev
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 23 Feb 2022 06:43:44 -0400
+
 45drives-tools (2.0.6-1bionic) bionic; urgency=medium
 
   * added support for 2U Stornado

@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.6-1
+## 45drives-tools 2.0.6-2
 
-* added support for 2U Stornado
+* added support for Destroyinator servers in dmap, server_identifier and lsdev
