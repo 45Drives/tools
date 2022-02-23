@@ -658,6 +658,12 @@ def main():
 	# get OS NAME and OS VERSION_ID
 	server["OS NAME"], server["OS VERSION_ID"] = get_os()
 	update_json_file(server,scan_time)
+
+	# warn user if improper number of HBA cards are detected.
+	if len(server["HBA"]) != g_product_lut[server["Model"]][g_product_lut_idx["24I_COUNT"]] + g_product_lut[server["Model"]][g_product_lut_idx["16I_COUNT"]]:
+		print("/opt/45drives/tools/server_identifier: !! WARNING !!")
+		print("                              Quantity of HBA Cards detected does not match the quantity expected")
+		print("                              for a \"{m}\". Drive aliasing may not work as desired. ".format(m=server["Model"]))
 	exit(0)
 
 if __name__ == "__main__":
