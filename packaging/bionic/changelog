@@ -1,3 +1,11 @@
+45drives-tools (2.0.6-3bionic) bionic; urgency=medium
+
+  * dmap will find and replace the udev rules path in 68-vdev.rules.
+  * lsdev will tell user to run as root when invoking smartctl.
+  * updated the smartctl timeout values in lsdev.
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 04 Apr 2022 11:58:05 -0300
+
 45drives-tools (2.0.6-2bionic) bionic; urgency=medium
 
   * added support for Destroyinator servers in dmap, server_identifier and lsdev
