@@ -1,3 +1,9 @@
+45drives-tools (2.0.6-4focal) focal; urgency=medium
+
+  * added support for Destroyinator servers in dmap, server_identifier and lsdev
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 28 Apr 2022 12:16:30 -0300
+
 45drives-tools (2.0.6-3focal) focal; urgency=medium
 
   * dmap will find and replace the udev rules path in 68-vdev.rules.

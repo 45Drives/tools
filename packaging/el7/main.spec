@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Apr 28 2022 Mark Hooper <mhooper@45drives.com> 2.0.6-4
+- added support for Destroyinator servers in dmap, server_identifier and lsdev
 * Mon Apr 04 2022 Mark Hooper <mhooper@45drives.com> 2.0.6-3
 - dmap will find and replace the udev rules path in 68-vdev.rules.
 - lsdev will tell user to run as root when invoking smartctl.
