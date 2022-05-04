@@ -199,6 +199,20 @@ def motherboard():
 	
 	return mobo_dict
 
+def getDmidecodePCI():
+    try:
+        dmidecode_result = subprocess.Popen(
+            ["dmidecode", "-t", "9"], stdout=subprocess.PIPE, universal_newlines=True).stdout.read()
+    except:
+        print("ERROR: dmidecode not installed")
+        exit(1)
+    pci_slots = []
+    rx_pci=re.compile(r"^Handle.*\n(?:.|\n)+?^.*(?:Designation:\s+).*SLOT(.).*(?:.|\n)+?^.*Bus Address:\s+(\S+).*",re.MULTILINE)
+    for match in rx_pci.finditer(dmidecode_result):
+        pci_slots.append({"ID":match.group(1),"Bus Address":match.group(2)})
+
+    return pci_slots
+
 def hba():
 	# determine the model and count of hba cards present in the system
 	# by parsing the output of /opt/45drives/tools/storcli64 show.
@@ -276,45 +290,33 @@ def hba():
 						hybrid_flag = True
 					hba.append(hba_dict.copy())
 		
-		slots = []
-		addresses = []
-		try:
-			dmidecode_result = subprocess.Popen(["dmidecode","-t","9"],stdout=subprocess.PIPE,universal_newlines=True).stdout
-		except:
-			print("ERROR: dmidecode not installed")
-			exit(1)
-		for line in dmidecode_result:
-			regex_id = re.search("ID:\s+(\d)",line)
-			if regex_id != None:
-				slots.append(int(regex_id.group(1)))
-			regex_bus_address = re.search("Bus Address:\s+(\S+)",line)
-			if regex_bus_address != None:
-				addresses.append(regex_bus_address.group(1))
+		# get list of pci devices including their bus address and slot id
+		pci_slots = getDmidecodePCI()
 
-		# get a list of pci devices
+		# get a list of pci devices used by system
 		sys_bus_path = "/sys/bus/pci/devices"
 		try:
 			sys_bus_addrs = os.listdir(sys_bus_path)
 		except:
 			sys_bus_addrs = []
 
-		for i in range(0,len(addresses)):
+		for pci_slot in pci_slots:
 			for card in hba:
-				if card["Bus Address"] in addresses[i] and i < len(slots):
-					card["PCI Slot"] = slots[i]
-					if len(sys_bus_addrs) > 0 and addresses[i] not in sys_bus_addrs:
+				if card["Bus Address"] in pci_slot["Bus Address"]:
+					card["PCI Slot"] = pci_slot["ID"]
+					if len(sys_bus_addrs) > 0 and pci_slot["Bus Address"] not in sys_bus_addrs:
 						# dmidecode gave a bus address that does not match the one used by the system
 						for j in range(0,len(sys_bus_addrs)):
 							if card["Bus Address"] in sys_bus_addrs[j]:
 								# we have found the system bus address that matches the substring
 								# address provided by storcli64. update the card's bus address field
 								card["Bus Address"] = sys_bus_addrs[j]
+								print("using /sys/bus/pci/devices",sys_bus_addrs[j])
 								break
 					else:
 						# use the bus address provided by dmidecode
 						# update the cards bus address to the full format (eg: 0000:01:00.0)
-						card["Bus Address"] = addresses[i]
-
+						card["Bus Address"] = pci_slot["Bus Address"]
 					
 		#sort the final list of hba cards by the Bus Address field. This ensures that
 		#the order in which they are stored resembles the lspci output. which has
