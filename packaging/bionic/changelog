@@ -1,3 +1,10 @@
+45drives-tools (2.0.6-5bionic) bionic; urgency=medium
+
+  * updated how bus addresses for hba cards are handled in server_identifier
+  * added support for H12 motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 04 May 2022 08:25:49 -0300
+
 45drives-tools (2.0.6-4bionic) bionic; urgency=medium
 
   * added support for Destroyinator servers in dmap, server_identifier and lsdev

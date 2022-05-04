@@ -55,6 +55,9 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed May 04 2022 Mark Hooper <mhooper@45drives.com> 2.0.6-5
+- updated how bus addresses for hba cards are handled in server_identifier
+- added support for H12 motherboards
 * Thu Apr 28 2022 Mark Hooper <mhooper@45drives.com> 2.0.6-4
 - added support for Destroyinator servers in dmap, server_identifier and lsdev
 * Mon Apr 04 2022 Mark Hooper <mhooper@45drives.com> 2.0.6-3
