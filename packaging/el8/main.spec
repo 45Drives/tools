@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Tue May 17 2022 Mark Hooper <mhooper@45drives.com> 2.0.7-1
+- updated virtual machine behavior for server_identifier
 * Wed May 04 2022 Mark Hooper <mhooper@45drives.com> 2.0.6-5
 - updated how bus addresses for hba cards are handled in server_identifier
 - added support for H12 motherboards

@@ -1,3 +1,9 @@
+45drives-tools (2.0.7-1bionic) bionic; urgency=medium
+
+  * updated virtual machine behavior for server_identifier
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 17 May 2022 12:18:55 -0300
+
 45drives-tools (2.0.6-5bionic) bionic; urgency=medium
 
   * updated how bus addresses for hba cards are handled in server_identifier
