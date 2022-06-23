@@ -1,3 +1,9 @@
+45drives-tools (2.0.8-1bionic) bionic; urgency=medium
+
+  * added support for 9600-24i and 9600-16i hba cards
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 23 Jun 2022 11:50:44 -0300
+
 45drives-tools (2.0.7-1bionic) bionic; urgency=medium
 
   * updated virtual machine behavior for server_identifier

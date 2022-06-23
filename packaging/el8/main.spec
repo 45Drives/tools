@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Jun 23 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-1
+- added support for 9600-24i and 9600-16i hba cards
 * Tue May 17 2022 Mark Hooper <mhooper@45drives.com> 2.0.7-1
 - updated virtual machine behavior for server_identifier
 * Wed May 04 2022 Mark Hooper <mhooper@45drives.com> 2.0.6-5

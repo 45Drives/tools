@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.7-1
+## 45drives-tools 2.0.8-1
 
-* updated virtual machine behavior for server_identifier
+* added support for 9600-24i and 9600-16i hba cards
