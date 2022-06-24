@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Fri Jun 24 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-2
+- modified how hba cards are detected using lspci
 * Thu Jun 23 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-1
 - added support for 9600-24i and 9600-16i hba cards
 * Tue May 17 2022 Mark Hooper <mhooper@45drives.com> 2.0.7-1

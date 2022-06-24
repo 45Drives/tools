@@ -1,3 +1,9 @@
+45drives-tools (2.0.8-2bionic) bionic; urgency=medium
+
+  * modified how hba cards are detected using lspci
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 24 Jun 2022 09:35:59 -0300
+
 45drives-tools (2.0.8-1bionic) bionic; urgency=medium
 
   * added support for 9600-24i and 9600-16i hba cards

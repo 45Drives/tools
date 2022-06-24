@@ -221,7 +221,7 @@ def getDmidecodePCI():
 
 def hba_lspci():
 	# determine the model and count of hba cards present in the system
-	# by parsing the output of "lspci -d 1000:* -k"
+	# by parsing the output of "lspci -d 1000:* -mm"
 	# example output:
 	#17:00.0 RAID bus controller: Broadcom / LSI Fusion-MPT 24GSAS/PCIe SAS40xx (rev 01)
 	#    Subsystem: Broadcom / LSI eHBA 9600-24i Tri-Mode Storage Adapter
@@ -245,16 +245,10 @@ def hba_lspci():
 	lspci_output = []
 
 	try:
-		lspci_result = subprocess.Popen(["lspci", "-d", "1000:*","-mm"],stdout=subprocess.PIPE,universal_newlines=True).stdout
+		lspci_result = subprocess.Popen(["lspci", "-d", "1000:*","-vv"],stdout=subprocess.PIPE,universal_newlines=True).stdout.read()
 	except:
-		print("ERROR: error running lspci -d 1000:* -mm")
+		print("ERROR: error running lspci -d 1000:* -vv")
 		exit(1)
-	for line in lspci_result:
-		lspci_output.append(line.strip("\n"))
-		for model in hba_models.keys():
-			if model in line:
-				hba_count = hba_count +1
-
 
 	hba_drivers = {
 		"SAS9305-16i":"mpt3sas",
@@ -262,14 +256,6 @@ def hba_lspci():
 		"HBA 9405W-16i":"mpt3sas",
 		"9600-24i":"mpi3mr",
 		"9600-16i":"mpi3mr"
-	}
-
-	hba_dict = {
-		"Model":"?",
-		"Adapter":"?",
-		"Bus Address":"?",
-		"Drive Connections":0,
-		"Kernel Driver":"?"
 	}
 
 	hba_adapters = {
@@ -282,23 +268,30 @@ def hba_lspci():
 
 	hybrid_flag = False
 
+	hba_dict = {
+		"Model":"?",
+		"Adapter":"?",
+		"Bus Address":"?",
+		"Drive Connections":0,
+		"Kernel Driver":"?",
+		"Ctl":0
+	}
+
+	rx_pci=re.compile(r"^(\w\w:\w\w\.\w).*\n.*(?:(?:(?:^\t).*\n)+^.*)?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|HBA 9405W-16i).*\n",re.MULTILINE)
 	ctl = 0
-	if hba_count != 0:
-		for line in lspci_output:
-			for model in hba_models.keys():
-				regex = re.search("(\w\w:\w\w\.0).*({fld})".format(fld=model),line)
-				if regex != None:
-					hba_dict["Model"] = regex.group(2)
-					hba_dict["Adapter"] = hba_adapters[model]
-					hba_dict["Bus Address"] = regex.group(1)
-					hba_dict["Drive Connections"] = hba_models[model]
-					hba_dict["Kernel Driver"] = hba_drivers[model]
-					hba_dict["Ctl"] = ctl
-					ctl = ctl + 1
-					if hba_dict["Drive Connections"] == 24:
-						hybrid_flag = True
-					hba.append(hba_dict.copy())
-		
+	for match in rx_pci.finditer(lspci_result):
+		hba_dict["Model"] = match.group(2)
+		hba_dict["Adapter"] = hba_adapters[match.group(2)]
+		hba_dict["Bus Address"] = match.group(1)
+		hba_dict["Drive Connections"] = hba_models[match.group(2)]
+		hba_dict["Kernel Driver"] = hba_drivers[match.group(2)]
+		hba_dict["Ctl"] = ctl
+		ctl = ctl + 1
+		if hba_dict["Drive Connections"] == 24:
+			hybrid_flag = True
+		hba.append(hba_dict.copy())
+	
+	if len(hba) != 0:
 		# get list of pci devices including their bus address and slot id
 		pci_slots = getDmidecodePCI()
 
