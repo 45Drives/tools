@@ -1,3 +1,9 @@
+45drives-tools (2.0.8-3bionic) bionic; urgency=medium
+
+  * added /opt/45drives/tools/pci.ids file for use by lspci when detecting HBA cards
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 29 Jun 2022 13:15:55 -0300
+
 45drives-tools (2.0.8-2bionic) bionic; urgency=medium
 
   * modified how hba cards are detected using lspci

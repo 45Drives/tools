@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Jun 29 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-3
+- added /opt/45drives/tools/pci.ids file for use by lspci when detecting HBA cards
 * Fri Jun 24 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-2
 - modified how hba cards are detected using lspci
 * Thu Jun 23 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-1
