@@ -245,7 +245,7 @@ def hba_lspci():
 	lspci_output = []
 
 	try:
-		lspci_result = subprocess.Popen(["lspci", "-d", "1000:*","-vv"],stdout=subprocess.PIPE,universal_newlines=True).stdout.read()
+		lspci_result = subprocess.Popen(["lspci", "-d", "1000:*","-vv", "-i", "/opt/45drives/tools/pci.ids"],stdout=subprocess.PIPE,universal_newlines=True).stdout.read()
 	except:
 		print("ERROR: error running lspci -d 1000:* -vv")
 		exit(1)
