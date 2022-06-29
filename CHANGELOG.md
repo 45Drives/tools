@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.8-3
+## 45drives-tools 2.0.8-4
 
-* added /opt/45drives/tools/pci.ids file for use by lspci when detecting HBA cards
+* updated postrm script
