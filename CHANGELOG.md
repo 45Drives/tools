@@ -1,3 +1,4 @@
-## 45drives-tools 2.0.8-4
+## 45drives-tools 2.0.8-5
 
-* updated postrm script
+* updated pci.ids file to report 9405W-16i cards accurately
+* updated the hba adapter reported in server_identifier for 9405W-16i cards

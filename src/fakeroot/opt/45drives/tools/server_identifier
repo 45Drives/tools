@@ -221,7 +221,7 @@ def getDmidecodePCI():
 
 def hba_lspci():
 	# determine the model and count of hba cards present in the system
-	# by parsing the output of "lspci -d 1000:* -mm"
+	# by parsing the output of "lspci -d 1000:* -vv -i /opt/45drives/tools/pci.ids"
 	# example output:
 	#17:00.0 RAID bus controller: Broadcom / LSI Fusion-MPT 24GSAS/PCIe SAS40xx (rev 01)
 	#    Subsystem: Broadcom / LSI eHBA 9600-24i Tri-Mode Storage Adapter
@@ -261,7 +261,7 @@ def hba_lspci():
 	hba_adapters = {
 		"SAS9305-16i":"SAS3224 PCI-Express Fusion-MPT SAS-3",
 		"SAS9305-24i":"SAS3224 PCI-Express Fusion-MPT SAS-3",
-		"HBA 9405W-16i":"SAS3224 PCI-Express Fusion-MPT SAS-3",
+		"HBA 9405W-16i":"SAS3616 Fusion-MPT Tri-Mode I/O Controller Chip (IOC)",
 		"9600-24i":"Fusion-MPT 24GSAS/PCIe SAS40xx",
 		"9600-16i":"Fusion-MPT 24GSAS/PCIe SAS40xx"
 	}

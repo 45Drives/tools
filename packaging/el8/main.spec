@@ -55,6 +55,9 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Jun 30 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-5
+- updated pci.ids file to report 9405W-16i cards accurately
+- updated the hba adapter reported in server_identifier for 9405W-16i cards
 * Wed Jun 29 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-4
 - updated postrm script
 * Wed Jun 29 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-3

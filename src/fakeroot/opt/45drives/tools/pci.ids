@@ -805,7 +805,7 @@
 		1000 3070  HBA 9405W-8i8e
 	00d1  SAS3616 Fusion-MPT Tri-Mode I/O Controller Chip (IOC)
 # 9405W 16 external port Channel HBA
-		1000 3080  HBA 9405W-16e
+		1000 3080  HBA 9405W-16i
 # 9405W 16 internal port Channel HBA
 		1000 3090  HBA 9405W-16i
 	00d3  MegaRAID Tri-Mode SAS3716W
