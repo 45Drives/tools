@@ -2,9 +2,9 @@
     "__version": "45D-R1",
     "name": "45drives-tools",
     "title": "45drives-tools",
-    "prerelease": true,
+    "prerelease": false,
     "version": "2.0.8",
-    "buildVersion": "6",
+    "buildVersion": "5",
     "author": "Mark Hooper <mhooper@45drives.com>",
     "url": "https://github.com/45Drives/tools",
     "category": "utils",
@@ -50,25 +50,15 @@
             "type": "deb"
         },
         {
-            "image": "ubuntu-bionic-builder",
-            "codeName": "bionic",
-            "type": "deb"
-        },
-        {
             "image": "rocky-el8-builder",
             "codeName": "el8",
-            "type": "el"
-        },
-        {
-            "image": "centos-el7-builder",
-            "codeName": "el7",
             "type": "el"
         }
     ],
     "changelog": {
         "urgency": "medium",
         "version": "2.0.8",
-        "buildVersion": "6",
+        "buildVersion": "5",
         "ignore": [],
         "date": null,
         "packager": "Mark Hooper <mhooper@45drives.com>",
