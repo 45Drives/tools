@@ -1,4 +1,4 @@
-## 45drives-tools 2.0.8-6
+## 45drives-tools 2.0.8-7
 
 * released to 45drives stable repo
 * added support for 9600 series HBA cards
