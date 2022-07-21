@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Jul 21 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-8
+- added an entry in server_identifier for Stornado-2U-Turbo
 * Wed Jul 06 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-7
 - released to 45drives stable repo
 - added support for 9600 series HBA cards
