@@ -140,6 +140,7 @@ g_product_lut = {
 	"Stornado-2U-Enhanced-AMD":			["X11SPL-F"  ,0,2,"2U","2USTORNADO"],
 	"Stornado-2U-Enhanced-S":			["X11SPL-F"  ,0,2,"2U","2USTORNADO"],
 	"Stornado-2U-Turbo-G":				["X11SPL-F"  ,0,2,"2U","2USTORNADO"],
+	"Stornado-2U-Turbo":				["X11DPL-i"  ,0,2,"2U","2USTORNADO"],
 
 	"Destroyinator-AV15-Enhanced":		["X11SPL-F",0,1,"AV15","DESTROYINATOR"],
 	"Destroyinator-AV15-Enhanced-S":	["X11SPL-F",0,1,"AV15","DESTROYINATOR"],
