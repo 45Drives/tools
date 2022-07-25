@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Mon Jul 25 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-9
+- hotfix for AV15-H16 Servers
 * Thu Jul 21 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-8
 - added an entry in server_identifier for Stornado-2U-Turbo
 * Wed Jul 06 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-7

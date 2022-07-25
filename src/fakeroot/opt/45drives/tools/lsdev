@@ -281,6 +281,7 @@ def build_server(options):
 	
 	alias_template = {
 		"H16":{
+			"AV15":[23],
 			"Q30":[15,23],
 			"S45":[15,15,23],
 			"XL60":[15,15,15,23]

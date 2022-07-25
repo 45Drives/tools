@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Mon Jul 25 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-9
+- hotfix for AV15-H16 Servers
 * Wed Jul 06 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-6
 - released to 45drives stable repo
 - added support for 9600 series HBA cards

@@ -68,6 +68,13 @@ g_product_lut = {
 	"Storinator-H8-XL60-Turbo":			["X11DPL-i"  ,0,4,"XL60","STORINATOR"],
 	"Storinator-H8-XL60-Turbo-G":		["X11SPL-F"  ,0,4,"XL60","STORINATOR"],
 
+	"Storinator-H16-AV15-Enhanced":		["X11SPL-F"  ,1,0,"AV15" ,"H16"],
+	"Storinator-H16-AV15-Enhanced-S":	["X11SPL-F"  ,1,0,"AV15" ,"H16"],
+	"Storinator-H16-AV15-Enhanced-AMD":	["H11SSL-i"  ,1,0,"AV15" ,"H16"],
+	"Storinator-H16-AV15-Turbo":		["X11DPL-i"  ,1,0,"AV15" ,"H16"],
+	"Storinator-H16-AV15-Turbo-G":		["X11SPL-F"  ,1,0,"AV15" ,"H16"],
+
+	"Storinator-H16-AV15-Enhanced-AMD":	["X11SPL-F"  ,1,0,"AV15" ,"H16"],
 	"Storinator-H16-Q30-Enhanced":		["X11SPL-F"  ,1,1,"Q30" ,"H16"],
 	"Storinator-H16-Q30-Enhanced-S":	["X11SPL-F"  ,1,1,"Q30" ,"H16"],
 	"Storinator-H16-Q30-Enhanced-AMD":	["H11SSL-i"  ,1,1,"Q30" ,"H16"],

@@ -1,3 +1,9 @@
+45drives-tools (2.0.8-9focal) focal; urgency=medium
+
+  * hotfix for AV15-H16 Servers
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 25 Jul 2022 07:37:07 -0300
+
 45drives-tools (2.0.8-8focal) focal; urgency=medium
 
   * added an entry in server_identifier for Stornado-2U-Turbo
