@@ -2,7 +2,7 @@
     "__version": "45D-R1",
     "name": "45drives-tools",
     "title": "45drives-tools",
-    "prerelease": true,
+    "prerelease": false,
     "version": "2.0.8",
     "buildVersion": "9",
     "author": "Mark Hooper <mhooper@45drives.com>",
