@@ -1,3 +1,3 @@
-## 45drives-tools 2.0.8-9
+## 45drives-tools 2.0.8-10
 
-* hotfix for AV15-H16 Servers
+* added device aliasing for AV15-H16 server models

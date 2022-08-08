@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Mon Aug 08 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-10
+- added device aliasing for AV15-H16 server models
 * Mon Jul 25 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-9
 - hotfix for AV15-H16 Servers
 * Wed Jul 06 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-6
