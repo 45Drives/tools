@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Tue Aug 23 2022 Mark Hooper <mhooper@45drives.com> 2.1.0-2
+- updated check for motherboard serial number in server_identifier
 * Tue Aug 23 2022 Mark Hooper <mhooper@45drives.com> 2.1.0-1
 - Added support for ASRockRack EPC621D8A motherboards
 - added support for F8X prototype server device aliasing

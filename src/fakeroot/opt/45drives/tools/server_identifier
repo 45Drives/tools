@@ -236,7 +236,7 @@ def motherboard():
 
 	try_fru = False
 	for key in mobo_dict.keys():
-		if mobo_dict[key] == "?":
+		if mobo_dict[key] in ["?",""]:
 			try_fru = True
 
 	if try_fru:
