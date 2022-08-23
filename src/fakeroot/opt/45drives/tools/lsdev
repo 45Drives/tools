@@ -315,6 +315,11 @@ def build_server(options):
 			"S45":[15,15,15],
 			"XL60":[15,15,15,15]
 		},
+		"F8":{
+			"F8X1":[20],
+			"F8X2":[20,20],
+			"F8X3":[20,20,20]
+		},
 		"SSG-6048R-E1CR24H":{
 			"SSG-6048R-E1CR24H":[4,4,4,4,4,4]
 		}
@@ -328,7 +333,16 @@ def build_server(options):
 	except IOError:
 		print("Error opening " + CONFIG_PATH + "/vdev_id.conf. Run `dmap`.")
 		exit(1)
+
+	if "Alias Style" not in server_obj.keys():
+		print("Unable to determine Alias Style from /etc/45drives/server_info/server_info.json: ")
+		print(json.dumps(server_obj,indent=4))
+		exit(1)
+	elif server_obj["Alias Style"] not in alias_template.keys():
+		print("Unknown Alias Style '{astyle}' encountered.".format(astyle=server_obj["Alias Style"]))
+		exit(1)
 	row_index = 1
+
 	for line in vdev_id:
 		# skip blank lines and comments
 		if not line or line == "" or line[0] == '#':
@@ -341,6 +355,9 @@ def build_server(options):
 		DRIVE = int(regex.group(2))
 		DRIVE_COUNT += 1
 		# new row
+		if server_obj["Chassis Size"] not in alias_template[server_obj["Alias Style"]].keys():
+			print("Unknown/Unsupported Chassis Size '{CS}' encountered.".format(CS=server_obj["Chassis Size"]))
+			exit(1)
 		if DRIVE_COUNT > alias_template[server_obj["Alias Style"]][server_obj["Chassis Size"]][CURRENT_ROW]:
 			DRIVE_COUNT = 1
 			CURRENT_ROW += 1

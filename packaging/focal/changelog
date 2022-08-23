@@ -1,3 +1,12 @@
+45drives-tools (2.1.0-1focal) focal; urgency=medium
+
+  * Added support for ASRockRack EPC621D8A motherboards
+  * added support for F8X prototype server device aliasing
+  * updated how hba cards are detected to work with ASRockRack motherboards
+  * improved/added new error messages for dmap, lsdev and server_identifier
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 23 Aug 2022 09:19:14 -0300
+
 45drives-tools (2.0.8-10focal) focal; urgency=medium
 
   * added device aliasing for AV15-H16 server models

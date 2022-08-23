@@ -55,6 +55,11 @@ fi
 %{_bindir}/*
 
 %changelog
+* Tue Aug 23 2022 Mark Hooper <mhooper@45drives.com> 2.1.0-1
+- Added support for ASRockRack EPC621D8A motherboards
+- added support for F8X prototype server device aliasing
+- updated how hba cards are detected to work with ASRockRack motherboards
+- improved/added new error messages for dmap, lsdev and server_identifier
 * Mon Aug 08 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-10
 - added device aliasing for AV15-H16 server models
 * Mon Jul 25 2022 Mark Hooper <mhooper@45drives.com> 2.0.8-9
