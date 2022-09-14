@@ -1,3 +1,10 @@
+45drives-tools (2.1.0-3focal) focal; urgency=medium
+
+  * Added support for F8X servers (naming convention subject to change)
+  * Updated server_identifier script to work with ASRockRack EPC621D8A motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 14 Sep 2022 05:54:34 -0300
+
 45drives-tools (2.1.0-2focal) focal; urgency=medium
 
   * updated check for motherboard serial number in server_identifier

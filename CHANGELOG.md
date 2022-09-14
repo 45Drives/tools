@@ -1,3 +1,4 @@
-## 45drives-tools 2.1.0-2
+## 45drives-tools 2.1.0-3
 
-* updated check for motherboard serial number in server_identifier
+* Added support for F8X servers (naming convention subject to change)
+* Updated server_identifier script to work with ASRockRack EPC621D8A motherboards
