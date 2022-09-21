@@ -283,7 +283,8 @@ def create_vdev_id(server):
 		"SAS9305-24i": [2,3,1,0,  6,7,5,4,  18,19,17,16,  22,23,21,20,  10,11,9,8,  14,15,13,12],
 		"AVAGO3108MegaRAID": [25,31,37,43, 26,32,38,44, 27,33,39,45, 28,34,41,46, 29,35,40,47, 30,36,42,48],
 		"9600-24i": [27,28,29,30,31,32,33,34,35,36,37,38,39,41,41,42,43,44,45,46,47,48,49,50],
-		"9600-16i": [27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42]
+		"9600-16i": [27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42],
+		"9361-16i": [24,25,23,22,28,29,27,26,17,18,16,15,20,21,19]
 	}
 
 	alias_template = {
@@ -347,6 +348,7 @@ def create_vdev_id(server):
 			print("                          in /etc/45drives/server_info/server_info.json along with any other parameters")
 			sys.exit(1)
 
+	print()
 	# We have a valid combination of alias styles and chassis sizes.
 	version = get_version()
 	vdev_id_str = "# This file was generated using dmap {v} (/opt/45drives/tools/dmap).\n".format(v=version)
@@ -358,7 +360,7 @@ def create_vdev_id(server):
 				if(j>=15 and server["Alias Style"] == "H32" and i==len(alias_template[server["Alias Style"]][server["Chassis Size"]])-2):
 					# We are ailiasing a hybrid 32, which staggers the labels across the 2nd last and last rows.
 					# But, the physical addresses need to increment by 1, while keeping the labels the same.
-					if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i"]:
+					if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i","9361-16i"]:
 						vdev_id_str += (
 							"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
 								i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j+1]
@@ -372,7 +374,7 @@ def create_vdev_id(server):
 								)
 							)
 				else:
-					if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i"]:
+					if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i", "9361-16i"]:
 						# The default case for ailiasing hba cards.
 						vdev_id_str += (
 							"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
@@ -380,7 +382,7 @@ def create_vdev_id(server):
 								)
 							)
 					else:
-						# alias 9600 style cards
+						# alias 9600 style cards and attempt hardware raid cards with warning. 
 						vdev_id_str += (
 							"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
 								i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
@@ -391,7 +393,7 @@ def create_vdev_id(server):
 		for i in range(0,len(server["HBA"])):
 			count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
 			for j in range(0,count):
-				if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i"]:
+				if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i","9361-16i"]:
 					# The default case for ailiasing hba cards.
 					vdev_id_str += (
 						"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
@@ -399,7 +401,7 @@ def create_vdev_id(server):
 							)
 						)
 				else:
-					# alias 9600 style cards
+					# alias 9600 style cards, and attempt hardware raid cards with warning. 
 					vdev_id_str += (
 						"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
 							i=1+(j//4),j=(j%4)+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
@@ -425,8 +427,8 @@ def create_vdev_id(server):
 def alias_f8(server,alias_template,phy_order):
 	# the physical order of the cards is reversed in each section group of 4.
 	f8_order = {
-		"SAS9305-24i": [0,1,3,2,  4,5,7,6,  16,17,19,18,  20,21,23,22,  8,9,11,10,  12,13,15,14],
-		"9600-24i": [30,29,28,27, 34,33,32,31, 38,37,36,35, 42,41,41,39, 46,45,44,43, 50,49,48,47]
+		"SAS9305-24i": [2,3,1,0,  6,7,5,4,  18,19,17,16,  22,23,21,20,  10,11,9,8,  14,15,13,12],
+		"9600-24i": [27,28,29,30, 31,32,33,34, 35,36,37,38, 39,41,41,42, 43,44,45,46, 47,48,49,50]
 	}
 	vdev_id_str = ""
 	for i in range(0,len(server["HBA"])):
@@ -577,6 +579,25 @@ def alias_mi4(model,os_name,os_version_id):
 	return vdev_id_str
 
 ###############################################################################
+# Name: warn_hwraid
+# Args: server
+# Desc: outputs a warning to user about potential for inaccurate aliases.
+###############################################################################
+def warn_hwraid(server):
+	hba_cards = server.get("HBA",[])
+	if not hba_cards:
+		return
+	
+	for card in hba_cards:
+		if card.get("Model","") in ["9361-16i"]:
+			log("/opt/tools/45drives/dmap:     WARNING - Hardware RAID card detected.")
+			for key in card.keys():
+				log("                                            {k}: {v}".format(k=key,v=card[key]))
+			log("                                        device paths may be incorrect and/or unreliable.")
+		
+
+
+###############################################################################
 # Name: main (dmap)
 # Args: (see parser)
 # Desc: generates vdev_id.conf
@@ -608,6 +629,7 @@ def main():
 		reset_map(conf_path)
 
 	server = get_server_info()
+	warn_hwraid(server)
 	vdev_id_conf = create_vdev_id(server)
 
 	if vdev_id_conf == None:
