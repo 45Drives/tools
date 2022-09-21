@@ -305,13 +305,14 @@ def hba_lspci(server):
 		"SAS9305-24i":24,
 		"HBA 9405W-16i":16,
 		"9600-24i":24,
-		"9600-16i":16
+		"9600-16i":16,
+		"9361-16i":16
 	}
 
 	lspci_output = []
 
 	try:
-		lspci_result = subprocess.Popen(["lspci", "-d", "1000:*","-vv", "-i", "/opt/45drives/tools/pci.ids"],stdout=subprocess.PIPE,universal_newlines=True).stdout.read()
+		lspci_result = subprocess.Popen(["lspci", "-d", "1000:*","-vv", "-i", "/opt/45drives/tools/pci.ids"],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,universal_newlines=True).stdout.read()
 	except:
 		print("ERROR: error running lspci -d 1000:* -vv")
 		exit(1)
@@ -321,7 +322,8 @@ def hba_lspci(server):
 		"SAS9305-24i":"mpt3sas",
 		"HBA 9405W-16i":"mpt3sas",
 		"9600-24i":"mpi3mr",
-		"9600-16i":"mpi3mr"
+		"9600-16i":"mpi3mr",
+		"9361-16i":"megaraid_sas"
 	}
 
 	hba_adapters = {
@@ -329,7 +331,8 @@ def hba_lspci(server):
 		"SAS9305-24i":"SAS3224 PCI-Express Fusion-MPT SAS-3",
 		"HBA 9405W-16i":"SAS3616 Fusion-MPT Tri-Mode I/O Controller Chip (IOC)",
 		"9600-24i":"Fusion-MPT 24GSAS/PCIe SAS40xx",
-		"9600-16i":"Fusion-MPT 24GSAS/PCIe SAS40xx"
+		"9600-16i":"Fusion-MPT 24GSAS/PCIe SAS40xx",
+		"9361-16i":"MegaRAID SAS-3 3316"
 	}
 
 	hybrid_flag = False
@@ -343,7 +346,7 @@ def hba_lspci(server):
 		"Ctl":0
 	}
 
-	rx_pci=re.compile(r"^(\w\w:\w\w\.\w).*\n.*(?:(?:(?:^\t).*\n)+^.*)?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|HBA 9405W-16i).*\n",re.MULTILINE)
+	rx_pci=re.compile(r"^(\w\w:\w\w\.\w).*\n.*(?:(?:(?:^\t).*\n)+^.*)?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|HBA 9405W-16i|9361-16i).*\n",re.MULTILINE)
 	ctl = 0
 	for match in rx_pci.finditer(lspci_result):
 		hba_dict["Model"] = match.group(2)
