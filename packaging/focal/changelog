@@ -1,3 +1,9 @@
+45drives-tools (2.1.0-4focal) focal; urgency=medium
+
+  * added support for 9400-16i HBA cards
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 31 Oct 2022 10:48:26 -0300
+
 45drives-tools (2.1.0-3focal) focal; urgency=medium
 
   * Added support for F8X servers (naming convention subject to change)

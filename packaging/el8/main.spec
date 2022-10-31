@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Mon Oct 31 2022 Mark Hooper <mhooper@45drives.com> 2.1.0-4
+- added support for 9400-16i HBA cards
 * Wed Sep 14 2022 Mark Hooper <mhooper@45drives.com> 2.1.0-3
 - Added support for F8X servers (naming convention subject to change)
 - Updated server_identifier script to work with ASRockRack EPC621D8A motherboards

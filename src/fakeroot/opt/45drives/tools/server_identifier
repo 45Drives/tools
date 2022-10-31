@@ -304,6 +304,7 @@ def hba_lspci(server):
 		"SAS9305-16i":16,
 		"SAS9305-24i":24,
 		"HBA 9405W-16i":16,
+		"HBA 9400-16i":16,
 		"9600-24i":24,
 		"9600-16i":16,
 		"9361-16i":16
@@ -321,6 +322,7 @@ def hba_lspci(server):
 		"SAS9305-16i":"mpt3sas",
 		"SAS9305-24i":"mpt3sas",
 		"HBA 9405W-16i":"mpt3sas",
+		"HBA 9400-16i":"mpt3sas",
 		"9600-24i":"mpi3mr",
 		"9600-16i":"mpi3mr",
 		"9361-16i":"megaraid_sas"
@@ -330,6 +332,7 @@ def hba_lspci(server):
 		"SAS9305-16i":"SAS3224 PCI-Express Fusion-MPT SAS-3",
 		"SAS9305-24i":"SAS3224 PCI-Express Fusion-MPT SAS-3",
 		"HBA 9405W-16i":"SAS3616 Fusion-MPT Tri-Mode I/O Controller Chip (IOC)",
+		"HBA 9400-16i":"SAS3416 Fusion-MPT Tri-Mode I/O Controller Chip (IOC)",
 		"9600-24i":"Fusion-MPT 24GSAS/PCIe SAS40xx",
 		"9600-16i":"Fusion-MPT 24GSAS/PCIe SAS40xx",
 		"9361-16i":"MegaRAID SAS-3 3316"
@@ -346,7 +349,7 @@ def hba_lspci(server):
 		"Ctl":0
 	}
 
-	rx_pci=re.compile(r"^(\w\w:\w\w\.\w).*\n.*(?:(?:(?:^\t).*\n)+^.*)?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|HBA 9405W-16i|9361-16i).*\n",re.MULTILINE)
+	rx_pci=re.compile(r"^(\w\w:\w\w\.\w).*\n.*(?:(?:(?:^\t).*\n)+^.*)?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|HBA 9405W-16i|9361-16i|HBA 9400-16i).*\n",re.MULTILINE)
 	ctl = 0
 	for match in rx_pci.finditer(lspci_result):
 		hba_dict["Model"] = match.group(2)
@@ -437,13 +440,15 @@ def hba():
 	hba_models = {
 		"SAS9305-16i":16,
 		"SAS9305-24i":24,
-		"HBA 9405W-16i":16
+		"HBA 9405W-16i":16,
+		"HBA 9400-16i": 16
 	}
 
 	hba_drivers = {
 		"SAS9305-16i":"mpt3sas",
 		"SAS9305-24i":"mpt3sas",
-		"HBA 9405W-16i":"mpt3sas"
+		"HBA 9405W-16i":"mpt3sas",
+		"HBA 9400-16i":"mpt3sas"
 	}
 
 	hba_dict = {
