@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Jan 04 2023 Mark Hooper <mhooper@45drives.com> 2.1.1-1
+- updated how F8X servers are aliased in dmap
 * Mon Oct 31 2022 Mark Hooper <mhooper@45drives.com> 2.1.0-4
 - added support for 9400-16i HBA cards
 * Wed Sep 14 2022 Mark Hooper <mhooper@45drives.com> 2.1.0-3

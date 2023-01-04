@@ -1,3 +1,3 @@
-## 45drives-tools 2.1.0-4
+## 45drives-tools 2.1.1-1
 
-* added support for 9400-16i HBA cards
+* updated how F8X servers are aliased in dmap
