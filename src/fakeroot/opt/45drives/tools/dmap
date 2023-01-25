@@ -186,7 +186,7 @@ def verify_vdev():
 			filedata = file.read()
 		filedata = filedata.replace('/usr/lib/udev', udev_dir)
 		with open(rules_path, 'w') as file:
-  			file.write(filedata)
+			file.write(filedata)
 	
 	# make the script executable if it is not already executable. 
 	if not script_x_test:
@@ -426,7 +426,14 @@ def create_vdev_id(server):
 	return vdev_id_str
 
 def alias_f8(server,alias_template,phy_order):
-	# the physical order of the cards is reversed in each section group of 4.
+	# Cables are installed into a 24i card with port 5 unused
+	# Order is as follows:
+	# P0 -> X-1 to X-3  (SSDs)
+	# P1 -> X-4 to X-8  (SSDs)
+	# P2 -> X-17 to X-20 (HDDs)
+	# P3 -> X-13 to X-16 (HDDs)
+	# P4 -> X-9 to X-12 (HDDs)
+	# P5 -> UNUSED
 	f8_order = {
 		"SAS9305-24i": [0,1,3,2,  4,5,7,6,  8,9,11,10,  20,21,23,22,  16,17,19,18,    12,13,15,14],
 		"9600-24i": [30,29,28,27, 34,33,32,31, 46,45,44,43,  42,41,41,39,  38,37,36,35,  50,49,48,47]
