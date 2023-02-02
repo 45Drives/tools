@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Feb 02 2023 Mark Hooper <mhooper@45drives.com> 2.1.2-1
+- Added support for F8X line of Storinators
 * Wed Jan 04 2023 Mark Hooper <mhooper@45drives.com> 2.1.1-1
 - updated how F8X servers are aliased in dmap
 * Mon Oct 31 2022 Mark Hooper <mhooper@45drives.com> 2.1.0-4

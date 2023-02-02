@@ -1,3 +1,3 @@
-## 45drives-tools 2.1.1-1
+## 45drives-tools 2.1.2-1
 
-* updated how F8X servers are aliased in dmap
+* Added support for F8X line of Storinators
