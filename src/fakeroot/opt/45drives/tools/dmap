@@ -17,6 +17,7 @@ import subprocess
 import os
 import sys
 import json
+import shlex
 from optparse import OptionParser
 
 
@@ -236,6 +237,62 @@ def get_version():
 		f.close()
 		return version.strip()
 
+def hwraid_map(HBA,ALIAS_TEMPLATE,server):
+	    # {
+        #     "Model": "9361-24i",
+        #     "Adapter": "MegaRAID SAS-3 3316",
+        #     "Bus Address": "0000:17:00.0",
+        #     "Drive Connections": 24,
+        #     "Kernel Driver": "megaraid_sas",
+        #     "Ctl": 0,
+        #     "PCI Slot": "5"
+        # },
+
+	port_order = {
+		"9361-16i": [0,1,2,3, 4,5,6,7, 8,9,10,11, 12,13,14,15 ],
+		"9361-24i": [0,1,2,3, 4,5,6,7, 8,9,10,11, 12,13,14,15, 16,17,18,19, 20,21,22,23]
+	}
+
+	if HBA["Model"] not in port_order.keys():
+		return [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+	storcli_paths = {
+        "storcli64": "/opt/45drives/tools/storcli64"
+    }
+	
+	storcli = subprocess.Popen(
+		shlex.split("{pth} /c{ctl} show all J".format(pth=storcli_paths["storcli64"],ctl=HBA["Ctl"])), stdout=subprocess.PIPE, universal_newlines=True)
+	jq_command = "jq '.Controllers[0].\"Response Data\".\"JBOD LIST\" | map({PORT: .\"EID:Slt\", DID: .\"DID\"})'"
+	jq = subprocess.Popen(
+		shlex.split(jq_command), stdin=storcli.stdout, stdout=subprocess.PIPE, universal_newlines=True, stderr=subprocess.STDOUT)
+	jqout,_ = jq.communicate()
+	try:
+		jq_json = json.loads(jqout)
+	except ValueError:
+		jq_json = []
+	#print(json.dumps(jq_json,indent=4))
+
+	device_id_list = [99,99,99,99, 99,99,99,99, 99,99,99,99, 99,99,99,99, 99,99,99,99, 99,99,99,99]
+
+	for entry in jq_json:
+		index = port_order[HBA["Model"]].index(int(entry.get("PORT","252:99").split(":")[1]))
+		if index != -1:
+			device_id_list[index] = entry.get("DID",99)
+
+
+	alias_style_index_lut = {
+		"F8": [3,2,1,0, 7,6,5,4, 19,18,17,16, 15,14,13,12, 11,10,9,8, 23,22,21,20],
+		"STORINATOR": [3,2,1,0, 7,6,5,4, 11,10,9,8, 15,14,13,12 ,19,18,17,16, 23,22,21,20],
+		"STORNADO": [3,2,1,0, 7,6,5,4, 11,10,9,8, 15,14,13,12 ,19,18,17,16, 23,22,21,20],
+	}
+
+	alias_ordered_list = []
+	for entry in alias_style_index_lut[server["Alias Style"]]:
+		alias_ordered_list.append(device_id_list[entry])
+
+	return alias_ordered_list
+	
+
 ###############################################################################
 # Name: create_vdev_id
 # Args: server (dict)
@@ -284,8 +341,9 @@ def create_vdev_id(server):
 		"SAS9305-24i": [2,3,1,0,  6,7,5,4,  18,19,17,16,  22,23,21,20,  10,11,9,8,  14,15,13,12],
 		"AVAGO3108MegaRAID": [25,31,37,43, 26,32,38,44, 27,33,39,45, 28,34,41,46, 29,35,40,47, 30,36,42,48],
 		"9600-24i": [27,28,29,30,31,32,33,34,35,36,37,38,39,41,41,42,43,44,45,46,47,48,49,50],
-		"9600-16i": [27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42],
-		"9361-16i": [24,25,23,22,28,29,27,26,17,18,16,15,20,21,19]
+		"9600-16i": [27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42]
+		#"9361-16i": [24,25,23,22,28,29,27,26,17,18,16,15,20,21,19],
+		#"9361-24i": [24,25,23,22,28,29,27,26,17,18,16,15,20,21,19,1,1,1,1,1,1,1,1]
 	}
 
 	alias_template = {
@@ -356,58 +414,92 @@ def create_vdev_id(server):
 	if len(server["HBA"]) > 0 and server["Chassis Size"] != "C8" and server["Alias Style"] != "DESTROYINATOR" and server["Alias Style"] != "F8":
 		# we have hba cards to inspect/alias
 		for i in range(0,len(server["HBA"])):
+			if server["HBA"][i]["Model"] in ["9361-16i","9361-24i"]:
+				hmap = hwraid_map(server["HBA"][i],alias_template,server)
 			count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
 			for j in range(0,count):
 				if(j>=15 and server["Alias Style"] == "H32" and i==len(alias_template[server["Alias Style"]][server["Chassis Size"]])-2):
 					# We are ailiasing a hybrid 32, which staggers the labels across the 2nd last and last rows.
 					# But, the physical addresses need to increment by 1, while keeping the labels the same.
-					if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i","9361-16i"]:
+					if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i","9361-16i","9361-24i"]:
 						vdev_id_str += (
 							"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
 								i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j+1]
 								)
 							)
-					else:
+					elif server["HBA"][i]["Model"] in ["9600-24i", "9600-16i"]:
 						# alias 9600 style cards
 						vdev_id_str += (
 							"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
 								i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j+1]
 								)
 							)
+					elif server["HBA"][i]["Model"] in ["9361-16i","9361-24i"]:
+						# Hardware Raid card -> we need to get unique device map from storcli64
+						vdev_id_str += (
+							"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
+								i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=hmap[j+1]
+								)
+							)
+						if hmap[j+1] == 99:
+							print("/opt/tools/45drives/dmap:\tWARNING - Drive missing from slot {i}-{j}. Insert disk into slot {i}-{j} and try running dmap again.".format(i=i+1,j=j+1))
 				else:
-					if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i", "9361-16i"]:
+					if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i", "9361-16i", "9361-24i"]:
 						# The default case for ailiasing hba cards.
 						vdev_id_str += (
 							"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
 								i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
 								)
 							)
-					else:
-						# alias 9600 style cards and attempt hardware raid cards with warning. 
+					elif server["HBA"][i]["Model"] in ["9600-24i", "9600-16i"]:
+						# alias 9600 style cards
 						vdev_id_str += (
 							"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
 								i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
 								)
 							)
+					elif server["HBA"][i]["Model"] in ["9361-16i","9361-24i"]:
+						# Hardware Raid card -> we need to get unique device map from storcli64
+						hmap = hwraid_map(server["HBA"][i],alias_template,server)
+						vdev_id_str += (
+							"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
+								i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=hmap[j]
+								)
+							)
+						if hmap[j] == 99:
+							print("/opt/tools/45drives/dmap:\tWARNING - Drive missing from slot {i}-{j}. Insert disk into slot {i}-{j} and try running dmap again.".format(i=i+1,j=j+1))
+					
 	elif len(server["HBA"]) > 0 and server["Chassis Size"] == "C8":
 		# we have a C8 server, order needs to be 1-1, 1-2, 1-3, 1-4,       2-1,2-2,2-3,2-4
 		for i in range(0,len(server["HBA"])):
+			if server["HBA"][i]["Model"] in ["9361-16i","9361-24i"]:
+				hmap = hwraid_map(server["HBA"][i],alias_template,server)
 			count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
 			for j in range(0,count):
-				if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i","9361-16i"]:
+				if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i","9361-16i","9361-24i"]:
 					# The default case for ailiasing hba cards.
 					vdev_id_str += (
 						"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
 							i=1+(j//4),j=(j%4)+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
 							)
 						)
-				else:
-					# alias 9600 style cards, and attempt hardware raid cards with warning. 
+				elif server["HBA"][i]["Model"] in ["9600-24i", "9600-16i"]:
+					# alias 9600 style cards
 					vdev_id_str += (
 						"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
 							i=1+(j//4),j=(j%4)+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
 							)
 						)
+				elif server["HBA"][i]["Model"] in ["9361-16i","9361-24i"]:
+					# Hardware Raid Card
+					vdev_id_str += (
+						"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
+							i=1+(j//4),j=(j%4)+1,addr=server["HBA"][i]["Bus Address"],p=hmap[j]
+							)
+						)
+					if hmap[j] == 99:
+							print("/opt/tools/45drives/dmap:\tWARNING - Drive missing from slot {i}-{j}. Insert disk into slot {i}-{j} and try running dmap again.".format(i=1+(j//4),j=(j%4)+1))
+
 	elif server["Chassis Size"] == "MI4" and server["Alias Style"] == "STORINATOR":
 		vdev_id_str += alias_mi4(server["Model"],server["OS NAME"],server["OS VERSION_ID"])
 	elif server["Alias Style"] == "AV15-BASE":
@@ -418,14 +510,14 @@ def create_vdev_id(server):
 		vdev_id_str += alias_destroyinator(server,alias_template,phy_order)
 	elif server["Alias Style"] == "F8":
 		# we are using the DESTROYINATOR ailiasing scheme.
-		vdev_id_str += alias_f8(server,alias_template,phy_order)
+		vdev_id_str += alias_f8(server,alias_template)
 	elif server["Alias Style"] == "?":
 		# we don't know what kind of server this is. Likely a vm
 		vdev_id_str = None
 
 	return vdev_id_str
 
-def alias_f8(server,alias_template,phy_order):
+def alias_f8(server,alias_template):
 	# Cables are installed into a 24i card with port 5 unused
 	# Order is as follows:
 	# P0 -> X-1 to X-3  (SSDs)
@@ -440,14 +532,33 @@ def alias_f8(server,alias_template,phy_order):
 	}
 	vdev_id_str = ""
 	for i in range(0,len(server["HBA"])):
+		if server["HBA"][i]["Model"] in ["9361-16i","9361-24i"]:
+			hmap = hwraid_map(server["HBA"][i],alias_template,server)
 		count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
 		for j in range(0,count):
-			# The default case for ailiasing hba cards.
-			vdev_id_str += (
-				"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
-					i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=f8_order[server["HBA"][i]["Model"]][j]
+			if server["HBA"][i]["Model"]=="SAS9305-24i":
+				# The default case for ailiasing hba cards.
+				vdev_id_str += (
+					"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
+						i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=f8_order[server["HBA"][i]["Model"]][j]
+						)
 					)
-				)
+			elif server["HBA"][i]["Model"] in ["9600-24i"]:
+				# alias 9600 style cards, and attempt hardware raid cards with warning. 
+				vdev_id_str += (
+					"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
+						i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=f8_order[server["HBA"][i]["Model"]][j]
+						)
+					)
+			elif server["HBA"][i]["Model"] in ["9361-24i"]:			
+				vdev_id_str += (
+					"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
+						i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=hmap[j]
+						)
+					)
+				if hmap[j] == 99:
+					print("/opt/tools/45drives/dmap:\tWARNING - Drive missing from slot {i}-{j}. Insert disk into slot {i}-{j} and try running dmap again.".format(i=i+1,j=j+1))
+	print("\n")
 	return vdev_id_str
 
 def alias_destroyinator(server,alias_template,phy_order):
@@ -597,7 +708,7 @@ def warn_hwraid(server):
 		return
 	
 	for card in hba_cards:
-		if card.get("Model","") in ["9361-16i"]:
+		if card.get("Model","") in ["9361-16i","9361-24i"]:
 			log("/opt/tools/45drives/dmap:     WARNING - Hardware RAID card detected.")
 			for key in card.keys():
 				log("                                            {k}: {v}".format(k=key,v=card[key]))
