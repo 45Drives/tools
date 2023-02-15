@@ -22,6 +22,7 @@ from optparse import OptionParser
 
 
 g_quiet = False
+g_enable_jbod = False
 
 
 ###############################################################################
@@ -255,6 +256,21 @@ def check_jbod_enabled(HBA, server,storcli_paths):
 		return False
 	return not (jq_json.get("Value","OFF") == "OFF")
 
+def enable_jbod_mode(enable_jbod_command):
+	jbod_cmd = subprocess.Popen(shlex.split(enable_jbod_command), stdout=subprocess.PIPE, universal_newlines=True,stderr=subprocess.STDOUT)
+	jbod_cmd.wait()
+	jq_jbod_en_filter = "jq '.Controllers[0].\"Response Data\".\"Controller Properties\"[0]'"
+	jq_en_jbod_proc = subprocess.Popen(shlex.split(jq_jbod_en_filter), stdin=jbod_cmd.stdout, stdout=subprocess.PIPE, universal_newlines=True, stderr=subprocess.STDOUT)
+	jq_en_jbod_proc.wait()
+	jq_jbod_en_out,_ = jq_en_jbod_proc.communicate()
+	jbod_en_json = json.loads(jq_jbod_en_out)
+	try:
+		jbod_en_json = json.loads(jq_jbod_en_out)
+		log("\tJBOD: {va}\n".format(va=jbod_en_json.get("Value","OFF")))
+	except ValueError:
+		log("\tCouldn't determine result of running: {en}".format(en=enable_jbod_command))
+		log(jq_jbod_en_out)
+		log("")
 
 def hwraid_map(HBA,server):
 	port_order = {
@@ -281,21 +297,25 @@ def hwraid_map(HBA,server):
 		
 		enable_jbod_command = "{pth} /c{cid} set jbod=on J".format(pth=storcli_paths["storcli64"],cid=HBA["Ctl"])
 		log("\tCommand: {cm}".format(cm=enable_jbod_command))
-		response = input("\tWould you like dmap to enable JBOD mode for you using this command? (y/n): ")
-		if response in ["y","Y"]:
-			jbod_cmd = subprocess.Popen(shlex.split(enable_jbod_command), stdout=subprocess.PIPE, universal_newlines=True,stderr=subprocess.STDOUT)
-			jbod_cmd.wait()
-			jq_jbod_en_filter = "jq '.Controllers[0].\"Response Data\".\"Controller Properties\"[0]'"
-			jq_en_jbod_proc = subprocess.Popen(shlex.split(jq_jbod_en_filter), stdin=jbod_cmd.stdout, stdout=subprocess.PIPE, universal_newlines=True, stderr=subprocess.STDOUT)
-			jq_en_jbod_proc.wait()
-			jq_jbod_en_out,_ = jq_en_jbod_proc.communicate()
-			jbod_en_json = json.loads(jq_jbod_en_out)
-			try:
-				jbod_en_json = json.loads(jq_jbod_en_out)
-				log("\tJBOD: {va}".format(va=jbod_en_json.get("Value","OFF")))
-			except ValueError:
-				log("\tCouldn't determine result of running: {en}".format(en=enable_jbod_command))
-				log(jq_jbod_en_out)
+		
+		global g_enable_jbod
+		if g_enable_jbod:
+			enable_jbod_mode(enable_jbod_command)
+		else:
+			response = input("\tWould you like dmap to enable JBOD mode for this card using this command? (y/n): ")
+			if response in ["y","Y"]:
+				done = False
+				while not done:
+					log("\tWARNING - If you have any RAID Arrays configured already, enabling JBOD mode can compromise your data.")
+					confirm = input("\tConfirm enabling JBOD mode by typing 'CONFIRM' or 'SKIP' to skip enabling JBOD: ")
+					if confirm in ["confirm","CONFIRM"]:
+						done = True
+						enable_jbod_mode(enable_jbod_command)
+					elif confirm in ["skip","SKIP"]:
+						done = True
+						log("\tSkipped the Enable JBOD mode step, Aliases will be created with invalid bus addresses in /etc/vdev_id.conf\n")
+					else:
+						log("\tInvalid entry, Try again..\n")
 
 	storcli = subprocess.Popen(
 		shlex.split("{pth} /c{ctl} show all J".format(pth=storcli_paths["storcli64"],ctl=HBA["Ctl"])), stdout=subprocess.PIPE, universal_newlines=True)
@@ -380,8 +400,6 @@ def create_vdev_id(server):
 		"AVAGO3108MegaRAID": [25,31,37,43, 26,32,38,44, 27,33,39,45, 28,34,41,46, 29,35,40,47, 30,36,42,48],
 		"9600-24i": [27,28,29,30,31,32,33,34,35,36,37,38,39,41,41,42,43,44,45,46,47,48,49,50],
 		"9600-16i": [27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42]
-		#"9361-16i": [24,25,23,22,28,29,27,26,17,18,16,15,20,21,19],
-		#"9361-24i": [24,25,23,22,28,29,27,26,17,18,16,15,20,21,19,1,1,1,1,1,1,1,1]
 	}
 
 	alias_template = {
@@ -746,7 +764,7 @@ def warn_hwraid(server):
 	
 	for card in hba_cards:
 		if card.get("Model","") in ["9361-16i","9361-24i"]:
-			log("WARNING - Hardware RAID card detected.")
+			log("\nWARNING - Hardware RAID card detected.")
 			log("Device paths are subject to change on reboot. ")
 			log("\tHardware RAID Card Information:")
 			for key in card.keys():
@@ -768,11 +786,15 @@ def main():
 	parser.add_option("-s","--size",action="store",dest="sz",default=None,help="Specify chassis size")
 	parser.add_option("-q","--quiet",action="store_true",dest="quiet",default=False,help="Quiet Mode")
 	parser.add_option("-r","--reset-map",action="store_true",dest="reset_map",default=False,help="Resets the drive map")
+	parser.add_option("-J","--jbod",action="store_true",dest="enable_jbod",default=False,help="Automatically enable JBOD mode when prompted.")
 	(options, args) = parser.parse_args()
 
 	# apply the quiet flag to the global variable
 	global g_quiet
 	g_quiet = options.quiet
+
+	global g_enable_jbod
+	g_enable_jbod = options.enable_jbod
 
 	# verify that vdev is configured
 	if not verify_vdev():
