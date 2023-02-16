@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Feb 16 2023 Mark Hooper <mhooper@45drives.com> 2.2.0-3
+- updated physical order for 9600-16i HBA cards
 * Thu Feb 16 2023 Mark Hooper <mhooper@45drives.com> 2.2.0-2
 - added storcli2 binary to tools directory
 * Wed Feb 15 2023 Mark Hooper <mhooper@45drives.com> 2.2.0-1

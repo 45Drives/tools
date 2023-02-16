@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.0-2
+## 45drives-tools 2.2.0-3
 
-* added storcli2 binary to tools directory
+* updated physical order for 9600-16i HBA cards
