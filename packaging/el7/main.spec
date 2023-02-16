@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Feb 16 2023 Mark Hooper <mhooper@45drives.com> 2.2.0-2
+- added storcli2 binary to tools directory
 * Wed Feb 15 2023 Mark Hooper <mhooper@45drives.com> 2.2.0-1
 - dmap can now alias hardware RAID cards (9316-16i and 9361-24i)
 - dmap will prompt user to put hardware cards in jbod mode with warning and perform

@@ -1,3 +1,9 @@
+45drives-tools (2.2.0-2focal) focal; urgency=medium
+
+  * added storcli2 binary to tools directory
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 16 Feb 2023 06:56:45 -0400
+
 45drives-tools (2.2.0-1focal) focal; urgency=medium
 
   * dmap can now alias hardware RAID cards (9316-16i and 9361-24i)
