@@ -169,7 +169,7 @@ def get_model_serial_firmware(device_name):
 		regex_serial = re.search("^\s+Serial Number:\s+(.*)$",line)
 		regex_firmware = re.search("^\s+Firmware Revision:\s+(.*)$",line)
 		if regex_model != None:
-			 model=regex_model.group(1).rstrip()
+			model=regex_model.group(1).rstrip()
 		if regex_serial != None:
 			serial=regex_serial.group(1).rstrip()
 		if regex_firmware != None:

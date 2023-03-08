@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Mar 08 2023 Mark Hooper <mhooper@45drives.com> 2.2.0-6
+- Added a hotfix to alias MI4 servers using H11SSL-i motherboards
 * Wed Mar 08 2023 Mark Hooper <mhooper@45drives.com> 2.2.0-5
 - Added a hotfix to alias MI4 servers using H11SSL-i motherboards
 * Mon Feb 27 2023 Mark Hooper <mhooper@45drives.com> 2.2.0-4
