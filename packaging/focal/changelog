@@ -1,3 +1,9 @@
+45drives-tools (2.2.0-7focal) focal; urgency=medium
+
+  * hotfix for H11SSL-i motherboards in MI4 units
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Mar 2023 06:59:12 -0400
+
 45drives-tools (2.2.0-6focal) focal; urgency=medium
 
   * Added a hotfix to alias MI4 servers using H11SSL-i motherboards

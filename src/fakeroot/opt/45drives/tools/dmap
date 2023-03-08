@@ -557,7 +557,7 @@ def create_vdev_id(server):
 							log("WARNING - Drive missing from slot {i}-{j}. Insert disk into slot {i}-{j} and try running dmap again.".format(i=1+(j//4),j=(j%4)+1))
 
 	elif server["Chassis Size"] == "MI4" and server["Alias Style"] == "STORINATOR":
-		vdev_id_str += alias_mi4(server["Model"],server["OS NAME"],server["OS VERSION_ID"],server["Motherboard"]["Model"])
+		vdev_id_str += alias_mi4(server["Model"],server["OS NAME"],server["OS VERSION_ID"],server["Motherboard"]["Product Name"])
 	elif server["Alias Style"] == "AV15-BASE":
 		# we are using the AV15-BASE ailiasing scheme.
 		vdev_id_str += alias_av15_base(server["OS NAME"],server["OS VERSION_ID"])

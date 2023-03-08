@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.0-6
+## 45drives-tools 2.2.0-7
 
-* Added a hotfix to alias MI4 servers using H11SSL-i motherboards
+* hotfix for H11SSL-i motherboards in MI4 units
