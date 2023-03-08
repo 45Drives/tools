@@ -557,7 +557,7 @@ def create_vdev_id(server):
 							log("WARNING - Drive missing from slot {i}-{j}. Insert disk into slot {i}-{j} and try running dmap again.".format(i=1+(j//4),j=(j%4)+1))
 
 	elif server["Chassis Size"] == "MI4" and server["Alias Style"] == "STORINATOR":
-		vdev_id_str += alias_mi4(server["Model"],server["OS NAME"],server["OS VERSION_ID"])
+		vdev_id_str += alias_mi4(server["Model"],server["OS NAME"],server["OS VERSION_ID"],server["Motherboard"]["Model"])
 	elif server["Alias Style"] == "AV15-BASE":
 		# we are using the AV15-BASE ailiasing scheme.
 		vdev_id_str += alias_av15_base(server["OS NAME"],server["OS VERSION_ID"])
@@ -722,7 +722,7 @@ def alias_av15_base(os_name,os_version_id):
 #       ports. These ports start at ISATA-2 as the boot drives are using 
 #       ISATA-0 and ISATA-1. This means that we need 1-1 to use "...-ata-3".
 ###############################################################################
-def alias_mi4(model,os_name,os_version_id):
+def alias_mi4(model,os_name,os_version_id,mobo_model):
 	vdev_id_str = ""
 	bus_address_sata = None
 
@@ -737,20 +737,28 @@ def alias_mi4(model,os_name,os_version_id):
 		log("Error executing lspci.")
 		sys.exit(1)
 
-	for line in lspci_result:
-		regex_sata = re.search("(\w\w:\w\w.\w).*Intel.*\sSATA Controller",line)
-		if regex_sata != None:
-			bus_address_sata = "0000:"+regex_sata.group(1)
-		if bus_address_sata != None:
-			break
-
-	if bus_address_sata != None:
+	if mobo_model in ["H11SSL-i"]:
+		# H11SSL-i has different sata controller. It also has 3, so need to specify 
+		# a hard coded bus address. 
+		bus_address_sata = "0000:42:00.2"
 		for i in range(0,4):
 			#alias the drives connected to the on board sata sata connectors
-			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(drive=i+1,addr=bus_address_sata,i=i+3,s=ata_suffix)
+			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(drive=i+1,addr=bus_address_sata,i=i+5,s=ata_suffix)
 	else:
-		log("Error aliasing " + model)
-		sys.exit(1)
+		for line in lspci_result:
+			regex_sata = re.search("(\w\w:\w\w.\w).*Intel.*\sSATA Controller",line)
+			if regex_sata != None:
+				bus_address_sata = "0000:"+regex_sata.group(1)
+			if bus_address_sata != None:
+				break
+
+		if bus_address_sata != None:
+			for i in range(0,4):
+				#alias the drives connected to the on board sata sata connectors
+				vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(drive=i+1,addr=bus_address_sata,i=i+3,s=ata_suffix)
+		else:
+			log("Error aliasing " + model)
+			sys.exit(1)
 	return vdev_id_str
 
 ###############################################################################
