@@ -2,9 +2,9 @@
     "__version": "45D-R1",
     "name": "45drives-tools",
     "title": "45drives-tools",
-    "prerelease": false,
-    "version": "2.2.0",
-    "buildVersion": "7",
+    "prerelease": true,
+    "version": "2.2.1",
+    "buildVersion": "1",
     "author": "Mark Hooper <mhooper@45drives.com>",
     "url": "https://github.com/45Drives/tools",
     "category": "utils",
@@ -31,7 +31,8 @@
             "pciutils",
             "hdparm",
             "udev",
-            "mpi3mr"
+            "mpi3mr",
+            "lsscsi"
         ],
         "el": [
             "ipmitool",
@@ -40,7 +41,8 @@
             "dmidecode",
             "python3",
             "pciutils",
-            "hdparm"
+            "hdparm",
+            "lsscsi"
         ]
     },
     "releases": [
@@ -62,8 +64,8 @@
     ],
     "changelog": {
         "urgency": "medium",
-        "version": "2.2.0",
-        "buildVersion": "7",
+        "version": "2.2.1",
+        "buildVersion": "1",
         "ignore": [],
         "date": null,
         "packager": "Mark Hooper <mhooper@45drives.com>",

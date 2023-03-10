@@ -55,6 +55,11 @@ fi
 %{_bindir}/*
 
 %changelog
+* Fri Mar 10 2023 Mark Hooper <mhooper@45drives.com> 2.2.1-1
+- Made a loadtest script for performing read/write operations on all storage drives
+  simultaneously.
+- added an lsscsi dependency required for loadtest script
+- updated manifest for testing package
 * Wed Mar 08 2023 Mark Hooper <mhooper@45drives.com> 2.2.0-7
 - hotfix for H11SSL-i motherboards in MI4 units
 * Wed Mar 08 2023 Mark Hooper <mhooper@45drives.com> 2.2.0-6
