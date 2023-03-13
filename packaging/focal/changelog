@@ -1,3 +1,9 @@
+45drives-tools (2.2.1-3focal) focal; urgency=medium
+
+  * user can specify location of loadtest logfile using -l option
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 13 Mar 2023 10:30:09 -0300
+
 45drives-tools (2.2.1-2focal) focal; urgency=medium
 
   * modified loadtest to work without requiring an hba card

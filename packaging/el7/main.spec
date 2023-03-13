@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Mon Mar 13 2023 Mark Hooper <mhooper@45drives.com> 2.2.1-3
+- user can specify location of loadtest logfile using -l option
 * Mon Mar 13 2023 Mark Hooper <mhooper@45drives.com> 2.2.1-2
 - modified loadtest to work without requiring an hba card
 * Fri Mar 10 2023 Mark Hooper <mhooper@45drives.com> 2.2.1-1

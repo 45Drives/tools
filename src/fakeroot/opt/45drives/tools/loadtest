@@ -370,6 +370,7 @@ def write_to_kmsg(msg):
     subprocess.run(cmd_str, shell=True)
 
 def check_log_path(log_path):
+    # create directories in user specified path if needed.
     if not os.path.isdir(os.path.dirname(os.path.abspath(os.path.expanduser(log_path)))):
         # directory doesn't exist for given log_path.
         print("Missing director(y/ies) in path provided. ({lp})".format(lp=log_path))
@@ -382,20 +383,28 @@ def check_log_path(log_path):
                 print("Unable to make directories: {ld}".format(ld=os.path.dirname(os.path.abspath(os.path.expanduser(log_path)))))
                 print("Exiting loadtest..")
                 exit(1)
-            print("Making Log File: {lp}".format(lp=os.path.abspath(os.path.expanduser(log_path))))
-            if os.path.isfile(os.path.abspath(os.path.expanduser(log_path))):
-                overwrite = input("Overwrite existing file: {lp} ? (y/n): ")
-                if overwrite in ["y","Y"]:
-                    os.remove(os.path.abspath(os.path.expanduser(log_path)))
-                    log_file = open(os.path.abspath(os.path.expanduser(log_path)),"w")
-                    log_file.write("loadtest Log File. {lp}".format(lp=os.path.abspath(os.path.expanduser(log_path))))
-                    log_file.close()
-                else:
-                    print("Run loadtest again using different path. (option: -l <log_file>)")
-                    exit(1)
         else:
             print("Run loadtest again using valid path argument. (option: -l <log_file>)")
             exit(1)
+
+    if os.path.isfile(os.path.abspath(os.path.expanduser(log_path))):
+        #prompt user for overwrite if logfile exists already.
+        overwrite = input("Overwrite existing file: {lp} ? (y/n): ".format(lp=os.path.abspath(os.path.expanduser(log_path))))
+        if overwrite in ["y","Y"]:
+            os.remove(os.path.abspath(os.path.expanduser(log_path)))
+            print("Making Log File: {lp}".format(lp=os.path.abspath(os.path.expanduser(log_path))))
+            log_file = open(os.path.abspath(os.path.expanduser(log_path)),"w")
+            log_file.write("loadtest Log File. {lp}".format(lp=os.path.abspath(os.path.expanduser(log_path))))
+            log_file.close()
+        else:
+            print("Run loadtest again using different path. (option: -l <log_file>)")
+            exit(1)
+    else:
+        #Create log file, and inform user of its location.
+        print("Making Log File: {lp}".format(lp=os.path.abspath(os.path.expanduser(log_path))))
+        log_file = open(os.path.abspath(os.path.expanduser(log_path)),"w")
+        log_file.write("loadtest Log File. {lp}".format(lp=os.path.abspath(os.path.expanduser(log_path))))
+        log_file.close()
 
 def is_root():
     return os.geteuid() == 0
