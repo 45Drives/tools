@@ -29,6 +29,8 @@ def get_server_info():
         return server_info
     else:
         print("/etc/45drives/server_info/server_info.json not found.")
+        print("loadtest is designed to run on 45Drives server hardware only.")
+        print("If you have a 45drives server, run 'dmap', and try again.")
         sys.exit(1)
 
 def get_disks_from_vdev_id():
@@ -88,6 +90,22 @@ def consolidate_data(server_info,disks,scsi_info):
                                 "uuid":scsi["uuid"],
                             }
                         )
+    for disk in disks:
+        for scsi in scsi_info:
+            if disk["dev"] == scsi["dev"]:
+                if "disks" not in server_info.keys():
+                    server_info["disks"] = []
+                server_info["disks"].append(
+                    {
+                        "id":disk["id"],
+                        "path":disk["path"],
+                        "occupied":disk["occupied"],
+                        "dev":disk["dev"],
+                        "scsi_id":scsi["scsi_id"],
+                        "uuid":scsi["uuid"],
+                    }
+                )
+
 
 def setup_fio_file(server_info,RO,RW):
     FIO_PARAMS_RW={
@@ -129,10 +147,7 @@ def setup_fio_file(server_info,RO,RW):
     if RO:
         FIO_PARAMS = FIO_PARAMS_RO
 
-    disks = []
-    for hba in server_info["HBA"]:
-        for disk in hba.get("disks",[]):
-            disks.append(disk)
+    disks = server_info.get("disks",[])
 
     if os.path.isfile(os.path.expanduser("/opt/45drives/tools/loadtest.fio")):
         os.remove(os.path.expanduser("/opt/45drives/tools/loadtest.fio"))
@@ -207,10 +222,7 @@ def get_log():
     return outs.decode("UTF-8").split("\n")
         
 def show_loadtest_disks(server_info):
-    disks = []
-    for hba in server_info["HBA"]:
-        for disk in hba.get("disks",[]):
-            disks.append(disk)
+    disks = server_info.get("disks",[])
 
     print("Performing a loadtest on the following disks: ")
     disk_str = ""
@@ -245,11 +257,8 @@ def check_log(log,server_info):
                 "error_msg": errorFailedIO.group(3)
             })
 
-    disks = []
+    disks = server_info.get("disks",[])
     bad_disks = set()
-    for hba in server_info["HBA"]:
-        for disk in hba.get("disks",[]):
-            disks.append(disk)
     for perr in power_reset_errors:
         for disk in disks:
             if perr.get("scsi_id","0:0:0:0") == disk.get("scsi_id",""):
@@ -267,12 +276,12 @@ def check_log(log,server_info):
         print("Errors found")
     return bad_disks
 
-def write_logs(logs):
-    if os.path.isfile(os.path.expanduser("/opt/45drives/tools/loadtest.log")):
-        os.remove(os.path.expanduser("/opt/45drives/tools/loadtest.log"))
+def write_logs(logs,log_path):
+    if os.path.isfile(os.path.abspath(os.path.expanduser(log_path))):
+        os.remove(os.path.abspath(os.path.expanduser(log_path)))
     
-    print("Writing log file to: /opt/45drives/tools/loadtest.log")
-    log_file = open("/opt/45drives/tools/loadtest.log","w")
+    print("Writing log file to: {lp}".format(lp=os.path.abspath(os.path.expanduser(log_path))))
+    log_file = open(os.path.abspath(os.path.expanduser(log_path)),"w")
     trial_num = 1
     for log in logs:
         log_file.write("---------------------------------------------------------------------------------\n")
@@ -282,17 +291,17 @@ def write_logs(logs):
             log_file.write(line)
             log_file.write("\n")
         trial_num = trial_num + 1
+    log_file.close()
     
 def disable_dmesg_console():
     rv=subprocess.run(["dmesg","--console-off"],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
     if rv:
-        print("Unable to disable dmesg console messages.")
-        exit(1)
+        print("Unable to disable dmesg console messages. (dmesg --console-off)")
 
 def enable_dmesg_console():
     rv=subprocess.run(["dmesg","--console-on"],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
     if rv:
-        print("Unable to turn dmesg console messaging on.")
+        print("Unable to enable dmesg console messages. (dmesg --console-off)")
         exit(1)
 
 def show_welcome_and_confirmation(ro, rw):
@@ -360,6 +369,37 @@ def write_to_kmsg(msg):
     cmd_str = "echo {m} > /dev/kmsg".format(m=msg)
     subprocess.run(cmd_str, shell=True)
 
+def check_log_path(log_path):
+    if not os.path.isdir(os.path.dirname(os.path.abspath(os.path.expanduser(log_path)))):
+        # directory doesn't exist for given log_path.
+        print("Missing director(y/ies) in path provided. ({lp})".format(lp=log_path))
+        response = input("Would you like to create the the missing director(y/ies) '{ld}' (y/n): ".format(ld=os.path.dirname(os.path.abspath(os.path.expanduser(log_path)))))
+        if response in ["y","Y"]:
+            print("Making directories required for log file: {ld}".format(ld=os.path.dirname(os.path.abspath(os.path.expanduser(log_path)))))
+            try:
+                os.makedirs(os.path.dirname(os.path.abspath(os.path.expanduser(log_path))))
+            except:
+                print("Unable to make directories: {ld}".format(ld=os.path.dirname(os.path.abspath(os.path.expanduser(log_path)))))
+                print("Exiting loadtest..")
+                exit(1)
+            print("Making Log File: {lp}".format(lp=os.path.abspath(os.path.expanduser(log_path))))
+            if os.path.isfile(os.path.abspath(os.path.expanduser(log_path))):
+                overwrite = input("Overwrite existing file: {lp} ? (y/n): ")
+                if overwrite in ["y","Y"]:
+                    os.remove(os.path.abspath(os.path.expanduser(log_path)))
+                    log_file = open(os.path.abspath(os.path.expanduser(log_path)),"w")
+                    log_file.write("loadtest Log File. {lp}".format(lp=os.path.abspath(os.path.expanduser(log_path))))
+                    log_file.close()
+                else:
+                    print("Run loadtest again using different path. (option: -l <log_file>)")
+                    exit(1)
+        else:
+            print("Run loadtest again using valid path argument. (option: -l <log_file>)")
+            exit(1)
+
+def is_root():
+    return os.geteuid() == 0
+
 def main(): 
     parser = OptionParser() #use optparse to handle command line arguments
     parser.add_option("-w", "--readwrite", action="store_true", dest="readwrite",
@@ -371,8 +411,14 @@ def main():
     parser.add_option("-t", "--trial_duration", action="store", dest="trial_duration",
         default=30, type="int", help="trial duration in seconds")  
     parser.add_option("-n", "--noflush", action="store_true", dest="noflush",
-        default=False, help="don't flush dmesg log during loadtest") 
+        default=False, help="don't flush dmesg log during loadtest")
+    parser.add_option("-l", "--logfile", action="store", dest="log_file",
+        default="/opt/45drives/tools/loadtest.log", type="str", help="specify path for loadtest log file.")
     (options, args) = parser.parse_args()
+
+    if not is_root():
+        print("Loadtest must be run with root privelages.")
+        exit(1)
 
     RO, RW = show_welcome_and_confirmation(options.readonly, options.readwrite)
 
@@ -381,6 +427,10 @@ def main():
         exit(1)
     
     if not options.noflush: disable_dmesg_console()
+
+    check_log_path(options.log_file)
+    server_info = get_loadtest_info()
+
     logs = []
     bad_disks = set()
     total_trials = options.test_duration//options.trial_duration
@@ -423,7 +473,7 @@ def main():
         write_to_kmsg("45Drives Loadtest Completed") 
         logs[-1] = get_log()
 
-    write_logs(logs)
+    write_logs(logs,options.log_file)
     if not options.noflush: enable_dmesg_console()
 
 

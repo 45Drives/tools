@@ -1,3 +1,9 @@
+45drives-tools (2.2.1-2focal) focal; urgency=medium
+
+  * modified loadtest to work without requiring an hba card
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 13 Mar 2023 10:14:27 -0300
+
 45drives-tools (2.2.1-1focal) focal; urgency=medium
 
   * Made a loadtest script for performing read/write operations on all storage drives
