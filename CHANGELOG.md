@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.1-3
+## 45drives-tools 2.2.1-4
 
-* user can specify location of loadtest logfile using -l option
+* modified loadtest script to output final result to log file

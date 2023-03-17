@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Fri Mar 17 2023 Mark Hooper <mhooper@45drives.com> 2.2.1-4
+- modified loadtest script to output final result to log file
 * Mon Mar 13 2023 Mark Hooper <mhooper@45drives.com> 2.2.1-3
 - user can specify location of loadtest logfile using -l option
 * Mon Mar 13 2023 Mark Hooper <mhooper@45drives.com> 2.2.1-2

@@ -472,14 +472,16 @@ def main():
         print("--------------------------------------------------------------------------------")
         print("Loadtest Halted. Errors encountered with the following disks:")
         write_to_kmsg("End 45Drives loadtest trial {x} of {y}.".format(x=current_trial,y=total_trials))
-        write_to_kmsg("45Drives Loadtest Halted. ") 
+        write_to_kmsg("45Drives Loadtest Halted.") 
+        write_to_kmsg("45Drives Loadtest Failed") 
         logs[-1] = get_log()
 
         for sus_disk in bad_disks:
             print(f"\t{sus_disk}")
     else:
         print("\n{g}Loadtest Passed{e}".format(g=ANSI_colors["GREEN"],e=ANSI_colors["END"])) 
-        write_to_kmsg("45Drives Loadtest Completed") 
+        write_to_kmsg("45Drives Loadtest Completed")
+        write_to_kmsg("45Drives Loadtest Passed") 
         logs[-1] = get_log()
 
     write_logs(logs,options.log_file)
