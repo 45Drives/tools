@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Tue Mar 21 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-1
+- Added a loadtest script for performing reads/writes to all storage drives simultaneously
 * Fri Mar 17 2023 Mark Hooper <mhooper@45drives.com> 2.2.1-4
 - modified loadtest script to output final result to log file
 * Mon Mar 13 2023 Mark Hooper <mhooper@45drives.com> 2.2.1-3

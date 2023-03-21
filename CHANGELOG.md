@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.1-4
+## 45drives-tools 2.2.2-1
 
-* modified loadtest script to output final result to log file
+* Added a loadtest script for performing reads/writes to all storage drives simultaneously
