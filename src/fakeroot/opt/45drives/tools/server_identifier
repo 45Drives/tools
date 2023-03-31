@@ -320,10 +320,11 @@ def getStorcliInfo(hba_card):
 		jq_json = json.loads(jqout)
 	except ValueError:
 		jq_json =  {}
-	
-	hba_card["Firmware Version"] = jq_json.get("Firmware Version","?")
-	hba_card["Driver Version"] = jq_json.get("Driver Version","?")
-	hba_card["Driver Name"] = jq_json.get("Driver Name","?")
+		
+	if jq_json != None:
+		hba_card["Firmware Version"] = jq_json.get("Firmware Version","?")
+		hba_card["Driver Version"] = jq_json.get("Driver Version","?")
+		hba_card["Driver Name"] = jq_json.get("Driver Name","?")
 
 # print("VERSION:  ",json.dumps(jq_json,indent=4))
 # VERSION:   {

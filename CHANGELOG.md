@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.2-1
+## 45drives-tools 2.2.2-2
 
-* Added a loadtest script for performing reads/writes to all storage drives simultaneously
+* Handled error when storcli64 is unable to report firmware version in server_identifier

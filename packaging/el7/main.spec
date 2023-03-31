@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Fri Mar 31 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-2
+- Handled error when storcli64 is unable to report firmware version in server_identifier
 * Tue Mar 21 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-1
 - Added a loadtest script for performing reads/writes to all storage drives simultaneously
 * Fri Mar 17 2023 Mark Hooper <mhooper@45drives.com> 2.2.1-4

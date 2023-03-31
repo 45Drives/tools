@@ -254,7 +254,13 @@ def check_jbod_enabled(HBA, server,storcli_paths):
 		log("\tCommand Run: {cm} | {jq}".format(cm=command_str, jq=jq_command))
 		log("\tAction Taken: Assuming that JBOD mode is Not Enabled")
 		return False
-	return not (jq_json.get("Value","OFF") == "OFF")
+	if jqout != None:
+		return not (jq_json.get("Value","OFF") == "OFF")
+	else:
+		log("Error gathering information from storcli64 when trying to determine if JBOD mode is enabled:")
+		log("\tCommand Run: {cm} | {jq}".format(cm=command_str, jq=jq_command))
+		log("\tAction Taken: Assuming that JBOD mode is Not Enabled")
+		return False
 
 def enable_jbod_mode(enable_jbod_command):
 	jbod_cmd = subprocess.Popen(shlex.split(enable_jbod_command), stdout=subprocess.PIPE, universal_newlines=True,stderr=subprocess.STDOUT)
