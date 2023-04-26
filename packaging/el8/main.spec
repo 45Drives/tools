@@ -55,6 +55,9 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Apr 26 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-3
+- Implemented fix for determining server model based on installed hardware for units
+  serialized before 45Drives-tools package existed
 * Fri Mar 31 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-2
 - Handled error when storcli64 is unable to report firmware version in server_identifier
 * Tue Mar 21 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-1

@@ -1,3 +1,10 @@
+45drives-tools (2.2.2-3focal) focal; urgency=medium
+
+  * Implemented fix for determining server model based on installed hardware for
+    units serialized before 45Drives-tools package existed
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 26 Apr 2023 12:55:05 -0300
+
 45drives-tools (2.2.2-2focal) focal; urgency=medium
 
   * Handled error when storcli64 is unable to report firmware version in server_identifier

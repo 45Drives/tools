@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.2-2
+## 45drives-tools 2.2.2-3
 
-* Handled error when storcli64 is unable to report firmware version in server_identifier
+* Implemented fix for determining server model based on installed hardware for units serialized before 45Drives-tools package existed
