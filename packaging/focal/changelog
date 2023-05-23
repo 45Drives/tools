@@ -1,3 +1,9 @@
+45drives-tools (2.2.2-5focal) focal; urgency=medium
+
+  * added new lines to entries when alaising mi4 using ROMED8-2T
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 23 May 2023 08:22:37 -0300
+
 45drives-tools (2.2.2-4focal) focal; urgency=medium
 
   * added support for MI4 servers that use ASRockRack ROME8-2T motherboards

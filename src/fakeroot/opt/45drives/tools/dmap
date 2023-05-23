@@ -753,10 +753,10 @@ def alias_mi4(model,os_name,os_version_id,mobo_model):
 	elif mobo_model in ["ROMED8-2T"]:
 		# this is the AMD board made by ASRock Rack. It staggers two sata controllers.
 		# these correspond to the on board mini sas hd connectors for sata_2, sata_3, sata_4, sata_5 using a 4 port fan out cable each. 
-		vdev_id_str += "alias 1-1 /dev/disk/by-path/pci-0000:49:00.0-ata-7"
-		vdev_id_str += "alias 1-2 /dev/disk/by-path/pci-0000:49:00.0-ata-8"
-		vdev_id_str += "alias 1-3 /dev/disk/by-path/pci-0000:48:00.0-ata-8"
-		vdev_id_str += "alias 1-4 /dev/disk/by-path/pci-0000:48:00.0-ata-5"
+		vdev_id_str += "alias 1-1 /dev/disk/by-path/pci-0000:49:00.0-ata-7\n"
+		vdev_id_str += "alias 1-2 /dev/disk/by-path/pci-0000:49:00.0-ata-8\n"
+		vdev_id_str += "alias 1-3 /dev/disk/by-path/pci-0000:48:00.0-ata-8\n"
+		vdev_id_str += "alias 1-4 /dev/disk/by-path/pci-0000:48:00.0-ata-5\n"
 	else:
 		for line in lspci_result:
 			regex_sata = re.search("(\w\w:\w\w.\w).*Intel.*\sSATA Controller",line)

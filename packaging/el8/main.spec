@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Tue May 23 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-5
+- added new lines to entries when alaising mi4 using ROMED8-2T
 * Tue May 23 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-4
 - added support for MI4 servers that use ASRockRack ROME8-2T motherboards
 * Wed Apr 26 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-3
