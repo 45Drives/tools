@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.2-3
+## 45drives-tools 2.2.2-4
 
-* Implemented fix for determining server model based on installed hardware for units serialized before 45Drives-tools package existed
+* added support for MI4 servers that use ASRockRack ROME8-2T motherboards

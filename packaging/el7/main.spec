@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Tue May 23 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-4
+- added support for MI4 servers that use ASRockRack ROME8-2T motherboards
 * Wed Apr 26 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-3
 - Implemented fix for determining server model based on installed hardware for units
   serialized before 45Drives-tools package existed

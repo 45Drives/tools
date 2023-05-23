@@ -4,7 +4,7 @@
     "title": "45drives-tools",
     "prerelease": false,
     "version": "2.2.2",
-    "buildVersion": "3",
+    "buildVersion": "4",
     "author": "Mark Hooper <mhooper@45drives.com>",
     "url": "https://github.com/45Drives/tools",
     "category": "utils",
@@ -65,7 +65,7 @@
     "changelog": {
         "urgency": "medium",
         "version": "2.2.2",
-        "buildVersion": "3",
+        "buildVersion": "4",
         "ignore": [],
         "date": null,
         "packager": "Mark Hooper <mhooper@45drives.com>",
