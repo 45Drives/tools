@@ -1,3 +1,9 @@
+45drives-tools (2.2.2-6focal) focal; urgency=medium
+
+  * added rudimentary bus address translation for ROMED8-2T Motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 12 Jun 2023 10:22:25 -0300
+
 45drives-tools (2.2.2-5focal) focal; urgency=medium
 
   * added new lines to entries when alaising mi4 using ROMED8-2T

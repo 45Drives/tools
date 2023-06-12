@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Mon Jun 12 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-6
+- added rudimentary bus address translation for ROMED8-2T Motherboards
 * Tue May 23 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-5
 - added new lines to entries when alaising mi4 using ROMED8-2T
 * Tue May 23 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-4

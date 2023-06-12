@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.2-5
+## 45drives-tools 2.2.2-6
 
-* added new lines to entries when alaising mi4 using ROMED8-2T
+* added rudimentary bus address translation for ROMED8-2T Motherboards
