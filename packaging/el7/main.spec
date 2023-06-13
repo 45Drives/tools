@@ -55,6 +55,9 @@ fi
 %{_bindir}/*
 
 %changelog
+* Tue Jun 13 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-7
+- added a check in server_identifier to ensure that the bus address of a given HBA
+  matches that found in /sys/bus/pci/devices
 * Mon Jun 12 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-6
 - added rudimentary bus address translation for ROMED8-2T Motherboards
 * Tue May 23 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-5

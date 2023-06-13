@@ -1,3 +1,10 @@
+45drives-tools (2.2.2-7focal) focal; urgency=medium
+
+  * added a check in server_identifier to ensure that the bus address of a given
+    HBA matches that found in /sys/bus/pci/devices
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 13 Jun 2023 13:16:03 -0300
+
 45drives-tools (2.2.2-6focal) focal; urgency=medium
 
   * added rudimentary bus address translation for ROMED8-2T Motherboards
