@@ -467,6 +467,8 @@ def hba_lspci(server):
 		for pci_slot in pci_slots:
 			for card in hba:
 				if card["Bus Address"] in pci_slot["Bus Address"]:
+					# The bus address provided by dmidecode contains the bus address provided by lspci.
+					# we can assign the PCI Slot accordingly.
 					card["PCI Slot"] = pci_slot["ID"]
 					if len(sys_bus_addrs) > 0 and pci_slot["Bus Address"] not in sys_bus_addrs:
 						# dmidecode gave a bus address that does not match the one used by the system
@@ -481,13 +483,24 @@ def hba_lspci(server):
 						# use the bus address provided by dmidecode
 						# update the cards bus address to the full format (eg: 0000:01:00.0)
 						card["Bus Address"] = pci_slot["Bus Address"]
-					
-		#sort the final list of hba cards by the Bus Address field. This ensures that
-		#the order in which they are stored resembles the lspci output. which has
-		#worked reliably in the past.
+		
+		#ensure that the bus address is the one in use by the system.
+		verify_bus_addresses(sys_bus_addrs,hba)
+
+		#sort them in ascending order
 		hba = sorted(hba, key=lambda k: k['Bus Address']) 
 
 	return hba, hybrid_flag
+
+def verify_bus_addresses(sys_bus_addrs,hba_cards):
+	for card in hba_cards:
+		if len(sys_bus_addrs) > 0:
+			for j in range(0,len(sys_bus_addrs)):
+				if card["Bus Address"] in sys_bus_addrs[j]:
+					# we have found the system bus address that matches the substring
+					# address provided by lspci update the card's bus address field
+					card["Bus Address"] = sys_bus_addrs[j]
+					break
 
 def hba():
 	# determine the model and count of hba cards present in the system
