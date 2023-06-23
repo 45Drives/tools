@@ -1,3 +1,10 @@
+45drives-tools (2.2.3-1focal) focal; urgency=medium
+
+  * updated server_identifier and lsdev to operate with ceph gateway servers more
+    gracefully
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 23 Jun 2023 08:46:49 -0300
+
 45drives-tools (2.2.2-8focal) focal; urgency=medium
 
   * added contingency in server_identifier for 2U Gateway servers
