@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.2-7
+## 45drives-tools 2.2.2-8
 
-* added a check in server_identifier to ensure that the bus address of a given HBA matches that found in /sys/bus/pci/devices
+* added contingency in server_identifier for 2U Gateway servers

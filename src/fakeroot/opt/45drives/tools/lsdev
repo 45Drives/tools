@@ -338,6 +338,10 @@ def build_server(options):
 		print("Unable to determine Alias Style from /etc/45drives/server_info/server_info.json: ")
 		print(json.dumps(server_obj,indent=4))
 		exit(1)
+	elif "Chassis Size" in server_obj.keys() and server_obj["Chassis Size"] in ["2UGW"]:
+		print("This program is intended to display disk information for servers with dedicated storage bays.".format(astyle=server_obj["Alias Style"]))
+		print("Use command line utilities such as lsblk to see disk information for Ceph Gateways.".format(astyle=server_obj["Alias Style"]))
+		exit(1)
 	elif server_obj["Alias Style"] not in alias_template.keys():
 		print("Unknown Alias Style '{astyle}' encountered.".format(astyle=server_obj["Alias Style"]))
 		exit(1)

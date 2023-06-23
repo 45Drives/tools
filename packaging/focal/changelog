@@ -1,3 +1,9 @@
+45drives-tools (2.2.2-8focal) focal; urgency=medium
+
+  * added contingency in server_identifier for 2U Gateway servers
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 23 Jun 2023 08:01:32 -0300
+
 45drives-tools (2.2.2-7focal) focal; urgency=medium
 
   * added a check in server_identifier to ensure that the bus address of a given

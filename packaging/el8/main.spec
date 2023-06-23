@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Fri Jun 23 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-8
+- added contingency in server_identifier for 2U Gateway servers
 * Tue Jun 13 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-7
 - added a check in server_identifier to ensure that the bus address of a given HBA
   matches that found in /sys/bus/pci/devices

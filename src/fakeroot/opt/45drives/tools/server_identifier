@@ -34,6 +34,12 @@ g_mobo_to_version_lut = {
 }
 
 g_product_lut = {
+	"Gateway-2UGW-Base":				[g_mobo_to_version_lut["Base"],0,0,"2UGW","2UGW"],
+	"Gateway-2UGW-Base-B":				[g_mobo_to_version_lut["Base"],0,0,"2UGW","2UGW"],
+	"Gateway-2UGW-Enhanced":			[g_mobo_to_version_lut["Enhanced"],0,0,"2UGW","2UGW"],
+	"Gateway-2UGW-Enhanced-S":			[g_mobo_to_version_lut["Enhanced"],0,0,"2UGW","2UGW"],
+	"Gateway-2UGW-Turbo-G":				[g_mobo_to_version_lut["Turbo"],0,0,"2UGW","2UGW"],
+
 	"Storinator-AV15-Base":				[g_mobo_to_version_lut["Base"],0,0,"AV15","AV15-BASE"],
 	"Storinator-AV15-Base-B":			[g_mobo_to_version_lut["Base-B"],0,1,"AV15","STORINATOR"],
 	"Storinator-AV15-Enhanced":			[g_mobo_to_version_lut["Enhanced"],0,1,"AV15","STORINATOR"],
