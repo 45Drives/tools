@@ -91,7 +91,53 @@ block_dev_to_slot_num() {
 slot_num_to_slot_name() {
   local SLOT_NUM=$1
   [[ $SLOT_NUM =~ ^[0-9]+$ ]] || perror 1 Invalid slot number: "$SLOT_NUM" || return $?
-  awk '$1 == "'"$(alias_style)"'" { print $'"$((2 + "$SLOT_NUM"))"' }' "$SLOT_NAME_MAP_FILE" || perror $? "Failed to lookup slot name for slot $SLOT_NUM"
+  awk '
+  BEGIN {
+    found_style = 0
+  }
+  $1 == "'"$(alias_style)"'" {
+    found_style = 1
+    print $'"$((2 + "$SLOT_NUM"))"'
+  }
+  END {
+    if (!found_style) {
+      print "alias style lookup failed ('"$(alias_style)"')" > "/dev/stderr"
+      exit 1
+    }
+    exit 0
+  }
+  ' "$SLOT_NAME_MAP_FILE" || perror $? "Failed to lookup slot name for slot $SLOT_NUM"
+  return $?
+}
+
+slot_name_to_slot_num() {
+  local SLOT_NAME=$1
+  awk '
+  BEGIN {
+    found_style = 0
+    found_slot = 0
+  }
+  $1 == "'"$(alias_style)"'" {
+    found_style = 1
+    for (i = 2; i<=NF; ++i) {
+      if ($i == "'"$SLOT_NAME"'") {
+        found_slot = 1
+        print i - 2
+      }
+    }
+  }
+  END {
+    if (!found_style) {
+      print "alias style lookup failed" > "/dev/stderr"
+      exit 1
+    }
+    if (!found_slot) {
+      print "slot column lookup failed" > "/dev/stderr"
+      exit 1
+    }
+    exit 0
+  }
+  ' "$SLOT_NAME_MAP_FILE"
   return $?
 }
 

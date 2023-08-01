@@ -27,7 +27,7 @@ generate_vdev_id_conf() {
   # shellcheck source=./ubm_funcs.sh
   source "$SCRIPT_DIR/ubm_funcs.sh" || {
     RESULT=$?
-    echo Failed to source "$SCRIPT_DIR/ubm_funcs" >&2
+    echo Failed to source "$SCRIPT_DIR/ubm_funcs.sh" >&2
     exit $RESULT
   }
   TMPFILE=$(mktemp)
