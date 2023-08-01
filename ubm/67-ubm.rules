@@ -1,0 +1,30 @@
+#
+# /lib/udev/rules.d/67-ubm.rules
+#
+# udev rule definitions for Universal Backplane Management via Broadcom 9600 series HBA
+#
+# part of 45drives-tools
+#
+# Authors
+# Josh Boudreau <jboudreau@45drives.com>
+
+################################
+# Disk rules
+################################
+
+SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", ENV{UBM_SLOT_NAME}!="?*", IMPORT{program}="/opt/45drives/ubm/ubm_id_disk %k"
+SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", ENV{UBM_SLOT_NAME}!="?*", IMPORT{program}="/opt/45drives/ubm/ubm_id_disk %k"
+
+# DISK_HANDLED_BY_UBM environment variable will make udev skip rules in 68-vdev.rules
+ENV{SUBSYSTEM}=="block", ENV{UBM_SLOT_NAME}=="?*", ENV{DISK_HANDLED_BY_UBM}="1"
+
+KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{UBM_SLOT_NAME}=="?*", SYMLINK+="disk/by-vdev/$env{UBM_SLOT_NAME}"
+KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{UBM_SLOT_NUM}=="?*", SYMLINK+="disk/by-slot-number/$env{UBM_SLOT_NUM}"
+KERNEL=="*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{UBM_SLOT_NAME}=="?*", SYMLINK+="disk/by-vdev/$env{UBM_SLOT_NAME}-part%n"
+KERNEL=="*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{UBM_SLOT_NUM}=="?*", SYMLINK+="disk/by-slot-number/$env{UBM_SLOT_NUM}-part%n"
+
+KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_PATH}=="?*", ENV{UBM_SLOT_NAME}=="?*", RUN+="/opt/45drives/ubm/ubm_patch_vdev_id_conf $env{UBM_SLOT_NAME} $env{ID_PATH}"
+
+################################
+# Enclosure (backplane) rules
+################################
