@@ -4,7 +4,7 @@ install:
 	mkdir -p $(DESTDIR)/opt/45drives/tools
 	mkdir -p $(DESTDIR)/etc/45drives/server_info
 	mkdir -p $(DESTDIR)/usr/bin
-	cp -a src/fakeroot/opt/45drives/tools/* $(DESTDIR)/opt/45drives/tools
+	cp -a tools/* $(DESTDIR)/opt/45drives/tools
 ifdef TOOLS_VERSION
 	echo $(TOOLS_VERSION) > $(DESTDIR)/etc/45drives/server_info/tools_version
 endif
@@ -24,4 +24,3 @@ uninstall:
 	rm -f $(DESTDIR)/usr/bin/lsdev
 	rm -f $(DESTDIR)/usr/bin/server_identifier
 	rm -f $(DESTDIR)/usr/bin/zcreate
-
