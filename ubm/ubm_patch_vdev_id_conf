@@ -4,6 +4,8 @@
 #
 # Patches /etc/vdev_id.conf alias path for given drive
 #
+# Part of 45drives-tools
+#
 # Authors
 # Josh Boudreau <jboudreau@45drives.com>
 

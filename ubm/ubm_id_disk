@@ -8,6 +8,8 @@
 #
 # ENV{DEVTYPE}=="disk", IMPORT{program}="/opt/45drives/ubm/ubm_id_disk %k"
 #
+# Part of 45drives-tools
+#
 # Authors
 # Josh Boudreau <jboudreau@45drives.com>
 

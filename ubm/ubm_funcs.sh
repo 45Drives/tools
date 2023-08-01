@@ -1,5 +1,7 @@
 # ubm_funcs.sh - source to include ubm helper functions
 #
+# Part of 45drives-tools
+#
 # Authors
 # Josh Boudreau <jboudreau@45drives.com>
 
