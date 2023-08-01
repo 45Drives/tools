@@ -48,11 +48,14 @@ fi
 
 %files
 %dir /opt/45drives/tools
+%dir /opt/45drives/ubm
 %dir /etc/45drives/server_info
 %defattr(-,root,root,-)
 /etc/45drives/server_info/*
 /opt/45drives/tools/*
+/opt/45drives/ubm/*
 %{_bindir}/*
+/usr/lib/udev/rules.d/*
 
 %changelog
 * Mon Jun 12 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-6
