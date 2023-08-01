@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#
+# /opt/45drives/ubm/ubm_id_disk %k
+#
+# Outputs env variable values for UBM_SLOT_NUM and UBM_SLOT_NAME
+#
+# UDEV rule example:
+#
+# ENV{DEVTYPE}=="disk", IMPORT{program}="/opt/45drives/ubm/ubm_id_disk %k"
+#
+# Authors
+# Josh Boudreau <jboudreau@45drives.com>
+
+[ -z "$BASH" ] && echo "Must use bash" >&2 && exit 1
+
+BLOCK_DEV_KERNEL_NAME=$1
+
+SCRIPT_DIR="$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")"
+# shellcheck source=./ubm_funcs.sh
+source "$SCRIPT_DIR/ubm_funcs.sh" || { RESULT=$?; echo Failed to source "$SCRIPT_DIR/ubm_funcs" >&2; exit $RESULT; }
+
+BLOCK_DEV_KERNEL_NAME=$(normalize_block_dev_name "$BLOCK_DEV_KERNEL_NAME") || exit 0
+
+CTRL_NUM=$(block_dev_to_storcli_ctrlr "$BLOCK_DEV_KERNEL_NAME") || exit 0
+echo "MPI3MR_CTRL_NUM=$CTRL_NUM"
+
+SLOT_NUM=$(block_dev_to_slot_num "$BLOCK_DEV_KERNEL_NAME") || exit 0
+echo "UBM_SLOT_NUM=$SLOT_NUM"
+
+SLOT_NAME=$(slot_num_to_slot_name "$SLOT_NUM") || exit 0
+echo "UBM_SLOT_NAME=$SLOT_NAME"
