@@ -13,7 +13,7 @@
 
 SCRIPT_DIR="$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")"
 
-SERVER_INFO_FILE=/etc/45drives/server_info/server_info.json
+CACHE_DIR='/var/cache/45drives/ubm'
 
 SLOT_NAME_MAP_FILE="$SCRIPT_DIR/ubm_slot_name_map.txt"
 
@@ -31,19 +31,42 @@ die() {
   exit "$EXIT_CODE"
 }
 
-get_alias_style() {
-  jq -re '."Alias Style"' "$SERVER_INFO_FILE" || perror $? "Failed to get alias style"
-  return $?
-}
-
 # will exit script on error
-alias_style() {
-  if [[ -z "$ALIAS_STYLE" ]]; then
-    ALIAS_STYLE=$(get_alias_style) || exit $?
-    export ALIAS_STYLE
+get_map_key() {
+  if [[ -z "$UBM_MAP_KEY" ]]; then
+    if [[ ! -r "$CACHE_DIR/map_key" ]]; then
+      mkdir -p "$CACHE_DIR" >/dev/null
+      local LOOKUP_KEY
+      LOOKUP_KEY=$(
+        (
+          set -o pipefail
+          ipmitool fru | awk -F: '
+            BEGIN {
+              found_key = 0
+            }
+            $1 ~ "Product Name" {
+              found_key=1
+              key=toupper($2);
+              sub(/-(TURBO|BASE|ENHANCED).*$/, "", key);
+              sub(/\s+/, "", key);
+              print key;
+            }
+            END {
+              if (!found_key) {
+                print "map key lookup failed" > "/dev/stderr"
+                exit 1
+              }
+              exit 0
+            }
+            '
+        )
+      ) || die $? "Failed to get Product Name from FRU"
+      echo "$LOOKUP_KEY" >"$CACHE_DIR/map_key"
+    fi
+    UBM_MAP_KEY="$(<"$CACHE_DIR/map_key")"
+    export UBM_MAP_KEY
   fi
-  echo "$ALIAS_STYLE"
-  return 0
+  echo "$UBM_MAP_KEY"
 }
 
 normalize_block_dev_name() {
@@ -64,6 +87,25 @@ block_dev_to_storcli_ctrlr() {
   local BLOCK_DEV_SYS_PATH
   BLOCK_DEV_SYS_PATH=$(realpath -- "/sys/block/$BLOCK_DEV_NAME") || perror $? "Failed to resolve $BLOCK_DEV_NAME sys path" || return $?
   cat "$BLOCK_DEV_SYS_PATH"/../../../../scsi_host/host*/unique_id || perror $? "Failed to get $BLOCK_DEV_NAME storcli2 controller index"
+  return $?
+}
+
+slot_num_to_storcli_ctrlr() {
+  local SLOT_NUM=$1
+  (
+    set -o pipefail
+    /opt/45drives/tools/storcli2 /call/eall show all J | jq -re '
+[
+  .Controllers[] |
+  select( (."Command Status"."Status" == "Success") and ()  ) |
+  ."Response Data"."Drives List"[] |
+  select(
+    ."Drive Detailed Information"."OS Drive Name" | endswith("'"$BLOCK_DEV_NAME"'")
+  )
+] | if length == 1 then .[] else empty end |
+."Drive Information"."EID:Slt" | split(":")[1]
+'
+  ) || perror $? "Failed to get slot number for $BLOCK_DEV_NAME"
   return $?
 }
 
@@ -95,13 +137,13 @@ slot_num_to_slot_name() {
   BEGIN {
     found_style = 0
   }
-  $1 == "'"$(alias_style)"'" {
+  $1 == "'"$(get_map_key)"'" {
     found_style = 1
     print $'"$((2 + "$SLOT_NUM"))"'
   }
   END {
     if (!found_style) {
-      print "alias style lookup failed ('"$(alias_style)"')" > "/dev/stderr"
+      print "map key lookup failed ('"$(get_map_key)"')" > "/dev/stderr"
       exit 1
     }
     exit 0
@@ -117,7 +159,7 @@ slot_name_to_slot_num() {
     found_style = 0
     found_slot = 0
   }
-  $1 == "'"$(alias_style)"'" {
+  $1 == "'"$(get_map_key)"'" {
     found_style = 1
     for (i = 2; i<=NF; ++i) {
       if ($i == "'"$SLOT_NAME"'") {
@@ -128,7 +170,7 @@ slot_name_to_slot_num() {
   }
   END {
     if (!found_style) {
-      print "alias style lookup failed" > "/dev/stderr"
+      print "map key lookup failed" > "/dev/stderr"
       exit 1
     }
     if (!found_slot) {
@@ -153,7 +195,7 @@ block_dev_to_slot_name() {
 all_slot_names() {
   (
     set -o pipefail
-    grep "^$(alias_style)" "$SLOT_NAME_MAP_FILE" | cut -d' ' -f2- | xargs printf '%s\n'
+    grep "^$(get_map_key)" "$SLOT_NAME_MAP_FILE" | cut -d' ' -f2- | xargs printf '%s\n'
   ) || perror $? "Failed to lookup all slot names"
   return $?
 }
