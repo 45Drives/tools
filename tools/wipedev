@@ -1,8 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ---------------------------------------------------------------------------
 # wipedev - wipes the partition table of drives in system
 
-# Copyright 2016, Brett Kelly <bkelly@45drives.com>
+# Copyright 2016, Brett Kelly   <bkelly@45drives.com>
+#           2023, Josh Boudreau <jboudreau@45drives.com>
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -10,75 +11,73 @@
 # (at your option) any later version.
 
 usage() { # Help
-        cat << EOF
-Usage:	wipedev
-		[-a] Wipe all drives
-		[-d] Wipe specific drive 
-		[-h] Displays this message
+  local exit_code=${1:-0}
+  cat <<'EOF'
+Usage:	wipedev [-D] [-a] [-d BAY]... [BAY...]
+    [-D] Dry run
+    [-a] Wipe all drives
+    [-d] Wipe specific drive (e.g. `wipedev -d 1-1`)
+    [-h] Displays this message
 EOF
-        exit 0
-}
-checkroot(){
-	SCRIPT_NAME=$(basename "$0")
-	if [ "$EUID" -ne 0 ];then
-		echo "You must have root privileges to run $SCRIPT_NAME"
-		exit 0
-	fi
+  exit "$exit_code"
 }
 
-ALL_FLAG=0
 DEVICE_PATH=/dev/disk/by-vdev
 CONFIG_PATH=/etc
-checkroot
-while getopts 'ad:' OPTION;do
-	case ${OPTION} in
-	a)
-		ALL_FLAG=1
-		;;
-	d)
-		DISK=("$OPTARG")
-		if [ -b $DEVICE_PATH/$DISK ];then
-			:
-		else
-			echo "$DISK is not present in system"
-			exit 1
-		fi
-		;;
-	esac
-done
 
-if [ $# -eq 0 ];then
-	usage
-fi
-
-if [ $ALL_FLAG -eq 1 ];then
-	BAYS=$((cat $CONFIG_PATH/vdev_id.conf| awk "NR>1" | wc -l) 2>/dev/null)
-	i=0
-	j=2
-	## LOOP THROUGH BAYS
-	while [ "$i" -lt $BAYS ];do
-		bay=$(cat $CONFIG_PATH/vdev_id.conf | awk -v j=$j 'NR==j{print $2}')
-		BAY[$i]=$bay
-		let i=i+1
-		let j=j+1
-	done
-else
-	BAYS=1
-	BAY=$DISK
-fi
-
-i=0
-while [ "$i" -lt $BAYS ];do 
-   	if [ ! -b $DEVICE_PATH/${BAY[$i]} ];then
-        echo "Drive bay [${BAY[$i]}] is empty"
-		:
-	else     
-	    wipefs -a $DEVICE_PATH/${BAY[$i]}
-	    if [ $? -eq 0 ]; then
-		    echo -e "device ${BAY[$i]} fs has been wiped"
-	    else
-            echo "Error wiping ${BAY[$i]} fs try again manually 'wipefs -a $DEVICE_PATH/${BAY[$i]}'"
-	    fi
+ECHO_IF_DRY_RUN=
+ALL_FLAG=
+BAYS=()
+while getopts 'Dad:h' OPTION; do
+  case "$OPTION" in
+  D)
+    ECHO_IF_DRY_RUN='echo (dry run)'
+    ;;
+  a)
+    ALL_FLAG=1
+    ;;
+  d)
+    if [ -b "$DEVICE_PATH/$OPTARG" ]; then
+      BAYS+=("$OPTARG")
+    else
+      echo "Warning: $OPTARG is either empty or does not exist" >&2
     fi
-    let i=i+1
+    ;;
+  h)
+    usage 0
+    ;;
+  ?)
+    usage 2
+    ;;
+  esac
 done
+shift $((OPTIND - 1))
+
+if [ "$#" -gt 0 ]; then
+  # add additional positional arguments as if they were supplied with -d
+  BAYS+=("$@")
+fi
+
+if [ -n "$ALL_FLAG" ]; then
+  set -o pipefail
+  shopt -s lastpipe
+  readarray -t BAYS < <(awk '$1 == "alias" {print $2}' "$CONFIG_PATH/vdev_id.conf")
+  [ ${#BAYS[@]} -eq 0 ] && echo "Error getting all drives from $CONFIG_PATH/vdev_id.conf" >&2 && exit 1
+fi
+
+[ ${#BAYS[@]} -eq 0 ] && echo "No drives specified" >&2 && usage 2
+
+EXIT_CODE=0
+
+for bay in "${BAYS[@]}"; do
+  if [ ! -b "$DEVICE_PATH/$bay" ]; then
+    echo "Drive bay [$bay] is empty"
+  elif $ECHO_IF_DRY_RUN wipefs -a "$DEVICE_PATH/$bay"; then
+    [ -z "$ECHO_IF_DRY_RUN" ] && echo "device $bay fs has been wiped"
+  else
+    EXIT_CODE=$?
+    echo "Error wiping $bay fs try again manually 'wipefs -a $DEVICE_PATH/$bay'"
+  fi
+done
+
+exit $EXIT_CODE
