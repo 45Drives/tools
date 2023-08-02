@@ -939,8 +939,10 @@ def main():
 		"VM":False,
 		"Edit Mode":False,
 		"OS NAME": "?",
-		"OS VERSION_ID": "?"
+		"OS VERSION_ID": "?",
+		"Auto Alias": False
 	}
+
 	# get current time
 	current_day = datetime.today()
 	current_time = datetime.now()
@@ -963,6 +965,10 @@ def main():
 			vm_passthrough(server) 			# VM with hba pass through detected, update server accordingly
 
 	server["Alias Style"] = g_product_lut[server["Model"]][g_product_lut_idx["ALIAS_STYLE"]]
+
+	# set auto alias flag for servers that are automatically aliased using udev rules.
+	if server["Alias Style"] in ["2UTMSTORNADO"]:
+		server["Auto Alias"] = True
 	
 	# This is added to use only a single chassis size for the Stornado
 	if "Product Part Number" in serial_result.keys():

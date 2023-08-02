@@ -835,6 +835,17 @@ def main():
 
 	server = get_server_info()
 	warn_hwraid(server)
+
+	# check to see if server is capable of auto aliasing
+	if server.get("Auto Alias",False):
+		#trigger udev
+		if options.trigger_udev:
+			reload_udev()
+			trigger_udev()
+		log("Server model {sm} is eligible for automatic device aliasing via udev rules.".format(sm=server["model"]))
+		log("dmap will not modify /etc/vdev_id.conf when it is created automatically by udev rules.")
+		sys.exit(0)
+
 	vdev_id_conf = create_vdev_id(server)
 
 	if vdev_id_conf == None:
