@@ -21,7 +21,7 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","2UTM"]
 
 g_mobo_to_version_lut = {
 	"Base": ["X11SSH-CTF","X11SSM-F"],
@@ -29,8 +29,8 @@ g_mobo_to_version_lut = {
 	"Enhanced": ["X11SPL-F","X10SRL-F"],
 	"Enhanced-S":["X11SPL-F"],
 	"Enhanced-AMD":["H11SSL-i"],
-	"Turbo": ["X11DPL-i","X10DRL-i"],
-	"Turbo-G":["X11SPL-F"],
+	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6"],
+	"Turbo-G":["X11SPL-F","X12DPi-N6"],
 }
 
 g_product_lut = {
@@ -189,6 +189,12 @@ g_product_lut = {
 	"Stornado-2U-Enhanced-S":			[g_mobo_to_version_lut["Enhanced-S"]  ,0,2,"2U","2USTORNADO"],
 	"Stornado-2U-Turbo-G":				[g_mobo_to_version_lut["Turbo-G"]  ,0,2,"2U","2USTORNADO"],
 	"Stornado-2U-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,2,"2U","2USTORNADO"],
+
+	"Stornado-2UTM-Base-B":				[g_mobo_to_version_lut["Base-B"]  ,0,4,"2UTM","2UTMSTORNADO"],
+	"Stornado-2UTM-Enhanced-AMD":		[g_mobo_to_version_lut["Enhanced-AMD"]  ,0,4,"2UTM","2UTMSTORNADO"],
+	"Stornado-2UTM-Enhanced-S":			[g_mobo_to_version_lut["Enhanced-S"]  ,0,4,"2UTM","2UTMSTORNADO"],
+	"Stornado-2UTM-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,0,4,"2UTM","2UTMSTORNADO"],
+	"Stornado-2UTM-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,4,"2UTM","2UTMSTORNADO"],
 
 	"Destroyinator-AV15-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,1,"AV15","DESTROYINATOR"],
 	"Destroyinator-AV15-Enhanced-S":	[g_mobo_to_version_lut["Enhanced-S"],0,1,"AV15","DESTROYINATOR"],
