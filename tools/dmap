@@ -842,7 +842,7 @@ def main():
 		if options.trigger_udev:
 			reload_udev()
 			trigger_udev()
-		log("Server model {sm} is eligible for automatic device aliasing via udev rules.".format(sm=server["model"]))
+		log("Server model {sm} is eligible for automatic device aliasing via udev rules.".format(sm=server["Model"]))
 		log("dmap will not modify /etc/vdev_id.conf when it is created automatically by udev rules.")
 		sys.exit(0)
 
