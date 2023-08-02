@@ -19,8 +19,10 @@ SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", ENV{UBM_SLOT_
 ENV{SUBSYSTEM}=="block", ENV{UBM_SLOT_NAME}=="?*", ENV{DISK_HANDLED_BY_UBM}="1"
 
 KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{UBM_SLOT_NAME}=="?*", SYMLINK+="disk/by-vdev/$env{UBM_SLOT_NAME}"
+KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{UBM_SLOT_NAME}=="?*", SYMLINK+="$env{UBM_SLOT_NAME}"
 KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{UBM_SLOT_NUM}=="?*", SYMLINK+="disk/by-slot-number/$env{UBM_SLOT_NUM}"
 KERNEL=="*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{UBM_SLOT_NAME}=="?*", SYMLINK+="disk/by-vdev/$env{UBM_SLOT_NAME}-part%n"
+KERNEL=="*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{UBM_SLOT_NAME}=="?*", SYMLINK+="$env{UBM_SLOT_NAME}-part%n"
 KERNEL=="*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{UBM_SLOT_NUM}=="?*", SYMLINK+="disk/by-slot-number/$env{UBM_SLOT_NUM}-part%n"
 
 KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_PATH}=="?*", ENV{UBM_SLOT_NAME}=="?*", RUN+="/opt/45drives/ubm/ubm_patch_vdev_id_conf $env{UBM_SLOT_NAME} $env{ID_PATH}"
