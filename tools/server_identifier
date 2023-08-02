@@ -21,7 +21,7 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","2UTM"]
 
 g_mobo_to_version_lut = {
 	"Base": ["X11SSH-CTF","X11SSM-F"],
@@ -29,11 +29,17 @@ g_mobo_to_version_lut = {
 	"Enhanced": ["X11SPL-F","X10SRL-F"],
 	"Enhanced-S":["X11SPL-F"],
 	"Enhanced-AMD":["H11SSL-i"],
-	"Turbo": ["X11DPL-i","X10DRL-i"],
-	"Turbo-G":["X11SPL-F"],
+	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6"],
+	"Turbo-G":["X11SPL-F","X12DPi-N6"],
 }
 
 g_product_lut = {
+	"Gateway-2UGW-Base":				[g_mobo_to_version_lut["Base"],0,0,"2UGW","2UGW"],
+	"Gateway-2UGW-Base-B":				[g_mobo_to_version_lut["Base"],0,0,"2UGW","2UGW"],
+	"Gateway-2UGW-Enhanced":			[g_mobo_to_version_lut["Enhanced"],0,0,"2UGW","2UGW"],
+	"Gateway-2UGW-Enhanced-S":			[g_mobo_to_version_lut["Enhanced"],0,0,"2UGW","2UGW"],
+	"Gateway-2UGW-Turbo-G":				[g_mobo_to_version_lut["Turbo"],0,0,"2UGW","2UGW"],
+
 	"Storinator-AV15-Base":				[g_mobo_to_version_lut["Base"],0,0,"AV15","AV15-BASE"],
 	"Storinator-AV15-Base-B":			[g_mobo_to_version_lut["Base-B"],0,1,"AV15","STORINATOR"],
 	"Storinator-AV15-Enhanced":			[g_mobo_to_version_lut["Enhanced"],0,1,"AV15","STORINATOR"],
@@ -183,6 +189,12 @@ g_product_lut = {
 	"Stornado-2U-Enhanced-S":			[g_mobo_to_version_lut["Enhanced-S"]  ,0,2,"2U","2USTORNADO"],
 	"Stornado-2U-Turbo-G":				[g_mobo_to_version_lut["Turbo-G"]  ,0,2,"2U","2USTORNADO"],
 	"Stornado-2U-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,2,"2U","2USTORNADO"],
+
+	"Stornado-2UTM-Base-B":				[g_mobo_to_version_lut["Base-B"]  ,0,4,"2UTM","2UTMSTORNADO"],
+	"Stornado-2UTM-Enhanced-AMD":		[g_mobo_to_version_lut["Enhanced-AMD"]  ,0,4,"2UTM","2UTMSTORNADO"],
+	"Stornado-2UTM-Enhanced-S":			[g_mobo_to_version_lut["Enhanced-S"]  ,0,4,"2UTM","2UTMSTORNADO"],
+	"Stornado-2UTM-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,0,4,"2UTM","2UTMSTORNADO"],
+	"Stornado-2UTM-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,4,"2UTM","2UTMSTORNADO"],
 
 	"Destroyinator-AV15-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,1,"AV15","DESTROYINATOR"],
 	"Destroyinator-AV15-Enhanced-S":	[g_mobo_to_version_lut["Enhanced-S"],0,1,"AV15","DESTROYINATOR"],
@@ -467,6 +479,8 @@ def hba_lspci(server):
 		for pci_slot in pci_slots:
 			for card in hba:
 				if card["Bus Address"] in pci_slot["Bus Address"]:
+					# The bus address provided by dmidecode contains the bus address provided by lspci.
+					# we can assign the PCI Slot accordingly.
 					card["PCI Slot"] = pci_slot["ID"]
 					if len(sys_bus_addrs) > 0 and pci_slot["Bus Address"] not in sys_bus_addrs:
 						# dmidecode gave a bus address that does not match the one used by the system
@@ -481,13 +495,24 @@ def hba_lspci(server):
 						# use the bus address provided by dmidecode
 						# update the cards bus address to the full format (eg: 0000:01:00.0)
 						card["Bus Address"] = pci_slot["Bus Address"]
-					
-		#sort the final list of hba cards by the Bus Address field. This ensures that
-		#the order in which they are stored resembles the lspci output. which has
-		#worked reliably in the past.
+		
+		#ensure that the bus address is the one in use by the system.
+		verify_bus_addresses(sys_bus_addrs,hba)
+
+		#sort them in ascending order
 		hba = sorted(hba, key=lambda k: k['Bus Address']) 
 
 	return hba, hybrid_flag
+
+def verify_bus_addresses(sys_bus_addrs,hba_cards):
+	for card in hba_cards:
+		if len(sys_bus_addrs) > 0:
+			for j in range(0,len(sys_bus_addrs)):
+				if card["Bus Address"] in sys_bus_addrs[j]:
+					# we have found the system bus address that matches the substring
+					# address provided by lspci update the card's bus address field
+					card["Bus Address"] = sys_bus_addrs[j]
+					break
 
 def hba():
 	# determine the model and count of hba cards present in the system

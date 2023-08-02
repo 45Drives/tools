@@ -306,6 +306,9 @@ def build_server(options):
 		"2USTORNADO":{
 			"2U":[32]
 		},
+		"2UTMSTORNADO":{
+			"2UTM":[32]
+		},
 		"AV15-BASE":{
 			"AV15":[15]
 		},
@@ -331,12 +334,20 @@ def build_server(options):
 	try:
 		vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
 	except IOError:
+		if "Chassis Size" in server_obj.keys() and server_obj["Chassis Size"] in ["2UGW"]:
+			print("This program is intended to display disk information for servers with dedicated storage bays.".format(astyle=server_obj["Alias Style"]))
+			print("Use command line utilities such as lsblk to see disk information for Ceph Gateways.".format(astyle=server_obj["Alias Style"]))
+			exit(1)
 		print("Error opening " + CONFIG_PATH + "/vdev_id.conf. Run `dmap`.")
 		exit(1)
 
 	if "Alias Style" not in server_obj.keys():
 		print("Unable to determine Alias Style from /etc/45drives/server_info/server_info.json: ")
 		print(json.dumps(server_obj,indent=4))
+		exit(1)
+	elif "Chassis Size" in server_obj.keys() and server_obj["Chassis Size"] in ["2UGW"]:
+		print("This program is intended to display disk information for servers with dedicated storage bays.".format(astyle=server_obj["Alias Style"]))
+		print("Use command line utilities such as lsblk to see disk information for Ceph Gateways.".format(astyle=server_obj["Alias Style"]))
 		exit(1)
 	elif server_obj["Alias Style"] not in alias_template.keys():
 		print("Unknown Alias Style '{astyle}' encountered.".format(astyle=server_obj["Alias Style"]))
@@ -618,7 +629,7 @@ def print_bays(server, options, osd, server_info):
 	table_print(ansi = options.colour, c_count = len(print_array), c_txt = print_array, c_labels = col_headers, h_txt = header_text, padding = 1)
 	
 	# legend
-	if "Alias Style" in server_info.keys() and server_info["Alias Style"] != "2USTORNADO":
+	if "Alias Style" in server_info.keys() and server_info["Alias Style"] not in ["2USTORNADO","2UTMSTORNADO"]:
 		print(" <-- motherboard | front plate -->")
 	print(" Legend:")
 	if options.colour:

@@ -437,6 +437,9 @@ def create_vdev_id(server):
 		"2USTORNADO":{
 			"2U":[16,16]
 		},
+		"2UTMSTORNADO":{
+			"2UTM":[8,8,8,8]
+		},
 		"AV15-BASE":{
 			"AV15":[0]
 		},
@@ -459,13 +462,13 @@ def create_vdev_id(server):
 	# Make sure that the user didn't make any manual edits that can throw dmap.
 	if server["Alias Style"] not in alias_template.keys():
 			log("/opt/45drives/tools/dmap: !! ERROR !! Invalid Alias Style set in /etc/45drives/server_info/server_info.json")
-			log("                          Valid Options are: ", alias_template.keys())
+			log("                          Valid Options are: {o}".format(o=alias_template.keys()))
 			log("                          You can manually edit this file by setting \"Edit Mode\": true")
 			log("                          in /etc/45drives/server_info/server_info.json along with any other parameters")
 			sys.exit(1)
 	elif server["Chassis Size"] not in alias_template[server["Alias Style"]].keys():
 			log("/opt/45drives/tools/dmap: !! ERROR !! Invalid Chassis Size and Alias Style combination set in /etc/45drives/server_info/server_info.json")
-			log("                          Valid Chassis Size Options for " + server["Alias Style"] + " are: ", alias_template[server["Alias Style"]].keys())
+			log("                          Valid Chassis Size Options for " + server["Alias Style"] + " are: {o}".format(o=alias_template[server["Alias Style"]].keys()))
 			log("                          You can manually edit this file by setting \"Edit Mode\": true")
 			log("                          in /etc/45drives/server_info/server_info.json along with any other parameters")
 			sys.exit(1)

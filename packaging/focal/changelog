@@ -1,3 +1,23 @@
+45drives-tools (2.2.3-1focal) focal; urgency=medium
+
+  * updated server_identifier and lsdev to operate with ceph gateway servers more
+    gracefully
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 23 Jun 2023 08:46:49 -0300
+
+45drives-tools (2.2.2-8focal) focal; urgency=medium
+
+  * added contingency in server_identifier for 2U Gateway servers
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 23 Jun 2023 08:01:32 -0300
+
+45drives-tools (2.2.2-7focal) focal; urgency=medium
+
+  * added a check in server_identifier to ensure that the bus address of a given
+    HBA matches that found in /sys/bus/pci/devices
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 13 Jun 2023 13:16:03 -0300
+
 45drives-tools (2.2.2-6focal) focal; urgency=medium
 
   * added rudimentary bus address translation for ROMED8-2T Motherboards
