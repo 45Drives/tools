@@ -1,0 +1,16 @@
+# file: /opt/45drives/ubm/ubm_slot_name_map.txt
+# 
+# Slot name mapping from UBM slot number (as index) to friendly slot name.
+# UBM slot numbers will always be numeric, incremental, and unique, starting at 0.
+#
+# Format:
+# ALIAS_STYLE_KEY SLOT_NAME_0 SLOT_NAME_1 ... SLOT_NAME_N
+#
+# where ALIAS_STYLE_KEY is the "Product Name" field from `ipmitool fru`, to uppercase, with -TURBO*|-ENHANCED*|-BASE* suffixes removed
+#
+# Example usage:
+# ALIAS_STYLE=$(ipmitool fru | awk -F: '$1 ~ "Product Name" { key=toupper($2); sub(/-(TURBO|BASE|ENHANCED).*$/, "", key); sub(/\s+/, "", key); print key }')
+# LOOKUP_COLUMN=$((2 + "$SLOT_NUM"))
+# SLOT_NAME=$(awk '$1 == "'"$ALIAS_STYLE"'" { print $'"$LOOKUP_COLUMN"' }' /opt/45drives/ubm/ubm_slot_name_map.txt)
+
+STORNADO-2UTM 1-1 1-2 1-3 1-4 1-5 1-6 1-7 1-8 2-1 2-2 2-3 2-4 2-5 2-6 2-7 2-8 3-1 3-2 3-3 3-4 3-5 3-6 3-7 3-8 4-1 4-2 4-3 4-4 4-5 4-6 4-7 4-8
