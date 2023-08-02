@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.3-1
+## 45drives-tools 3.0.0-1
 
-* updated server_identifier and lsdev to operate with ceph gateway servers more gracefully
+* test build of tools which supports ubm backplanes

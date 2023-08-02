@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Wed Aug 02 2023 Mark Hooper <mhooper@45drives.com> 3.0.0-1
+- test build of tools which supports ubm backplanes
 * Fri Jun 23 2023 Mark Hooper <mhooper@45drives.com> 2.2.3-1
 - updated server_identifier and lsdev to operate with ceph gateway servers more gracefully
 * Fri Jun 23 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-8
