@@ -50,13 +50,13 @@ get_map_key() {
               sub(/-(TURBO|BASE|ENHANCED).*$/, "", key);
               sub(/\s+/, "", key);
               print key;
+              exit
             }
             END {
               if (!found_key) {
                 print "map key lookup failed" > "/dev/stderr"
                 exit 1
               }
-              exit 0
             }
             '
         )
@@ -140,13 +140,13 @@ slot_num_to_slot_name() {
   $1 == "'"$(get_map_key)"'" {
     found_style = 1
     print $'"$((2 + "$SLOT_NUM"))"'
+    exit
   }
   END {
     if (!found_style) {
       print "map key lookup failed ('"$(get_map_key)"')" > "/dev/stderr"
       exit 1
     }
-    exit 0
   }
   ' "$SLOT_NAME_MAP_FILE" || perror $? "Failed to lookup slot name for slot $SLOT_NUM"
   return $?
@@ -156,20 +156,21 @@ slot_name_to_slot_num() {
   local SLOT_NAME=$1
   awk '
   BEGIN {
-    found_style = 0
+    found_key = 0
     found_slot = 0
   }
   $1 == "'"$(get_map_key)"'" {
-    found_style = 1
+    found_key = 1
     for (i = 2; i<=NF; ++i) {
       if ($i == "'"$SLOT_NAME"'") {
         found_slot = 1
         print i - 2
+        exit
       }
     }
   }
   END {
-    if (!found_style) {
+    if (!found_key) {
       print "map key lookup failed" > "/dev/stderr"
       exit 1
     }
@@ -177,7 +178,6 @@ slot_name_to_slot_num() {
       print "slot column lookup failed" > "/dev/stderr"
       exit 1
     }
-    exit 0
   }
   ' "$SLOT_NAME_MAP_FILE"
   return $?
@@ -197,5 +197,27 @@ all_slot_names() {
     set -o pipefail
     grep "^$(get_map_key)" "$SLOT_NAME_MAP_FILE" | cut -d' ' -f2- | xargs printf '%s\n'
   ) || perror $? "Failed to lookup all slot names"
+  return $?
+}
+
+all_slot_nums() {
+  awk '
+  BEGIN {
+    found_key = 0
+  }
+  $1 == "'"$(get_map_key)"'" {
+    found_key = 1
+    for (i = 2; i<=NF; ++i) {
+      print i - 2
+    }
+    exit
+  }
+  END {
+    if (!found_key) {
+      print "map key lookup failed" > "/dev/stderr"
+      exit 1
+    }
+  }
+  ' "$SLOT_NAME_MAP_FILE" || perror $? "Failed to lookup all slot numbers"
   return $?
 }
