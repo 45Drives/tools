@@ -32,12 +32,15 @@ make DESTDIR=%{buildroot} TOOLS_VERSION="%{version}-::package_build_version::" i
 if [ $1 == 0 ];then
     rm -rf /opt/45drives/tools
     rm -rf /etc/45drives/server_info
+    rm -rf /opt/45drives/dalias
 	rm -f /usr/bin/cephfs-dir-stats
 	rm -f /usr/bin/dmap
 	rm -f /usr/bin/findosd
 	rm -f /usr/bin/lsdev
 	rm -f /usr/bin/server_identifier
 	rm -f /usr/bin/zcreate
+  rm -f /usr/bin/wipedev
+  rm -f /usr/bin/dalias
     rmdir /etc/45drives --ignore-fail-on-non-empty
     rmdir /opt/45drives --ignore-fail-on-non-empty
     OLD_TOOLS_DIR=/opt/tools
@@ -48,16 +51,20 @@ fi
 
 %files
 %dir /opt/45drives/tools
+%dir /opt/45drives/dalias
 %dir /opt/45drives/ubm
 %dir /etc/45drives/server_info
 %defattr(-,root,root,-)
 /etc/45drives/server_info/*
 /opt/45drives/tools/*
 /opt/45drives/ubm/*
+/opt/45drives/dalias/*
 %{_bindir}/*
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Thu Aug 03 2023 Mark Hooper <mhooper@45drives.com> 3.0.0-2
+- added dalias program for manual device aliasing
 * Wed Aug 02 2023 Mark Hooper <mhooper@45drives.com> 3.0.0-1
 - test build of tools which supports ubm backplanes
 * Fri Jun 23 2023 Mark Hooper <mhooper@45drives.com> 2.2.3-1

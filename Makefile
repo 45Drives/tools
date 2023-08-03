@@ -4,9 +4,11 @@ install:
 	mkdir -p "$(DESTDIR)/opt/45drives/tools"
 	mkdir -p "$(DESTDIR)/opt/45drives/ubm"
 	mkdir -p "$(DESTDIR)/etc/45drives/server_info"
+	mkdir -p "$(DESTDIR)/etc/45drives/dalias"
 	mkdir -p "$(DESTDIR)/usr/bin"
 	mkdir -p "$(DESTDIR)/usr/lib/udev/rules.d"
 	cp -a tools/* "$(DESTDIR)/opt/45drives/tools"
+	cp -a dalias/* "$(DESTDIR)/opt/45drives/dalias"
 	install -m 755 -t "$(DESTDIR)/opt/45drives/ubm" ubm/ubm_id_disk
 	install -m 755 -t "$(DESTDIR)/opt/45drives/ubm" ubm/ubm_id_enc
 	install -m 755 -t "$(DESTDIR)/opt/45drives/ubm" ubm/ubm_patch_vdev_id_conf
@@ -22,6 +24,8 @@ endif
 	ln -sf /opt/45drives/tools/lsdev "$(DESTDIR)/usr/bin/lsdev"
 	ln -sf /opt/45drives/tools/server_identifier "$(DESTDIR)/usr/bin/server_identifier"
 	ln -sf /opt/45drives/tools/zcreate "$(DESTDIR)/usr/bin/zcreate"
+	ln -sf /opt/45drives/dalias/dalias "$(DESTDIR)/usr/bin/dalias"
+	ln -sf /opt/45drives/tools/wipedev "$(DESTDIR)/usr/bin/wipedev"
 
 uninstall:
 	rm -rf "$(DESTDIR)/etc/45drives/server_info"
@@ -34,3 +38,5 @@ uninstall:
 	rm -f "$(DESTDIR)/usr/bin/server_identifier"
 	rm -f "$(DESTDIR)/usr/bin/zcreate"
 	rm -f "$(DESTDIR)/usr/lib/udev/rules.d/67-ubm.rules"
+	rm -f "$(DESTDIR)/usr/bin/dalias"
+	rm -f "$(DESTDIR)/usr/bin/wipedev"

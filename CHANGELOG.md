@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.0-1
+## 45drives-tools 3.0.0-2
 
-* test build of tools which supports ubm backplanes
+* added dalias program for manual device aliasing
