@@ -4,7 +4,7 @@ install:
 	mkdir -p "$(DESTDIR)/opt/45drives/tools"
 	mkdir -p "$(DESTDIR)/opt/45drives/ubm"
 	mkdir -p "$(DESTDIR)/etc/45drives/server_info"
-	mkdir -p "$(DESTDIR)/etc/45drives/dalias"
+	mkdir -p "$(DESTDIR)/opt/45drives/dalias"
 	mkdir -p "$(DESTDIR)/usr/bin"
 	mkdir -p "$(DESTDIR)/usr/lib/udev/rules.d"
 	cp -a tools/* "$(DESTDIR)/opt/45drives/tools"

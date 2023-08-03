@@ -3,7 +3,7 @@
 if [ "$1" == "remove" ] || [ "$1" == "purge" ]; then
     rm -rf /opt/45drives/tools
     rm -rf /etc/45drives/server_info
-	rm -rf /etc/45drives/dalias
+	rm -rf /opt/45drives/dalias
 	rm -f /usr/bin/cephfs-dir-stats
 	rm -f /usr/bin/dmap
 	rm -f /usr/bin/findosd

@@ -63,6 +63,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Thu Aug 03 2023 Mark Hooper <mhooper@45drives.com> 3.0.0-3
+- updated Makefile
 * Thu Aug 03 2023 Mark Hooper <mhooper@45drives.com> 3.0.0-2
 - added dalias program for manual device aliasing
 * Wed Aug 02 2023 Mark Hooper <mhooper@45drives.com> 3.0.0-1
