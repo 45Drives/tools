@@ -63,6 +63,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Wed Aug 09 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.0-4
+- change mpi3mr dependency to mpi3mr-dkms
 * Thu Aug 03 2023 Mark Hooper <mhooper@45drives.com> 3.0.0-3
 - updated Makefile
 * Thu Aug 03 2023 Mark Hooper <mhooper@45drives.com> 3.0.0-2

@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.0-3
+## 45drives-tools 3.0.0-4
 
-* updated Makefile
+* change mpi3mr dependency to mpi3mr-dkms

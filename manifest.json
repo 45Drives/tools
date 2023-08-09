@@ -4,7 +4,7 @@
     "title": "45drives-tools",
     "prerelease": true,
     "version": "3.0.0",
-    "buildVersion": "3",
+    "buildVersion": "4",
     "author": "Mark Hooper <mhooper@45drives.com>",
     "url": "https://github.com/45Drives/tools",
     "category": "utils",
@@ -31,7 +31,7 @@
             "pciutils",
             "hdparm",
             "udev",
-            "mpi3mr",
+            "mpi3mr-dkms",
             "lsscsi"
         ],
         "el": [
@@ -42,6 +42,7 @@
             "python3",
             "pciutils",
             "hdparm",
+            "mpi3mr-dkms",
             "lsscsi"
         ]
     },
@@ -65,7 +66,7 @@
     "changelog": {
         "urgency": "medium",
         "version": "3.0.0",
-        "buildVersion": "3",
+        "buildVersion": "4",
         "ignore": [],
         "date": null,
         "packager": "Mark Hooper <mhooper@45drives.com>",
