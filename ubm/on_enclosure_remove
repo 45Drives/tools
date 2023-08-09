@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#
+# ACTION=="remove", ENV{SUBSYSTEM}=="enclosure", RUN+="/opt/45drives/ubm/on_enclosure_remove"
+#
+# Removes array slot device links in /var/run/45drives/slots from SLOT_LINKS environment
+# variable set by /opt/45drives/ubm/on_enclosure_add
+#
+# Part of 45drives-tools
+#
+# Authors
+# Josh Boudreau <jboudreau@45drives.com> 2023
+#
+
+for SLOT_LINK in $SLOT_LINKS; do
+  if [ -L "$SLOT_LINK" ]; then
+    LINK_DIR=$(dirname "$SLOT_LINK")
+    rm "$SLOT_LINK"
+    rmdir --parents --ignore-fail-on-non-empty "$LINK_DIR"
+  fi
+done

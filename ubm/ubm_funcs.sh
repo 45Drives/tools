@@ -31,7 +31,6 @@ die() {
   exit "$EXIT_CODE"
 }
 
-# will exit script on error
 get_map_key() {
   if [[ -z "$UBM_MAP_KEY" ]]; then
     if [[ ! -r "$CACHE_DIR/map_key" ]]; then
@@ -133,18 +132,20 @@ block_dev_to_slot_num() {
 slot_num_to_slot_name() {
   local SLOT_NUM=$1
   [[ $SLOT_NUM =~ ^[0-9]+$ ]] || perror 1 Invalid slot number: "$SLOT_NUM" || return $?
+  local MAP_KEY
+  MAP_KEY=$(get_map_key) || return $?
   awk '
   BEGIN {
     found_style = 0
   }
-  $1 == "'"$(get_map_key)"'" {
+  $1 == "'"$MAP_KEY"'" {
     found_style = 1
     print $'"$((2 + "$SLOT_NUM"))"'
     exit
   }
   END {
     if (!found_style) {
-      print "map key lookup failed ('"$(get_map_key)"')" > "/dev/stderr"
+      print "map key lookup failed ('"$MAP_KEY"')" > "/dev/stderr"
       exit 1
     }
   }
@@ -154,12 +155,14 @@ slot_num_to_slot_name() {
 
 slot_name_to_slot_num() {
   local SLOT_NAME=$1
+  local MAP_KEY
+  MAP_KEY=$(get_map_key) || return $?
   awk '
   BEGIN {
     found_key = 0
     found_slot = 0
   }
-  $1 == "'"$(get_map_key)"'" {
+  $1 == "'"$MAP_KEY"'" {
     found_key = 1
     for (i = 2; i<=NF; ++i) {
       if ($i == "'"$SLOT_NAME"'") {
@@ -193,19 +196,23 @@ block_dev_to_slot_name() {
 }
 
 all_slot_names() {
+  local MAP_KEY
+  MAP_KEY=$(get_map_key) || return $?
   (
     set -o pipefail
-    grep "^$(get_map_key)" "$SLOT_NAME_MAP_FILE" | cut -d' ' -f2- | xargs printf '%s\n'
+    grep "^$MAP_KEY" "$SLOT_NAME_MAP_FILE" | cut -d' ' -f2- | xargs printf '%s\n'
   ) || perror $? "Failed to lookup all slot names"
   return $?
 }
 
 all_slot_nums() {
+  local MAP_KEY
+  MAP_KEY=$(get_map_key) || return $?
   awk '
   BEGIN {
     found_key = 0
   }
-  $1 == "'"$(get_map_key)"'" {
+  $1 == "'"$MAP_KEY"'" {
     found_key = 1
     for (i = 2; i<=NF; ++i) {
       print i - 2
