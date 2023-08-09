@@ -16,7 +16,7 @@
 SLOT_LINK_DIR=/var/run/45drives/slots
 CACHE_DIR='/var/cache/45drives/ubm'
 SCRIPT_DIR="$(dirname -- "$(readlink -f -- "$0")")"
-SLOT_NAME_MAP_FILE="$SCRIPT_DIR/ubm_slot_name_map.txt"
+SLOT_NAME_MAP_FILE="$SCRIPT_DIR/slot_name_map.txt"
 
 # DEVPATH defined in env by udev
 [ -z "$DEVPATH" ] && exit 0

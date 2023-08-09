@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# /opt/45drives/ubm/ubm_patch_vdev_id_conf $env{UBM_SLOT_NAME} $env{ID_PATH}
+# /opt/45drives/ubm/patch_vdev_id_conf $env{UBM_SLOT_NAME} $env{ID_PATH}
 #
 # Patches /etc/vdev_id.conf alias path for given drive
 #
@@ -67,4 +67,4 @@ generate_vdev_id_conf() {
   sed -i 's/\x0/#/g' "$TMPFILE"
 
   mv "$TMPFILE" "$VDEV_ID_CONF"
-) 200>/var/lock/ubm_patch_vdev_id_conf.lock
+) 200>/var/lock/patch_vdev_id_conf.lock

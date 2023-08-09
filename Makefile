@@ -9,11 +9,14 @@ install:
 	mkdir -p "$(DESTDIR)/usr/lib/udev/rules.d"
 	cp -a tools/* "$(DESTDIR)/opt/45drives/tools"
 	cp -a dalias/* "$(DESTDIR)/opt/45drives/dalias"
-	install -m 755 -t "$(DESTDIR)/opt/45drives/ubm" ubm/ubm_id_disk
-	install -m 755 -t "$(DESTDIR)/opt/45drives/ubm" ubm/ubm_id_enc
-	install -m 755 -t "$(DESTDIR)/opt/45drives/ubm" ubm/ubm_patch_vdev_id_conf
-	install -m 644 -t "$(DESTDIR)/opt/45drives/ubm" ubm/ubm_funcs.sh
-	install -m 644 -t "$(DESTDIR)/opt/45drives/ubm" ubm/ubm_slot_name_map.txt
+	install -m 755 -t "$(DESTDIR)/opt/45drives/ubm" \
+		ubm/id_disk \
+		ubm/patch_vdev_id_conf \
+		ubm/on_enclosure_add \
+		ubm/on_enclosure_remove
+	install -m 644 -t "$(DESTDIR)/opt/45drives/ubm" \
+		ubm/ubm_funcs.sh \
+		ubm/slot_name_map.txt
 	install -m 644 -t "$(DESTDIR)/usr/lib/udev/rules.d" ubm/67-ubm.rules
 ifdef TOOLS_VERSION
 	echo $(TOOLS_VERSION) > "$(DESTDIR)/etc/45drives/server_info/tools_version"

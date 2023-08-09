@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# /opt/45drives/ubm/ubm_id_disk %k
+# /opt/45drives/ubm/id_disk %k
 #
 # Outputs env variable values for SLOT_NUM and SLOT_NAME
 #
 # UDEV rule example:
 #
-# ENV{DEVTYPE}=="disk", IMPORT{program}="/opt/45drives/ubm/ubm_id_disk %k"
+# ENV{DEVTYPE}=="disk", IMPORT{program}="/opt/45drives/ubm/id_disk %k"
 #
 # Part of 45drives-tools
 #
@@ -18,7 +18,7 @@ BLOCK_DEV_KERNEL_NAME=$1
 
 CACHE_DIR='/var/cache/45drives/ubm'
 SCRIPT_DIR="$(dirname -- "$(readlink -f -- "$0")")"
-SLOT_NAME_MAP_FILE="$SCRIPT_DIR/ubm_slot_name_map.txt"
+SLOT_NAME_MAP_FILE="$SCRIPT_DIR/slot_name_map.txt"
 
 [ -z "$BLOCK_DEV_KERNEL_NAME" ] && echo "Must pass device kernel name" >&2 && exit 2
 

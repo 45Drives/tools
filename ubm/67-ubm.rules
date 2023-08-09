@@ -14,9 +14,9 @@
 # if slot attribute is exposed in sysfs (using patched mpi3mr driver), assign to ENV{SLOT_NUM} to avoid running storcli2 for every device
 SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", ATTR{slot}=="?*", ENV{SLOT_NUM}="$attr{slot}"
 SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", ATTRS{slot}=="?*", IMPORT{parent}="SLOT_NUM"
-# fill in remaining ENV variables with ubm_id_disk
-SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", IMPORT{program}="/opt/45drives/ubm/ubm_id_disk %k"
-SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", IMPORT{program}="/opt/45drives/ubm/ubm_id_disk %k"
+# fill in remaining ENV variables with ubm/id_disk
+SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", IMPORT{program}="/opt/45drives/ubm/id_disk %k"
+SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", IMPORT{program}="/opt/45drives/ubm/id_disk %k"
 
 # DISK_HANDLED_BY_UBM environment variable will make udev skip rules in 68-vdev.rules
 ENV{SUBSYSTEM}=="block", ENV{SLOT_NUM}=="?*", ENV{DISK_HANDLED_BY_UBM}="1"
@@ -27,7 +27,7 @@ KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{SLOT_NUM}=="?*", SYMLINK+="disk/
 KERNEL=="*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{SLOT_NAME}=="?*", SYMLINK+="disk/by-vdev/$env{SLOT_NAME}-part%n", SYMLINK+="$env{SLOT_NAME}-part%n"
 KERNEL=="*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{SLOT_NUM}=="?*", SYMLINK+="disk/by-slot-number/$env{SLOT_NUM}-part%n"
 
-KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_PATH}=="?*", ENV{SLOT_NAME}=="?*", RUN+="/opt/45drives/ubm/ubm_patch_vdev_id_conf $env{SLOT_NAME} $env{ID_PATH}"
+KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_PATH}=="?*", ENV{SLOT_NAME}=="?*", RUN+="/opt/45drives/ubm/patch_vdev_id_conf $env{SLOT_NAME} $env{ID_PATH}"
 
 ################################
 # Enclosure (backplane) rules

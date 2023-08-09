@@ -15,7 +15,7 @@ SCRIPT_DIR="$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")"
 
 CACHE_DIR='/var/cache/45drives/ubm'
 
-SLOT_NAME_MAP_FILE="$SCRIPT_DIR/ubm_slot_name_map.txt"
+SLOT_NAME_MAP_FILE="$SCRIPT_DIR/slot_name_map.txt"
 
 perror() {
   local EXIT_CODE=$1
