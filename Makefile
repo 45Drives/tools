@@ -13,7 +13,8 @@ install:
 		ubm/id_disk \
 		ubm/patch_vdev_id_conf \
 		ubm/on_enclosure_add \
-		ubm/on_enclosure_remove
+		ubm/on_enclosure_remove \
+		ubm/slot_led_ctrl
 	install -m 644 -t "$(DESTDIR)/opt/45drives/ubm" \
 		ubm/ubm_funcs.sh \
 		ubm/slot_name_map.txt
@@ -29,6 +30,7 @@ endif
 	ln -sf /opt/45drives/tools/zcreate "$(DESTDIR)/usr/bin/zcreate"
 	ln -sf /opt/45drives/dalias/dalias "$(DESTDIR)/usr/bin/dalias"
 	ln -sf /opt/45drives/tools/wipedev "$(DESTDIR)/usr/bin/wipedev"
+	ln -sf /opt/45drives/ubm/slot_led_ctrl "$(DESTDIR)/usr/bin/slot_led_ctrl"
 
 uninstall:
 	rm -rf "$(DESTDIR)/etc/45drives/server_info"
@@ -43,3 +45,4 @@ uninstall:
 	rm -f "$(DESTDIR)/usr/lib/udev/rules.d/67-ubm.rules"
 	rm -f "$(DESTDIR)/usr/bin/dalias"
 	rm -f "$(DESTDIR)/usr/bin/wipedev"
+	rm -f "$(DESTDIR)/usr/bin/slot_led_ctrl"

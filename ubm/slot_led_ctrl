@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+#
+# Control LEDs for drive slots
+#
+# Part of 45drives-tools
+#
+# Authors
+# Josh Boudreau <jboudreau@45drives.com> 2023
+#
+
+SLOT_LINK_DIR=/var/run/45drives/slots
+SLOT_LINK_BY_NAME_DIR=$SLOT_LINK_DIR
+SLOT_LINK_NUMERIC_DIR=$SLOT_LINK_DIR/numeric
+
+usage() {
+  local exit_code=$1
+  [ -z "$exit_code" ] && exit_code=0
+  printf "Usage: %s: [ -a | [ -s SLOT_NAME | -i SLOT_INDEX ]... ] [-l|-A|-f] [-t SECONDS] on|off\n" "$0" >&2
+  echo
+  echo "Slot choice:"
+  echo "  -a            - All slots"
+  echo "  -s SLOT_NAME  - control LEDs for slot SLOT_NAME  (e.g. -s 1-1)"
+  echo "  -i SLOT_INDEX - control LEDs for slot SLOT_INDEX (e.g. -i 7)"
+  echo "LED pattern:"
+  echo "  -l - locate"
+  echo "  -A - active"
+  echo "  -f - fault"
+  exit "$exit_code"
+}
+
+slot_nums=()
+slot_names=()
+all_flag=
+pattern=locate
+
+while getopts 's:i:alAfh' opt; do
+  case $opt in
+  s)
+    slot_names+=("$OPTARG")
+    ;;
+  i)
+    slot_nums+=("$OPTARG")
+    ;;
+  a)
+    all_flag=1
+    ;;
+  l)
+    pattern=locate
+    ;;
+  A)
+    pattern=active
+    ;;
+  f)
+    pattern=fault
+    ;;
+  h)
+    usage 0
+    ;;
+  *)
+    printf "Unknown flag: %s\n" "$opt" >&2
+    usage 2
+    ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+[ $# -ne 1 ] && echo "Error: missing 'on' or 'off' argument" >&2 && usage 2
+
+ON_OFF=$1
+OUTPUT_VAL=
+case "$ON_OFF" in
+on | ON)
+  OUTPUT_VAL=1
+  ;;
+off | OFF)
+  OUTPUT_VAL=0
+  ;;
+*)
+  echo "Invalid option" >&2
+  usage 2
+  ;;
+esac
+
+if [ -n "$all_flag" ]; then
+  for slot in "$SLOT_LINK_DIR"/numeric/*; do
+    [ -w "$slot/$pattern" ] &&
+      echo $OUTPUT_VAL >"$slot/$pattern" || echo "Error: Failed to write to $slot/$pattern" >&2
+  done
+  exit 0
+fi
+
+[ ${#slot_nums[@]} -eq 0 ] && [ ${#slot_names[@]} -eq 0 ] && echo "No slots given" >&2 && usage 2
+
+for slot_name in "${slot_names[@]}"; do
+  [ -w "$SLOT_LINK_BY_NAME_DIR/$slot_name/$pattern" ] &&
+    echo $OUTPUT_VAL >"$SLOT_LINK_BY_NAME_DIR/$slot_name/$pattern" || echo "Error: Failed to write to $SLOT_LINK_BY_NAME_DIR/$slot_name/$pattern" >&2
+done
+
+for slot_num in "${slot_nums[@]}"; do
+  [ -w "$SLOT_LINK_NUMERIC_DIR/$slot_num/$pattern" ] &&
+    echo $OUTPUT_VAL >"$SLOT_LINK_NUMERIC_DIR/$slot_num/$pattern" || echo "Error: Failed to write to $SLOT_LINK_NUMERIC_DIR/$slot_num/$pattern" >&2
+done
