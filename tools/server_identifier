@@ -287,7 +287,7 @@ def getDmidecodePCI(server):
 		print("ERROR: dmidecode not installed")
 		exit(1)
 	pci_slots = []
-	rx_pci=re.compile(r"^Handle.*\n(?:.|\n)+?^.*(?:Designation:\s+).*(?:PCIE|SLOT)(.).*(?:.|\n)+?^.*Bus Address:\s+(\S+).*",re.MULTILINE)
+	rx_pci=re.compile(r"^Handle.*\n(?:.|\n)+?^.*(?:Designation:\s+).*(?:PCIE|SLOT|Slot)(.).*(?:.|\n)+?^.*Bus Address:\s+(\S+).*",re.MULTILINE)
 	for match in rx_pci.finditer(dmidecode_result):
 		pci_slots.append({"ID":match.group(1),"Bus Address":match.group(2)})
 
