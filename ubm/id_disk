@@ -40,25 +40,10 @@ if [ "$DEVTYPE" = "partition" ]; then
   BLOCK_DEV_KERNEL_NAME=$(lsblk -dno PKNAME "/dev/$BLOCK_DEV_KERNEL_NAME") || perror $? "Failed to get parent device name" || exit 0
 fi
 
-if [ -z "$STORCLI2_CTRL_NUM" ]; then
-  [ -z "$DEVPATH" ] && echo "DEVPATH not set!" >&2 && exit 1
-  HOST_PATH=/sys"$DEVPATH"
-  while [ -n "$HOST_PATH" ]; do
-    if [[ "$HOST_PATH" =~ /host[0-9]+$ ]]; then
-      break
-    fi
-    HOST_PATH=$(dirname "$HOST_PATH")
-  done
-  [ -z "$HOST_PATH" ] && exit 0
-  STORCLI2_CTRL_NUM=$(find "$HOST_PATH" -mindepth 1 -maxdepth 1 -type d -regex '.*mpi3mrctl[0-9]+$' -print -quit | grep -o -E '[0-9]+$')
-  [ -z "$STORCLI2_CTRL_NUM" ] && exit 0
-  set_env_var STORCLI2_CTRL_NUM "$STORCLI2_CTRL_NUM"
-fi
-
 if [ -z "$SLOT_NUM" ]; then
   SLOT_NUM=$(
     set -o pipefail
-    /opt/45drives/tools/storcli2 /c"$STORCLI2_CTRL_NUM"/eall/sall show all J | jq -re '
+    /opt/45drives/tools/storcli2 /call/eall/sall show all J | jq -re '
     [
       .Controllers[] |
       select(."Command Status"."Status" == "Success") |
