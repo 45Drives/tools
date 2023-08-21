@@ -41,9 +41,18 @@ if [ "$DEVTYPE" = "partition" ]; then
 fi
 
 if [ -z "$STORCLI2_CTRL_NUM" ]; then
-  BLOCK_DEV_SYS_PATH=$(realpath -- "/sys/block/$BLOCK_DEV_KERNEL_NAME") || perror $? "Failed to resolve $BLOCK_DEV_KERNEL_NAME sys path" || exit $?
-  HOST_UNIQUE_ID=$(cat "$BLOCK_DEV_SYS_PATH"/../../../../scsi_host/host*/unique_id) || perror $? "Failed to get $BLOCK_DEV_KERNEL_NAME storcli2 controller index" || exit 0
-  set_env_var STORCLI2_CTRL_NUM "$HOST_UNIQUE_ID"
+  [ -z "$DEVPATH" ] && echo "DEVPATH not set!" >&2 && exit 1
+  HOST_PATH=/sys"$DEVPATH"
+  while [ -n "$HOST_PATH" ]; do
+    if [[ "$HOST_PATH" =~ /host[0-9]+$ ]]; then
+      break
+    fi
+    HOST_PATH=$(dirname "$HOST_PATH")
+  done
+  [ -z "$HOST_PATH" ] && exit 0
+  STORCLI2_CTRL_NUM=$(find "$HOST_PATH" -mindepth 1 -maxdepth 1 -type d -regex '.*mpi3mrctl[0-9]+$' -print -quit | grep -o -E '[0-9]+$')
+  [ -z "$STORCLI2_CTRL_NUM" ] && exit 0
+  set_env_var STORCLI2_CTRL_NUM "$STORCLI2_CTRL_NUM"
 fi
 
 if [ -z "$SLOT_NUM" ]; then
