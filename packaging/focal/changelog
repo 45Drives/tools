@@ -1,3 +1,9 @@
+45drives-tools (3.0.0-7focal) focal; urgency=medium
+
+  * Print message to stderr when using storcli2 to get SLOT_NUM
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 22 Aug 2023 13:49:50 -0300
+
 45drives-tools (3.0.0-6focal) focal; urgency=medium
 
   * Fixed id_disk for case where controller has no drives

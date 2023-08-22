@@ -1,4 +1,3 @@
-## 45drives-tools 3.0.0-6
+## 45drives-tools 3.0.0-7
 
-* Fixed id_disk for case where controller has no drives
-* Fixed udev rule to grab slot attr from parent of scsi block dev
+* Print message to stderr when using storcli2 to get SLOT_NUM

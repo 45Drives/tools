@@ -41,6 +41,8 @@ if [ "$DEVTYPE" = "partition" ]; then
 fi
 
 if [ -z "$SLOT_NUM" ]; then
+  echo "INFO: querying slot number from storcli2. Issue with mpi3mr reporting slot attr?" >&2
+  set_env_var WARN_GOT_SLOT_NUM_FROM_STORCLI2 1
   SLOT_NUM=$(
     set -o pipefail
     /opt/45drives/tools/storcli2 /call/eall/sall show all J | jq -re '

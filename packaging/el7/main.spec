@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Tue Aug 22 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.0-7
+- Print message to stderr when using storcli2 to get SLOT_NUM
 * Tue Aug 22 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.0-6
 - Fixed id_disk for case where controller has no drives
 - Fixed udev rule to grab slot attr from parent of scsi block dev
