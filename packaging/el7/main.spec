@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Tue Aug 22 2023 Mark Hooper <mhooper@45drives.com> 3.0.0-5
+- updated server_identifier to identify and handle 9660-16i hardware raid cards
 * Wed Aug 09 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.0-4
 - change mpi3mr dependency to mpi3mr-dkms
 * Thu Aug 03 2023 Mark Hooper <mhooper@45drives.com> 3.0.0-3

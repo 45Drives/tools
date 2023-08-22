@@ -320,62 +320,84 @@ def getStorcliInfo(hba_card):
 		"HBA 9400-16i":"/opt/45drives/tools/storcli64",
 		"9600-24i":"/opt/45drives/tools/storcli2",
 		"9600-16i":"/opt/45drives/tools/storcli2",
+		"9660-16i":"/opt/45drives/tools/storcli2",
 		"9361-16i":"/opt/45drives/tools/storcli64",
 		"9361-24i":"/opt/45drives/tools/storcli64"
 	}
 
-	jq_filter = {
+	jq_version = {
 		"SAS9305-16i": "jq '.Controllers[0].\"Response Data\".\"Version\"'",
 		"SAS9305-24i": "jq '.Controllers[0].\"Response Data\".\"Version\"'",
 		"HBA 9405W-16i": "jq '.Controllers[0].\"Response Data\".\"Version\"'",
 		"HBA 9400-16i": "jq '.Controllers[0].\"Response Data\".\"Version\"'",
 		"9600-24i": "jq '.Controllers[0].\"Response Data\".\"Version\"'",
 		"9600-16i": "jq '.Controllers[0].\"Response Data\".\"Version\"'",
+		"9660-16i": "jq '.Controllers[0].\"Response Data\".\"Version\"'",
 		"9361-16i": "jq '.Controllers[0].\"Response Data\".\"Version\"'",
 		"9361-24i": "jq '.Controllers[0].\"Response Data\".\"Version\"'"
 	}
-	
+
+	jq_bus_address = {
+		"SAS9305-16i": "jq '.Controllers[0].\"Response Data\".\"Basics\"'",
+		"SAS9305-24i": "jq '.Controllers[0].\"Response Data\".\"Basics\"'",
+		"HBA 9405W-16i": "jq '.Controllers[0].\"Response Data\".\"Basics\"'",
+		"HBA 9400-16i": "jq '.Controllers[0].\"Response Data\".\"Basics\"'",
+		"9600-24i": "jq '.Controllers[0].\"Response Data\".\"HostInterface\"'",
+		"9600-16i": "jq '.Controllers[0].\"Response Data\".\"HostInterface\"'",
+		"9660-16i": "jq '.Controllers[0].\"Response Data\".\"HostInterface\"'",
+		"9361-16i": "jq '.Controllers[0].\"Response Data\".\"Basics\"'",
+		"9361-24i": "jq '.Controllers[0].\"Response Data\".\"Basics\"'"
+	}
+
+	if hba_card["Model"] not in storcli_path.keys() or hba_card["Model"] not in storcli_path.keys():
+		print("Unable to proceed with unknown HBA card. {mod}".format(mod=hba_card["Model"]))
+		sys.exit(1)
 	storcli = subprocess.Popen(
 		shlex.split("{pth} /c{ctl} show all J".format(pth=storcli_path[hba_card["Model"]],ctl=hba_card["Ctl"])), stdout=subprocess.PIPE, universal_newlines=True)
 	storcli.wait()
-	jq_command = jq_filter[hba_card["Model"]]
-	jq = subprocess.Popen(
-			shlex.split(jq_command), stdin=storcli.stdout, stdout=subprocess.PIPE, universal_newlines=True, stderr=subprocess.STDOUT)
-	jq.wait()
-	jqout,_ = jq.communicate()
+	jq_version_command = jq_version[hba_card["Model"]]
+	jq_version_process = subprocess.Popen(
+			shlex.split(jq_version_command), stdin=storcli.stdout, stdout=subprocess.PIPE, universal_newlines=True, stderr=subprocess.STDOUT)
+	jq_version_process.wait()
+	jqout_version,_ = jq_version_process.communicate()
 	try:
-		jq_json = json.loads(jqout)
+		jq_version_json = json.loads(jqout_version)
 	except ValueError:
-		jq_json =  {}
+		jq_version_json =  {}
 		
-	if jq_json != None:
-		hba_card["Firmware Version"] = jq_json.get("Firmware Version","?")
-		hba_card["Driver Version"] = jq_json.get("Driver Version","?")
-		hba_card["Driver Name"] = jq_json.get("Driver Name","?")
-
-# print("VERSION:  ",json.dumps(jq_json,indent=4))
-# VERSION:   {
-	# "Firmware Package Build": "24.22.0-0105",
-	# "Firmware Version": "4.740.00-8474",
-	# "CPLD Version": "04468-031",
-	# "Bios Version": "6.36.00.3_4.19.08.00_0x06180206",
-	# "HII Version": "03.25.05.15",
-	# "Ctrl-R Version": "5.19-0609",
-	# "NVDATA Version": "4.1705.00-00014",
-	# "Boot Block Version": "3.10.01.00-0004",
-	# "Driver Name": "megaraid_sas",
-	# "Driver Version": "07.719.03.00-rh1"
-# }
-# VERSION:   {
-	# "Firmware Package Build": "00.00.00.00",
-	# "Firmware Version": "16.00.01.00",
-	# "Bios Version": "08.27.00.00_13.00.00.00",
-	# "NVDATA Version": "16.00.00.05",
-	# "Driver Name": "mpt3sas",
-	# "Driver Version": "42.100.00.00"
-# }
+	if jq_version_json != None:
+		hba_card["Firmware Version"] = jq_version_json.get("Firmware Version","?")
+		hba_card["Driver Version"] = jq_version_json.get("Driver Version","?")
+		hba_card["Driver Name"] = jq_version_json.get("Driver Name","?")
 
 
+	storcli_address = subprocess.Popen(
+		shlex.split("{pth} /c{ctl} show all J".format(pth=storcli_path[hba_card["Model"]],ctl=hba_card["Ctl"])), stdout=subprocess.PIPE, universal_newlines=True)
+	jq_address_command = jq_bus_address[hba_card["Model"]]
+	jq_address_process = subprocess.Popen(
+			shlex.split(jq_address_command),stdin=storcli_address.stdout,stdout=subprocess.PIPE, universal_newlines=True, stderr=subprocess.STDOUT)
+	jq_address_process.wait()
+	jqout_address,_ = jq_address_process.communicate()
+	try:
+		jq_address_json = json.loads(jqout_address)
+	except ValueError:
+		jq_address_json =  {}
+
+	if jq_address_json != None:
+		hba_card["PCI Address"] = "{add}".format(add=jq_address_json.get("PCI Address","00:00:00:0"))
+		if hba_card["PCI Address"].startswith("00:00:"):
+			hba_card["PCI Address"] = hba_card["PCI Address"][5:]
+		if hba_card["PCI Address"].startswith("00:"):
+			hba_card["PCI Address"] = hba_card["PCI Address"][3:]
+		if hba_card["PCI Address"].endswith(":0"):
+			hba_card["PCI Address"] = hba_card["PCI Address"][:-2]
+		elif hba_card["PCI Address"].endswith(":00"):
+			hba_card["PCI Address"] = hba_card["PCI Address"][:-3]
+		hba_card["PCI Address"] = "{add}.0".format(add=hba_card["PCI Address"])
+
+	if "Bus Address" in hba_card.keys() and "PCI Address" in hba_card.keys() and hba_card["Bus Address"] != hba_card["PCI Address"]:
+		print("Updating Controller ID: {ctl}, PCI Address: {pci}, Bus Address: {ba}".format(ctl=hba_card["Ctl"],pci=hba_card["PCI Address"],ba=hba_card["Bus Address"]))
+		hba_card["Bus Address"] = hba_card["PCI Address"]
 
 def hba_lspci(server):
 	# determine the model and count of hba cards present in the system
@@ -399,6 +421,7 @@ def hba_lspci(server):
 		"HBA 9400-16i":16,
 		"9600-24i":24,
 		"9600-16i":16,
+		"9660-16i":16,
 		"9361-16i":16,
 		"9361-24i":24
 	}
@@ -418,6 +441,7 @@ def hba_lspci(server):
 		"HBA 9400-16i":"mpt3sas",
 		"9600-24i":"mpi3mr",
 		"9600-16i":"mpi3mr",
+		"9660-16i":"mpi3mr",
 		"9361-16i":"megaraid_sas",
 		"9361-24i":"megaraid_sas"
 	}
@@ -429,11 +453,13 @@ def hba_lspci(server):
 		"HBA 9400-16i":"SAS3416 Fusion-MPT Tri-Mode I/O Controller Chip (IOC)",
 		"9600-24i":"Fusion-MPT 24GSAS/PCIe SAS40xx",
 		"9600-16i":"Fusion-MPT 24GSAS/PCIe SAS40xx",
+		"9660-16i":"Fusion-MPT 24GSAS/PCIe SAS40xx",
 		"9361-16i":"MegaRAID SAS-3 3316",
 		"9361-24i":"MegaRAID SAS-3 3316"
 	}
 
 	hybrid_flag = False
+	hwraid_flag = False
 
 	hba_dict = {
 		"Model":"?",
@@ -447,7 +473,11 @@ def hba_lspci(server):
 		"Driver Name": "?"
 	}
 
-	rx_pci=re.compile(r"^(\w\w:\w\w\.\w).*\n.*(?:(?:(?:^\t).*\n)+^.*)?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|HBA 9405W-16i|9361-16i|HBA 9400-16i|9361-24i).*\n",re.MULTILINE)
+	hwraid_models = [
+		"9660-16i", "9361-16i", "9361-24i"
+	]
+
+	rx_pci=re.compile(r"^(\w\w:\w\w\.\w).*\n.*(?:(?:(?:^\t).*\n)+^.*)?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|HBA 9405W-16i|9361-16i|HBA 9400-16i|9361-24i|9660-16i).*\n",re.MULTILINE)
 	ctl = 0
 	for match in rx_pci.finditer(lspci_result):
 		hba_dict["Model"] = match.group(2)
@@ -464,6 +494,8 @@ def hba_lspci(server):
 	if len(hba) > 0:
 		for card in hba:
 			getStorcliInfo(card)
+			if card["Model"] in hwraid_models:
+				hwraid_flag = True
 
 	if len(hba) != 0:
 		# get list of pci devices including their bus address and slot id
@@ -502,7 +534,7 @@ def hba_lspci(server):
 		#sort them in ascending order
 		hba = sorted(hba, key=lambda k: k['Bus Address']) 
 
-	return hba, hybrid_flag
+	return hba, hybrid_flag, hwraid_flag
 
 def verify_bus_addresses(sys_bus_addrs,hba_cards):
 	for card in hba_cards:
@@ -513,120 +545,6 @@ def verify_bus_addresses(sys_bus_addrs,hba_cards):
 					# address provided by lspci update the card's bus address field
 					card["Bus Address"] = sys_bus_addrs[j]
 					break
-
-def hba():
-	# determine the model and count of hba cards present in the system
-	# by parsing the output of /opt/45drives/tools/storcli64 show.
-	# example output:
-		# CLI Version = 007.1017.0000.0000 May 10, 2019
-		# Operating system = Linux 4.18.0-240.1.1.el8_3.x86_64
-		# Status Code = 0
-		# Status = Success
-		# Description = None
-		# 
-		# Number of Controllers = 2
-		# Host Name = hoop.45lab.com
-		# Operating System  = Linux 4.18.0-240.1.1.el8_3.x86_64
-		# StoreLib IT Version = 07.1100.0200.0100
-		# StoreLib IR3 Version = 16.06-0
-		# 
-		# IT System Overview :
-		# ==================
-		# 
-		# ----------------------------------------------------------------------------
-		# Ctl Model         AdapterType   VendId DevId SubVendId SubDevId PCI Address 
-		# ----------------------------------------------------------------------------
-		#   0 HBA 9405W-16i   SAS3616(B0) 0x1000  0xD1    0x1000   0x3080 00:17:00:00 
-		#   1 HBA 9405W-16i   SAS3616(B0) 0x1000  0xD1    0x1000   0x3080 00:65:00:00 
-		# ----------------------------------------------------------------------------
-	hba_count = 0
-	hba = []
-	try:
-		storcli_result = subprocess.Popen(["/opt/45drives/tools/storcli64","show"],stdout=subprocess.PIPE,universal_newlines=True).stdout
-	except:
-		print("ERROR: storcli is not installed")
-		exit(1)
-	for line in storcli_result:
-		regex = re.search("Number of Controllers = (\d)",line)
-		if regex != None:
-			hba_count = int(regex.group(1))
-			break
-
-	hba_models = {
-		"SAS9305-16i":16,
-		"SAS9305-24i":24,
-		"HBA 9405W-16i":16,
-		"HBA 9400-16i": 16
-	}
-
-	hba_drivers = {
-		"SAS9305-16i":"mpt3sas",
-		"SAS9305-24i":"mpt3sas",
-		"HBA 9405W-16i":"mpt3sas",
-		"HBA 9400-16i":"mpt3sas"
-	}
-
-	hba_dict = {
-		"Model":"?",
-		"Adapter":"?",
-		"Bus Address":"?",
-		"Drive Connections":0,
-		"Kernel Driver":"?"
-	}
-
-	hybrid_flag = False
-
-	if hba_count != 0:
-		for line in storcli_result:
-			for model in hba_models.keys():
-				# Model AdapterType VendId DevId SubVendId SubDevId PCIAddress 	
-				regex = re.search("(\d)\s+({fld})\s+(\w+).*\w\w:(\w\w:\w\w:\w\w)\s+$".format(fld=model),line)
-				if regex != None:
-					hba_dict["Model"] = regex.group(2)
-					hba_dict["Adapter"] = regex.group(3)
-					hba_dict["Bus Address"] = regex.group(4)
-					hba_dict["Bus Address"] = hba_dict["Bus Address"][:-3] + ".0"
-					hba_dict["Drive Connections"] = hba_models[model]
-					hba_dict["Kernel Driver"] = hba_drivers[model]
-					hba_dict["Ctl"] = int(regex.group(1))
-					if hba_dict["Drive Connections"] == 24:
-						hybrid_flag = True
-					hba.append(hba_dict.copy())
-		
-		# get list of pci devices including their bus address and slot id
-		pci_slots = getDmidecodePCI()
-
-		# get a list of pci devices used by system
-		sys_bus_path = "/sys/bus/pci/devices"
-		try:
-			sys_bus_addrs = os.listdir(sys_bus_path)
-		except:
-			sys_bus_addrs = []
-
-		for pci_slot in pci_slots:
-			for card in hba:
-				if card["Bus Address"] in pci_slot["Bus Address"]:
-					card["PCI Slot"] = pci_slot["ID"]
-					if len(sys_bus_addrs) > 0 and pci_slot["Bus Address"] not in sys_bus_addrs:
-						# dmidecode gave a bus address that does not match the one used by the system
-						for j in range(0,len(sys_bus_addrs)):
-							if card["Bus Address"] in sys_bus_addrs[j]:
-								# we have found the system bus address that matches the substring
-								# address provided by storcli64. update the card's bus address field
-								card["Bus Address"] = sys_bus_addrs[j]
-								print("using /sys/bus/pci/devices",sys_bus_addrs[j])
-								break
-					else:
-						# use the bus address provided by dmidecode
-						# update the cards bus address to the full format (eg: 0000:01:00.0)
-						card["Bus Address"] = pci_slot["Bus Address"]
-					
-		#sort the final list of hba cards by the Bus Address field. This ensures that
-		#the order in which they are stored resembles the lspci output. which has
-		#worked reliably in the past.
-		hba = sorted(hba, key=lambda k: k['Bus Address']) 
-
-	return hba, hybrid_flag
 
 def serial_check():
 	#### OLD SERIAL ######################################
@@ -940,7 +858,8 @@ def main():
 		"Edit Mode":False,
 		"OS NAME": "?",
 		"OS VERSION_ID": "?",
-		"Auto Alias": False
+		"Auto Alias": False,
+		"HWRAID": False
 	}
 
 	# get current time
@@ -951,8 +870,7 @@ def main():
 	serial_result = {}
 	
 	server["Motherboard"] = motherboard()
-	#server["HBA"], server["Hybrid"] = hba() <- depreciated..
-	server["HBA"], server["Hybrid"] = hba_lspci(server)
+	server["HBA"], server["Hybrid"], server["HWRAID"] = hba_lspci(server)
 	server["VM"] = vm_check(server["Motherboard"])
 	if not server["VM"]:
 		serial_result = serial_check()

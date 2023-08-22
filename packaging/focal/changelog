@@ -1,3 +1,9 @@
+45drives-tools (3.0.0-5focal) focal; urgency=medium
+
+  * updated server_identifier to identify and handle 9660-16i hardware raid cards
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 22 Aug 2023 11:30:42 -0300
+
 45drives-tools (3.0.0-4focal) focal; urgency=medium
 
   * change mpi3mr dependency to mpi3mr-dkms
