@@ -46,10 +46,11 @@ if [ -z "$SLOT_NUM" ]; then
     /opt/45drives/tools/storcli2 /call/eall/sall show all J | jq -re '
     [
       .Controllers[] |
-      select(."Command Status"."Status" == "Success") |
-      ."Response Data"."Drives List"[] |
+      select(."Command Status"."Status" == "Success" ) |
+      select(."Response Data" != null) | ."Response Data" |
+      select(."Drives List" != null) | ."Drives List" | .[] |
       select(
-      ."Drive Detailed Information"."OS Drive Name" | endswith("'"$BLOCK_DEV_KERNEL_NAME"'")
+        ."Drive Detailed Information"."OS Drive Name" | endswith("'"$BLOCK_DEV_KERNEL_NAME"'")
       )
     ] | if length == 1 then .[] else empty end |
     ."Drive Information"."EID:Slt" | split(":")[1]

@@ -12,7 +12,7 @@
 # Disk rules
 ################################
 # if slot attribute is exposed in sysfs (using patched mpi3mr driver), assign to ENV{SLOT_NUM} to avoid running storcli2 for every device
-SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", ATTR{slot}=="?*", ENV{SLOT_NUM}="$attr{slot}"
+SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", ATTRS{slot}=="?*", ENV{SLOT_NUM}="$attrs{slot}"
 SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", ATTRS{slot}=="?*", IMPORT{parent}="SLOT_NUM"
 # fill in remaining ENV variables with ubm/id_disk (SLOT_NUM, SLOT_NAME, DISK_HANDLED_BY_UBM, UBM_MAP_KEY, STORCLI2_CTRL_NUM, STORCLI2_EID)
 SUBSYSTEMS=="scsi", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", IMPORT{program}="/opt/45drives/ubm/id_disk %k"
