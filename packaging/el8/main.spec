@@ -63,6 +63,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Thu Aug 24 2023 Mark Hooper <mhooper@45drives.com> 3.0.0-8
+- updated loadtest script to add disk model information in the log file.
 * Tue Aug 22 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.0-7
 - Print message to stderr when using storcli2 to get SLOT_NUM
 * Tue Aug 22 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.0-6

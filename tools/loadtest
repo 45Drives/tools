@@ -9,15 +9,15 @@ from optparse import OptionParser
 
 
 ANSI_colors={
-	"LGREEN":'\033[1;32m',
-	"GREEN":'\033[0;32m',
-	"YELLOW":'\033[0;33m',
-	"MAGENTA":'\033[0;35m',
-	"CYAN":'\033[0;36m',
-	"WHITE":'\033[0;37m',
-	"RED":'\033[0;31m',
-	"GREY":'\033[1;30m',
-	"END":'\033[0m'
+    "LGREEN":'\033[1;32m',
+    "GREEN":'\033[0;32m',
+    "YELLOW":'\033[0;33m',
+    "MAGENTA":'\033[0;35m',
+    "CYAN":'\033[0;36m',
+    "WHITE":'\033[0;37m',
+    "RED":'\033[0;31m',
+    "GREY":'\033[1;30m',
+    "END":'\033[0m'
 }
 
 def get_server_info():
@@ -52,10 +52,34 @@ def get_disks_from_vdev_id():
                     "id": line.split()[1],
                     "path": line.split()[2],
                     "occupied": os.path.islink(line.split()[2]),
-                    "dev": os.path.basename(os.path.realpath(line.split()[2])) if os.path.islink(line.split()[2]) else ""
+                    "dev": os.path.basename(os.path.realpath(line.split()[2])) if os.path.islink(line.split()[2]) else "",
+                    "model": get_disk_model(line.split()[2])
                 }
             )
     return disks
+
+def get_disk_model(disk_path):
+    if not os.path.islink(disk_path):
+        return ""
+    device_name = os.path.basename(os.path.realpath(disk_path))
+    smartctl = subprocess.Popen(shlex.split("smartctl --all /dev/{pth} -j".format(pth=device_name)), stdout=subprocess.PIPE, universal_newlines=True)
+    smartctl.wait()
+
+    jq_model_command = "jq ."
+    jq_model_process = subprocess.Popen(
+            shlex.split(jq_model_command), stdin=smartctl.stdout, stdout=subprocess.PIPE, universal_newlines=True, stderr=subprocess.STDOUT)
+    jq_model_process.wait()
+    jqout_model,_ = jq_model_process.communicate()
+
+    try:
+        jq_model_json = json.loads(jqout_model)
+    except ValueError:
+        jq_model_json =  {}
+        
+    if jq_model_json != None and "product" in jq_model_json.keys():
+        return jq_model_json["product"]
+    else:
+        return "Unknown"
 
 def get_scsi_info():
     scsi_info = []
@@ -88,6 +112,7 @@ def consolidate_data(server_info,disks,scsi_info):
                                 "dev":disk["dev"],
                                 "scsi_id":scsi["scsi_id"],
                                 "uuid":scsi["uuid"],
+                                "model":disk["model"]
                             }
                         )
     for disk in disks:
@@ -103,6 +128,7 @@ def consolidate_data(server_info,disks,scsi_info):
                         "dev":disk["dev"],
                         "scsi_id":scsi["scsi_id"],
                         "uuid":scsi["uuid"],
+                        "model":disk["model"]
                     }
                 )
 
@@ -196,7 +222,7 @@ def run_fio(duration):
     fio_output = fio.communicate()
 
 def get_loadtest_info():
-	# read/parse vdev_id.conf and return list of disk objects
+    # read/parse vdev_id.conf and return list of disk objects
     disks = get_disks_from_vdev_id()
     # read in server_info.json
     server_info = get_server_info()
@@ -356,17 +382,17 @@ def show_welcome_and_confirmation(ro, rw):
         
 
 def get_version():
-	version_file_path = "/etc/45drives/server_info/tools_version"
-	if not os.path.exists(version_file_path):
-		return ""
-	else:
-		f = open(version_file_path, "r")
-		version = f.readline()
-		f.close()
-		return version.strip()
+    version_file_path = "/etc/45drives/server_info/tools_version"
+    if not os.path.exists(version_file_path):
+        return ""
+    else:
+        f = open(version_file_path, "r")
+        version = f.readline()
+        f.close()
+        return version.strip()
 
 def write_to_kmsg(msg):
-    cmd_str = "echo {m} > /dev/kmsg".format(m=msg)
+    cmd_str = "echo '{m}' > /dev/kmsg".format(m=msg)
     subprocess.run(cmd_str, shell=True)
 
 def check_log_path(log_path):
@@ -406,6 +432,14 @@ def check_log_path(log_path):
         log_file.write("loadtest Log File. {lp}".format(lp=os.path.abspath(os.path.expanduser(log_path))))
         log_file.close()
 
+def write_disk_models_to_kmsg(server_info):
+    disks = server_info.get("disks",[])
+    write_to_kmsg("Disks present during loadtest: ")
+    for disk in disks:
+        if "occupied" in disk.keys() and disk["occupied"]:
+            disk_string = "{alias}: {dev} ({model})".format(alias=disk["id"],dev=disk["dev"],model=disk["model"])
+            write_to_kmsg(disk_string)
+
 def is_root():
     return os.geteuid() == 0
 
@@ -444,8 +478,11 @@ def main():
     bad_disks = set()
     total_trials = options.test_duration//options.trial_duration
     current_trial = 1
-
+    
     write_to_kmsg("Starting 45Drives loadtest.")
+    write_disk_models_to_kmsg(server_info)
+    log = get_log()
+    logs.append(log)
     while bad_disks == set() and current_trial <= total_trials:
         print("--------------------------------------------------------------------------------")
         print("Trial {x} of {y}".format(x=current_trial,y=total_trials))
@@ -489,4 +526,4 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
+    main()

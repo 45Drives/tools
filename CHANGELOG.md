@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.0-7
+## 45drives-tools 3.0.0-8
 
-* Print message to stderr when using storcli2 to get SLOT_NUM
+* updated loadtest script to add disk model information in the log file.

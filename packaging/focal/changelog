@@ -1,3 +1,9 @@
+45drives-tools (3.0.0-8focal) focal; urgency=medium
+
+  * updated loadtest script to add disk model information in the log file.
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 24 Aug 2023 05:00:17 -0300
+
 45drives-tools (3.0.0-7focal) focal; urgency=medium
 
   * Print message to stderr when using storcli2 to get SLOT_NUM
