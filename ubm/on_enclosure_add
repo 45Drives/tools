@@ -26,10 +26,10 @@ ENCLOSURE_PATH="/sys/$DEVPATH"
 [ ! -d "$ENCLOSURE_PATH" ] && exit 0
 
 if [ -z "$UBM_MAP_KEY" ]; then
-    if [ ! -r "$CACHE_DIR/map_key" ]; then
-        UBM_MAP_KEY=$(
-            set -o pipefail
-            ipmitool fru | awk -F: '
+  if [ ! -r "$CACHE_DIR/map_key" ]; then
+    UBM_MAP_KEY=$(
+      set -o pipefail
+      ipmitool fru | awk -F: '
       BEGIN {
         found_key = 0
       }
@@ -37,7 +37,7 @@ if [ -z "$UBM_MAP_KEY" ]; then
         found_key=1
         key=toupper($2);
         sub(/-(TURBO|BASE|ENHANCED).*$/, "", key);
-        sub(/\s+/, "", key);
+        gsub(/[\t ]+/, "", key);
         print key;
         exit
       }
@@ -48,13 +48,15 @@ if [ -z "$UBM_MAP_KEY" ]; then
         }
       }
       '
-        ) || perror $? "Failed to get Product Name from FRU" || exit 0
-        [ -d "$CACHE_DIR" ] || mkdir -p "$CACHE_DIR" >/dev/null
-        echo "$UBM_MAP_KEY" >"$CACHE_DIR/map_key"
-    else
-        UBM_MAP_KEY="$(<"$CACHE_DIR/map_key")"
-    fi
-    set_env_var UBM_MAP_KEY "$UBM_MAP_KEY"
+    ) || perror $? "Failed to get Product Name from FRU" || exit 0
+    [ -d "$CACHE_DIR" ] || mkdir -p "$CACHE_DIR" >/dev/null
+    TMPFILE=$(mktemp -p "$CACHE_DIR")
+    echo "$UBM_MAP_KEY" >"$TMPFILE"
+    mv "$TMPFILE" "$CACHE_DIR/map_key"
+  else
+    UBM_MAP_KEY="$(<"$CACHE_DIR/map_key")"
+  fi
+  set_env_var UBM_MAP_KEY "$UBM_MAP_KEY"
 fi
 
 mkdir -p "$SLOT_LINK_DIR/numeric"
@@ -64,34 +66,34 @@ COMPONENTS=$(cat "$ENCLOSURE_PATH/components") || exit 0
 SLOT_LINKS=()
 
 for ((i = 0; i < COMPONENTS; i++)); do
-    slot_dev="$ENCLOSURE_PATH/$i"
-    STATUS=$(cat "$slot_dev/status" 2>/dev/null) || continue
-    [[ "$STATUS" != "unsupported" && "$STATUS" != "unavailable" ]] || continue
-    TYPE=$(cat "$slot_dev/type" 2>/dev/null) || continue
-    [[ "$TYPE" == 'array device' ]] || continue
-    SLOT_NUM=$(cat "$slot_dev/slot" 2>/dev/null) || continue
-    ln -snf "$slot_dev" "$SLOT_LINK_DIR/numeric/$SLOT_NUM" || continue
-    SLOT_LINKS+=("$SLOT_LINK_DIR/numeric/$SLOT_NUM")
-    SLOT_NAME=$(
-        awk '
-        BEGIN {
-          found_style = 0
-        }
-        $1 == "'"$UBM_MAP_KEY"'" {
-          found_style = 1
-          print $'"$((2 + "$SLOT_NUM"))"'
-          exit
-        }
-        END {
-          if (!found_style) {
-            print "map key lookup failed ('"$UBM_MAP_KEY"')" > "/dev/stderr"
-            exit 1
-          }
-        }
-        ' "$SLOT_NAME_MAP_FILE"
-    ) || perror $? "Failed to lookup slot name for slot $SLOT_NUM" || continue
-    ln -snf "numeric/$SLOT_NUM" "$SLOT_LINK_DIR/$SLOT_NAME" || continue
-    SLOT_LINKS+=("$SLOT_LINK_DIR/$SLOT_NAME")
+  slot_dev="$ENCLOSURE_PATH/$i"
+  STATUS=$(cat "$slot_dev/status" 2>/dev/null) || continue
+  [[ "$STATUS" != "unsupported" && "$STATUS" != "unavailable" ]] || continue
+  TYPE=$(cat "$slot_dev/type" 2>/dev/null) || continue
+  [[ "$TYPE" == 'array device' ]] || continue
+  SLOT_NUM=$(cat "$slot_dev/slot" 2>/dev/null) || continue
+  ln -snf "$slot_dev" "$SLOT_LINK_DIR/numeric/$SLOT_NUM" || continue
+  SLOT_LINKS+=("$SLOT_LINK_DIR/numeric/$SLOT_NUM")
+  SLOT_NAME=$(
+    awk '
+    BEGIN {
+      found_style = 0
+    }
+    $1 == "'"$UBM_MAP_KEY"'" {
+      found_style = 1
+      print $'"$((2 + "$SLOT_NUM"))"'
+      exit
+    }
+    END {
+      if (!found_style) {
+        print "map key lookup failed ('"$UBM_MAP_KEY"')" > "/dev/stderr"
+        exit 1
+      }
+    }
+    ' "$SLOT_NAME_MAP_FILE"
+  ) || perror $? "Failed to lookup slot name for slot $SLOT_NUM" || continue
+  ln -snf "numeric/$SLOT_NUM" "$SLOT_LINK_DIR/$SLOT_NAME" || continue
+  SLOT_LINKS+=("$SLOT_LINK_DIR/$SLOT_NAME")
 done
 
 [ "${#SLOT_LINKS[@]}" -gt 0 ] && printf '%s=%s\n' SLOT_LINKS "${SLOT_LINKS[*]}"

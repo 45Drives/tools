@@ -86,7 +86,9 @@ if [ -z "$UBM_MAP_KEY" ]; then
       '
     ) || perror $? "Failed to get Product Name from FRU" || exit 0
     [ -d "$CACHE_DIR" ] || mkdir -p "$CACHE_DIR" >/dev/null
-    echo "$UBM_MAP_KEY" >"$CACHE_DIR/map_key"
+    TMPFILE=$(mktemp -p "$CACHE_DIR")
+    echo "$UBM_MAP_KEY" > "$TMPFILE"
+    mv "$TMPFILE" "$CACHE_DIR/map_key"
   else
     UBM_MAP_KEY="$(<"$CACHE_DIR/map_key")"
   fi
