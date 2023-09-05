@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.0-8
+## 45drives-tools 3.0.0-9
 
-* updated loadtest script to add disk model information in the log file.
+* fix UBM_MAP_KEY caching in id_disk and on_enclosure_add

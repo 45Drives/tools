@@ -1,3 +1,9 @@
+45drives-tools (3.0.0-9focal) focal; urgency=medium
+
+  * fix UBM_MAP_KEY caching in id_disk and on_enclosure_add
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 05 Sep 2023 10:02:53 -0300
+
 45drives-tools (3.0.0-8focal) focal; urgency=medium
 
   * updated loadtest script to add disk model information in the log file.
