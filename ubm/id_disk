@@ -74,6 +74,7 @@ if [ -z "$UBM_MAP_KEY" ]; then
         key=toupper($2);
         sub(/-(TURBO|BASE|ENHANCED).*$/, "", key);
         sub(/\s+/, "", key);
+        sub(/ /, "", key);
         print key;
         exit
       }
