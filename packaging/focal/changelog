@@ -1,3 +1,9 @@
+45drives-tools (2.2.3-2focal) focal; urgency=medium
+
+  * updated bus address used when aliasing MI4 server with X11SPi-TF Motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 06 Sep 2023 06:43:58 -0300
+
 45drives-tools (2.2.3-1focal) focal; urgency=medium
 
   * added hotfix for aliasing MI4 servers that use X11SPi-TF Motherboards

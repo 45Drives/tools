@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Wed Sep 06 2023 Mark Hooper <mhooper@45drives.com> 2.2.3-2
+- updated bus address used when aliasing MI4 server with X11SPi-TF Motherboards
 * Wed Sep 06 2023 Mark Hooper <mhooper@45drives.com> 2.2.3-1
 - added hotfix for aliasing MI4 servers that use X11SPi-TF Motherboards
 * Mon Jun 12 2023 Mark Hooper <mhooper@45drives.com> 2.2.2-6

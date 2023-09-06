@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.3-1
+## 45drives-tools 2.2.3-2
 
-* added hotfix for aliasing MI4 servers that use X11SPi-TF Motherboards
+* updated bus address used when aliasing MI4 server with X11SPi-TF Motherboards
