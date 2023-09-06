@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.2-6
+## 45drives-tools 2.2.3-1
 
-* added rudimentary bus address translation for ROMED8-2T Motherboards
+* added hotfix for aliasing MI4 servers that use X11SPi-TF Motherboards
