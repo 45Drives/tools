@@ -328,7 +328,7 @@ def main():
 		"# Whitespace will be automatically trimmed from each alias name. \n"
 	]
 	parser = OptionParser()
-	parser.add_option("-t","--template", type="choice", choices = template_choices, action="store", dest="template", default=None, help="Use an alaising scheme from an existing 45Drives server template. Valid Choices are")
+	parser.add_option("-t","--template", type="choice", choices = template_choices, action="store", dest="template", default=None, help="Use an alaising scheme from an existing 45Drives server template. Valid Choices are: {tc}".format(tc=template_choices))
 	(options, args) = parser.parse_args()
 
 	print_welcome()
