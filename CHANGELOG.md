@@ -1,3 +1,3 @@
-## 45drives-tools 2.2.3-2
+## 45drives-tools 2.2.3-3
 
-* updated bus address used when aliasing MI4 server with X11SPi-TF Motherboards
+* hotfix for H12SSL-i motherboards in MI4 units

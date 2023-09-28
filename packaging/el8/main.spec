@@ -55,6 +55,8 @@ fi
 %{_bindir}/*
 
 %changelog
+* Thu Sep 28 2023 Mark Hooper <mhooper@45drives.com> 2.2.3-3
+- hotfix for H12SSL-i motherboards in MI4 units
 * Wed Sep 06 2023 Mark Hooper <mhooper@45drives.com> 2.2.3-2
 - updated bus address used when aliasing MI4 server with X11SPi-TF Motherboards
 * Wed Sep 06 2023 Mark Hooper <mhooper@45drives.com> 2.2.3-1
