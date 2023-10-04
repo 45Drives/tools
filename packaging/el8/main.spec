@@ -63,6 +63,9 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Wed Oct 04 2023 Mark Hooper <mhooper@45drives.com> 3.0.1-1
+- lsdev and server_identifier have been updated to hangle HL15 servers
+- added drive mapping for MI4 units using H12SSL-i and X11SPi-TF motherboards
 * Tue Sep 05 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.0-9
 - fix UBM_MAP_KEY caching in id_disk and on_enclosure_add
 * Thu Aug 24 2023 Mark Hooper <mhooper@45drives.com> 3.0.0-8

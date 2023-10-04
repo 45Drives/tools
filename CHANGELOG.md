@@ -1,3 +1,4 @@
-## 45drives-tools 3.0.0-9
+## 45drives-tools 3.0.1-1
 
-* fix UBM_MAP_KEY caching in id_disk and on_enclosure_add
+* lsdev and server_identifier have been updated to hangle HL15 servers
+* added drive mapping for MI4 units using H12SSL-i and X11SPi-TF motherboards
