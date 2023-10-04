@@ -21,7 +21,7 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","2UTM"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","2UTM","HL15"]
 
 g_mobo_to_version_lut = {
 	"Base": ["X11SSH-CTF","X11SSM-F"],
@@ -39,6 +39,8 @@ g_product_lut = {
 	"Gateway-2UGW-Enhanced":			[g_mobo_to_version_lut["Enhanced"],0,0,"2UGW","2UGW"],
 	"Gateway-2UGW-Enhanced-S":			[g_mobo_to_version_lut["Enhanced"],0,0,"2UGW","2UGW"],
 	"Gateway-2UGW-Turbo-G":				[g_mobo_to_version_lut["Turbo"],0,0,"2UGW","2UGW"],
+
+	"HomeLab-HL15":                     [g_mobo_to_version_lut["Turbo"],0,0,"HL15","STORINATOR"],
 
 	"Storinator-AV15-Base":				[g_mobo_to_version_lut["Base"],0,0,"AV15","AV15-BASE"],
 	"Storinator-AV15-Base-B":			[g_mobo_to_version_lut["Base-B"],0,1,"AV15","STORINATOR"],

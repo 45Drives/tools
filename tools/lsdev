@@ -297,7 +297,8 @@ def build_server(options):
 			"S45":[15,15,15],
 			"XL60":[15,15,15,15],
 			"C8":[4,4],
-			"MI4":[4]
+			"MI4":[4],
+			"HL15":[15]
 		},
 		"STORNADO":{
 			"AV15":[32],
@@ -621,11 +622,14 @@ def print_bays(server, options, osd, server_info):
 			print_array[-1].append((cell_string, colour))
 	
 	header_text = [
-		"Storinator Disk Info",
-		"Disk Controller(s): " + server["meta"]["disk-controller"],
-		"Driver Version(s): " + server["meta"]["driver-version"],
-		"Firmware Version(s): " + server["meta"]["firmware-version"]
+		"Storage Disk Info"
 	]
+	if server["meta"]["disk-controller"] not in ["?","-"]:
+		header_text.append("Disk Controller(s): " + server["meta"]["disk-controller"])
+	if server["meta"]["driver-version"] not in ["?","-"]:
+		header_text.append("Driver Version(s): " + server["meta"]["driver-version"])
+	if server["meta"]["firmware-version"] not in ["?","-"]:
+		header_text.append("Firmware Version(s): " + server["meta"]["firmware-version"])
 	
 	col_headers = []
 	for row in reversed(range(len(server["rows"]))):
