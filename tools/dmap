@@ -753,6 +753,20 @@ def alias_mi4(model,os_name,os_version_id,mobo_model):
 		for i in range(0,4):
 			#alias the drives connected to the on board sata sata connectors
 			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(drive=i+1,addr=bus_address_sata,i=i+5,s=ata_suffix)
+	elif mobo_model in ["H12SSL-i"]:
+		# H11SSL-i has different sata controller. It also has 3, so need to specify 
+		# a hard coded bus address. 
+		bus_address_sata = "0000:48:00.0"
+		for i in range(0,4):
+			#alias the drives connected to the on board sata sata connectors
+			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(drive=i+1,addr=bus_address_sata,i=i+3,s=ata_suffix)
+	elif mobo_model in ["X11SPi-TF"]:
+		# The X11SPi-TF would use the S-SATA ports for the boot drives, so it starts at the first I-SATA port. 1,2,3 and 4 are used here. 
+		# a hard coded bus address. 
+		bus_address_sata = "0000:00:17.0"
+		for i in range(0,4):
+			#alias the drives connected to the on board sata sata connectors
+			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(drive=i+1,addr=bus_address_sata,i=i+1,s=ata_suffix)
 	elif mobo_model in ["ROMED8-2T"]:
 		# this is the AMD board made by ASRock Rack. It staggers two sata controllers.
 		# these correspond to the on board mini sas hd connectors for sata_2, sata_3, sata_4, sata_5 using a 4 port fan out cable each. 
