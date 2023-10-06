@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Fri Oct 06 2023 Mark Hooper <mhooper@45drives.com> 3.0.1-2
+- added another field in loadtest script to check for hard drive model
 * Wed Oct 04 2023 Mark Hooper <mhooper@45drives.com> 3.0.1-1
 - lsdev and server_identifier have been updated to hangle HL15 servers
 - added drive mapping for MI4 units using H12SSL-i and X11SPi-TF motherboards

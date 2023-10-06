@@ -75,8 +75,10 @@ def get_disk_model(disk_path):
         jq_model_json = json.loads(jqout_model)
     except ValueError:
         jq_model_json =  {}
-        
-    if jq_model_json != None and "product" in jq_model_json.keys():
+
+    if jq_model_json != None and "model_name" in jq_model_json.keys():
+        return jq_model_json["model_name"]
+    elif jq_model_json != None and "product" in jq_model_json.keys():
         return jq_model_json["product"]
     else:
         return "Unknown"
