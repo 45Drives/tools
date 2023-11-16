@@ -21,7 +21,7 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","2UTM","HL15"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","F2","HL15"]
 
 g_mobo_to_version_lut = {
 	"Base": ["X11SSH-CTF","X11SSM-F"],
@@ -192,11 +192,11 @@ g_product_lut = {
 	"Stornado-2U-Turbo-G":				[g_mobo_to_version_lut["Turbo-G"]  ,0,2,"2U","2USTORNADO"],
 	"Stornado-2U-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,2,"2U","2USTORNADO"],
 
-	"Stornado-2UTM-Base-B":				[g_mobo_to_version_lut["Base-B"]  ,0,4,"2UTM","2UTMSTORNADO"],
-	"Stornado-2UTM-Enhanced-AMD":		[g_mobo_to_version_lut["Enhanced-AMD"]  ,0,4,"2UTM","2UTMSTORNADO"],
-	"Stornado-2UTM-Enhanced-S":			[g_mobo_to_version_lut["Enhanced-S"]  ,0,4,"2UTM","2UTMSTORNADO"],
-	"Stornado-2UTM-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,0,4,"2UTM","2UTMSTORNADO"],
-	"Stornado-2UTM-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,4,"2UTM","2UTMSTORNADO"],
+	"Stornado-F2-Base-B":				[g_mobo_to_version_lut["Base-B"]  ,0,4,"F2","F2STORNADO"],
+	"Stornado-F2-Enhanced-AMD":			[g_mobo_to_version_lut["Enhanced-AMD"]  ,0,4,"F2","F2STORNADO"],
+	"Stornado-F2-Enhanced-S":			[g_mobo_to_version_lut["Enhanced-S"]  ,0,4,"F2","F2STORNADO"],
+	"Stornado-F2-Turbo-G":				[g_mobo_to_version_lut["Turbo-G"]  ,0,4,"F2","F2STORNADO"],
+	"Stornado-F2-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,4,"F2","F2STORNADO"],
 
 	"Destroyinator-AV15-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,1,"AV15","DESTROYINATOR"],
 	"Destroyinator-AV15-Enhanced-S":	[g_mobo_to_version_lut["Enhanced-S"],0,1,"AV15","DESTROYINATOR"],
@@ -887,7 +887,7 @@ def main():
 	server["Alias Style"] = g_product_lut[server["Model"]][g_product_lut_idx["ALIAS_STYLE"]]
 
 	# set auto alias flag for servers that are automatically aliased using udev rules.
-	if server["Alias Style"] in ["2UTMSTORNADO"]:
+	if server["Alias Style"] in ["F2STORNADO"]:
 		server["Auto Alias"] = True
 	
 	# This is added to use only a single chassis size for the Stornado

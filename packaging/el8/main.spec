@@ -63,6 +63,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Thu Nov 16 2023 Mark Hooper <mhooper@45drives.com> 3.0.1-3
+- changed all instances of 2UTM to F2 for new Stornado server
 * Fri Oct 06 2023 Mark Hooper <mhooper@45drives.com> 3.0.1-2
 - added another field in loadtest script to check for hard drive model
 * Wed Oct 04 2023 Mark Hooper <mhooper@45drives.com> 3.0.1-1

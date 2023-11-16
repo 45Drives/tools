@@ -437,8 +437,8 @@ def create_vdev_id(server):
 		"2USTORNADO":{
 			"2U":[16,16]
 		},
-		"2UTMSTORNADO":{
-			"2UTM":[8,8,8,8]
+		"F2STORNADO":{
+			"F2":[8,8,8,8]
 		},
 		"AV15-BASE":{
 			"AV15":[0]

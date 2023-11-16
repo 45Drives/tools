@@ -307,8 +307,8 @@ def build_server(options):
 		"2USTORNADO":{
 			"2U":[32]
 		},
-		"2UTMSTORNADO":{
-			"2UTM":[32]
+		"F2STORNADO":{
+			"F2":[32]
 		},
 		"AV15-BASE":{
 			"AV15":[15]
@@ -639,7 +639,7 @@ def print_bays(server, options, osd, server_info):
 	table_print(ansi = options.colour, c_count = len(print_array), c_txt = print_array, c_labels = col_headers, h_txt = header_text, padding = 1)
 	
 	# legend
-	if "Alias Style" in server_info.keys() and server_info["Alias Style"] not in ["2USTORNADO","2UTMSTORNADO"]:
+	if "Alias Style" in server_info.keys() and server_info["Alias Style"] not in ["2USTORNADO","F2STORNADO"]:
 		print(" <-- motherboard | front plate -->")
 	print(" Legend:")
 	if options.colour:

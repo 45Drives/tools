@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.1-2
+## 45drives-tools 3.0.1-3
 
-* added another field in loadtest script to check for hard drive model
+* changed all instances of 2UTM to F2 for new Stornado server

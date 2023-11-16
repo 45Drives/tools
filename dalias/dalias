@@ -142,7 +142,7 @@ def get_confirmation(alias_dict):
 	print(" {w}Confirmation {e}".format(w=ANSI_colors["WHITE"],e=ANSI_colors["END"]))
 	print("{s:{c}^{l}}".format(s="-",l=80,c="-"))
 	confirmation = input("\nWould you like to create/replace {w}{f}{e} and trigger udev rules? (y/n): ".format(f=default_path,w=ANSI_colors["WHITE"],e=ANSI_colors["END"]))
-	if confirmation != "y": sys.exit(1)
+	if confirmation not in ["y","Y"]: sys.exit(1)
 	
 	# generate vdev_id.conf content
 	file_content = "# This file was generated using dalias ({v})\n".format(v=dalias_version)
