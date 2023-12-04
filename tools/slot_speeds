@@ -30,7 +30,7 @@ shift $((OPTIND - 1))
 
 ALL_SLOT_SPEEDS_JSON=$(
     set -o pipefail
-    storcli2 /call/eall/sall show all J | jq -re '
+    /opt/45drives/tools/storcli2 /call/eall/sall show all J | jq -re '
 [
     .Controllers[] | select(."Response Data") | ."Response Data"."Drives List"[] |
     {
