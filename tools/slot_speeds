@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+usage() {
+    local exit_code=$1
+    [ -z "$exit_code" ] && exit_code=0
+    printf 'Usage: %s slot_speeds [ -j ]\n' "$0"
+    echo
+    echo 'Options:'
+    echo '  -j - Print JSON formatted output'
+    exit "$exit_code"
+}
+
+JSON=false
+
+while getopts 'hj' opt; do
+    case $opt in
+    h)
+        usage 0
+        ;;
+    j)
+        JSON=true
+        ;;
+    *)
+        printf "Unknown flag: %s\n" "$opt" >&2
+        usage 2 >&2
+        ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+ALL_SLOT_SPEEDS_JSON=$(
+    set -o pipefail
+    storcli2 /call/eall/sall show all J | jq -re '
+[
+    .Controllers[] | select(."Response Data") | ."Response Data"."Drives List"[] |
+    {
+        slot: ."Drive Information"."EID:Slt" | split (":")[1],
+        type: ."Drive Information"."Intf",
+        width: ."Drive Detailed Information"."Negotiated Link Width",
+        width_max: ."Drive Detailed Information"."Capable Link Width",
+        rate: ."Drive Detailed Information"."Path Information"[0]."Negotiated Speed",
+        rate_max: ."Drive Detailed Information"."Capable Speed",
+        dev_path: ."Drive Detailed Information"."OS Drive Name"
+    }
+] | sort_by(.slot | tonumber)
+'
+) || {
+    EXIT_CODE=$?
+    echo "Error: failed to get slot info ($EXIT_CODE)" >&2
+    exit $EXIT_CODE
+}
+
+if $JSON; then
+    echo "$ALL_SLOT_SPEEDS_JSON"
+    exit 0
+fi
+
+echo "$ALL_SLOT_SPEEDS_JSON" | jq -re '.[] |
+    .slot + "\t" +
+    .type + "\t" +
+    .width + "\t" +
+    .width_max + "\t" +
+    .rate + "\t" +
+    .rate_max + "\t" +
+    .dev_path
+' | column -t -s $'\t' --table-columns 'Slot,Type,Width,Max Width,Rate,Max Rate,Device Path' --table-right 'Slot,Width,Max Width,Rate,Max Rate'
