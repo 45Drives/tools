@@ -35,6 +35,7 @@ ALL_SLOT_SPEEDS_JSON=$(
     .Controllers[] | select(."Response Data") | ."Response Data"."Drives List"[] |
     {
         slot: ."Drive Information"."EID:Slt" | split (":")[1],
+        enclosure_id: ."Drive Information"."EID:Slt" | split (":")[0],
         type: ."Drive Information"."Intf",
         width: ."Drive Detailed Information"."Negotiated Link Width",
         width_max: ."Drive Detailed Information"."Capable Link Width",
@@ -55,12 +56,7 @@ if $JSON; then
     exit 0
 fi
 
-echo "$ALL_SLOT_SPEEDS_JSON" | jq -re '.[] |
-    .slot + "\t" +
-    .type + "\t" +
-    .width + "\t" +
-    .width_max + "\t" +
-    .rate + "\t" +
-    .rate_max + "\t" +
-    .dev_path
-' | column -t -s $'\t' --table-columns 'Slot,Type,Width,Max Width,Rate,Max Rate,Device Path' --table-right 'Slot,Width,Max Width,Rate,Max Rate'
+echo "$ALL_SLOT_SPEEDS_JSON" | jq -re '
+.[] |
+    [ .slot, .enclosure_id, .type, .width, .width_max, .rate, .rate_max, .dev_path ] | @tsv
+' | column -t -s $'\t' --table-columns 'Slot,Encl ID,Type,Width,Max Width,Rate,Max Rate,Device Path' --table-right 'Slot,Encl ID,Width,Max Width,Rate,Max Rate'
