@@ -1,3 +1,9 @@
+45drives-tools (3.0.3-2focal) focal; urgency=medium
+
+  * bump build
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 07 Dec 2023 10:08:47 -0400
+
 45drives-tools (3.0.3-1focal) focal; urgency=medium
 
   * add slot_speeds script

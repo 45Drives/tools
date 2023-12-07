@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.3-1
+## 45drives-tools 3.0.3-2
 
-* add slot_speeds script
+* bump build
