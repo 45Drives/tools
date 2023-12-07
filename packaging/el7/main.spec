@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Thu Dec 07 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.3-1
+- add slot_speeds script
 * Tue Nov 21 2023 Mark Hooper <mhooper@45drives.com> 3.0.2-1
 - added support for Stornado F2 device aliasing via use of udev rules
 - dalias program added to provide means of custom device aliasing

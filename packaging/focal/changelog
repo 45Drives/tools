@@ -1,3 +1,9 @@
+45drives-tools (3.0.3-1focal) focal; urgency=medium
+
+  * add slot_speeds script
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 07 Dec 2023 09:54:11 -0400
+
 45drives-tools (3.0.2-1focal) focal; urgency=medium
 
   * added support for Stornado F2 device aliasing via use of udev rules
