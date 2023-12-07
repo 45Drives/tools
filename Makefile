@@ -31,6 +31,7 @@ endif
 	ln -sf /opt/45drives/dalias/dalias "$(DESTDIR)/usr/bin/dalias"
 	ln -sf /opt/45drives/tools/wipedev "$(DESTDIR)/usr/bin/wipedev"
 	ln -sf /opt/45drives/ubm/slot_led_ctrl "$(DESTDIR)/usr/bin/slot_led_ctrl"
+	ln -sf /opt/45drives/tools/slot_speeds "$(DESTDIR)/usr/bin/slot_speeds"
 
 uninstall:
 	rm -rf "$(DESTDIR)/etc/45drives/server_info"
