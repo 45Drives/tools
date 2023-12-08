@@ -147,7 +147,7 @@ partition_to_parent_name() {
 #   local SLOT_NUM=$1
 #   (
 #     set -o pipefail
-#     /opt/45drives/tools/storcli2 /call/eall show all J | jq -re '
+#     storcli2 /call/eall show all J | jq -re '
 # [
 #   .Controllers[] |
 #   select( (."Command Status"."Status" == "Success") and ()  ) |
@@ -161,6 +161,16 @@ partition_to_parent_name() {
 #   ) || perror $? "Failed to get slot number for $BLOCK_DEV_NAME"
 #   return $?
 # }
+
+# storcli2 [ OPTS ... ]
+#
+# Wrapper for storcli2 to keep storcli2.log files in /var/log
+storcli2() {
+  (
+    cd /var/log || exit $?
+    /opt/45drives/tools/storcli2 "$@"
+  )
+}
 
 # block_dev_to_slot_num DEV_PATH|SYSFS_PATH|DEV_OS_NAME [ STORCLI2_CTRL_NUM ]
 #
@@ -181,7 +191,7 @@ block_dev_to_slot_num() {
   [[ -z "$CTRL_NUM" ]] && CTRL_NUM=all
   (
     set -o pipefail
-    /opt/45drives/tools/storcli2 "/c$CTRL_NUM/eall/sall" show all J | jq -re '
+    storcli2 "/c$CTRL_NUM/eall/sall" show all J | jq -re '
     [
       .Controllers[] |
       select(."Command Status"."Status" == "Success" ) |
