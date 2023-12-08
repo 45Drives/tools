@@ -14,7 +14,8 @@ install:
 		ubm/patch_vdev_id_conf \
 		ubm/on_enclosure_add \
 		ubm/on_enclosure_remove \
-		ubm/slot_led_ctrl
+		ubm/slot_led_ctrl \
+		ubm/ubm_func_wrapper.sh
 	install -m 644 -t "$(DESTDIR)/opt/45drives/ubm" \
 		ubm/ubm_funcs.sh \
 		ubm/slot_name_map.txt
@@ -32,6 +33,14 @@ endif
 	ln -sf /opt/45drives/tools/wipedev "$(DESTDIR)/usr/bin/wipedev"
 	ln -sf /opt/45drives/ubm/slot_led_ctrl "$(DESTDIR)/usr/bin/slot_led_ctrl"
 	ln -sf /opt/45drives/tools/slot_speeds "$(DESTDIR)/usr/bin/slot_speeds"
+	for i in \
+		block_dev_to_slot_num \
+		slot_num_to_slot_name \
+		slot_name_to_slot_num \
+		block_dev_to_slot_name \
+		all_slot_nums \
+		all_slot_names \
+		; do ln -sf /opt/45drives/tools/ubm_func_wrapper.sh "$(DESTDIR)/usr/bin/$i"; done
 
 uninstall:
 	rm -rf "$(DESTDIR)/etc/45drives/server_info"
@@ -47,3 +56,12 @@ uninstall:
 	rm -f "$(DESTDIR)/usr/bin/dalias"
 	rm -f "$(DESTDIR)/usr/bin/wipedev"
 	rm -f "$(DESTDIR)/usr/bin/slot_led_ctrl"
+	rm -f "$(DESTDIR)/usr/bin/slot_speeds"
+	for i in \
+		block_dev_to_slot_num \
+		slot_num_to_slot_name \
+		slot_name_to_slot_num \
+		block_dev_to_slot_name \
+		all_slot_nums \
+		all_slot_names \
+		; do rm -f "$(DESTDIR)/usr/bin/$i"; done
