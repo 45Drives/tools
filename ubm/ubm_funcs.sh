@@ -317,7 +317,7 @@ all_slot_names() {
   UBM_MAP_KEY=$(get_map_key) || return $?
   (
     set -o pipefail
-    grep "^$UBM_MAP_KEY" "$SCRIPT_DIR/slot_name_map.txt" | cut -d' ' -f2- | xargs printf '%s\n'
+    grep "^$UBM_MAP_KEY" "$SCRIPT_DIR/slot_name_map.txt" | cut -d' ' -f2-
   ) || perror $? "Failed to lookup all slot names"
 }
 
@@ -330,7 +330,10 @@ all_slot_nums() {
   $1 == MAP_KEY {
     found_key = 1
     for (i = 2; i<=NF; ++i) {
-      print i - 2
+      printf "%d", i - 2
+      if (i+1 <= NF) {
+        printf " "
+      }
     }
     exit
   }
@@ -339,6 +342,7 @@ all_slot_nums() {
       print "map key lookup failed" > "/dev/stderr"
       exit 1
     }
+    print ""
   }
   ' "$SLOT_NAME_MAP_FILE" || perror $? "Failed to lookup all slot numbers"
 }
