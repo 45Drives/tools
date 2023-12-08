@@ -3,7 +3,7 @@
     "name": "45drives-tools",
     "title": "45drives-tools",
     "prerelease": true,
-    "version": "3.0.4",
+    "version": "3.0.5",
     "buildVersion": "1",
     "author": "Mark Hooper <mhooper@45drives.com>",
     "url": "https://github.com/45Drives/tools",
@@ -65,7 +65,7 @@
     ],
     "changelog": {
         "urgency": "medium",
-        "version": "3.0.4",
+        "version": "3.0.5",
         "buildVersion": "1",
         "ignore": [],
         "date": null,

@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.4-1
+## 45drives-tools 3.0.5-1
 
-* Overhaul bash scripts for UBM
+* Add more ubm helper functions/tools
