@@ -11,10 +11,14 @@
 # Josh Boudreau <jboudreau@45drives.com> 2023
 #
 
+[ -z "$SLOT_LINKS" ] && perror "INFO: no links to remove" && exit 0
+
 for SLOT_LINK in $SLOT_LINKS; do
   if [ -L "$SLOT_LINK" ]; then
     LINK_DIR=$(dirname "$SLOT_LINK")
     rm "$SLOT_LINK"
     rmdir --parents --ignore-fail-on-non-empty "$LINK_DIR"
+  else
+    perror "Not a symbolic link: $SLOT_LINK"
   fi
 done

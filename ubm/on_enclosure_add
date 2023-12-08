@@ -13,55 +13,22 @@
 # Josh Boudreau <jboudreau@45drives.com> 2023
 #
 
+# shellcheck source=./ubm_funcs.sh
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/ubm_funcs.sh"
+
 SLOT_LINK_DIR=/var/run/45drives/slots
 CACHE_DIR='/var/cache/45drives/ubm'
-SCRIPT_DIR="$(dirname -- "$(readlink -f -- "$0")")"
-SLOT_NAME_MAP_FILE="$SCRIPT_DIR/slot_name_map.txt"
 
 # DEVPATH defined in env by udev
-[ -z "$DEVPATH" ] && exit 0
+[ -z "$DEVPATH" ] && perror "DEVPATH not in env!" && exit 0
 
 ENCLOSURE_PATH="/sys/$DEVPATH"
 
-[ ! -d "$ENCLOSURE_PATH" ] && exit 0
+[ ! -d "$ENCLOSURE_PATH" ] && perror "$ENCLOSURE_PATH not a directory!" && exit 0
 
-if [ -z "$UBM_MAP_KEY" ]; then
-  if [ ! -r "$CACHE_DIR/map_key" ]; then
-    UBM_MAP_KEY=$(
-      set -o pipefail
-      ipmitool fru | awk -F: '
-      BEGIN {
-        found_key = 0
-      }
-      $1 ~ "Product Name" {
-        found_key=1
-        key=toupper($2);
-        sub(/-(TURBO|BASE|ENHANCED).*$/, "", key);
-        gsub(/[\t ]+/, "", key);
-        print key;
-        exit
-      }
-      END {
-        if (!found_key) {
-          print "map key lookup failed" > "/dev/stderr"
-          exit 1
-        }
-      }
-      '
-    ) || perror $? "Failed to get Product Name from FRU" || exit 0
-    [ -d "$CACHE_DIR" ] || mkdir -p "$CACHE_DIR" >/dev/null
-    TMPFILE=$(mktemp -p "$CACHE_DIR")
-    echo "$UBM_MAP_KEY" >"$TMPFILE"
-    mv "$TMPFILE" "$CACHE_DIR/map_key"
-  else
-    UBM_MAP_KEY="$(<"$CACHE_DIR/map_key")"
-  fi
-  set_env_var UBM_MAP_KEY "$UBM_MAP_KEY"
-fi
+mkdir -p "$SLOT_LINK_DIR/numeric" || perror "Failed to mkdir -p $SLOT_LINK_DIR/numeric" || exit 0
 
-mkdir -p "$SLOT_LINK_DIR/numeric"
-
-COMPONENTS=$(cat "$ENCLOSURE_PATH/components") || exit 0
+COMPONENTS=$(cat "$ENCLOSURE_PATH/components") || perror "failed to grab # of components!"  || exit 0
 
 SLOT_LINKS=()
 
@@ -74,24 +41,7 @@ for ((i = 0; i < COMPONENTS; i++)); do
   SLOT_NUM=$(cat "$slot_dev/slot" 2>/dev/null) || continue
   ln -snf "$slot_dev" "$SLOT_LINK_DIR/numeric/$SLOT_NUM" || continue
   SLOT_LINKS+=("$SLOT_LINK_DIR/numeric/$SLOT_NUM")
-  SLOT_NAME=$(
-    awk '
-    BEGIN {
-      found_style = 0
-    }
-    $1 == "'"$UBM_MAP_KEY"'" {
-      found_style = 1
-      print $'"$((2 + "$SLOT_NUM"))"'
-      exit
-    }
-    END {
-      if (!found_style) {
-        print "map key lookup failed ('"$UBM_MAP_KEY"')" > "/dev/stderr"
-        exit 1
-      }
-    }
-    ' "$SLOT_NAME_MAP_FILE"
-  ) || perror $? "Failed to lookup slot name for slot $SLOT_NUM" || continue
+  SLOT_NAME=$(slot_num_to_slot_name "$SLOT_NUM") || perror "Failed to lookup slot name for slot $SLOT_NUM" || continue
   ln -snf "numeric/$SLOT_NUM" "$SLOT_LINK_DIR/$SLOT_NAME" || continue
   SLOT_LINKS+=("$SLOT_LINK_DIR/$SLOT_NAME")
 done
