@@ -34,6 +34,7 @@ perror() {
     EXIT_CODE=$1
     shift
   fi
+  # shellcheck disable=SC2046
   printf -- '%s: ' "$0" $(printf '%s\n' "${FUNCNAME[@]:1}" | tac) >&2
   printf -- '%s' "$*" >&2
   [ "$EXIT_CODE" -ne "0" ] && printf ' (exited %d)' "$EXIT_CODE" >&2
