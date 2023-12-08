@@ -184,23 +184,28 @@ block_dev_to_slot_num() {
   local BLOCK_DEV_NAME=$1
   local CTRL_NUM=$2
   BLOCK_DEV_NAME=$(normalize_block_dev_name "$BLOCK_DEV_NAME") || return $?
-  if [[ -f "/sys/block/$BLOCK_DEV_NAME/slot" ]]; then
-    cat "/sys/block/$BLOCK_DEV_NAME/slot"
+  if [[ -f "/sys/block/$BLOCK_DEV_NAME/device/slot" ]]; then
+    cat "/sys/block/$BLOCK_DEV_NAME/device/slot"
     return 0
   fi
+  perror "Warning: getting slot number from storcli2 output (slow)"
   [[ -z "$CTRL_NUM" ]] && CTRL_NUM=all
   (
     set -o pipefail
     storcli2 "/c$CTRL_NUM/eall/sall" show all J | jq -re '
     [
       .Controllers[] |
-      select(."Command Status"."Status" == "Success" ) |
-      select(."Response Data" != null) | ."Response Data" |
-      select(."Drives List" != null) | ."Drives List" | .[] |
-      select(
-        ."Drive Detailed Information"."OS Drive Name" | endswith("'"$BLOCK_DEV_KERNEL_NAME"'")
-      )
-    ] | if length == 1 then .[] else empty end |
+      select(."Command Status"."Status" == "Success" and ."Response Data"."Drives List") |
+      ."Response Data"."Drives List"[] |
+      select(."Drive Detailed Information"."OS Drive Name" == "/dev/'"$BLOCK_DEV_NAME"'")
+    ] |
+    if length == 1 then
+      .[0]
+    elif length == 0 then
+      error("'"$BLOCK_DEV_NAME"' not found in storcli2 output")
+    else
+      error("more than one match for '"$BLOCK_DEV_NAME"'")
+    end |
     ."Drive Information"."EID:Slt" | split(":")[1]
     '
   ) || perror "Failed to get slot number for $BLOCK_DEV_NAME"
