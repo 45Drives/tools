@@ -14,11 +14,11 @@
 # Josh Boudreau <jboudreau@45drives.com> 2023
 #
 
-BLOCK_DEV_KERNEL_NAME=$1
+# shellcheck source=./ubm_funcs.sh
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/ubm_funcs.sh"
 
-CACHE_DIR='/var/cache/45drives/ubm'
-SCRIPT_DIR="$(dirname -- "$(readlink -f -- "$0")")"
-SLOT_NAME_MAP_FILE="$SCRIPT_DIR/slot_name_map.txt"
+BLOCK_DEV_KERNEL_NAME=$1
+BLOCK_DEV_KERNEL_NAME=$(normalize_block_dev_name "$1") || exit 0
 
 [ -z "$BLOCK_DEV_KERNEL_NAME" ] && echo "Must pass device kernel name" >&2 && exit 2
 
@@ -29,90 +29,25 @@ set_env_var() {
   printf '%s=%s\n' "$KEY" "$VAL"
 }
 
-perror() {
-  local EXIT_CODE=$1
-  shift
-  echo "${BASH_SOURCE[0]}: ${FUNCNAME[1]}:" "$@" "(exited $EXIT_CODE)" >&2
-  return "$EXIT_CODE"
-}
-
 if [ "$DEVTYPE" = "partition" ]; then
-  BLOCK_DEV_KERNEL_NAME=$(lsblk -dno PKNAME "/dev/$BLOCK_DEV_KERNEL_NAME") || perror $? "Failed to get parent device name" || exit 0
+  BLOCK_DEV_KERNEL_NAME=$(partition_to_parent_name "$BLOCK_DEV_KERNEL_NAME") || exit 0
 fi
 
 if [ -z "$SLOT_NUM" ]; then
   echo "INFO: querying slot number from storcli2. Issue with mpi3mr reporting slot attr?" >&2
   set_env_var WARN_GOT_SLOT_NUM_FROM_STORCLI2 1
-  SLOT_NUM=$(
-    set -o pipefail
-    /opt/45drives/tools/storcli2 /call/eall/sall show all J | jq -re '
-    [
-      .Controllers[] |
-      select(."Command Status"."Status" == "Success" ) |
-      select(."Response Data" != null) | ."Response Data" |
-      select(."Drives List" != null) | ."Drives List" | .[] |
-      select(
-        ."Drive Detailed Information"."OS Drive Name" | endswith("'"$BLOCK_DEV_KERNEL_NAME"'")
-      )
-    ] | if length == 1 then .[] else empty end |
-    ."Drive Information"."EID:Slt" | split(":")[1]
-    '
-  ) || perror $? "Failed to get slot number for $BLOCK_DEV_KERNEL_NAME" || exit 0
+  SLOT_NUM=$(block_dev_to_slot_num "$BLOCK_DEV_KERNEL_NAME") || exit 0
   set_env_var SLOT_NUM "$SLOT_NUM"
 fi
 
-if [ -z "$UBM_MAP_KEY" ]; then
-  if [ ! -r "$CACHE_DIR/map_key" ]; then
-    UBM_MAP_KEY=$(
-      set -o pipefail
-      ipmitool fru | awk -F: '
-      BEGIN {
-        found_key = 0
-      }
-      $1 ~ "Product Name" {
-        found_key=1
-        key=toupper($2);
-        sub(/-(TURBO|BASE|ENHANCED).*$/, "", key);
-        gsub(/[\t ]+/, "", key);
-        print key;
-        exit
-      }
-      END {
-        if (!found_key) {
-          print "map key lookup failed" > "/dev/stderr"
-          exit 1
-        }
-      }
-      '
-    ) || perror $? "Failed to get Product Name from FRU" || exit 0
-    [ -d "$CACHE_DIR" ] || mkdir -p "$CACHE_DIR" >/dev/null
-    TMPFILE=$(mktemp -p "$CACHE_DIR")
-    echo "$UBM_MAP_KEY" > "$TMPFILE"
-    mv "$TMPFILE" "$CACHE_DIR/map_key"
-  else
-    UBM_MAP_KEY="$(<"$CACHE_DIR/map_key")"
-  fi
+if UBM_MAP_KEY=$(get_map_key); then
   set_env_var UBM_MAP_KEY "$UBM_MAP_KEY"
+else
+  perror "get_map_key failed"
+  exit 0
 fi
 
 if [ -z "$SLOT_NAME" ]; then
-  SLOT_NAME=$(
-    awk '
-    BEGIN {
-      found_style = 0
-    }
-    $1 == "'"$UBM_MAP_KEY"'" {
-      found_style = 1
-      print $'"$((2 + "$SLOT_NUM"))"'
-      exit
-    }
-    END {
-      if (!found_style) {
-        print "map key lookup failed ('"$UBM_MAP_KEY"')" > "/dev/stderr"
-        exit 1
-      }
-    }
-    ' "$SLOT_NAME_MAP_FILE"
-  ) || perror $? "Failed to lookup slot name for slot $SLOT_NUM" || exit 0
+  SLOT_NAME=$(slot_num_to_slot_name "$SLOT_NUM") || perror "Failed to lookup slot name for slot $SLOT_NUM" || exit 0
   set_env_var SLOT_NAME "$SLOT_NAME"
 fi
