@@ -311,8 +311,10 @@ slot_num_to_slot_name() {
 # slot_name_to_slot_num 2-3 -> "10"
 slot_name_to_slot_num() {
   local SLOT_NAME=$1
+  local SLOT_NUM
   UBM_MAP_KEY=$(get_map_key) || return $?
-  table_lookup_col "$SCRIPT_DIR/slot_name_map.txt" 0 "$UBM_MAP_KEY" "$SLOT_NAME" || perror "table_lookup_col failed"
+  SLOT_NUM=$(table_lookup_col "$SCRIPT_DIR/slot_name_map.txt" 0 "$UBM_MAP_KEY" "$SLOT_NAME") || perror "table_lookup_col failed" || return $?
+  echo $((SLOT_NUM - 1))
 }
 
 # block_dev_to_slot_name DEV_PATH|SYSFS_PATH|DEV_OS_NAME [ STORCLI2_CTRL_NUM ]
@@ -359,5 +361,5 @@ all_slot_nums() {
     }
     print ""
   }
-  ' "$SLOT_NAME_MAP_FILE" || perror $? "Failed to lookup all slot numbers"
+  ' "$SCRIPT_DIR/slot_name_map.txt" || perror $? "Failed to lookup all slot numbers"
 }
