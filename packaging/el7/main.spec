@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Fri Dec 08 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.4-1
+- Overhaul bash scripts for UBM
 * Thu Dec 07 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.3-2
 - bump build
 * Thu Dec 07 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.3-1

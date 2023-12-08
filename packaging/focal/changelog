@@ -1,3 +1,9 @@
+45drives-tools (3.0.4-1focal) focal; urgency=medium
+
+  * Overhaul bash scripts for UBM
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Fri, 08 Dec 2023 12:48:49 -0400
+
 45drives-tools (3.0.3-2focal) focal; urgency=medium
 
   * bump build

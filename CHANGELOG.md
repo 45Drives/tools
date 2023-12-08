@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.3-2
+## 45drives-tools 3.0.4-1
 
-* bump build
+* Overhaul bash scripts for UBM
