@@ -28,22 +28,28 @@ while getopts 'hj' opt; do
 done
 shift $((OPTIND - 1))
 
+# shellcheck source=../ubm/ubm_funcs.sh
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../ubm/ubm_funcs.sh"
+
+SLOT_NAME_LUT=$(all_slot_names | jq -R '[ split(" ") | .[] | select(length > 0) ]')
+
 ALL_SLOT_SPEEDS_JSON=$(
     set -o pipefail
-    /opt/45drives/tools/storcli2 /call/eall/sall show all J | jq -re '
-[
-    .Controllers[] | select(."Response Data") | ."Response Data"."Drives List"[] |
-    {
-        slot: ."Drive Information"."EID:Slt" | split (":")[1],
-        enclosure_id: ."Drive Information"."EID:Slt" | split (":")[0],
-        type: ."Drive Information"."Intf",
-        width: ."Drive Detailed Information"."Negotiated Link Width",
-        width_max: ."Drive Detailed Information"."Capable Link Width",
-        rate: ."Drive Detailed Information"."Path Information"[0]."Negotiated Speed",
-        rate_max: ."Drive Detailed Information"."Capable Speed",
-        dev_path: ."Drive Detailed Information"."OS Drive Name"
-    }
-] | sort_by(.slot | tonumber)
+    storcli2 /call/eall/sall show all J | jq -re '
+    [
+        .Controllers[] | select(."Response Data") | ."Response Data"."Drives List"[] |
+        {
+            slot_num: ."Drive Information"."EID:Slt" | split (":")[1] | tonumber,
+            enclosure_id: ."Drive Information"."EID:Slt" | split (":")[0] | tonumber,
+            type: ( ."Drive Information"."Intf" // "-" ),
+            width: ( ."Drive Detailed Information"."Negotiated Link Width" // "-" ),
+            width_max: ( ."Drive Detailed Information"."Capable Link Width" // "-" ),
+            rate: [."Drive Detailed Information"."Path Information"[] | ."Negotiated Speed" // ."NegotiatedSpeed" // "-"] | join(","),
+            rate_max: ( ."Drive Detailed Information"."Capable Speed" // "-" ),
+            dev_path: ( ."Drive Detailed Information"."OS Drive Name" // "-" )
+        } |
+        . + { slot_name: ( '"$SLOT_NAME_LUT"'[.slot_num] // "-" ) }
+    ] | sort_by(.slot_num)
 '
 ) || {
     EXIT_CODE=$?
@@ -56,7 +62,9 @@ if $JSON; then
     exit 0
 fi
 
-echo "$ALL_SLOT_SPEEDS_JSON" | jq -re '
-.[] |
-    [ .slot, .enclosure_id, .type, .width, .width_max, .rate, .rate_max, .dev_path ] | @tsv
-' | column -t -s $'\t' --table-columns 'Slot,Encl ID,Type,Width,Max Width,Rate,Max Rate,Device Path' --table-right 'Slot,Encl ID,Width,Max Width,Rate,Max Rate'
+(
+    echo -e "Slot Num\tSlot Name\tEncl ID\tType\tWidth\tMax Width\tRate\tMax Rate\tDevice Path"
+    jq -re '
+    .[] | [ .slot_num, .slot_name, .enclosure_id, .type, .width, .width_max, .rate, .rate_max, .dev_path ] | @tsv
+    ' <<<"$ALL_SLOT_SPEEDS_JSON"
+) | column -s $'\t' -t
