@@ -17,6 +17,8 @@
 # shellcheck source=./ubm_funcs.sh
 source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/ubm_funcs.sh"
 
+check_ubm_func_support || exit 0
+
 BLOCK_DEV_KERNEL_NAME=$1
 BLOCK_DEV_KERNEL_NAME=$(normalize_block_dev_name "$1") || exit 0
 

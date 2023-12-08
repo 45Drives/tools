@@ -16,6 +16,8 @@
 # shellcheck source=./ubm_funcs.sh
 source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/ubm_funcs.sh"
 
+check_ubm_func_support || exit 0
+
 SLOT_LINK_DIR=/var/run/45drives/slots
 CACHE_DIR='/var/cache/45drives/ubm'
 

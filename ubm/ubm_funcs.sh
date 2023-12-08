@@ -55,6 +55,35 @@ die() {
   exit $?
 }
 
+_get_map_key() {
+  if [[ -r "$CACHE_DIR/map_key" ]]; then
+    cat "$CACHE_DIR/map_key"
+    return 0
+  fi
+  (
+    set -o pipefail
+    ipmitool fru | awk -F: '
+      BEGIN {
+        found_key = 0
+      }
+      $1 ~ "Product Name" {
+        found_key=1
+        key=toupper($2);
+        sub(/-(TURBO|BASE|ENHANCED).*$/, "", key);
+        sub(/\s+/, "", key);
+        print key;
+        exit
+      }
+      END {
+        if (!found_key) {
+          print "map key lookup failed" > "/dev/stderr"
+          exit 1
+        }
+      }
+      '
+  )
+}
+
 # get_map_key
 # print map key for table lookups
 #
@@ -65,33 +94,11 @@ get_map_key() {
     if [[ -r "$CACHE_DIR/map_key" ]]; then
       UBM_MAP_KEY="$(<"$CACHE_DIR/map_key")"
     else
-      UBM_MAP_KEY=$(
-        (
-          set -o pipefail
-          ipmitool fru | awk -F: '
-            BEGIN {
-              found_key = 0
-            }
-            $1 ~ "Product Name" {
-              found_key=1
-              key=toupper($2);
-              sub(/-(TURBO|BASE|ENHANCED).*$/, "", key);
-              sub(/\s+/, "", key);
-              print key;
-              exit
-            }
-            END {
-              if (!found_key) {
-                print "map key lookup failed" > "/dev/stderr"
-                exit 1
-              }
-            }
-            '
-        )
-      ) || perror "Failed to get Product Name from FRU" || return $?
+      UBM_MAP_KEY=$(_get_map_key) || perror "Failed to get Product Name from FRU" || return $?
       [ -d "$CACHE_DIR" ] || mkdir -p "$CACHE_DIR" >/dev/null
       TMPFILE=$(mktemp -p "$CACHE_DIR") || return $?
       echo "$UBM_MAP_KEY" >"$TMPFILE"
+      chmod 644 "$TMPFILE"
       mv "$TMPFILE" "$CACHE_DIR/map_key" || return $?
     fi
   fi
@@ -230,7 +237,7 @@ table_lookup_val() {
   [[ ! "$ROW_SEARCH_COL" =~ ^[0-9]+$ ]] && perror "Invalid row search column: $ROW_SEARCH_COL" && return 2
   [[ -z "$ROW_SEARCH_VAL" ]] && perror "Row search value is empty" && return 2
   [[ ! "$OUTPUT_COL" =~ ^[0-9]+$ ]] && perror "Invalid output column: $OUTPUT_COL" && return 2
-  awk -v ROW_SEARCH_COL=$((ROW_SEARCH_COL+1)) -v ROW_SEARCH_VAL="$ROW_SEARCH_VAL" -v OUTPUT_COL=$((OUTPUT_COL+1)) '
+  awk -v ROW_SEARCH_COL=$((ROW_SEARCH_COL + 1)) -v ROW_SEARCH_VAL="$ROW_SEARCH_VAL" -v OUTPUT_COL=$((OUTPUT_COL + 1)) '
   BEGIN {
     found_row = 0
   }
@@ -265,7 +272,7 @@ table_lookup_col() {
   [[ ! "$ROW_SEARCH_COL" =~ ^[0-9]+$ ]] && perror "Invalid row search column: $ROW_SEARCH_COL" && return 2
   [[ -z "$ROW_SEARCH_VAL" ]] && perror "Row search value is empty" && return 2
   [[ -z "$COL_SEARCH_VAL" ]] && perror "Column search value is empty" && return 2
-  awk -v ROW_SEARCH_COL=$((ROW_SEARCH_COL+1)) -v ROW_SEARCH_VAL="$ROW_SEARCH_VAL" -v COL_SEARCH_VAL="$COL_SEARCH_VAL" '
+  awk -v ROW_SEARCH_COL=$((ROW_SEARCH_COL + 1)) -v ROW_SEARCH_VAL="$ROW_SEARCH_VAL" -v COL_SEARCH_VAL="$COL_SEARCH_VAL" '
   BEGIN {
     found_row = 0
     found_col = 0
@@ -332,6 +339,56 @@ block_dev_to_slot_name() {
   slot_num_to_slot_name "$SLOT_NUM" || perror "slot_num_to_slot_name failed"
 }
 
+# slot_num_to_block_dev SLOT_NUM
+#
+# Get block device OS name from slot number
+#
+# e.g.
+# slot_num_to_block_dev 5 -> "sdj"
+slot_num_to_block_dev() {
+  local SLOT_NUM=$1
+  [[ ! "$SLOT_NUM" =~ ^[0-9]+$ ]] && perror "Invalid slot number: $SLOT_NUM" && return 2
+  for slot_attr in /sys/block/*/device/slot; do
+    if [[ $(cat "$slot_attr") == "$SLOT_NUM" ]]; then
+      cut -d'/' -f 4 <<<"$slot_attr"
+      return 0
+    fi
+  done
+  perror "Warning: getting slot number from storcli2 output (slow)"
+  (
+    set -o pipefail
+    storcli2 "/call/eall/sall" show all J | jq -re '
+    [
+      .Controllers[] |
+      select(."Command Status"."Status" == "Success" and ."Response Data"."Drives List") |
+      ."Response Data"."Drives List"[] |
+      select(."Drive Information"."EID:Slt" | split(":")[1] == "'"$SLOT_NUM"'")
+    ] |
+    if length == 1 then
+      .[0]
+    elif length == 0 then
+      error("slot '"$SLOT_NUM"' not found in storcli2 output")
+    else
+      error("more than one match for slot '"$SLOT_NUM"'")
+    end |
+    ."Drive Detailed Information"."OS Drive Name" // error("OS Drive Name not given for slot '"$SLOT_NUM"'") | split("/")[-1]
+    '
+  )
+}
+
+# slot_name_to_block_dev SLOT_NUM
+#
+# Get block device OS name from slot number
+#
+# e.g.
+# slot_num_to_block_dev 3-4 -> "sdj"
+slot_name_to_block_dev() {
+  local SLOT_NUM
+  SLOT_NUM=$(slot_name_to_slot_num "$@") || return $?
+  slot_num_to_block_dev "$SLOT_NUM"
+}
+
+# Get all slot names, space delimited
 all_slot_names() {
   UBM_MAP_KEY=$(get_map_key) || return $?
   (
@@ -340,6 +397,7 @@ all_slot_names() {
   ) || perror $? "Failed to lookup all slot names"
 }
 
+# Get all slot numbers, space delimited
 all_slot_nums() {
   UBM_MAP_KEY=$(get_map_key) || return $?
   awk -v MAP_KEY="$UBM_MAP_KEY" '
@@ -364,4 +422,30 @@ all_slot_nums() {
     print ""
   }
   ' "$SCRIPT_DIR/slot_name_map.txt" || perror $? "Failed to lookup all slot numbers"
+}
+
+# check_ubm_func_support [ -q ]
+#
+# Check for server compatibility with ubm_funcs
+#
+# Options:
+#   -q - silence error message
+#
+# e.g.
+# check_ubm_func_support || exit $?
+check_ubm_func_support() {
+  local ubm_map_key
+  local PERROR=perror
+  _silent_perror() {
+    # shellcheck disable=SC2317
+    return $?
+  }
+  if [[ "$1" == "-q" ]]; then
+    PERROR=_silent_perror
+  fi
+  ubm_map_key=$(_get_map_key 2>/dev/null) || $PERROR "Failed to determine ubm_map_key" || return $?
+  if ! grep -q "^$ubm_map_key" "$SCRIPT_DIR/slot_name_map.txt"; then
+    $PERROR "ERROR: It seems like this server is not supported for UBM functions: '$ubm_map_key' not in $SCRIPT_DIR/slot_name_map.txt"
+    return 1
+  fi
 }
