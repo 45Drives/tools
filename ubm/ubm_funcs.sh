@@ -34,7 +34,8 @@ perror() {
     EXIT_CODE=$1
     shift
   fi
-  printf -- '%s: %s: %s' "$0" "${FUNCNAME[1]}" "$*" >&2
+  printf -- '%s: ' "$0" $(printf '%s\n' "${FUNCNAME[@]:1}" | tac) >&2
+  printf -- '%s' "$*" >&2
   [ "$EXIT_CODE" -ne "0" ] && printf ' (exited %d)' "$EXIT_CODE" >&2
   echo >&2
   return "$EXIT_CODE"
