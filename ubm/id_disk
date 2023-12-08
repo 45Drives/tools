@@ -36,8 +36,7 @@ if [ "$DEVTYPE" = "partition" ]; then
 fi
 
 if [ -z "$SLOT_NUM" ]; then
-  echo "INFO: querying slot number from storcli2. Issue with mpi3mr reporting slot attr?" >&2
-  set_env_var WARN_GOT_SLOT_NUM_FROM_STORCLI2 1
+  set_env_var WARN_SLOT_NUM_NOT_SET_VIA_ATTR 1
   SLOT_NUM=$(block_dev_to_slot_num "$BLOCK_DEV_KERNEL_NAME") || exit 0
   set_env_var SLOT_NUM "$SLOT_NUM"
 fi
