@@ -41,11 +41,15 @@ ALL_SLOT_SPEEDS_JSON=$(
         {
             slot_num: ."Drive Information"."EID:Slt" | split (":")[1] | tonumber,
             enclosure_id: ."Drive Information"."EID:Slt" | split (":")[0] | tonumber,
-            type: ( ."Drive Information"."Intf" // "-" ),
+            type: ( ."Drive Information"."Intf" // "-"  | gsub("\\s*$"; "")),
             width: ( ."Drive Detailed Information"."Negotiated Link Width" // "-" ),
             width_max: ( ."Drive Detailed Information"."Capable Link Width" // "-" ),
             rate: [."Drive Detailed Information"."Path Information"[] | ."Negotiated Speed" // ."NegotiatedSpeed" // "-"] | join(","),
             rate_max: ( ."Drive Detailed Information"."Capable Speed" // "-" ),
+            model: ( ."Drive Detailed Information"."Model" // "-" | gsub("\\s*$"; "")),
+            firmware_rev: ( ."Drive Detailed Information"."Firmware Revision Level" // "-" | gsub("\\s*$"; "")),
+            state: ( ."Drive Information"."State" // "-" ),
+            status: ( ."Drive Information"."Status" // "-" ),
             dev_path: ( ."Drive Detailed Information"."OS Drive Name" // "-" )
         } |
         . + { slot_name: ( '"$SLOT_NAME_LUT"'[.slot_num] // "-" ) }
@@ -63,8 +67,8 @@ if $JSON; then
 fi
 
 (
-    echo -e "Slot Num\tSlot Name\tEncl ID\tType\tWidth\tMax Width\tRate\tMax Rate\tDevice Path"
+    echo -e "Slot Num\tSlot Name\tEncl ID\tType\tWidth\tMax Width\tRate\tMax Rate\tModel\tFW Rev\tState\tStatus\tDevice Path"
     jq -re '
-    .[] | [ .slot_num, .slot_name, .enclosure_id, .type, .width, .width_max, .rate, .rate_max, .dev_path ] | @tsv
+    .[] | [ .slot_num, .slot_name, .enclosure_id, .type, .width, .width_max, .rate, .rate_max, .model, .firmware_rev, .state, .status, .dev_path ] | @tsv
     ' <<<"$ALL_SLOT_SPEEDS_JSON"
 ) | column -s $'\t' -t
