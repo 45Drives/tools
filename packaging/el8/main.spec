@@ -63,6 +63,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Mon Dec 18 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.6-1
+- add model, fw rev, state, status to slot_speeds output
 * Fri Dec 08 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.5-1
 - Add more ubm helper functions/tools
 * Fri Dec 08 2023 Joshua Boudreau <jboudreau@45drives.com> 3.0.4-1

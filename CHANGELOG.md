@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.5-1
+## 45drives-tools 3.0.6-1
 
-* Add more ubm helper functions/tools
+* add model, fw rev, state, status to slot_speeds output
