@@ -90,10 +90,42 @@ if $JSON; then
 fi
 
 (
-    echo -e "Slot Num\tSlot Name\tStorcli2 Path\tType\tWidth\tMax Width\tRate\tMax Rate\tModel\tFW Rev\tState\tStatus\tDevice Path"
     jq -re '
-    .[] |
-    [ .slot_num, .slot_name, .storcli_path, .type, .width, .width_max, .rate, .rate_max, .model, .firmware_rev, .state, .status, .dev_path ] |
+    '"$SLOT_NAME_LUT"' as $slot_name_lut |
+    # append placeholder objects at end for empty slots
+    . + (
+        # array of all possible slot numbers
+        [ range($slot_name_lut | length) ] |
+        # transform to placeholder objects
+        map({
+            slot_num: .,
+            slot_name: $slot_name_lut[.]
+        })
+        # remaining properties will just result in null
+    ) |
+    # remove duplicates from placeholder objects
+    unique_by(.slot_num) |
+    # prepend table headers
+    [{
+        slot_num: "Slot Num",
+        enclosure_id: "Encl ID",
+        controller_num: "Controller Num",
+        type: "Type",
+        width: "Width",
+        width_max: "Max Width",
+        rate: "Rate",
+        rate_max: "Max Rate",
+        model: "Model",
+        firmware_rev: "FW Rev",
+        state: "State",
+        status: "Status",
+        dev_path: "Device Path",
+        slot_name: "Slot Name",
+        storcli_path: "Storcli2 Path",
+    }] + . |
+    # transform objects into arrays for tsv output
+    .[] | [ .slot_num, .slot_name, .storcli_path, .type, .width, .width_max, .rate, .rate_max, .model, .firmware_rev, .state, .status, .dev_path ] |
+    # replace any nulls with "-"
     map(. // "-") |
     @tsv
     ' <<<"$ALL_SLOT_SPEEDS_JSON"
