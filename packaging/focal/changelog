@@ -1,3 +1,9 @@
+45drives-tools (3.0.6-3focal) focal; urgency=medium
+
+  * fix installation of ubm_func_wrapper tools
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 02 Jan 2024 12:01:23 -0400
+
 45drives-tools (3.0.6-2focal) focal; urgency=medium
 
   * updated dmap to femove ubm map key directory to mitigate potential auto-aliasing

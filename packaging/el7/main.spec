@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Tue Jan 02 2024 Joshua Boudreau <jboudreau@45drives.com> 3.0.6-3
+- fix installation of ubm_func_wrapper tools
 * Tue Jan 02 2024 Mark Hooper <mhooper@45drives.com> 3.0.6-2
 - updated dmap to femove ubm map key directory to mitigate potential auto-aliasing
   issues

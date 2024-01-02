@@ -43,7 +43,7 @@ endif
 		all_slot_nums \
 		all_slot_names \
 		check_ubm_func_support \
-		; do ln -sf /opt/45drives/tools/ubm_func_wrapper.sh "$(DESTDIR)/usr/bin/$i"; done
+		; do ln -sf /opt/45drives/tools/ubm_func_wrapper.sh "$(DESTDIR)/usr/bin/$$i"; done
 
 uninstall:
 	rm -rf "$(DESTDIR)/etc/45drives/server_info"
@@ -70,4 +70,4 @@ uninstall:
 		all_slot_nums \
 		all_slot_names \
 		check_ubm_func_support \
-		; do rm -f "$(DESTDIR)/usr/bin/$i"; done
+		; do rm -f "$(DESTDIR)/usr/bin/$$i"; done
