@@ -37,10 +37,17 @@ ALL_SLOT_SPEEDS_JSON=$(
     set -o pipefail
     storcli2 /call/eall/sall show all J | jq -re '
     [
-        .Controllers[] | select(."Response Data") | ."Response Data"."Drives List"[] |
+        # keep only controller responses with "Drives List" in output
+        .Controllers[] | select(."Response Data"."Drives List") |
+        # inject controller number into each element of "Drives List"
+        (."Command Status"."Controller" | tonumber) as $controller_num |
+        # expand "Drives List" for transformation
+        ."Response Data"."Drives List"[] |
+        # transform each element of "Drives List"
         {
             slot_num: ."Drive Information"."EID:Slt" | split (":")[1] | tonumber,
             enclosure_id: ."Drive Information"."EID:Slt" | split (":")[0] | tonumber,
+            controller_num: $controller_num,
             type: ( ."Drive Information"."Intf" // "-"  | gsub("\\s*$"; "")),
             width: ( ."Drive Detailed Information"."Negotiated Link Width" // "-" ),
             width_max: ( ."Drive Detailed Information"."Capable Link Width" // "-" ),
@@ -52,7 +59,8 @@ ALL_SLOT_SPEEDS_JSON=$(
             status: ( ."Drive Information"."Status" // "-" ),
             dev_path: ( ."Drive Detailed Information"."OS Drive Name" // "-" )
         } |
-        . + { slot_name: ( '"$SLOT_NAME_LUT"'[.slot_num] // "-" ) }
+        . + { slot_name: ( '"$SLOT_NAME_LUT"'[.slot_num] // "-" ) } |
+        . + { storcli_path: ("/c" + (.controller_num | tostring) + "/e" + (.enclosure_id | tostring) + "/s" + (.slot_num | tostring)) }
     ] | sort_by(.slot_num)
 '
 ) || {
@@ -67,8 +75,8 @@ if $JSON; then
 fi
 
 (
-    echo -e "Slot Num\tSlot Name\tEncl ID\tType\tWidth\tMax Width\tRate\tMax Rate\tModel\tFW Rev\tState\tStatus\tDevice Path"
+    echo -e "Slot Num\tSlot Name\tStorcli2 Path\tType\tWidth\tMax Width\tRate\tMax Rate\tModel\tFW Rev\tState\tStatus\tDevice Path"
     jq -re '
-    .[] | [ .slot_num, .slot_name, .enclosure_id, .type, .width, .width_max, .rate, .rate_max, .model, .firmware_rev, .state, .status, .dev_path ] | @tsv
+    .[] | [ .slot_num, .slot_name, .storcli_path, .type, .width, .width_max, .rate, .rate_max, .model, .firmware_rev, .state, .status, .dev_path ] | @tsv
     ' <<<"$ALL_SLOT_SPEEDS_JSON"
 ) | column -s $'\t' -t
