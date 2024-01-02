@@ -35,11 +35,12 @@ SLOT_NAME_LUT=$(all_slot_names | jq -R '[ split(" ") | .[] | select(length > 0) 
 
 ALL_SLOT_SPEEDS_JSON=$(
     set -o pipefail
-    storcli2 /call/eall/sall show all J | jq -re '
+    storcli2 /call/eall/sall show all J | jq -e '
+    '"$SLOT_NAME_LUT"' as $slot_name_lut |
     [
         # keep only controller responses with "Drives List" in output
         .Controllers[] | select(."Response Data"."Drives List") |
-        # inject controller number into each element of "Drives List"
+        # save controller number to inject into each element of "Drives List"
         (."Command Status"."Controller" | tonumber) as $controller_num |
         # expand "Drives List" for transformation
         ."Response Data"."Drives List"[] |
@@ -48,18 +49,32 @@ ALL_SLOT_SPEEDS_JSON=$(
             slot_num: ."Drive Information"."EID:Slt" | split (":")[1] | tonumber,
             enclosure_id: ."Drive Information"."EID:Slt" | split (":")[0] | tonumber,
             controller_num: $controller_num,
-            type: ( ."Drive Information"."Intf" // "-"  | gsub("\\s*$"; "")),
-            width: ( ."Drive Detailed Information"."Negotiated Link Width" // "-" ),
-            width_max: ( ."Drive Detailed Information"."Capable Link Width" // "-" ),
-            rate: [."Drive Detailed Information"."Path Information"[] | ."Negotiated Speed" // ."NegotiatedSpeed" // "-"] | join(","),
-            rate_max: ( ."Drive Detailed Information"."Capable Speed" // "-" ),
-            model: ( ."Drive Detailed Information"."Model" // "-" | gsub("\\s*$"; "")),
-            firmware_rev: ( ."Drive Detailed Information"."Firmware Revision Level" // "-" | gsub("\\s*$"; "")),
-            state: ( ."Drive Information"."State" // "-" ),
-            status: ( ."Drive Information"."Status" // "-" ),
-            dev_path: ( ."Drive Detailed Information"."OS Drive Name" // "-" )
+            type: ( ."Drive Information"."Intf" | if . then gsub("\\s*$"; "") else . end),
+            width: ."Drive Detailed Information"."Negotiated Link Width",
+            width_max: ."Drive Detailed Information"."Capable Link Width",
+            # a little tricky for rate as storcli2 returns array of link speeds
+            rate: (
+                ."Drive Detailed Information"."Path Information" |
+                if type == "array" then
+                    map(."Negotiated Speed" // ."NegotiatedSpeed") |
+                    map(select(.)) |
+                    if length > 0 then
+                        join(",")
+                    else
+                        null
+                    end
+                else
+                    .
+                end
+            ),
+            rate_max: ."Drive Detailed Information"."Capable Speed",
+            model: ( ."Drive Detailed Information"."Model" | if . then gsub("\\s*$"; "") else . end),
+            firmware_rev: ( ."Drive Detailed Information"."Firmware Revision Level" | if . then gsub("\\s*$"; "") else . end),
+            state: ."Drive Information"."State",
+            status: ."Drive Information"."Status",
+            dev_path: ."Drive Detailed Information"."OS Drive Name"
         } |
-        . + { slot_name: ( '"$SLOT_NAME_LUT"'[.slot_num] // "-" ) } |
+        . + { slot_name: ( $slot_name_lut[.slot_num] ) } |
         . + { storcli_path: ("/c" + (.controller_num | tostring) + "/e" + (.enclosure_id | tostring) + "/s" + (.slot_num | tostring)) }
     ] | sort_by(.slot_num)
 '
@@ -77,6 +92,9 @@ fi
 (
     echo -e "Slot Num\tSlot Name\tStorcli2 Path\tType\tWidth\tMax Width\tRate\tMax Rate\tModel\tFW Rev\tState\tStatus\tDevice Path"
     jq -re '
-    .[] | [ .slot_num, .slot_name, .storcli_path, .type, .width, .width_max, .rate, .rate_max, .model, .firmware_rev, .state, .status, .dev_path ] | @tsv
+    .[] |
+    [ .slot_num, .slot_name, .storcli_path, .type, .width, .width_max, .rate, .rate_max, .model, .firmware_rev, .state, .status, .dev_path ] |
+    map(. // "-") |
+    @tsv
     ' <<<"$ALL_SLOT_SPEEDS_JSON"
 ) | column -s $'\t' -t
