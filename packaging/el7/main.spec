@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Wed Jan 03 2024 Joshua Boudreau <jboudreau@45drives.com> 3.0.6-4
+- fix getting ubm map key (strip whitespace)
 * Tue Jan 02 2024 Joshua Boudreau <jboudreau@45drives.com> 3.0.6-3
 - fix installation of ubm_func_wrapper tools
 * Tue Jan 02 2024 Mark Hooper <mhooper@45drives.com> 3.0.6-2

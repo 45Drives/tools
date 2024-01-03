@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.6-3
+## 45drives-tools 3.0.6-4
 
-* fix installation of ubm_func_wrapper tools
+* fix getting ubm map key (strip whitespace)
