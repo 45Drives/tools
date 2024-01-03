@@ -15,7 +15,7 @@ SLOT_LINK_NUMERIC_DIR=$SLOT_LINK_DIR/numeric
 usage() {
   local exit_code=$1
   [ -z "$exit_code" ] && exit_code=0
-  printf "Usage: %s [ -a | [ -s SLOT_NAME | -i SLOT_INDEX ]... ] [-l|-A|-f] [-t SECONDS] on|off\n" "$0" >&2
+  printf "Usage: %s [ -a | [ -s SLOT_NAME | -i SLOT_INDEX ]... ] [-l|-A|-f] on|off\n" "$0" >&2
   echo
   echo "Slot choice:"
   echo "  -a            - All slots"
