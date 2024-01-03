@@ -1,3 +1,10 @@
+45drives-tools (3.0.6-5focal) focal; urgency=medium
+
+  * changed order in which /var/cache/45drives/ubm is removed. Rules will trigger
+    after removal (for re-generation)
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 03 Jan 2024 11:03:43 -0400
+
 45drives-tools (3.0.6-4focal) focal; urgency=medium
 
   * fix getting ubm map key (strip whitespace)

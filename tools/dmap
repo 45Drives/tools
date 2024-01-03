@@ -859,14 +859,14 @@ def main():
 
 	# check to see if server is capable of auto aliasing
 	if server.get("Auto Alias",False):
-		#trigger udev
-		if options.trigger_udev:
-			reload_udev()
-			trigger_udev()
 		log("Server model {sm} is eligible for automatic device aliasing via udev rules.".format(sm=server["Model"]))
 		log("dmap will not modify /etc/vdev_id.conf when it is created automatically by udev rules.")
-		log("Removing ubm map key directory to fix potential aliasing issues with auto-aliasing. (/var/cache/45drives/ubm)")
-		shutil.rmtree("/var/cache/45drives/ubm",ignore_errors = True)
+		#trigger udev
+		if options.trigger_udev:
+			log("Removing ubm map key directory to fix potential aliasing issues with auto-aliasing. (/var/cache/45drives/ubm)")
+			shutil.rmtree("/var/cache/45drives/ubm",ignore_errors = True)
+			reload_udev()
+			trigger_udev()
 		sys.exit(0)
 
 	vdev_id_conf = create_vdev_id(server)

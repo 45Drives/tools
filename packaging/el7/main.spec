@@ -58,6 +58,9 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Wed Jan 03 2024 Mark Hooper <mhooper@45drives.com> 3.0.6-5
+- changed order in which /var/cache/45drives/ubm is removed. Rules will trigger after
+  removal (for re-generation)
 * Wed Jan 03 2024 Joshua Boudreau <jboudreau@45drives.com> 3.0.6-4
 - fix getting ubm map key (strip whitespace)
 * Tue Jan 02 2024 Joshua Boudreau <jboudreau@45drives.com> 3.0.6-3
