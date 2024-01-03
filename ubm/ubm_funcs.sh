@@ -70,7 +70,7 @@ _get_map_key() {
         found_key=1
         key=toupper($2);
         sub(/-(TURBO|BASE|ENHANCED).*$/, "", key);
-        sub(/\s+/, "", key);
+        sub(/[[:space:]]+/, "", key);
         print key;
         exit
       }
