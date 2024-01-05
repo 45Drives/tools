@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.7-1
+## 45drives-tools 3.0.7-2
 
-* Added features required for Stornado F2 server release
+* fix symlink paths for ubm_func_wrapper.sh

@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Fri Jan 05 2024 Joshua Boudreau <jboudreau@45drives.com> 3.0.7-2
+- fix symlink paths for ubm_func_wrapper.sh
 * Fri Jan 05 2024 Mark Hooper <mhooper@45drives.com> 3.0.7-1
 - Added features required for Stornado F2 server release
 * Wed Jan 03 2024 Mark Hooper <mhooper@45drives.com> 3.0.6-5
