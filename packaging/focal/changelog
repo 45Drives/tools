@@ -1,3 +1,9 @@
+45drives-tools (3.0.7-3focal) focal; urgency=medium
+
+  * Updated dmap to support MI4 Aliasing on H11 and H12 Motherboards
+
+ -- Brett Kelly <bkelly@45drives.com>  Wed, 31 Jan 2024 07:48:05 -0400
+
 45drives-tools (3.0.7-2focal) focal; urgency=medium
 
   * fix symlink paths for ubm_func_wrapper.sh

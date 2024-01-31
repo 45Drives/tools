@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Wed Jan 31 2024 Brett Kelly <bkelly@45drives.com> 3.0.7-3
+- Updated dmap to support MI4 Aliasing on H11 and H12 Motherboards
 * Fri Jan 05 2024 Joshua Boudreau <jboudreau@45drives.com> 3.0.7-2
 - fix symlink paths for ubm_func_wrapper.sh
 * Fri Jan 05 2024 Mark Hooper <mhooper@45drives.com> 3.0.7-1

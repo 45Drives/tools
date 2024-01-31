@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.7-2
+## 45drives-tools 3.0.7-3
 
-* fix symlink paths for ubm_func_wrapper.sh
+* Updated dmap to support MI4 Aliasing on H11 and H12 Motherboards

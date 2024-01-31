@@ -747,14 +747,14 @@ def alias_mi4(model,os_name,os_version_id,mobo_model):
 		log("Error executing lspci.")
 		sys.exit(1)
 
-	if mobo_model in ["H11SSL-i"]:
+	if mobo_model in ["H11SSL-i","H11SSL-I"]:
 		# H11SSL-i has different sata controller. It also has 3, so need to specify 
 		# a hard coded bus address. 
 		bus_address_sata = "0000:42:00.2"
 		for i in range(0,4):
 			#alias the drives connected to the on board sata sata connectors
 			vdev_id_str += "alias 1-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(drive=i+1,addr=bus_address_sata,i=i+5,s=ata_suffix)
-	elif mobo_model in ["H12SSL-i"]:
+	elif mobo_model in ["H12SSL-i","H12SSL-I"]:
 		# H11SSL-i has different sata controller. It also has 3, so need to specify 
 		# a hard coded bus address. 
 		bus_address_sata = "0000:48:00.0"
