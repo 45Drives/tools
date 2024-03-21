@@ -1,3 +1,9 @@
+45drives-tools (3.0.8-1focal) focal; urgency=medium
+
+  * Add support for Proxinator VM8, VM16, and VM32
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 21 Mar 2024 08:09:48 -0300
+
 45drives-tools (3.0.7-3focal) focal; urgency=medium
 
   * Updated dmap to support MI4 Aliasing on H11 and H12 Motherboards
