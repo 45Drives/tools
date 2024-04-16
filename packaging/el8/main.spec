@@ -63,6 +63,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Tue Apr 16 2024 Brett Kelly <bkelly@45drives.com> 3.0.8-2
+- added support for VM8,16,32 in lsdev and server_identifier
 * Thu Mar 21 2024 Joshua Boudreau <jboudreau@45drives.com> 3.0.8-1
 - Add support for Proxinator VM8, VM16, and VM32
 * Wed Jan 31 2024 Brett Kelly <bkelly@45drives.com> 3.0.7-3
