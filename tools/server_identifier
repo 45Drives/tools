@@ -2,7 +2,7 @@
 ########################################################################################
 # server_identifier
 # This script can be run on standard 45Drives storage servers to determine the system 
-# model by gathering hardware infromation.
+# model by gathering hardware information.
 ########################################################################################
 import subprocess
 import re
@@ -21,7 +21,7 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","F2","HL15"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","F2","HL15","VM8","VM16","VM32"]
 
 g_mobo_to_version_lut = {
 	"Base": ["X11SSH-CTF","X11SSM-F"],
@@ -31,6 +31,9 @@ g_mobo_to_version_lut = {
 	"Enhanced-AMD":["H11SSL-i"],
 	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6"],
 	"Turbo-G":["X11SPL-F","X12DPi-N6"],
+	"Good": ["H12SSL-i","H12SSL-I"],
+	"Better": ["H12SSL-i","H12SSL-I"],
+	"Best": ["H12SSL-i","H12SSL-I"]
 }
 
 g_product_lut = {
@@ -197,6 +200,18 @@ g_product_lut = {
 	"Stornado-F2-Enhanced-S":			[g_mobo_to_version_lut["Enhanced-S"]  ,0,4,"F2","F2STORNADO"],
 	"Stornado-F2-Turbo-G":				[g_mobo_to_version_lut["Turbo-G"]  ,0,4,"F2","F2STORNADO"],
 	"Stornado-F2-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,4,"F2","F2STORNADO"],
+
+	"Proxinator-VM8-Base":				[g_mobo_to_version_lut["Good"]  ,0,1,"VM8","F2STORNADO"],
+	"Proxinator-VM8-Enhanced":			[g_mobo_to_version_lut["Better"]  ,0,1,"VM8","F2STORNADO"],
+	"Proxinator-VM8-Turbo":				[g_mobo_to_version_lut["Best"]  ,0,1,"VM8","F2STORNADO"],
+
+	"Proxinator-VM16-Base":				[g_mobo_to_version_lut["Good"]  ,0,2,"VM16","F2STORNADO"],
+	"Proxinator-VM16-Enhanced":			[g_mobo_to_version_lut["Better"]  ,0,2,"VM16","F2STORNADO"],
+	"Proxinator-VM16-Turbo":			[g_mobo_to_version_lut["Best"]  ,0,2,"VM16","F2STORNADO"],
+
+	"Proxinator-VM32-Base":				[g_mobo_to_version_lut["Good"]  ,0,4,"VM32","F2STORNADO"],
+	"Proxinator-VM32-Enhanced":			[g_mobo_to_version_lut["Better"]  ,0,4,"VM32","F2STORNADO"],
+	"Proxinator-VM32-Turbo":			[g_mobo_to_version_lut["Best"]  ,0,4,"VM32","F2STORNADO"],
 
 	"Destroyinator-AV15-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,1,"AV15","DESTROYINATOR"],
 	"Destroyinator-AV15-Enhanced-S":	[g_mobo_to_version_lut["Enhanced-S"],0,1,"AV15","DESTROYINATOR"],
