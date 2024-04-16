@@ -159,7 +159,9 @@ def get_model_serial_firmware(device_name):
 	try:
 		hdparm_result = subprocess.Popen(
 			["hdparm","-I", device_name],
-			stdout=subprocess.PIPE,universal_newlines=True
+			stdout=subprocess.PIPE,
+			stderr=subprocess.DEVNULL,
+			universal_newlines=True
 		).stdout
 	except OSError:
 		print("Error executing hdparm. Is it installed?")
@@ -308,7 +310,10 @@ def build_server(options):
 			"2U":[32]
 		},
 		"F2STORNADO":{
-			"F2":[32]
+			"F2":[32],
+			"VM8":[8],
+			"VM16":[16],
+			"VM32":[32]
 		},
 		"AV15-BASE":{
 			"AV15":[15]
