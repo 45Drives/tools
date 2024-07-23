@@ -63,6 +63,9 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Tue Jul 23 2024 Brett Kelly <bkelly@45drives.com> 3.0.9-2
+- added support for gigabyte motherboards
+- added check for valid json from smartctl
 * Tue Jul 23 2024 Brett Kelly <bkelly@45drives.com> 3.0.9-1
 - added support for gigabyte motherboards
 * Tue Jul 23 2024 Brett Kelly <bkelly@45drives.com> 3.09-1

@@ -1,3 +1,10 @@
+45drives-tools (3.0.9-2focal) focal; urgency=medium
+
+  * added support for gigabyte motherboards
+  * added check for valid json from smartctl
+
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 23 Jul 2024 17:40:19 -0300
+
 45drives-tools (3.0.9-1focal) focal; urgency=medium
 
   * added support for gigabyte motherboards
