@@ -63,6 +63,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Tue Jul 23 2024 Brett Kelly <bkelly@45drives.com> 3.0.9-1
+- added support for gigabyte motherboards
 * Tue Jul 23 2024 Brett Kelly <bkelly@45drives.com> 3.09-1
 - added support for gigabyte motherboards
 * Tue Apr 16 2024 Brett Kelly <bkelly@45drives.com> 3.0.8-2
