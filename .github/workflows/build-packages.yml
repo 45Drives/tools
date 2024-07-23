@@ -4,6 +4,7 @@ on:
     branches: 
       - build
       - dev
+      - master
     tags:
       - 'v*.*.*'
 jobs:
