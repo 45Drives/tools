@@ -3,9 +3,9 @@
     "name": "45drives-tools",
     "title": "45drives-tools",
     "prerelease": false,
-    "version": "3.0.8",
-    "buildVersion": "2",
-    "author": "Mark Hooper <mhooper@45drives.com>",
+    "version": "3.09",
+    "buildVersion": "1",
+    "author": "Brett Kelly <bkelly@45drives.com>",
     "url": "https://github.com/45Drives/tools",
     "category": "utils",
     "priority": "optional",
@@ -65,11 +65,11 @@
     ],
     "changelog": {
         "urgency": "medium",
-        "version": "3.0.8",
-        "buildVersion": "2",
+        "version": "3.09",
+        "buildVersion": "1",
         "ignore": [],
         "date": null,
-        "packager": "Mark Hooper <mhooper@45drives.com>",
+        "packager": "Brett Kelly <bkelly@45drives.com>",
         "changes": []
     }
 }

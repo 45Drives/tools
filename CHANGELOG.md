@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.8-2
+## 45drives-tools 3.09-1
 
-* added support for VM8,16,32 in lsdev and server_identifier
+* added support for gigabyte motherboards

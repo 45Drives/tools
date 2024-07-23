@@ -63,6 +63,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Tue Jul 23 2024 Brett Kelly <bkelly@45drives.com> 3.09-1
+- added support for gigabyte motherboards
 * Tue Apr 16 2024 Brett Kelly <bkelly@45drives.com> 3.0.8-2
 - added support for VM8,16,32 in lsdev and server_identifier
 * Thu Mar 21 2024 Joshua Boudreau <jboudreau@45drives.com> 3.0.8-1
