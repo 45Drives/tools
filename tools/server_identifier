@@ -24,16 +24,16 @@ g_product_lut_idx = {
 g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","F2","HL15","VM8","VM16","VM32"]
 
 g_mobo_to_version_lut = {
-	"Base": ["X11SSH-CTF","X11SSM-F"],
-	"Base-B": ["X11SPL-F"],
-	"Enhanced": ["X11SPL-F","X10SRL-F"],
-	"Enhanced-S":["X11SPL-F"],
-	"Enhanced-AMD":["H11SSL-i"],
-	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6"],
-	"Turbo-G":["X11SPL-F","X12DPi-N6"],
-	"Good": ["H12SSL-i","H12SSL-I"],
-	"Better": ["H12SSL-i","H12SSL-I"],
-	"Best": ["H12SSL-i","H12SSL-I"]
+	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
+	"Base-B": ["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
+	"Enhanced": ["X11SPL-F","X10SRL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
+	"Enhanced-S":["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
+	"Enhanced-AMD":["H11SSL-i","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
+	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
+	"Turbo-G":["X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
+	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
+	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
+	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"]
 }
 
 g_product_lut = {
@@ -281,7 +281,7 @@ def motherboard():
 
 	if try_fru:
 		try:
-			fru_result = subprocess.Popen(["ipmitool","fru"],stdout=subprocess.PIPE,universal_newlines=True).stdout
+			fru_result = subprocess.Popen(["ipmitool","fru","print","0"],stdout=subprocess.PIPE,universal_newlines=True).stdout
 		except:
 			print("ERROR: ipmitool fru failed to return result.")
 		for line in fru_result:
@@ -632,7 +632,7 @@ def serial_check():
 	}
 
 	try:
-		ipmi_test = subprocess.run(["ipmitool","fru"],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
+		ipmi_test = subprocess.run(["ipmitool","fru","print","0"],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode
 	except:
 		print("ERROR: ipmitool is not installed")
 		exit(1)
@@ -644,7 +644,7 @@ def serial_check():
 		return serial_result
 
 	
-	ipmi_result = subprocess.Popen(["ipmitool","fru"],stdout=subprocess.PIPE,universal_newlines=True).stdout
+	ipmi_result = subprocess.Popen(["ipmitool","fru","print","0"],stdout=subprocess.PIPE,universal_newlines=True).stdout
 	for line in ipmi_result:
 		for field in serial_fields:
 			regex = re.search("({fld})\s+:\s+(\S+)".format(fld=field),line)
