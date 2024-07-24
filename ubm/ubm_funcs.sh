@@ -62,7 +62,7 @@ _get_map_key() {
   fi
   (
     set -o pipefail
-    ipmitool fru | awk -F: '
+    ipmitool fru print 0 | awk -F: '
       BEGIN {
         found_key = 0
       }
