@@ -545,8 +545,9 @@ def hba_lspci(server):
 		hba.append(hba_dict.copy())
 
 	hba_card_order = getCardOrder()
-	formatted_hba_order = formatBusAddresses(hba_card_order)
-	fixControllerID(hba, formatted_hba_order)
+	if hba_card_order:
+		formatted_hba_order = formatBusAddresses(hba_card_order)
+		fixControllerID(hba, formatted_hba_order)
 
 	if len(hba) > 0:
 		for card in hba:
@@ -589,7 +590,7 @@ def hba_lspci(server):
 		verify_bus_addresses(sys_bus_addrs,hba)
 
 		#sort them in ascending order
-		hba = sorted(hba, key=lambda k: k['Bus Address']) 
+		hba = sorted(hba, key=lambda k: k['Ctl']) 
 
 	return hba, hybrid_flag, hwraid_flag
 
