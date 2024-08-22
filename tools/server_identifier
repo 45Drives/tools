@@ -365,7 +365,6 @@ def getStorcliInfo(hba_card):
 		"9361-16i": "jq '.Controllers[0].\"Response Data\".\"Basics\"'",
 		"9361-24i": "jq '.Controllers[0].\"Response Data\".\"Basics\"'"
 	}
-
 	if hba_card["Model"] not in storcli_path.keys() or hba_card["Model"] not in storcli_path.keys():
 		print("Unable to proceed with unknown HBA card. {mod}".format(mod=hba_card["Model"]))
 		sys.exit(1)
@@ -415,6 +414,43 @@ def getStorcliInfo(hba_card):
 	if "Bus Address" in hba_card.keys() and "PCI Address" in hba_card.keys() and hba_card["Bus Address"] != hba_card["PCI Address"]:
 		print("Updating Controller ID: {ctl}, PCI Address: {pci}, Bus Address: {ba}".format(ctl=hba_card["Ctl"],pci=hba_card["PCI Address"],ba=hba_card["Bus Address"]))
 		hba_card["Bus Address"] = hba_card["PCI Address"]
+
+def getCardOrder():
+	# Count the number of storcli2 compatible controllers. If not zero return from the function with that many controllers. Let the normal process take over.
+	# If storcli2 controllers are 0 and non zero storcli64 controllers continue with this function
+	# this function added to handle the case of the pre-F8X servers. this is not needed in 9600 series systems
+	# this will cause a mapping problem in the scenario of having 96XX and 93/94 cards in the system.
+	storcli64_check_command = "/opt/45drives/tools/storcli64 show J | jq '.Controllers[0].\"Response Data\".\"Number of Controllers\"'"
+	storcli64_check_process = subprocess.Popen(storcli64_check_command, shell=True, stdout=subprocess.PIPE)
+	storcli64_controller_count_str,_ = storcli64_check_process.communicate()
+	storcli64_controller_count = storcli64_controller_count_str.decode('utf-8').strip()
+	storcli2_check_command = "/opt/45drives/tools/storcli2 show J | jq '.Controllers[0].\"Response Data\".\"Number of Controllers\"'"
+	storcli2_check_process = subprocess.Popen(storcli2_check_command, shell=True, stdout=subprocess.PIPE)
+	storcli2_controller_count_str,_ = storcli2_check_process.communicate()
+	storcli2_controller_count = storcli2_controller_count_str.decode('utf-8').strip()
+
+	hba_card_order = []
+
+	if int(storcli2_controller_count) > 0:
+		return hba_card_order
+	if int(storcli64_controller_count) > 0:
+		hba_order_command = "/opt/45drives/tools/storcli64 show J | jq -r '.Controllers[0].\"Response Data\".\"IT System Overview\"[].\"PCI Address\"' | cut -d : -f 2"
+		hba_order_process = subprocess.Popen(hba_order_command, shell=True, stdout=subprocess.PIPE)
+		stdout,_ = hba_order_process.communicate()
+		hba_cards = stdout.decode('utf-8').splitlines()
+		hba_card_order  =[item for item in hba_cards if item]
+		return hba_card_order
+
+def formatBusAddresses(hba_cards):
+	# take input of PCI address, alter to match format lspci expects for comparison
+	bus_addresses_formatted = [item + ":00.0" for item in hba_cards]
+	return bus_addresses_formatted
+
+def fixControllerID(hba, correct_order):
+	# take formatted fixed ctl order, match pci address in both and update ctl to match correct order
+	for item in hba:
+		if item['Bus Address'] in correct_order:
+			item['Ctl'] = correct_order.index(item['Bus Address'])
 
 def hba_lspci(server):
 	# determine the model and count of hba cards present in the system
@@ -507,6 +543,10 @@ def hba_lspci(server):
 		if hba_dict["Drive Connections"] == 24:
 			hybrid_flag = True
 		hba.append(hba_dict.copy())
+
+	hba_card_order = getCardOrder()
+	formatted_hba_order = formatBusAddresses(hba_card_order)
+	fixControllerID(hba, formatted_hba_order)
 
 	if len(hba) > 0:
 		for card in hba:
@@ -860,7 +900,6 @@ def get_os():
 					os_release_fields[regex.group(1)] = regex.group(2)
 
 	return os_release_fields["NAME"],os_release_fields["VERSION_ID"]
-
 
 def main():
 	server = {
