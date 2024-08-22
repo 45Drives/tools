@@ -1,4 +1,3 @@
-## 45drives-tools 3.0.9-2
+## 45drives-tools 3.10.0-1
 
-* added support for gigabyte motherboards
-* added check for valid json from smartctl
+* adjusted logic when sorting cards to sort by controller id rather than bus address

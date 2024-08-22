@@ -63,6 +63,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Thu Aug 22 2024 Brett Kelly <bkelly@45drives.com> 3.10.0-1
+- adjusted logic when sorting cards to sort by controller id rather than bus address
 * Tue Jul 23 2024 Brett Kelly <bkelly@45drives.com> 3.0.9-2
 - added support for gigabyte motherboards
 - added check for valid json from smartctl

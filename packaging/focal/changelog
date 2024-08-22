@@ -1,3 +1,9 @@
+45drives-tools (3.10.0-1focal) focal; urgency=medium
+
+  * adjusted logic when sorting cards to sort by controller id rather than bus address
+
+ -- Brett Kelly <bkelly@45drives.com>  Thu, 22 Aug 2024 12:46:24 -0300
+
 45drives-tools (3.0.9-2focal) focal; urgency=medium
 
   * added support for gigabyte motherboards
