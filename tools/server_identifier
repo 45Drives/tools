@@ -21,19 +21,19 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","F2","HL15","VM8","VM16","VM32"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32"]
 
 g_mobo_to_version_lut = {
-	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
-	"Base-B": ["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
-	"Enhanced": ["X11SPL-F","X10SRL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
-	"Enhanced-S":["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
-	"Enhanced-AMD":["H11SSL-i","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
-	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
-	"Turbo-G":["X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
-	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
-	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"],
-	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000"]
+	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
+	"Base-B": ["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
+	"Enhanced": ["X11SPL-F","X10SRL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
+	"Enhanced-S":["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
+	"Enhanced-AMD":["H11SSL-i","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
+	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
+	"Turbo-G":["X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
+	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
+	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
+	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"]
 }
 
 g_product_lut = {
@@ -42,6 +42,12 @@ g_product_lut = {
 	"Gateway-2UGW-Enhanced":			[g_mobo_to_version_lut["Enhanced"],0,0,"2UGW","2UGW"],
 	"Gateway-2UGW-Enhanced-S":			[g_mobo_to_version_lut["Enhanced"],0,0,"2UGW","2UGW"],
 	"Gateway-2UGW-Turbo-G":				[g_mobo_to_version_lut["Turbo"],0,0,"2UGW","2UGW"],
+ 
+ 	"Gateway-1UGW-Base":				[g_mobo_to_version_lut["Base"],0,0,"1UGW","1UGW"],
+	"Gateway-1UGW-Base-B":				[g_mobo_to_version_lut["Base"],0,0,"1UGW","1UGW"],
+	"Gateway-1UGW-Enhanced":			[g_mobo_to_version_lut["Enhanced"],0,0,"1UGW","1UGW"],
+	"Gateway-1UGW-Enhanced-S":			[g_mobo_to_version_lut["Enhanced"],0,0,"1UGW","1UGW"],
+	"Gateway-1UGW-Turbo-G":				[g_mobo_to_version_lut["Turbo"],0,0,"1UGW","1UGW"],
 
 	"HomeLab-HL15":                     [g_mobo_to_version_lut["Turbo"],0,0,"HL15","STORINATOR"],
 
