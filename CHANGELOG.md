@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.10-1
+## 45drives-tools 3.0.11-1
 
-* adjusted logic when sorting cards to sort by controller id rather than bus address
+* Adds Gigabyte motherboards, Compute Node + 1U Gateway

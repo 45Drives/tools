@@ -1,3 +1,9 @@
+45drives-tools (3.0.11-1focal) focal; urgency=medium
+
+  * Adds Gigabyte motherboards, Compute Node + 1U Gateway
+
+ -- Jordan Keough <jkeough@45drives.com>  Wed, 16 Oct 2024 07:15:22 -0300
+
 45drives-tools (3.0.10-1focal) focal; urgency=medium
 
   * adjusted logic when sorting cards to sort by controller id rather than bus address

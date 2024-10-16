@@ -63,6 +63,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Wed Oct 16 2024 Jordan Keough <jkeough@45drives.com> 3.0.11-1
+- Adds Gigabyte motherboards, Compute Node + 1U Gateway
 * Thu Aug 22 2024 Brett Kelly <bkelly@45drives.com> 3.0.10-1
 - adjusted logic when sorting cards to sort by controller id rather than bus address
 * Thu Aug 22 2024 Brett Kelly <bkelly@45drives.com> 3.10.0-1
