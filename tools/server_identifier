@@ -33,7 +33,8 @@ g_mobo_to_version_lut = {
 	"Turbo-G":["X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
 	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
 	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
-	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"]
+	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
+ 	"Super": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"]
 }
 
 g_product_lut = {
@@ -48,6 +49,11 @@ g_product_lut = {
 	"Gateway-1UGW-Enhanced":			[g_mobo_to_version_lut["Enhanced"],0,0,"1UGW","1UGW"],
 	"Gateway-1UGW-Enhanced-S":			[g_mobo_to_version_lut["Enhanced"],0,0,"1UGW","1UGW"],
 	"Gateway-1UGW-Turbo-G":				[g_mobo_to_version_lut["Turbo"],0,0,"1UGW","1UGW"],
+ 
+  	"Compute-1UGW-Base":				[g_mobo_to_version_lut["Base"],0,0,"1UGW","1UGW"],
+	"Compute-1UGW-Enhanced":			[g_mobo_to_version_lut["Enhanced"],0,0,"1UGW","1UGW"],
+	"Compute-1UGW-Turbo":				[g_mobo_to_version_lut["Turbo"],0,0,"1UGW","1UGW"],
+	"Compute-1UGW-Super":				[g_mobo_to_version_lut["Super"],0,0,"1UGW","1UGW"],
 
 	"HomeLab-HL15":                     [g_mobo_to_version_lut["Turbo"],0,0,"HL15","STORINATOR"],
 
