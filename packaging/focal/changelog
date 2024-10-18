@@ -1,3 +1,9 @@
+45drives-tools (3.0.12-2focal) focal; urgency=medium
+
+  * adds support for hl4 and hl8
+
+ -- Brett Kelly <bkelly@45drives.com>  Fri, 18 Oct 2024 13:57:29 -0300
+
 45drives-tools (3.0.12-1focal) focal; urgency=medium
 
   * adds support for homelab hl4 & 8 units

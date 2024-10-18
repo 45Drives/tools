@@ -328,7 +328,7 @@ def build_server(options):
 		"HOMELAB":{
 			"HL15":[15],
 			"HL4":[4],
-			"HL8":[4,8],
+			"HL8":[4,4],
 		},
 		"STORNADO":{
 			"AV15":[32],
