@@ -21,7 +21,7 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8"]
 
 g_mobo_to_version_lut = {
 	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000", "MC13-LE1-000"],
@@ -55,7 +55,9 @@ g_product_lut = {
 	"Compute-1UGW-Turbo":				[g_mobo_to_version_lut["Turbo"],0,0,"1UGW","1UGW"],
 	"Compute-1UGW-Super":				[g_mobo_to_version_lut["Super"],0,0,"1UGW","1UGW"],
 
-	"HomeLab-HL15":                     [g_mobo_to_version_lut["Turbo"],0,0,"HL15","STORINATOR"],
+	"HomeLab-HL15":                     [g_mobo_to_version_lut["Turbo"],0,0,"HL15","HOMELAB"],
+	"HomeLab-HL4":             			[g_mobo_to_version_lut["Turbo"],0,0,"HL4","HOMELAB"],
+	"HomeLab-HL8":             			[g_mobo_to_version_lut["Turbo"],0,0,"HL8","HOMELAB"],
 
 	"Storinator-AV15-Base":				[g_mobo_to_version_lut["Base"],0,0,"AV15","AV15-BASE"],
 	"Storinator-AV15-Base-B":			[g_mobo_to_version_lut["Base-B"],0,1,"AV15","STORINATOR"],
@@ -692,8 +694,15 @@ def serial_check():
 	
 	if ipmi_test:
 		# ipmitool fru command has returned a standard error. This can happen on a virtual machine
-		print("/opt/45drives/tools/server_identifier: ipmitool fru command failed.")
-		print("/opt/45drives/tools/server_identifier: !! WARNING !! Cannot determine server type automatically using non-standard hardware.")
+		print("/opt/45drives/tools/server_identifier: ipmitool fru command failed. IPMI is not present on this system. Attempting to pull info from DMI tables")
+		with open('/sys/class/dmi/id/chassis_serial', 'r') as file:
+			serial_result["Product Serial"] = file.read().rstrip('\n')
+
+		with open('/sys/class/dmi/id/chassis_version', 'r') as file:
+			serial_result["Product Part Number"] = file.read().rstrip('\n')
+
+		serial_result["Product Name"] = "HomeLab-" + serial_result["Product Part Number"]
+
 		return serial_result
 
 	

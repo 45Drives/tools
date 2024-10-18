@@ -431,6 +431,11 @@ def create_vdev_id(server):
 			"C8":[8],
 			"MI4":[0]
 		},
+		"HOMELAB":{
+			"HL15":[15],
+			"HL4":[4],
+			"HL8":[4,8],
+		},
 		"STORNADO":{
 			"AV15":[16,16],
 			"F32":[16,16]
@@ -577,6 +582,10 @@ def create_vdev_id(server):
 	elif server["Alias Style"] == "F8":
 		# we are using the DESTROYINATOR ailiasing scheme.
 		vdev_id_str += alias_f8(server,alias_template)
+	elif server["Alias Style"] == "HOMELAB" and server["Chassis Size"] == "HL4":
+		vdev_id_str += alias_hl4(server,alias_template)
+	elif server["Alias Style"] == "HOMELAB" and server["Chassis Size"] == "HL8":
+		vdev_id_str += alias_hl8(server,alias_template)
 	elif server["Alias Style"] == "?":
 		# we don't know what kind of server this is. Likely a vm
 		vdev_id_str = None
@@ -675,6 +684,50 @@ def alias_destroyinator(server,alias_template,phy_order):
 	else:
 		log("Error aliasing DESTROYINATOR")
 		sys.exit(1)
+	return vdev_id_str
+
+###############################################################################
+# Name: alias_hl4
+# Args: 
+# Desc: 
+###############################################################################
+def alias_hl4(server,alias_template):
+	vdev_id_str = ""
+	hl4_order = [4,3,2,1]
+
+	for i in range(0,len(hl4_order)):
+		vdev_id_str += (
+			"alias 1-{s} /dev/disk/by-path/pci-0000:01:00.1-ata-{p}\n".format(
+				s=i+1,p=hl4_order[i]
+			)
+		)
+
+	return vdev_id_str
+
+
+###############################################################################
+# Name: alias_hl8
+# Args: 
+# Desc: 
+###############################################################################
+def alias_hl8(server,alias_template):
+	vdev_id_str = ""
+	hl4_order = [4,3,2,1]
+
+	for i in range(0,len(hl4_order)):
+		vdev_id_str += (
+			"alias 1-{s} /dev/disk/by-path/pci-0000:01:00.1-ata-{p}\n".format(
+				s=i+1,p=hl4_order[i]
+			)
+		)
+
+	for i in range(0,len(hl4_order)):
+		vdev_id_str += (
+			"alias 2-{s} /dev/disk/by-path/pci-0000:06:00.0-ata-{p}\n".format(
+				s=i+1,p=hl4_order[i]
+			)
+		)
+
 	return vdev_id_str
 
 ###############################################################################
