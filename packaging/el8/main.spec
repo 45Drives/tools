@@ -63,6 +63,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Fri Oct 18 2024 Brett Kelly <bkelly@45drives.com> 3.0.12-1
+- adds support for homelab hl4 & 8 units
 * Wed Oct 16 2024 Jordan Keough <jkeough@45drives.com> 3.0.11-1
 - Adds Gigabyte motherboards, Compute Node + 1U Gateway
 * Thu Aug 22 2024 Brett Kelly <bkelly@45drives.com> 3.0.10-1
