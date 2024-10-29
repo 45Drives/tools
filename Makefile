@@ -19,7 +19,12 @@ install:
 	install -m 644 -t "$(DESTDIR)/opt/45drives/ubm" \
 		ubm/ubm_funcs.sh \
 		ubm/slot_name_map.txt
-	install -m 644 -t "$(DESTDIR)/usr/lib/udev/rules.d" ubm/67-ubm.rules
+	install -m 644 -t "$(DESTDIR)/usr/lib/udev/rules.d" \
+		udev/61-flash-io-scheduler.rules \
+		udev/67-ubm.rules \
+		udev/68-vdev.rules
+	install -m 644 -t "$(DESTDIR)/opt/45drives/tools" \
+		udev/68-vdev.rules
 ifdef TOOLS_VERSION
 	echo $(TOOLS_VERSION) > "$(DESTDIR)/etc/45drives/server_info/tools_version"
 endif
@@ -55,7 +60,7 @@ uninstall:
 	rm -f "$(DESTDIR)/usr/bin/lsdev"
 	rm -f "$(DESTDIR)/usr/bin/server_identifier"
 	rm -f "$(DESTDIR)/usr/bin/zcreate"
-	rm -f "$(DESTDIR)/usr/lib/udev/rules.d/67-ubm.rules"
+	rm -f "$(DESTDIR)/usr/lib/udev/rules.d/{61-flash-io-scheduler.rules,67-ubm.rules}"
 	rm -f "$(DESTDIR)/usr/bin/dalias"
 	rm -f "$(DESTDIR)/usr/bin/wipedev"
 	rm -f "$(DESTDIR)/usr/bin/slot_led_ctrl"
