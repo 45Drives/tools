@@ -26,7 +26,7 @@ Conflicts:	%{name}-1.7
 %build
 
 %install
-make DESTDIR=%{buildroot} TOOLS_VERSION="%{version}-{{ build_number }}" install
+make DESTDIR=%{buildroot} TOOLS_VERSION="%{version}-%{release}" install
 
 %postun
 if [ $1 == 0 ];then
