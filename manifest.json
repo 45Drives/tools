@@ -67,6 +67,12 @@
         }
     ],
     "sources": [
+        "dalias",
+        "tools",
+        "ubm",
+        "udev",
+        "CHANGELOG.md",
+        "Makefile"
     ],
     "changelog": {
         "urgency": "medium",
