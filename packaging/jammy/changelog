@@ -1,0 +1,807 @@
+45drives-tools (3.0.12-2focal) focal; urgency=medium
+
+  * adds support for hl4 and hl8
+
+ -- Brett Kelly <bkelly@45drives.com>  Fri, 18 Oct 2024 13:57:29 -0300
+
+45drives-tools (3.0.12-1focal) focal; urgency=medium
+
+  * adds support for homelab hl4 & 8 units
+
+ -- Brett Kelly <bkelly@45drives.com>  Fri, 18 Oct 2024 13:55:08 -0300
+
+45drives-tools (3.0.11-1focal) focal; urgency=medium
+
+  * Adds Gigabyte motherboards, Compute Node + 1U Gateway
+
+ -- Jordan Keough <jkeough@45drives.com>  Wed, 16 Oct 2024 07:15:22 -0300
+
+45drives-tools (3.0.10-1focal) focal; urgency=medium
+
+  * adjusted logic when sorting cards to sort by controller id rather than bus address
+
+ -- Brett Kelly <bkelly@45drives.com>  Thu, 22 Aug 2024 12:53:14 -0300
+
+45drives-tools (3.10.0-1focal) focal; urgency=medium
+
+  * adjusted logic when sorting cards to sort by controller id rather than bus address
+
+ -- Brett Kelly <bkelly@45drives.com>  Thu, 22 Aug 2024 12:46:24 -0300
+
+45drives-tools (3.0.9-2focal) focal; urgency=medium
+
+  * added support for gigabyte motherboards
+  * added check for valid json from smartctl
+
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 23 Jul 2024 17:40:19 -0300
+
+45drives-tools (3.0.9-1focal) focal; urgency=medium
+
+  * added support for gigabyte motherboards
+
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 23 Jul 2024 11:28:02 -0300
+
+45drives-tools (3.09-1focal) focal; urgency=medium
+
+  * added support for gigabyte motherboards
+
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 23 Jul 2024 11:23:16 -0300
+
+45drives-tools (3.0.8-2focal) focal; urgency=medium
+
+  * added support for VM8,16,32 in lsdev and server_identifier
+
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 16 Apr 2024 14:03:23 -0300
+
+45drives-tools (3.0.8-1focal) focal; urgency=medium
+
+  * Add support for Proxinator VM8, VM16, and VM32
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 21 Mar 2024 08:09:48 -0300
+
+45drives-tools (3.0.7-3focal) focal; urgency=medium
+
+  * Updated dmap to support MI4 Aliasing on H11 and H12 Motherboards
+
+ -- Brett Kelly <bkelly@45drives.com>  Wed, 31 Jan 2024 07:48:05 -0400
+
+45drives-tools (3.0.7-2focal) focal; urgency=medium
+
+  * fix symlink paths for ubm_func_wrapper.sh
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Fri, 05 Jan 2024 11:34:32 -0400
+
+45drives-tools (3.0.7-1focal) focal; urgency=medium
+
+  * Added features required for Stornado F2 server release
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 05 Jan 2024 06:41:56 -0400
+
+45drives-tools (3.0.6-5focal) focal; urgency=medium
+
+  * changed order in which /var/cache/45drives/ubm is removed. Rules will trigger
+    after removal (for re-generation)
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 03 Jan 2024 11:03:43 -0400
+
+45drives-tools (3.0.6-4focal) focal; urgency=medium
+
+  * fix getting ubm map key (strip whitespace)
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Wed, 03 Jan 2024 07:32:46 -0400
+
+45drives-tools (3.0.6-3focal) focal; urgency=medium
+
+  * fix installation of ubm_func_wrapper tools
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 02 Jan 2024 12:01:23 -0400
+
+45drives-tools (3.0.6-2focal) focal; urgency=medium
+
+  * updated dmap to femove ubm map key directory to mitigate potential auto-aliasing
+    issues
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 02 Jan 2024 06:17:03 -0400
+
+45drives-tools (3.0.6-1focal) focal; urgency=medium
+
+  * add model, fw rev, state, status to slot_speeds output
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 18 Dec 2023 11:55:33 -0400
+
+45drives-tools (3.0.5-1focal) focal; urgency=medium
+
+  * Add more ubm helper functions/tools
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Fri, 08 Dec 2023 14:03:22 -0400
+
+45drives-tools (3.0.4-1focal) focal; urgency=medium
+
+  * Overhaul bash scripts for UBM
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Fri, 08 Dec 2023 12:48:49 -0400
+
+45drives-tools (3.0.3-2focal) focal; urgency=medium
+
+  * bump build
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 07 Dec 2023 10:08:47 -0400
+
+45drives-tools (3.0.3-1focal) focal; urgency=medium
+
+  * add slot_speeds script
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 07 Dec 2023 09:54:11 -0400
+
+45drives-tools (3.0.2-1focal) focal; urgency=medium
+
+  * added support for Stornado F2 device aliasing via use of udev rules
+  * dalias program added to provide means of custom device aliasing
+  * Homelab-HL15 server support added to lsdev
+  * releasing to stable repo
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 21 Nov 2023 06:08:18 -0400
+
+45drives-tools (3.0.1-3focal) focal; urgency=medium
+
+  * changed all instances of 2UTM to F2 for new Stornado server
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 16 Nov 2023 05:38:32 -0400
+
+45drives-tools (3.0.1-2focal) focal; urgency=medium
+
+  * added another field in loadtest script to check for hard drive model
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 06 Oct 2023 06:57:27 -0300
+
+45drives-tools (3.0.1-1focal) focal; urgency=medium
+
+  * lsdev and server_identifier have been updated to hangle HL15 servers
+  * added drive mapping for MI4 units using H12SSL-i and X11SPi-TF motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 04 Oct 2023 07:45:18 -0300
+
+45drives-tools (3.0.0-9focal) focal; urgency=medium
+
+  * fix UBM_MAP_KEY caching in id_disk and on_enclosure_add
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 05 Sep 2023 10:02:53 -0300
+
+45drives-tools (3.0.0-8focal) focal; urgency=medium
+
+  * updated loadtest script to add disk model information in the log file.
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 24 Aug 2023 05:00:17 -0300
+
+45drives-tools (3.0.0-7focal) focal; urgency=medium
+
+  * Print message to stderr when using storcli2 to get SLOT_NUM
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 22 Aug 2023 13:49:50 -0300
+
+45drives-tools (3.0.0-6focal) focal; urgency=medium
+
+  * Fixed id_disk for case where controller has no drives
+  * Fixed udev rule to grab slot attr from parent of scsi block dev
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 22 Aug 2023 12:01:33 -0300
+
+45drives-tools (3.0.0-5focal) focal; urgency=medium
+
+  * updated server_identifier to identify and handle 9660-16i hardware raid cards
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 22 Aug 2023 11:30:42 -0300
+
+45drives-tools (3.0.0-4focal) focal; urgency=medium
+
+  * change mpi3mr dependency to mpi3mr-dkms
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Wed, 09 Aug 2023 09:33:44 -0300
+
+45drives-tools (3.0.0-3focal) focal; urgency=medium
+
+  * updated Makefile
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 03 Aug 2023 08:31:45 -0300
+
+45drives-tools (3.0.0-2focal) focal; urgency=medium
+
+  * added dalias program for manual device aliasing
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 03 Aug 2023 08:14:19 -0300
+
+45drives-tools (3.0.0-1focal) focal; urgency=medium
+
+  * test build of tools which supports ubm backplanes
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 02 Aug 2023 11:14:26 -0300
+
+45drives-tools (2.2.3-1focal) focal; urgency=medium
+
+  * updated server_identifier and lsdev to operate with ceph gateway servers more
+    gracefully
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 23 Jun 2023 08:46:49 -0300
+
+45drives-tools (2.2.2-8focal) focal; urgency=medium
+
+  * added contingency in server_identifier for 2U Gateway servers
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 23 Jun 2023 08:01:32 -0300
+
+45drives-tools (2.2.2-7focal) focal; urgency=medium
+
+  * added a check in server_identifier to ensure that the bus address of a given
+    HBA matches that found in /sys/bus/pci/devices
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 13 Jun 2023 13:16:03 -0300
+
+45drives-tools (2.2.2-6focal) focal; urgency=medium
+
+  * added rudimentary bus address translation for ROMED8-2T Motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 12 Jun 2023 10:22:25 -0300
+
+45drives-tools (2.2.2-5focal) focal; urgency=medium
+
+  * added new lines to entries when alaising mi4 using ROMED8-2T
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 23 May 2023 08:22:37 -0300
+
+45drives-tools (2.2.2-4focal) focal; urgency=medium
+
+  * added support for MI4 servers that use ASRockRack ROME8-2T motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 23 May 2023 07:29:53 -0300
+
+45drives-tools (2.2.2-3focal) focal; urgency=medium
+
+  * Implemented fix for determining server model based on installed hardware for
+    units serialized before 45Drives-tools package existed
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 26 Apr 2023 12:55:05 -0300
+
+45drives-tools (2.2.2-2focal) focal; urgency=medium
+
+  * Handled error when storcli64 is unable to report firmware version in server_identifier
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 31 Mar 2023 11:30:04 -0300
+
+45drives-tools (2.2.2-1focal) focal; urgency=medium
+
+  * Added a loadtest script for performing reads/writes to all storage drives simultaneously
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 21 Mar 2023 07:14:53 -0300
+
+45drives-tools (2.2.1-4focal) focal; urgency=medium
+
+  * modified loadtest script to output final result to log file
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 17 Mar 2023 11:40:33 -0300
+
+45drives-tools (2.2.1-3focal) focal; urgency=medium
+
+  * user can specify location of loadtest logfile using -l option
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 13 Mar 2023 10:30:09 -0300
+
+45drives-tools (2.2.1-2focal) focal; urgency=medium
+
+  * modified loadtest to work without requiring an hba card
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 13 Mar 2023 10:14:27 -0300
+
+45drives-tools (2.2.1-1focal) focal; urgency=medium
+
+  * Made a loadtest script for performing read/write operations on all storage drives
+    simultaneously.
+  * added an lsscsi dependency required for loadtest script
+  * updated manifest for testing package
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 10 Mar 2023 08:33:59 -0400
+
+45drives-tools (2.2.0-7focal) focal; urgency=medium
+
+  * hotfix for H11SSL-i motherboards in MI4 units
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Mar 2023 06:59:12 -0400
+
+45drives-tools (2.2.0-6focal) focal; urgency=medium
+
+  * Added a hotfix to alias MI4 servers using H11SSL-i motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Mar 2023 06:54:16 -0400
+
+45drives-tools (2.2.0-5focal) focal; urgency=medium
+
+  * Added a hotfix to alias MI4 servers using H11SSL-i motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Mar 2023 06:52:35 -0400
+
+45drives-tools (2.2.0-4focal) focal; urgency=medium
+
+  * dmap can now alias hardware RAID cards (9316-16i and 9361-24i)
+  * dmap will prompt user to put hardware cards in jbod mode with warning and perform
+    necessary storcli64 commands
+  * server_identifier will now capture firmware version from HBA cards when run
+  * lsdev will display firmware version of connected storage controller cards
+  * added storcli2 binary to /opt/45drives/tools for 9600 series cards
+  * updated the device addressing scheme for 9600-16i HBA cards
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 27 Feb 2023 11:22:03 -0400
+
+45drives-tools (2.2.0-3focal) focal; urgency=medium
+
+  * updated physical order for 9600-16i HBA cards
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 16 Feb 2023 10:56:17 -0400
+
+45drives-tools (2.2.0-2focal) focal; urgency=medium
+
+  * added storcli2 binary to tools directory
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 16 Feb 2023 06:56:45 -0400
+
+45drives-tools (2.2.0-1focal) focal; urgency=medium
+
+  * dmap can now alias hardware RAID cards (9316-16i and 9361-24i)
+  * dmap will prompt user to put hardware cards in jbod mode with warning and perform
+    necessary storcli64 commands
+  * server_identifier will now capture firmware version from HBA cards when run
+  * lsdev will display firmware version
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 15 Feb 2023 07:26:21 -0400
+
+45drives-tools (2.1.2-1focal) focal; urgency=medium
+
+  * Added support for F8X line of Storinators
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 02 Feb 2023 05:27:27 -0400
+
+45drives-tools (2.1.1-1focal) focal; urgency=medium
+
+  * updated how F8X servers are aliased in dmap
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 04 Jan 2023 08:45:15 -0400
+
+45drives-tools (2.1.0-4focal) focal; urgency=medium
+
+  * added support for 9400-16i HBA cards
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 31 Oct 2022 10:48:26 -0300
+
+45drives-tools (2.1.0-3focal) focal; urgency=medium
+
+  * Added support for F8X servers (naming convention subject to change)
+  * Updated server_identifier script to work with ASRockRack EPC621D8A motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 14 Sep 2022 05:54:34 -0300
+
+45drives-tools (2.1.0-2focal) focal; urgency=medium
+
+  * updated check for motherboard serial number in server_identifier
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 23 Aug 2022 10:49:07 -0300
+
+45drives-tools (2.1.0-1focal) focal; urgency=medium
+
+  * Added support for ASRockRack EPC621D8A motherboards
+  * added support for F8X prototype server device aliasing
+  * updated how hba cards are detected to work with ASRockRack motherboards
+  * improved/added new error messages for dmap, lsdev and server_identifier
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 23 Aug 2022 09:19:14 -0300
+
+45drives-tools (2.0.8-10focal) focal; urgency=medium
+
+  * added device aliasing for AV15-H16 server models
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 08 Aug 2022 11:45:08 -0300
+
+45drives-tools (2.0.8-9focal) focal; urgency=medium
+
+  * hotfix for AV15-H16 Servers
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 25 Jul 2022 07:37:07 -0300
+
+45drives-tools (2.0.8-8focal) focal; urgency=medium
+
+  * added an entry in server_identifier for Stornado-2U-Turbo
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 21 Jul 2022 11:12:16 -0300
+
+45drives-tools (2.0.8-7focal) focal; urgency=medium
+
+  * released to 45drives stable repo
+  * added support for 9600 series HBA cards
+  * lspci is used over storcli64 to determine HBA card model (9305-16i vs 9305-24i
+    for example)
+  * added the mpi3mr dependency for ubuntu, as this driver is not built into the
+    kernel
+  * 45drives-tools > 2.0.8 is no longer supported for centos7 and ubuntu-bionic
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 06 Jul 2022 10:03:09 -0300
+
+45drives-tools (2.0.8-6focal) focal; urgency=medium
+
+  * released to 45drives stable repo
+  * added support for 9600 series HBA cards
+  * lspci is used over storcli64 to determine HBA card model (9305-16i vs 9305-24i
+    for example)
+  * added the mpi3mr dependency for ubuntu, as this driver is not built into the
+    kernel
+  * 45drives-tools > 2.0.8 is no longer supported for centos7 and ubuntu-bionic
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 06 Jul 2022 09:55:54 -0300
+
+45drives-tools (2.0.8-5focal) focal; urgency=medium
+
+  * updated pci.ids file to report 9405W-16i cards accurately
+  * updated the hba adapter reported in server_identifier for 9405W-16i cards
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 30 Jun 2022 10:41:20 -0300
+
+45drives-tools (2.0.8-4focal) focal; urgency=medium
+
+  * updated postrm script
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 29 Jun 2022 13:52:21 -0300
+
+45drives-tools (2.0.8-3focal) focal; urgency=medium
+
+  * added /opt/45drives/tools/pci.ids file for use by lspci when detecting HBA cards
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 29 Jun 2022 13:15:55 -0300
+
+45drives-tools (2.0.8-2focal) focal; urgency=medium
+
+  * modified how hba cards are detected using lspci
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 24 Jun 2022 09:35:59 -0300
+
+45drives-tools (2.0.8-1focal) focal; urgency=medium
+
+  * added support for 9600-24i and 9600-16i hba cards
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 23 Jun 2022 11:50:44 -0300
+
+45drives-tools (2.0.7-1focal) focal; urgency=medium
+
+  * updated virtual machine behavior for server_identifier
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 17 May 2022 12:18:55 -0300
+
+45drives-tools (2.0.6-5focal) focal; urgency=medium
+
+  * updated how bus addresses for hba cards are handled in server_identifier
+  * added support for H12 motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 04 May 2022 08:25:49 -0300
+
+45drives-tools (2.0.6-4focal) focal; urgency=medium
+
+  * added support for Destroyinator servers in dmap, server_identifier and lsdev
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 28 Apr 2022 12:16:30 -0300
+
+45drives-tools (2.0.6-3focal) focal; urgency=medium
+
+  * dmap will find and replace the udev rules path in 68-vdev.rules.
+  * lsdev will tell user to run as root when invoking smartctl.
+  * updated the smartctl timeout values in lsdev.
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 04 Apr 2022 11:58:05 -0300
+
+45drives-tools (2.0.6-2focal) focal; urgency=medium
+
+  * added support for Destroyinator servers in dmap, server_identifier and lsdev
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 23 Feb 2022 06:43:44 -0400
+
+45drives-tools (2.0.6-1focal) focal; urgency=medium
+
+  * added support for 2U Stornado
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 16 Feb 2022 10:15:13 -0400
+
+45drives-tools (2.0.5-4focal) focal; urgency=medium
+
+  * bugfix for missing smart_status key in lsdev
+
+ -- Mark Hooper <mhooper@45drives.com>  Mon, 24 Jan 2022 09:29:03 -0400
+
+45drives-tools (2.0.5-3focal) focal; urgency=medium
+
+  * bugfix for lsdev when invoking smartctl
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 13 Jan 2022 10:51:14 -0400
+
+45drives-tools (2.0.5-2focal) focal; urgency=medium
+
+  * added -d command line argument to generate-osd-vars.sh
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 26 Nov 2021 09:43:04 -0400
+
+45drives-tools (2.0.5-1focal) focal; urgency=medium
+
+  * Fixed bug in wipedev where `wipedev -a` skipped slot 1-1
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Wed, 24 Nov 2021 11:03:45 -0400
+
+45drives-tools (2.0.4-3focal) focal; urgency=medium
+
+  * updated server_identifier to store the controller id of hba cards
+  * updated lsdev to be able to read temperatures from SAS drives using smartctl
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 10 Nov 2021 09:09:21 -0400
+
+45drives-tools (2.0.4-2focal) focal; urgency=medium
+
+  * updated server_identifier to ensure that bus addresses for HBA cards provided
+    by dmidecode are present in /sys/bus/pci/devices
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 13 Oct 2021 10:31:32 -0300
+
+45drives-tools (2.0.4-1focal) focal; urgency=medium
+
+  * simplified generate-osd-vars.sh to be hardware agnostic
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 07 Oct 2021 10:24:54 -0300
+
+45drives-tools (2.0.3-12focal) focal; urgency=medium
+
+  * removed systemd-udev dependency
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 10 Sep 2021 08:55:42 -0300
+
+45drives-tools (2.0.3-11focal) focal; urgency=medium
+
+  * fixed typo in dmap udev path from last patch
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 10 Sep 2021 07:48:58 -0300
+
+45drives-tools (2.0.3-10focal) focal; urgency=medium
+
+  * added packaging for Ubuntu bionic
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Sep 2021 09:55:39 -0300
+
+45drives-tools (2.0.3-9focal) focal; urgency=medium
+
+  * removed the preinst script for bionic and reverted postrm
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Sep 2021 09:37:08 -0300
+
+45drives-tools (2.0.3-8focal) focal; urgency=medium
+
+  * pushing an update to auto build
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Sep 2021 09:34:40 -0300
+
+45drives-tools (2.0.3-7focal) focal; urgency=medium
+
+  * adding preferences file to bionic install
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Sep 2021 08:29:34 -0300
+
+45drives-tools (2.0.3-6focal) focal; urgency=medium
+
+  * trying to get specific dependency for smartmontools
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Sep 2021 07:01:23 -0300
+
+45drives-tools (2.0.3-5focal) focal; urgency=medium
+
+  * added dep smartmontools (7.0-0ubuntu1~ubuntu18.04.1)
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Sep 2021 06:53:13 -0300
+
+45drives-tools (2.0.3-4focal) focal; urgency=medium
+
+  * changed format of Depends in bionic control file
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Sep 2021 06:22:10 -0300
+
+45drives-tools (2.0.3-3focal) focal; urgency=medium
+
+  * updated bionic dependencies to require smartmontools from bionic-backports
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 08 Sep 2021 06:15:39 -0300
+
+45drives-tools (2.0.3-2focal) focal; urgency=medium
+
+  * updated dmap to look to rules files in /bin/udev if /usr/bin/udev is not found
+  * added udev as a dependency
+  * removed hard path of /usr/bin/cp from dmap
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 07 Sep 2021 13:27:22 -0300
+
+45drives-tools (2.0.3-1focal) focal; urgency=medium
+
+  * created a package for 45drives-tools for Ubuntu (bionic)
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 07 Sep 2021 11:13:34 -0300
+
+45drives-tools (2.0.2-13focal) focal; urgency=medium
+
+  * exported DEB_BUILD_OPTIONS to append nostrip
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 07 Sep 2021 11:10:52 -0300
+
+45drives-tools (2.0.2-12focal) focal; urgency=medium
+
+  * override dh_dwz make target
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 07 Sep 2021 10:44:17 -0300
+
+45drives-tools (2.0.2-11focal) focal; urgency=medium
+
+  * third build for Ubuntu Bionic
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 07 Sep 2021 08:04:26 -0300
+
+45drives-tools (2.0.2-10focal) focal; urgency=medium
+
+  * second build for Ubuntu bionic
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 07 Sep 2021 08:00:11 -0300
+
+45drives-tools (2.0.2-9focal) focal; urgency=medium
+
+  * added autopackaging for Ubuntu bionic
+
+ -- Mark Hooper <mhooper@45drives.com>  Tue, 07 Sep 2021 07:37:14 -0300
+
+45drives-tools (2.0.2-8focal) focal; urgency=medium
+
+  * added disk type to json output
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 27 Aug 2021 08:31:30 -0300
+
+45drives-tools (2.0.2-7focal) focal; urgency=medium
+
+  * added -c option to lsdev for displaying drive capacity
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 27 Aug 2021 08:09:42 -0300
+
+45drives-tools (2.0.2-6focal) focal; urgency=medium
+
+  * removed build id links in .spec files
+
+ -- Mark Hooper <mhooper@45drives.com>  Wed, 25 Aug 2021 09:53:56 -0300
+
+45drives-tools (2.0.2-5focal) focal; urgency=medium
+
+  * Modified --json option in lsdev
+
+ -- Mark Hooper <mhooper@45drives.com>  Fri, 20 Aug 2021 07:46:34 -0300
+
+45drives-tools (2.0.2-4focal) focal; urgency=medium
+
+  * updated el8 package signature
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 19 Aug 2021 12:20:23 -0300
+
+45drives-tools (2.0.2-3focal) focal; urgency=medium
+
+  * updated el8 package signature
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 19 Aug 2021 12:13:43 -0300
+
+45drives-tools (2.0.2-2focal) focal; urgency=medium
+
+  * added new product keys for Bronze, Silver and Gold Intel CPUs using X11SPL-F
+    Motherboards
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 19 Aug 2021 10:50:14 -0300
+
+45drives-tools (2.0.2-1focal) focal; urgency=medium
+
+  * added signed el7 packaging and put this version on 45drives-stable
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 05 Aug 2021 08:28:41 -0300
+
+45drives-tools (2.0.1-3focal) focal; urgency=medium
+
+  * testing el7 gpg signing
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 05 Aug 2021 08:20:23 -0300
+
+45drives-tools (2.0.1-2focal) focal; urgency=medium
+
+  * added el7 packaging
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 10:32:06 -0300
+
+45drives-tools (2.0.1-1focal) focal; urgency=medium
+
+  * made deb and rpm tools_version file congruent
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 10:20:42 -0300
+
+45drives-tools (2.0.0-14focal) focal; urgency=medium
+
+  * checking output of sed command
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 10:15:47 -0300
+
+45drives-tools (2.0.0-13focal) focal; urgency=medium
+
+  * checking output of sed command
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 10:02:07 -0300
+
+45drives-tools (2.0.0-12focal) focal; urgency=medium
+
+  * checking output of sed command
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 09:59:46 -0300
+
+45drives-tools (2.0.0-11focal) focal; urgency=medium
+
+  * checking output of sed command
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 09:54:45 -0300
+
+45drives-tools (2.0.0-10focal) focal; urgency=medium
+
+  * modified sed command in rules
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 09:40:41 -0300
+
+45drives-tools (2.0.0-9focal) focal; urgency=medium
+
+  * set postrm script to use bash (focal)
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 09:20:59 -0300
+
+45drives-tools (2.0.0-8focal) focal; urgency=medium
+
+  * modified search for tools version in rules file (focal)
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 09:09:39 -0300
+
+45drives-tools (2.0.0-7focal) focal; urgency=medium
+
+  * fixed indentation in dmap
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 08:21:27 -0300
+
+45drives-tools (2.0.0-6focal) focal; urgency=medium
+
+  * added ignore debug flag in spec file
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 07:46:44 -0300
+
+45drives-tools (2.0.0-5focal) focal; urgency=medium
+
+  * changed architecture and spec file
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 07:41:56 -0300
+
+45drives-tools (2.0.0-4focal) focal; urgency=medium
+
+  * updated makefile
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 07:32:22 -0300
+
+45drives-tools (2.0.0-3focal) focal; urgency=medium
+
+  * updated makefile
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 07:29:21 -0300
+
+45drives-tools (2.0.0-2focal) focal; urgency=medium
+
+  * updated makefile
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 07:26:17 -0300
+
+45drives-tools (2.0.0-1focal) focal; urgency=medium
+
+  * configured autopackaging for 45drives-tools on rocky and ubuntu
+  * updated uninstall process to remove all files associated with 45drives-tools
+  * updated makefile
+  * dmap outputs full version in vdev_id.conf
+
+ -- Mark Hooper <mhooper@45drives.com>  Thu, 29 Jul 2021 06:52:26 -0300
