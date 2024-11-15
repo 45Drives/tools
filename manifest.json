@@ -1,28 +1,24 @@
 {
-    "__version": "45D-R1",
+    "schema_version": "45D_AP_V2.0",
     "name": "45drives-tools",
     "title": "45drives-tools",
-    "prerelease": false,
+    "description": "cli tools for 45Drives server products",
     "version": "3.0.12",
-    "buildVersion": "2",
+    "build_number": "2",
+    "stable": false,
     "author": "Brett Kelly <bkelly@45drives.com>",
-    "url": "https://github.com/45Drives/tools",
-    "category": "utils",
-    "priority": "optional",
+    "git_url": "https://github.com/45Drives/ceph-ansible-45d",
     "licence": "GPL-3.0+",
-    "architecture": {
-        "deb": "amd64",
-        "el": "x86_64"
-    },
-    "description": {
-        "long": "cli tools for 45Drives server products",
-        "short": "cli tools for 45Drives server products"
-    },
     "defaults": {
-        "urgency": "medium"
+        "change_urgency": "medium"
+    },
+    "architecture": {
+        "rocky": "x86_64",
+        "debian": "amd64",
+        "ubuntu": "amd64"
     },
     "dependencies": {
-        "deb": [
+        "ubuntu_common": [
             "ipmitool",
             "jq",
             "smartmontools (>= 7.0 )",
@@ -33,7 +29,7 @@
             "udev",
             "lsscsi"
         ],
-        "el": [
+        "rocky_common": [
             "ipmitool",
             "jq",
             "smartmontools > 7.0",
@@ -44,33 +40,38 @@
             "lsscsi"
         ]
     },
-    "releases": [
+    "builds": [
         {
-            "image": "ubuntu-focal-builder",
-            "codeName": "focal",
-            "type": "deb"
+            "group": "ubuntu",
+            "os_name": "ubuntu-focal",
+            "repo": "community",
+            "image": "ci.cr.45d.io/ci/simple/ubuntu-focal:1"
         },
         {
-            "image": "ubuntu-jammy-builder",
-            "codeName": "jammy",
-            "type": "deb"
+            "group": "ubuntu",
+            "os_name": "ubuntu-jammy",
+            "repo": "community",
+            "image": "ci.cr.45d.io/ci/simple/ubuntu-jammy:1"
         },
         {
-            "image": "rocky-el8-builder",
-            "codeName": "el8",
-            "type": "el"
+            "group": "rocky",
+            "os_name": "rocky-el8",
+            "repo": "community",
+            "image": "ci.cr.45d.io/ci/simple/rocky-el8:1"
         },
         {
-            "image": "rocky-el9-builder",
-            "codeName": "el9",
-            "type": "el"
+            "group": "rocky",
+            "os_name": "rocky-el9",
+            "repo": "community",
+            "image": "ci.cr.45d.io/ci/simple/rocky-el9:1"
         }
+    ],
+    "sources": [
     ],
     "changelog": {
         "urgency": "medium",
-        "version": "3.0.12",
-        "buildVersion": "2",
-        "ignore": [],
+        "version": "7.0.0",
+        "build_number": "1",
         "date": null,
         "packager": "Brett Kelly <bkelly@45drives.com>",
         "changes": []

@@ -1,0 +1,78 @@
+{
+    "__version": "45D-R1",
+    "name": "45drives-tools",
+    "title": "45drives-tools",
+    "prerelease": false,
+    "version": "3.0.12",
+    "buildVersion": "2",
+    "author": "Brett Kelly <bkelly@45drives.com>",
+    "url": "https://github.com/45Drives/tools",
+    "category": "utils",
+    "priority": "optional",
+    "licence": "GPL-3.0+",
+    "architecture": {
+        "deb": "amd64",
+        "el": "x86_64"
+    },
+    "description": {
+        "long": "cli tools for 45Drives server products",
+        "short": "cli tools for 45Drives server products"
+    },
+    "defaults": {
+        "urgency": "medium"
+    },
+    "dependencies": {
+        "deb": [
+            "ipmitool",
+            "jq",
+            "smartmontools (>= 7.0 )",
+            "dmidecode",
+            "python3",
+            "pciutils",
+            "hdparm",
+            "udev",
+            "lsscsi"
+        ],
+        "el": [
+            "ipmitool",
+            "jq",
+            "smartmontools > 7.0",
+            "dmidecode",
+            "python3",
+            "pciutils",
+            "hdparm",
+            "lsscsi"
+        ]
+    },
+    "releases": [
+        {
+            "image": "ubuntu-focal-builder",
+            "codeName": "focal",
+            "type": "deb"
+        },
+        {
+            "image": "ubuntu-jammy-builder",
+            "codeName": "jammy",
+            "type": "deb"
+        },
+        {
+            "image": "rocky-el8-builder",
+            "codeName": "el8",
+            "type": "el"
+        },
+        {
+            "image": "rocky-el9-builder",
+            "codeName": "el9",
+            "type": "el"
+        }
+    ],
+    "changelog": {
+        "urgency": "medium",
+        "version": "3.0.12",
+        "buildVersion": "2",
+        "ignore": [],
+        "date": null,
+        "packager": "Brett Kelly <bkelly@45drives.com>",
+        "changes": []
+    }
+}
