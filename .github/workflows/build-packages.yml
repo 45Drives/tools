@@ -47,7 +47,7 @@ jobs:
         with:
           playbook: /root/git/auto-packaging/actions/ansible/sign.yml
           directory: ${{ github.workspace }}/packaging
-          group_vars_directory: ${{ github.workspace }}/packaging/group_var/
+          group_vars_directory: ${{ github.workspace }}/packaging/group_vars/
           inventory: |
             [ci]
             localhost
