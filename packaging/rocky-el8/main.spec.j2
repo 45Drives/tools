@@ -1,15 +1,15 @@
 %global debug_package %{nil}
 %define _build_id_links none
 
-Name: ::package_name::
-Version: ::package_version::
-Release: ::package_build_version::%{?dist}
-Summary: ::package_description_short::
-License: ::package_licence::
-URL: ::package_url::
+Name: {{ name }}
+Version: {{ version }}
+Release: {{ build_number }}%{?dist}
+Summary: {{ description }}
+License: {{ license }}
+URL: {{ git_url }}
 Source0: %{name}-%{version}.tar.gz
-BuildArch: ::package_architecture_el::
-Requires: ::package_dependencies_el::
+BuildArch: {{ architecture.rocky }}
+Requires: {{ dependencies.rocky_common | join(',') }}
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -17,8 +17,8 @@ Provides:	%{name} = %{version}-%{release}
 Conflicts:	%{name}-1.7
 
 %description
-::package_title::
-::package_description_long::
+{{ title }}
+{{ description }}
 
 %prep
 %setup -q
@@ -26,7 +26,7 @@ Conflicts:	%{name}-1.7
 %build
 
 %install
-make DESTDIR=%{buildroot} TOOLS_VERSION="%{version}-::package_build_version::" install
+make DESTDIR=%{buildroot} TOOLS_VERSION="%{version}-{{ version }}" install
 
 %postun
 if [ $1 == 0 ];then
