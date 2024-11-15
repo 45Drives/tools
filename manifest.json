@@ -56,11 +56,6 @@
             "type": "deb"
         },
         {
-            "image": "rocky-el7-builder",
-            "codeName": "el7",
-            "type": "el"   
-        },
-        {
             "image": "rocky-el8-builder",
             "codeName": "el8",
             "type": "el"
