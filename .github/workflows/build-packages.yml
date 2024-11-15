@@ -2,14 +2,12 @@ name: Build Packages
 on:
   push:
     branches: 
-      - build
-      - dev
-      - master
+      - buildtest
     tags:
       - 'v*.*.*'
 jobs:
   main:
-    runs-on: self-hosted
+    runs-on: deployinatorv1
     steps:
       - name: Checkout
         uses: actions/checkout@v2

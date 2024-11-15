@@ -31,7 +31,6 @@
             "pciutils",
             "hdparm",
             "udev",
-            "mpi3mr-dkms",
             "lsscsi"
         ],
         "el": [
@@ -42,7 +41,6 @@
             "python3",
             "pciutils",
             "hdparm",
-            "mpi3mr-dkms",
             "lsscsi"
         ]
     },
@@ -53,13 +51,23 @@
             "type": "deb"
         },
         {
+            "image": "ubuntu-jammy-builder",
+            "codeName": "jammy",
+            "type": "deb"
+        },
+        {
+            "image": "rocky-el7-builder",
+            "codeName": "el7",
+            "type": "el"   
+        },
+        {
             "image": "rocky-el8-builder",
             "codeName": "el8",
             "type": "el"
         },
         {
-            "image": "centos-el7-builder",
-            "codeName": "el7",
+            "image": "rocky-el9-builder",
+            "codeName": "el9",
             "type": "el"
         }
     ],
