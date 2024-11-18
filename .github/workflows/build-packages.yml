@@ -2,7 +2,7 @@ name: Build Packages
 on:
   push:
     branches: 
-      - buildtest
+      - buildv2
     tags:
       - 'v*.*.*'
 jobs:
