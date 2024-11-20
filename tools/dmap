@@ -693,7 +693,7 @@ def alias_destroyinator(server,alias_template,phy_order):
 ###############################################################################
 def alias_hl4(server,alias_template):
 	vdev_id_str = ""
-	hl4_order = [4,3,2,1]
+	hl4_order = [1,2,3,4]
 
 	for i in range(0,len(hl4_order)):
 		vdev_id_str += (
@@ -712,7 +712,7 @@ def alias_hl4(server,alias_template):
 ###############################################################################
 def alias_hl8(server,alias_template):
 	vdev_id_str = ""
-	hl4_order = [4,3,2,1]
+	hl4_order = [1,2,3,4]
 
 	for i in range(0,len(hl4_order)):
 		vdev_id_str += (
