@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.12-2
+## 45drives-tools 3.0.13-1
 
-* adds support for hl4 and hl8
+* Adds support for HL4/8 into dmap and dalias configs
