@@ -53,7 +53,7 @@ jobs:
             localhost
           become: true
           host_key_checking: true
-          extra_vars: sign_key_name=public
+          extra_vars: sign_key_name=prod
 
   # push_local:
   #   needs:
