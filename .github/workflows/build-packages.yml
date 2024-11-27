@@ -53,7 +53,7 @@ jobs:
             localhost
           become: true
           host_key_checking: true
-          extra_vars: sign_key_name=edge
+          extra_vars: sign_key_name=public
 
   # push_local:
   #   needs:
