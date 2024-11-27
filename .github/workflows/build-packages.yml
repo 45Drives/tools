@@ -36,7 +36,7 @@ jobs:
           build: ${{ toJSON(matrix.build) }}
           uuid: ${{ needs.prebuild.outputs.uuid }}
 
-  edge_deploy:
+  sign:
     needs:
       - prebuild
       - build
@@ -54,3 +54,12 @@ jobs:
           become: true
           host_key_checking: true
           extra_vars: sign_key_name=edge
+
+  # push_local:
+  #   needs:
+  #     - prebuild
+  #     - build
+  #     - sign
+  #   runs-on: buildinator
+  #   steps:
+  #     - name: 
