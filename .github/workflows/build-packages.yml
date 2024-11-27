@@ -53,7 +53,7 @@ jobs:
             localhost
           become: true
           host_key_checking: true
-          extra_vars: sign_key_name=edge
+          extra_vars: sign_key_name=testing
 
   # push_local:
   #   needs:
@@ -62,4 +62,8 @@ jobs:
   #     - sign
   #   runs-on: buildinator
   #   steps:
-  #     - name: 
+  #     - id: push_local
+  #       name: Push packages into local repository
+  #       uses: 45drives/actions/update-repo@main
+  #       with:
+  #         uuid: ${{ needs.prebuild.outputs.uuid }}
