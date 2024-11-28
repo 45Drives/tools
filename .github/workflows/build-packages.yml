@@ -65,3 +65,5 @@ jobs:
       - id: push_local
         name: Push packages into local repository
         uses: 45drives/actions/update-repo@main
+        with:
+          directory: ${{ github.workspace }}
