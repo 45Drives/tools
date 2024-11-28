@@ -55,15 +55,13 @@ jobs:
           host_key_checking: true
           extra_vars: sign_key_name=prod
 
-  # push_local:
-  #   needs:
-  #     - prebuild
-  #     - build
-  #     - sign
-  #   runs-on: buildinator
-  #   steps:
-  #     - id: push_local
-  #       name: Push packages into local repository
-  #       uses: 45drives/actions/update-repo@main
-  #       with:
-  #         uuid: ${{ needs.prebuild.outputs.uuid }}
+  push_local:
+    needs:
+      - prebuild
+      - build
+      - sign
+    runs-on: buildinator
+    steps:
+      - id: push_local
+        name: Push packages into local repository
+        uses: 45drives/actions/update-repo@main
