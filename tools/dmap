@@ -436,6 +436,11 @@ def create_vdev_id(server):
 			"HL4":[4],
 			"HL8":[4,4],
 		},
+		"PROFESSIONAL":{
+			"PRO15":[15],
+			"PRO4":[4],
+			"PRO8":[4,4],
+		},
 		"STORNADO":{
 			"AV15":[16,16],
 			"F32":[16,16]
@@ -586,6 +591,10 @@ def create_vdev_id(server):
 		vdev_id_str += alias_hl4(server,alias_template)
 	elif server["Alias Style"] == "HOMELAB" and server["Chassis Size"] == "HL8":
 		vdev_id_str += alias_hl8(server,alias_template)
+	elif server["Alias Style"] == "PROFESSIONAL" and server["Chassis Size"] == "PRO4":
+		vdev_id_str += alias_pro4(server,alias_template)
+	elif server["Alias Style"] == "PROFESSIONAL" and server["Chassis Size"] == "PRO8":
+		vdev_id_str += alias_pro8(server,alias_template)
 	elif server["Alias Style"] == "?":
 		# we don't know what kind of server this is. Likely a vm
 		vdev_id_str = None
@@ -729,6 +738,52 @@ def alias_hl8(server,alias_template):
 		)
 
 	return vdev_id_str
+
+###############################################################################
+# Name: alias_pro4
+# Args: 
+# Desc: 
+###############################################################################
+def alias_pro4(server,alias_template):
+	vdev_id_str = ""
+	pro4_order = [1,2,3,4]
+
+	for i in range(0,len(pro4_order)):
+		vdev_id_str += (
+			"alias 1-{s} /dev/disk/by-path/pci-0000:00:17.0-ata-{p}\n".format(
+				s=i+1,p=pro4_order[i]
+			)
+		)
+
+	return vdev_id_str
+
+
+###############################################################################
+# Name: alias_pro8
+# Args: 
+# Desc: 
+###############################################################################
+def alias_pro8(server,alias_template):
+	vdev_id_str = ""
+	pro8_order1 = [1,2,3,4]
+	pro8_order2 = [5,6,7,8]
+
+	for i in range(0,len(pro8_order1)):
+		vdev_id_str += (
+			"alias 1-{s} /dev/disk/by-path/pci-0000:00:17.0-ata-{p}\n".format(
+				s=i+1,p=pro8_order1[i]
+			)
+		)
+
+	for i in range(0,len(pro8_order2)):
+		vdev_id_str += (
+			"alias 2-{s} /dev/disk/by-path/pci-0000:00:17.0-ata-{p}\n".format(
+				s=i+1,p=pro8_order2[i]
+			)
+		)
+
+	return vdev_id_str
+
 
 ###############################################################################
 # Name: alias_av15_base

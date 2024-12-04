@@ -330,6 +330,11 @@ def build_server(options):
 			"HL4":[4],
 			"HL8":[4,4],
 		},
+  		"PROFESSIONAL":{
+			"PRO15":[15],
+			"PRO4":[4],
+			"PRO8":[4,4],
+		},
 		"STORNADO":{
 			"AV15":[32],
 			"F32":[32]
