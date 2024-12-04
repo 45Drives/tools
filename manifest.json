@@ -4,7 +4,7 @@
     "title": "45drives-tools",
     "prerelease": false,
     "version": "3.0.13",
-    "buildVersion": "1",
+    "buildVersion": "2",
     "author": "Brett Kelly <bkelly@45drives.com>",
     "url": "https://github.com/45Drives/tools",
     "category": "utils",
@@ -66,7 +66,7 @@
     "changelog": {
         "urgency": "medium",
         "version": "3.0.13",
-        "buildVersion": "1",
+        "buildVersion": "2",
         "ignore": [],
         "date": "2024-12-04T14:44:59.963037",
         "packager": "Jordan Keough <jkeough@45drives.com>",

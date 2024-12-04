@@ -1,3 +1,9 @@
+45drives-tools (3.0.13-2focal) focal; urgency=medium
+
+  * Adds support for HL4/8 and 45Professional
+
+ -- Jordan Keough <jkeough@45drives.com>  Wed, 04 Dec 2024 10:46:38 -0400
+
 45drives-tools (3.0.13-1focal) focal; urgency=medium
 
   * Adds support for HL4/8 into dmap and dalias configs

@@ -63,6 +63,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Wed Dec 04 2024 Jordan Keough <jkeough@45drives.com> 3.0.13-2
+- Adds support for HL4/8 and 45Professional
 * Wed Nov 20 2024 Jordan Keough <jkeough@45drives.com> 3.0.13-1
 - Adds support for HL4/8 into dmap and dalias configs
 * Fri Oct 18 2024 Brett Kelly <bkelly@45drives.com> 3.0.12-2
