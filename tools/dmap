@@ -695,23 +695,66 @@ def alias_destroyinator(server,alias_template,phy_order):
 		sys.exit(1)
 	return vdev_id_str
 
+
+###############################################################################
+# Helper Function to Get SATA Controller PCI Addresses
+###############################################################################
+def get_sata_pci_addresses():
+    try:
+        # Run the lshw command to get storage information
+        lshw_result = subprocess.Popen(
+            ["lshw", "-class", "storage"], stdout=subprocess.PIPE, universal_newlines=True
+        ).stdout
+    except Exception as e:
+        print(f"Error running lshw: {e}")
+        return []
+
+    pci_addresses = []
+    sata_found = False  # Flag to track if we are in a SATA section
+
+    bus_info_pattern = re.compile(r"bus info:\s+pci@(\S+)")  # Regex to capture PCI bus info
+    description_pattern = re.compile(r"description:\s+SATA controller")  # To identify SATA sections
+
+    for line in lshw_result:
+        if description_pattern.search(line):
+            sata_found = True
+        elif line.strip() == "":  # Empty line indicates end of current section
+            sata_found = False
+
+        if sata_found:
+            match = bus_info_pattern.search(line)
+            if match:
+                pci_addresses.append(match.group(1))  # Capture PCI address
+
+    return pci_addresses
+
+
 ###############################################################################
 # Name: alias_hl4
 # Args: 
 # Desc: 
 ###############################################################################
-def alias_hl4(server,alias_template):
-	vdev_id_str = ""
-	hl4_order = [1,2,3,4]
+def alias_hl4(server, alias_template):
+    vdev_id_str = ""
+    hl4_order = [1, 2, 3, 4]
 
-	for i in range(0,len(hl4_order)):
-		vdev_id_str += (
-			"alias 1-{s} /dev/disk/by-path/pci-0000:01:00.1-ata-{p}\n".format(
-				s=i+1,p=hl4_order[i]
-			)
-		)
+    # Fetch SATA addresses dynamically
+    sata_addresses = get_sata_pci_addresses()
 
-	return vdev_id_str
+    if len(sata_addresses) < 1:
+        raise RuntimeError("No SATA controllers found for HL4 configuration.")
+
+    # Use the first SATA controller for HL4
+    primary_sata_address = sata_addresses[0]
+
+    for i in range(len(hl4_order)):
+        vdev_id_str += (
+            "alias 1-{s} /dev/disk/by-path/pci-{addr}-ata-{p}\n".format(
+                s=i + 1, p=hl4_order[i], addr=primary_sata_address
+            )
+        )
+
+    return vdev_id_str
 
 
 ###############################################################################
@@ -719,25 +762,35 @@ def alias_hl4(server,alias_template):
 # Args: 
 # Desc: 
 ###############################################################################
-def alias_hl8(server,alias_template):
-	vdev_id_str = ""
-	hl4_order = [1,2,3,4]
+def alias_hl8(server, alias_template):
+    vdev_id_str = ""
+    hl4_order = [1, 2, 3, 4]
 
-	for i in range(0,len(hl4_order)):
-		vdev_id_str += (
-			"alias 1-{s} /dev/disk/by-path/pci-0000:01:00.1-ata-{p}\n".format(
-				s=i+1,p=hl4_order[i]
-			)
-		)
+    # Fetch SATA addresses dynamically
+    sata_addresses = get_sata_pci_addresses()
 
-	for i in range(0,len(hl4_order)):
-		vdev_id_str += (
-			"alias 2-{s} /dev/disk/by-path/pci-0000:06:00.0-ata-{p}\n".format(
-				s=i+1,p=hl4_order[i]
-			)
-		)
+    if len(sata_addresses) < 2:
+        raise RuntimeError("Insufficient SATA controllers found for HL8 configuration.")
 
-	return vdev_id_str
+    # Use the first two SATA controllers for HL8
+    primary_sata_address = sata_addresses[0]
+    secondary_sata_address = sata_addresses[1]
+
+    for i in range(len(hl4_order)):
+        vdev_id_str += (
+            "alias 1-{s} /dev/disk/by-path/pci-{addr}-ata-{p}\n".format(
+                s=i + 1, p=hl4_order[i], addr=primary_sata_address
+            )
+        )
+
+    for i in range(len(hl4_order)):
+        vdev_id_str += (
+            "alias 2-{s} /dev/disk/by-path/pci-{addr}-ata-{p}\n".format(
+                s=i + 1, p=hl4_order[i], addr=secondary_sata_address
+            )
+        )
+
+    return vdev_id_str
 
 ###############################################################################
 # Name: alias_pro4
