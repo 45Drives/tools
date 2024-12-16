@@ -58,6 +58,9 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Mon Dec 16 2024 Jordan Keough <jkeough@45drives.com> 3.0.14-1
+- Adds support for HL4/8 and 45Professional
+- Fixes sata addressing for HL4/8
 * Wed Dec 04 2024 Jordan Keough <jkeough@45drives.com> 3.0.13-2
 - Adds support for HL4/8 and 45Professional
 * Wed Nov 20 2024 Jordan Keough <jkeough@45drives.com> 3.0.13-1
