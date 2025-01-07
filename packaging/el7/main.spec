@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Tue Jan 07 2025 Brett Kelly <bkelly@45drives.com> 3.0.15-1
+- reverse mapping order pro4/pro8
 * Mon Dec 16 2024 Jordan Keough <jkeough@45drives.com> 3.0.14-1
 - Adds support for HL4/8 and 45Professional
 - Fixes sata addressing for HL4/8
