@@ -799,7 +799,7 @@ def alias_hl8():
 ###############################################################################
 def alias_pro4():
 	vdev_id_str = ""
-	pro4_order = [1,2,3,4]
+	pro4_order = [4,3,2,1]
 
 	for i in range(0,len(pro4_order)):
 		vdev_id_str += (
@@ -818,8 +818,8 @@ def alias_pro4():
 ###############################################################################
 def alias_pro8():
 	vdev_id_str = ""
-	pro8_order1 = [1,2,3,4]
-	pro8_order2 = [5,6,7,8]
+	pro8_order1 = [4,3,2,1]
+	pro8_order2 = [8,7,6,5]
 
 	for i in range(0,len(pro8_order1)):
 		vdev_id_str += (
