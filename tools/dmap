@@ -434,12 +434,12 @@ def create_vdev_id(server):
 		"HOMELAB":{
 			"HL15":[15],
 			"HL4":[4],
-			"HL8":[4,4],
+			"HL8":[4,4]
 		},
 		"PROFESSIONAL":{
 			"PRO15":[15],
 			"PRO4":[4],
-			"PRO8":[4,4],
+			"PRO8":[4,4]
 		},
 		"STORNADO":{
 			"AV15":[16,16],
@@ -449,7 +449,10 @@ def create_vdev_id(server):
 			"2U":[16,16]
 		},
 		"F2STORNADO":{
-			"F2":[8,8,8,8]
+			"F2":[8,8,8,8],
+			"VM8":[8],
+			"VM16":[8,8],
+			"VM32":[8,8,8]
 		},
 		"AV15-BASE":{
 			"AV15":[0]
