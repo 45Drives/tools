@@ -54,8 +54,6 @@ if [ $1 == 0 ];then
         rm -rf "$OLD_TOOLS_DIR"
     fi
 fi
-
-%postun
 %{?systemd_postun_with_restart zfs-scrub.timer}
 
 %files
