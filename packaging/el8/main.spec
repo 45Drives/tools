@@ -30,11 +30,10 @@ Conflicts:	%{name}-1.7
 make DESTDIR=%{buildroot} TOOLS_VERSION="%{version}-::package_build_version::" install
 
 %post
-if [ $1 == 0 ];then
-  systemctl daemon-reload
-  systemctl enable zfs-scrub.timer
-  systemctl start zfs-scrub.timer
-fi
+systemctl daemon-reload
+systemctl enable zfs-scrub.timer
+systemctl start zfs-scrub.timer
+
 
 %preun
 if [ $1 == 0 ];then
@@ -62,8 +61,9 @@ if [ $1 == 0 ];then
     if [ -d "$OLD_TOOLS_DIR" ]; then
         rm -rf "$OLD_TOOLS_DIR"
     fi
+  systemctl daemon-reload
 fi
-systemctl daemon-reload
+
 
 %files
 %dir /opt/45drives/tools
