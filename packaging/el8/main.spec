@@ -28,6 +28,12 @@ Conflicts:	%{name}-1.7
 %install
 make DESTDIR=%{buildroot} TOOLS_VERSION="%{version}-::package_build_version::" install
 
+%post
+%{?systemd_post zfs-scrub.timer}
+
+%preun
+%{?systemd_preun zfs-scrub.timer}
+
 %postun
 if [ $1 == 0 ];then
     rm -rf /opt/45drives/tools
@@ -49,6 +55,9 @@ if [ $1 == 0 ];then
     fi
 fi
 
+%postun
+%{?systemd_postun_with_restart zfs-scrub.timer}
+
 %files
 %dir /opt/45drives/tools
 %dir /opt/45drives/dalias
@@ -59,6 +68,8 @@ fi
 /opt/45drives/tools/*
 /opt/45drives/ubm/*
 /opt/45drives/dalias/*
+/etc/systemd/system/zfs-scrub.timer
+/etc/systemd/system/zfs-scrub.service
 %{_bindir}/*
 /usr/lib/udev/rules.d/*
 
