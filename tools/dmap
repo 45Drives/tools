@@ -939,6 +939,11 @@ def alias_mi4(model,os_name,os_version_id,mobo_model):
 		vdev_id_str += "alias 1-2 /dev/disk/by-path/pci-0000:49:00.0-ata-8\n"
 		vdev_id_str += "alias 1-3 /dev/disk/by-path/pci-0000:48:00.0-ata-8\n"
 		vdev_id_str += "alias 1-4 /dev/disk/by-path/pci-0000:48:00.0-ata-5\n"
+	elif mobo_model in ["MS03-6L0-000"]:
+		vdev_id_str += "alias 1-1 /dev/disk/by-path/pci-0000:00:17.0-ata-1\n"
+		vdev_id_str += "alias 1-2 /dev/disk/by-path/pci-0000:00:17.0-ata-2\n"
+		vdev_id_str += "alias 1-3 /dev/disk/by-path/pci-0000:00:17.0-ata-3\n"
+		vdev_id_str += "alias 1-4 /dev/disk/by-path/pci-0000:00:17.0-ata-4\n"
 	else:
 		for line in lspci_result:
 			regex_sata = re.search("(\w\w:\w\w.\w).*Intel.*\sSATA Controller",line)
