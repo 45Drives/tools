@@ -9,6 +9,7 @@ License: ::package_licence::
 URL: ::package_url::
 Source0: %{name}-%{version}.tar.gz
 BuildArch: ::package_architecture_el::
+BuildRequires: systemd-rpm-macros
 Requires: ::package_dependencies_el::
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -29,10 +30,18 @@ Conflicts:	%{name}-1.7
 make DESTDIR=%{buildroot} TOOLS_VERSION="%{version}-::package_build_version::" install
 
 %post
-%{?systemd_post zfs-scrub.timer}
+if [ $1 == 0 ];then
+  systemctl daemon-reload
+  systemctl enable zfs-scrub.timer
+  systemctl start zfs-scrub.timer
+fi
 
 %preun
-%{?systemd_preun zfs-scrub.timer}
+if [ $1 == 0 ];then
+  systemctl stop zfs-scrub.timer
+  systemctl disable zfs-scrub.timer
+fi
+
 
 %postun
 if [ $1 == 0 ];then
@@ -54,7 +63,7 @@ if [ $1 == 0 ];then
         rm -rf "$OLD_TOOLS_DIR"
     fi
 fi
-%{?systemd_postun_with_restart zfs-scrub.timer}
+systemctl daemon-reload
 
 %files
 %dir /opt/45drives/tools
