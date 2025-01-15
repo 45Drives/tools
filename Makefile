@@ -25,8 +25,8 @@ install:
 		udev/68-vdev.rules
 	install -m 644 -t "$(DESTDIR)/opt/45drives/tools" \
 		udev/68-vdev.rules
-	install -D -m 644 zfs-scrub.timer "$(DESTDIR)"/etc/systemd/system/zfs-scrub.timer
-	install -D -m 644 zfs-scrub.service "$(DESTDIR)"/etc/systemd/system/zfs-scrub.service
+	install -D -m 644 tools/zfs-scrub.timer "$(DESTDIR)"/etc/systemd/system/zfs-scrub.timer
+	install -D -m 644 tools/zfs-scrub.service "$(DESTDIR)"/etc/systemd/system/zfs-scrub.service
 
 ifdef TOOLS_VERSION
 	echo $(TOOLS_VERSION) > "$(DESTDIR)/etc/45drives/server_info/tools_version"
