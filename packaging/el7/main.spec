@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Wed Jan 22 2025 Brett Kelly <bkelly@45drives.com> 3.0.16-1
+- added support for VM8-15mm products
 * Wed Jan 15 2025 Brett Kelly <bkelly@45drives.com> 3.0.15-2
 - adds mapping for Mi4 + Gigabyte MS03-6L0
 - adds dmap support for vm8,16,32 in F2stornado
