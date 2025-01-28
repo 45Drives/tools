@@ -1,3 +1,9 @@
+45drives-tools (3.0.12-99jammy) jammy; urgency=medium
+
+  * bump package rev
+
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 28 Jan 2025 09:15:01 -0400
+
 45drives-tools (3.0.12-3jammy) jammy; urgency=medium
 
   * bump build number
