@@ -4,7 +4,7 @@
     "title": "45drives-tools",
     "description": "cli tools for 45Drives server products",
     "version": "3.0.12",
-    "build_number": "99",
+    "build_number": "100",
     "stable": true,
     "author": "Brett Kelly <bkelly@45drives.com>",
     "git_url": "https://github.com/45Drives/ceph-ansible-45d",
@@ -49,8 +49,20 @@
         },
         {
             "group": "ubuntu",
+            "os_name": "ubuntu-focal",
+            "repo": "enterprise",
+            "image": "ci.cr.45d.io/ci/simple/ubuntu-focal:1"
+        },
+        {
+            "group": "ubuntu",
             "os_name": "ubuntu-jammy",
             "repo": "community",
+            "image": "ci.cr.45d.io/ci/simple/ubuntu-jammy:1"
+        },
+        {
+            "group": "ubuntu",
+            "os_name": "ubuntu-jammy",
+            "repo": "enterprise",
             "image": "ci.cr.45d.io/ci/simple/ubuntu-jammy:1"
         },
         {
@@ -61,8 +73,20 @@
         },
         {
             "group": "rocky",
+            "os_name": "rocky-el8",
+            "repo": "enterprise",
+            "image": "ci.cr.45d.io/ci/simple/rocky-el8:1"
+        },
+        {
+            "group": "rocky",
             "os_name": "rocky-el9",
             "repo": "community",
+            "image": "ci.cr.45d.io/ci/simple/rocky-el9:1"
+        },
+        {
+            "group": "rocky",
+            "os_name": "rocky-el9",
+            "repo": "enterprise",
             "image": "ci.cr.45d.io/ci/simple/rocky-el9:1"
         }
     ],
@@ -77,7 +101,7 @@
     "changelog": {
         "urgency": "medium",
         "version": "3.0.12",
-        "build_number": "99",
+        "build_number": "100",
         "date": null,
         "packager": "Brett Kelly <bkelly@45drives.com>",
         "changes": []
