@@ -55,7 +55,7 @@ jobs:
           host_key_checking: true
           extra_vars: sign_key_name=prod
 
-  push_local:
+  update_repositories:
     needs:
       - prebuild
       - build
@@ -65,5 +65,11 @@ jobs:
       - id: push_local
         name: Push packages into local repository
         uses: 45drives/actions/update-repo@main
+        with:
+          directory: ${{ github.workspace }}
+      - id: push_remote
+        name: Sync local repository with remote repository
+        if: startWith(github.ref, 'refs/tags/')
+        uses: 45drives/actions/sync-repo@main
         with:
           directory: ${{ github.workspace }}
