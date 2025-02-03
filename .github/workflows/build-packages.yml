@@ -73,6 +73,7 @@ jobs:
       - prebuild
       - build
       - sign
+      - update_repositories
     runs-on: buildinator
     steps:
       - id: push_remote
