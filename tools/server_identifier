@@ -227,6 +227,10 @@ g_product_lut = {
 	"Proxinator-VM8-15mm-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,2,"VM8","F2STORNADO"],
 	"Proxinator-VM8-15mm-Turbo":		[g_mobo_to_version_lut["Turbo"]  ,0,2,"VM8","F2STORNADO"],
 
+	"Proxinator-VM4-15mm-Base":			[g_mobo_to_version_lut["Base"]  ,0,1,"VM4","F2STORNADO"],
+	"Proxinator-VM4-15mm-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,1,"VM4","F2STORNADO"],
+	"Proxinator-VM4-15mm-Turbo":		[g_mobo_to_version_lut["Turbo"]  ,0,1,"VM4","F2STORNADO"],
+
 	"Proxinator-VM16-Base":				[g_mobo_to_version_lut["Good"]  ,0,2,"VM16","F2STORNADO"],
 	"Proxinator-VM16-Enhanced":			[g_mobo_to_version_lut["Better"]  ,0,2,"VM16","F2STORNADO"],
 	"Proxinator-VM16-Turbo":			[g_mobo_to_version_lut["Best"]  ,0,2,"VM16","F2STORNADO"],
