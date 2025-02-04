@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.16-1
+## 45drives-tools 3.0.17-1
 
-* added support for VM8-15mm products
+* added support for Proxinator-VM4-15mm

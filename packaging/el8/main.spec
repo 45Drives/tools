@@ -81,6 +81,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Tue Feb 04 2025 Brett Kelly <bkelly@45drives.com> 3.0.17-1
+- added support for Proxinator-VM4-15mm
 * Wed Jan 22 2025 Brett Kelly <bkelly@45drives.com> 3.0.16-1
 - added support for VM8-15mm products
 * Wed Jan 15 2025 Brett Kelly <bkelly@45drives.com> 3.0.15-2
