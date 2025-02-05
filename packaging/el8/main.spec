@@ -81,6 +81,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Wed Feb 05 2025 Jordan Keough <jkeough@45drives.com> 3.0.18-1
+- Updates lsdev to use binary size units instead of decimal
 * Tue Feb 04 2025 Brett Kelly <bkelly@45drives.com> 3.0.17-1
 - added support for Proxinator-VM4-15mm
 * Wed Jan 22 2025 Brett Kelly <bkelly@45drives.com> 3.0.16-1

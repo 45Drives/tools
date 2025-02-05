@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.17-1
+## 45drives-tools 3.0.18-1
 
-* added support for Proxinator-VM4-15mm
+* Updates lsdev to use binary size units instead of decimal
