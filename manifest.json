@@ -44,51 +44,27 @@
         {
             "group": "ubuntu",
             "os_name": "ubuntu-focal",
-            "repo": "community",
-            "image": "ci.cr.45d.io/ci/simple/ubuntu-focal:1"
-        },
-        {
-            "group": "ubuntu",
-            "os_name": "ubuntu-focal",
-            "repo": "enterprise",
             "image": "ci.cr.45d.io/ci/simple/ubuntu-focal:1"
         },
         {
             "group": "ubuntu",
             "os_name": "ubuntu-jammy",
-            "repo": "community",
-            "image": "ci.cr.45d.io/ci/simple/ubuntu-jammy:1"
-        },
-        {
-            "group": "ubuntu",
-            "os_name": "ubuntu-jammy",
-            "repo": "enterprise",
             "image": "ci.cr.45d.io/ci/simple/ubuntu-jammy:1"
         },
         {
             "group": "rocky",
             "os_name": "rocky-el8",
-            "repo": "community",
-            "image": "ci.cr.45d.io/ci/simple/rocky-el8:1"
-        },
-        {
-            "group": "rocky",
-            "os_name": "rocky-el8",
-            "repo": "enterprise",
             "image": "ci.cr.45d.io/ci/simple/rocky-el8:1"
         },
         {
             "group": "rocky",
             "os_name": "rocky-el9",
-            "repo": "community",
-            "image": "ci.cr.45d.io/ci/simple/rocky-el9:1"
-        },
-        {
-            "group": "rocky",
-            "os_name": "rocky-el9",
-            "repo": "enterprise",
             "image": "ci.cr.45d.io/ci/simple/rocky-el9:1"
         }
+    ],
+    "repos": [
+        "community",
+        "enterprise"
     ],
     "sources": [
         "dalias",
