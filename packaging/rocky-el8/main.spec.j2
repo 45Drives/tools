@@ -28,6 +28,17 @@ Conflicts:	%{name}-1.7
 %install
 make DESTDIR=%{buildroot} TOOLS_VERSION="%{version}-{{ build_number }}" install
 
+%post
+systemctl daemon-reload
+systemctl enable zfs-scrub.timer
+systemctl start zfs-scrub.timer
+
+%preun
+if [ $1 == 0 ];then
+  systemctl stop zfs-scrub.timer
+  systemctl disable zfs-scrub.timer
+fi
+
 %postun
 if [ $1 == 0 ];then
     rm -rf /opt/45drives/tools
@@ -47,6 +58,7 @@ if [ $1 == 0 ];then
     if [ -d "$OLD_TOOLS_DIR" ]; then
         rm -rf "$OLD_TOOLS_DIR"
     fi
+  systemctl daemon-reload
 fi
 
 %files
@@ -59,6 +71,8 @@ fi
 /opt/45drives/tools/*
 /opt/45drives/ubm/*
 /opt/45drives/dalias/*
+/etc/systemd/system/zfs-scrub.timer
+/etc/systemd/system/zfs-scrub.service
 %{_bindir}/*
 /usr/lib/udev/rules.d/*
 
