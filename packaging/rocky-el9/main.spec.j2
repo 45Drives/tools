@@ -1,0 +1,67 @@
+%global debug_package %{nil}
+%define _build_id_links none
+
+Name: {{ name }}
+Version: {{ version }}
+Release: {{ build_number }}%{?dist}
+Summary: {{ description }}
+License: {{ license }}
+URL: {{ git_url }}
+Source0: %{name}-%{version}.tar.gz
+BuildArch: {{ architecture.rocky }}
+Requires: {{ dependencies.rocky_common | join(',') }}
+
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+
+Provides:	%{name} = %{version}-%{release}
+Conflicts:	%{name}-1.7
+
+%description
+{{ title }}
+{{ description }}
+
+%prep
+%setup -q
+
+%build
+
+%install
+make DESTDIR=%{buildroot} TOOLS_VERSION="%{version}-{{ build_number }}" install
+
+%postun
+if [ $1 == 0 ];then
+    rm -rf /opt/45drives/tools
+    rm -rf /etc/45drives/server_info
+    rm -rf /opt/45drives/dalias
+	rm -f /usr/bin/cephfs-dir-stats
+	rm -f /usr/bin/dmap
+	rm -f /usr/bin/findosd
+	rm -f /usr/bin/lsdev
+	rm -f /usr/bin/server_identifier
+	rm -f /usr/bin/zcreate
+  rm -f /usr/bin/wipedev
+  rm -f /usr/bin/dalias
+    rmdir /etc/45drives --ignore-fail-on-non-empty
+    rmdir /opt/45drives --ignore-fail-on-non-empty
+    OLD_TOOLS_DIR=/opt/tools
+    if [ -d "$OLD_TOOLS_DIR" ]; then
+        rm -rf "$OLD_TOOLS_DIR"
+    fi
+fi
+
+%files
+%dir /opt/45drives/tools
+%dir /opt/45drives/dalias
+%dir /opt/45drives/ubm
+%dir /etc/45drives/server_info
+%defattr(-,root,root,-)
+/etc/45drives/server_info/*
+/opt/45drives/tools/*
+/opt/45drives/ubm/*
+/opt/45drives/dalias/*
+%{_bindir}/*
+/usr/lib/udev/rules.d/*
+
+%changelog
+* Fri Feb 07 2025 Brett Kelly <bkelly@45drives.com> 4.0.0-1
+- jumping to 4.0 as we release for el9 and jammy
