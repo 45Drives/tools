@@ -1,3 +1,3 @@
-## 45drives-tools 3.0.18-1
+## 45drives-tools 4.0.0-1
 
-* Updates lsdev to use binary size units instead of decimal
+* jumping to 4.0 as we release for el9 and jammy

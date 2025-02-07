@@ -81,6 +81,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Fri Feb 07 2025 Brett Kelly <bkelly@45drives.com> 4.0.0-1
+- jumping to 4.0 as we release for el9 and jammy
 * Wed Feb 05 2025 Jordan Keough <jkeough@45drives.com> 3.0.18-1
 - Updates lsdev to use binary size units instead of decimal
 * Tue Feb 04 2025 Brett Kelly <bkelly@45drives.com> 3.0.17-1
