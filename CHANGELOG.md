@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.0-1
+## 45drives-tools 4.0.1-1
 
-* jumping to 4.0 as we release for el9 and jammy
+* Fix slot_speeds for PROXINATOR-VM8

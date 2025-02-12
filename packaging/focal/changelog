@@ -1,3 +1,9 @@
+45drives-tools (4.0.1-1focal) focal; urgency=medium
+
+  * Fix slot_speeds for PROXINATOR-VM8
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Wed, 12 Feb 2025 12:34:59 -0400
+
 45drives-tools (4.0.0-1focal) focal; urgency=medium
 
   * jumping to 4.0 as we release for el9 and jammy
