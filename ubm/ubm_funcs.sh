@@ -393,7 +393,7 @@ all_slot_names() {
   UBM_MAP_KEY=$(get_map_key) || return $?
   (
     set -o pipefail
-    grep "^$UBM_MAP_KEY" "$SCRIPT_DIR/slot_name_map.txt" | cut -d' ' -f2-
+    grep "^$UBM_MAP_KEY\s" "$SCRIPT_DIR/slot_name_map.txt" | cut -d' ' -f2-
   ) || perror $? "Failed to lookup all slot names"
 }
 
