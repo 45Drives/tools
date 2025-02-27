@@ -100,6 +100,7 @@ drive_mapping() {
     echo "Gathering drive mapping info..."
     log_cmd lsdev --json
     log_cmd /opt/45drives/tools/storcli2 /call show alilog
+    log_cmd /opt/45drives/tools/storcli64 /call show all
     log_cmd slot_speeds
     log_cmd modinfo mpi3mr
     for d in /sys/block/sd* /sys/class/enclosure/*; do
@@ -128,7 +129,6 @@ zfs_info() {
 ceph_info() {
     echo "Gathering ceph info..."
     log_cmd ceph status
-    log_cmd ceph mon_status
     log_cmd ceph health detail
     echo
 }
