@@ -81,6 +81,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Thu Feb 27 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.3-1
+- dump_info: add storcli64 cmd and remove ceph mon_status
 * Thu Feb 27 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.2-1
 - Add dump_info command for gathering system diagnostic information
 * Wed Feb 12 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.1-1

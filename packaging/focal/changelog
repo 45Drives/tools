@@ -1,3 +1,9 @@
+45drives-tools (4.0.3-1focal) focal; urgency=medium
+
+  * dump_info: add storcli64 cmd and remove ceph mon_status
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 27 Feb 2025 12:30:38 -0400
+
 45drives-tools (4.0.2-1focal) focal; urgency=medium
 
   * Add dump_info command for gathering system diagnostic information

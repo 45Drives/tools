@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.2-1
+## 45drives-tools 4.0.3-1
 
-* Add dump_info command for gathering system diagnostic information
+* dump_info: add storcli64 cmd and remove ceph mon_status
