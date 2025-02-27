@@ -1,3 +1,9 @@
+45drives-tools (4.0.2-1focal) focal; urgency=medium
+
+  * Add dump_info command for gathering system diagnostic information
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 27 Feb 2025 12:08:19 -0400
+
 45drives-tools (4.0.1-1focal) focal; urgency=medium
 
   * Fix slot_speeds for PROXINATOR-VM8

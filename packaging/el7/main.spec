@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Thu Feb 27 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.2-1
+- Add dump_info command for gathering system diagnostic information
 * Wed Feb 12 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.1-1
 - Fix slot_speeds for PROXINATOR-VM8
 * Fri Feb 07 2025 Brett Kelly <bkelly@45drives.com> 4.0.0-1

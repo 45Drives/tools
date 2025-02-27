@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.1-1
+## 45drives-tools 4.0.2-1
 
-* Fix slot_speeds for PROXINATOR-VM8
+* Add dump_info command for gathering system diagnostic information
