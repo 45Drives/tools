@@ -46,6 +46,7 @@ log_cmd() {
     relpath=$(printf '/%s' "${funcs[@]:1}")
     mkdir -p "$TEMP_DIR/$relpath" || die "Failed to create dir: $TEMP_DIR/$relpath"
     fpath="$TEMP_DIR/$relpath/$fname"
+    echo "$relpath/$fname $*" >> "$TEMP_DIR/command_lut.txt"
     echo "exec $*"
     (
         exec 3>"$fpath.combined"
@@ -121,6 +122,11 @@ smartctl_info() {
 
 zfs_info() {
     echo "Gathering zfs info..."
+    if ! command -v zpool >/dev/null; then
+        echo "ZFS not installed!"
+        echo
+        return
+    fi
     log_cmd zpool status
     log_cmd zpool events -v
     echo
@@ -128,8 +134,52 @@ zfs_info() {
 
 ceph_info() {
     echo "Gathering ceph info..."
+    if ! command -v ceph >/dev/null; then
+        echo "Ceph not installed!"
+        echo
+        return
+    fi
     log_cmd ceph status
     log_cmd ceph health detail
+    echo
+}
+
+houston() {
+    echo "Gathering houston script outputs..."
+    log_cmd /usr/share/cockpit/45drives-system/scripts/cpu_info
+    log_cmd /usr/share/cockpit/45drives-system/scripts/ipmi
+    log_cmd /usr/share/cockpit/45drives-system/scripts/motherboard
+    log_cmd /usr/share/cockpit/45drives-system/scripts/pci
+    log_cmd /usr/share/cockpit/45drives-system/scripts/network
+    log_cmd /usr/share/cockpit/45drives-system/scripts/ram
+    log_cmd /usr/share/cockpit/45drives-system/scripts/sata
+    log_cmd /usr/share/cockpit/45drives-system/scripts/server_info
+    log_cmd /usr/share/cockpit/45drives-system/scripts/system
+    log_cmd /usr/share/cockpit/45drives-disks/scripts/disk_info
+    log_cmd /usr/share/cockpit/45drives-disks/scripts/server_info
+    log_cmd /usr/share/cockpit/45drives-disks/scripts/zfs_info
+    log_cmd /usr/share/cockpit/45drives-motherboard/helper_scripts/motherboard
+    log_cmd /usr/share/cockpit/45drives-motherboard/helper_scripts/pci
+    log_cmd /usr/share/cockpit/45drives-motherboard/helper_scripts/ram
+    log_cmd /usr/share/cockpit/45drives-motherboard/helper_scripts/sata
+    log_cmd /usr/share/cockpit/45drives-motherboard/helper_scripts/network
+    echo
+}
+
+snapshield() {
+    echo "Gathering snapshield info..."
+    if ! systemctl list-unit-files snapshield-radar >/dev/null; then
+        echo 'snapshield-radar service not present! assuming not installed.'
+        echo
+        return
+    fi
+    for service in snapshield-{radar,ui,webd,redis,postgres,prometheus}; do
+        log_cmd journalctl -u "$service"
+    done
+    for container in snapshield-{redis,postgres,ui}; do
+        log_cmd podman logs "$container"
+    done
+    cp_files /usr/share/snapshield/logs /usr/share/snapshield/*.log
     echo
 }
 
@@ -139,9 +189,13 @@ drive_mapping
 
 smartctl_info
 
-command -v zpool >/dev/null && zfs_info
+houston
 
-command -v ceph >/dev/null && ceph_info
+snapshield
+
+zfs_info
+
+ceph_info
 
 ARCHIVE_PATH="$(pwd)/$ARCHIVE_NAME" || die 'Failed to get pwd!'
 
