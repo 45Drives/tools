@@ -58,6 +58,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Mon Mar 03 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.4-1
+- add houston and snapshield info to dump_info
 * Thu Feb 27 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.3-1
 - dump_info: add storcli64 cmd and remove ceph mon_status
 * Thu Feb 27 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.2-1

@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.3-1
+## 45drives-tools 4.0.4-1
 
-* dump_info: add storcli64 cmd and remove ceph mon_status
+* add houston and snapshield info to dump_info

@@ -1,3 +1,9 @@
+45drives-tools (4.0.4-1focal) focal; urgency=medium
+
+  * add houston and snapshield info to dump_info
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 03 Mar 2025 11:28:28 -0400
+
 45drives-tools (4.0.3-1focal) focal; urgency=medium
 
   * dump_info: add storcli64 cmd and remove ceph mon_status
