@@ -29,7 +29,9 @@ die() {
 
 TEMP_DIR=$(mktemp -d) || die 'Failed to create temp dir!'
 
-ARCHIVE_NAME="45drives_info_dump_$(date +"%FT%H%M%S").zip" || die 'Failed to get date!'
+HOSTNAME=$(hostname) || die 'Failed to get hostname!'
+DATE=$(date +"%FT%H%M%S") || die 'Failed to get date!'
+ARCHIVE_NAME="45drives_info_dump_${HOSTNAME}_${DATE}.zip"
 
 exec 1> >(tee "$TEMP_DIR/all.log")
 
