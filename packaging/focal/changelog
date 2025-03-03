@@ -1,3 +1,9 @@
+45drives-tools (4.0.5-1focal) focal; urgency=medium
+
+  * include hostname in dump_info archive name
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 03 Mar 2025 11:59:10 -0400
+
 45drives-tools (4.0.4-1focal) focal; urgency=medium
 
   * add houston and snapshield info to dump_info

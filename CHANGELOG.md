@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.4-1
+## 45drives-tools 4.0.5-1
 
-* add houston and snapshield info to dump_info
+* include hostname in dump_info archive name

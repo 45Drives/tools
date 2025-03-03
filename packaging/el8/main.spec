@@ -81,6 +81,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Mon Mar 03 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.5-1
+- include hostname in dump_info archive name
 * Mon Mar 03 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.4-1
 - add houston and snapshield info to dump_info
 * Thu Feb 27 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.3-1
