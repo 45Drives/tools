@@ -81,6 +81,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Tue Mar 04 2025 Brett Kelly <bkelly@45drives.com> 4.0.6-1
+- add VM4 to lsdev
 * Mon Mar 03 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.5-1
 - include hostname in dump_info archive name
 * Mon Mar 03 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.4-1

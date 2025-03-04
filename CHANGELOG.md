@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.5-1
+## 45drives-tools 4.0.6-1
 
-* include hostname in dump_info archive name
+* add VM4 to lsdev
