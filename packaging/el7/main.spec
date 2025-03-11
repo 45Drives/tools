@@ -58,6 +58,18 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Tue Mar 04 2025 Brett Kelly <bkelly@45drives.com> 4.0.6-1
+- add VM4 to lsdev
+* Mon Mar 03 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.5-1
+- include hostname in dump_info archive name
+* Mon Mar 03 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.4-1
+- add houston and snapshield info to dump_info
+* Thu Feb 27 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.3-1
+- dump_info: add storcli64 cmd and remove ceph mon_status
+* Thu Feb 27 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.2-1
+- Add dump_info command for gathering system diagnostic information
+* Wed Feb 12 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.1-1
+- Fix slot_speeds for PROXINATOR-VM8
 * Fri Feb 07 2025 Brett Kelly <bkelly@45drives.com> 4.0.0-1
 - jumping to 4.0 as we release for el9 and jammy
 * Wed Feb 05 2025 Jordan Keough <jkeough@45drives.com> 3.0.18-1

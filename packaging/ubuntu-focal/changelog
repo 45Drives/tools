@@ -1,3 +1,39 @@
+45drives-tools (4.0.6-1focal) focal; urgency=medium
+
+  * add VM4 to lsdev
+
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 04 Mar 2025 10:51:30 -0400
+
+45drives-tools (4.0.5-1focal) focal; urgency=medium
+
+  * include hostname in dump_info archive name
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 03 Mar 2025 11:59:10 -0400
+
+45drives-tools (4.0.4-1focal) focal; urgency=medium
+
+  * add houston and snapshield info to dump_info
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 03 Mar 2025 11:28:28 -0400
+
+45drives-tools (4.0.3-1focal) focal; urgency=medium
+
+  * dump_info: add storcli64 cmd and remove ceph mon_status
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 27 Feb 2025 12:30:38 -0400
+
+45drives-tools (4.0.2-1focal) focal; urgency=medium
+
+  * Add dump_info command for gathering system diagnostic information
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 27 Feb 2025 12:08:19 -0400
+
+45drives-tools (4.0.1-1focal) focal; urgency=medium
+
+  * Fix slot_speeds for PROXINATOR-VM8
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Wed, 12 Feb 2025 12:34:59 -0400
+
 45drives-tools (4.0.0-1focal) focal; urgency=medium
 
   * jumping to 4.0 as we release for el9 and jammy

@@ -1,0 +1,208 @@
+#!/usr/bin/env bash
+
+# dump_info - tool to dump diagnostic information
+# usage:
+# dump_info
+#
+# Copyright (C) 2025, Josh Boudreau <jboudreau@45drives.com>
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+
+die() {
+    local exit=$?
+    printf '%s' "ERROR: "
+    if [[ "${#FUNCNAME[@]}" -gt 2 ]]; then
+        local funcs=()
+        for func in "${FUNCNAME[@]:1}"; do
+            funcs=("$func" "${funcs[@]}")
+        done
+        printf '%s: ' "${funcs[@]}"
+    fi
+    echo "$*"
+    exit $exit
+}
+
+[ "$(id -u)" == "0" ] || die 'Please run as root'
+
+TEMP_DIR=$(mktemp -d) || die 'Failed to create temp dir!'
+
+HOSTNAME=$(hostname) || die 'Failed to get hostname!'
+DATE=$(date +"%FT%H%M%S") || die 'Failed to get date!'
+ARCHIVE_NAME="45drives_info_dump_${HOSTNAME}_${DATE}.zip"
+
+exec 1> >(tee "$TEMP_DIR/all.log")
+
+log_cmd() {
+    local fname
+    local fpath
+    local result
+    local relpath
+    fname=$(printf '%s' "$*" | tr '[:space:]' '_' | tr '/' '-' | tr -cd '[:alnum:][_\-.]' | sed 's/^-//') || die 'Failed to transform command name!'
+    local funcs=()
+    for func in "${FUNCNAME[@]:1}"; do
+        funcs=("$func" "${funcs[@]}")
+    done
+    relpath=$(printf '/%s' "${funcs[@]:1}")
+    mkdir -p "$TEMP_DIR/$relpath" || die "Failed to create dir: $TEMP_DIR/$relpath"
+    fpath="$TEMP_DIR/$relpath/$fname"
+    echo "$relpath/$fname $*" >> "$TEMP_DIR/command_lut.txt"
+    echo "exec $*"
+    (
+        exec 3>"$fpath.combined"
+        exec 1> >(tee "$fpath.stdout" | sed 's/^/stdout: /' >&3)
+        exec 2> >(tee "$fpath.stderr" | sed 's/^/stderr: /' >&3)
+        exec "$@"
+        RESULT=$?
+        exec 3>&- # close fd 3
+        exit $RESULT
+    )
+    result=$?
+    echo "$result" >"$fpath.exit_code"
+    echo "exited: $result"
+    echo
+}
+
+cp_files() {
+    local dest="$TEMP_DIR/rootfs"
+    local symlink_path
+    local funcs=()
+    for func in "${FUNCNAME[@]:1}"; do
+        funcs=("$func" "${funcs[@]}")
+    done
+    symlink_path="$TEMP_DIR/$(printf '/%s' "${funcs[@]:1}")"
+    mkdir -p "$dest" || die "Failed to create dir: $dest"
+    echo "copying following files:"
+    printf '> %s\n' "$@"
+    for f in "$@"; do
+        cp --target-directory "$dest" --parents -arf -L "$f" 2>&1
+        ln -snrf "$dest/$f" "$symlink_path/$(basename "$f")"
+    done
+    echo
+}
+
+system_info() {
+    echo "Gathering system info..."
+    log_cmd ipmitool fru print 0
+    log_cmd lscpu
+    log_cmd lsmod
+    log_cmd uname -a
+    log_cmd dmidecode
+    log_cmd dmesg
+    log_cmd lspci -vvvv
+    log_cmd rpm -qa
+    log_cmd apt list --installed
+    log_cmd cpupower frequency-info
+    cp_files /etc/os-release /etc/redhat-release /etc/debian-release /etc/vdev_id.conf /etc/45drives /etc/yum.repos.d /etc/apt/sources.list.d
+    echo
+}
+
+drive_mapping() {
+    echo "Gathering drive mapping info..."
+    log_cmd lsdev --json
+    log_cmd /opt/45drives/tools/storcli2 /call show alilog
+    log_cmd /opt/45drives/tools/storcli64 /call show all
+    log_cmd slot_speeds
+    log_cmd modinfo mpi3mr
+    for d in /sys/block/sd* /sys/class/enclosure/*; do
+        log_cmd udevadm info "$d"
+        log_cmd udevadm info --attribute-walk "$d"
+    done
+    cp_files /etc/vdev_id.conf /var/cache/45drives/ubm/map_key
+    echo
+}
+
+smartctl_info() {
+    echo "Gathering drive smart data..."
+    for d in /dev/sd*; do
+        log_cmd smartctl -a "$d"
+    done
+    echo
+}
+
+zfs_info() {
+    echo "Gathering zfs info..."
+    if ! command -v zpool >/dev/null; then
+        echo "ZFS not installed!"
+        echo
+        return
+    fi
+    log_cmd zpool status
+    log_cmd zpool events -v
+    echo
+}
+
+ceph_info() {
+    echo "Gathering ceph info..."
+    if ! command -v ceph >/dev/null; then
+        echo "Ceph not installed!"
+        echo
+        return
+    fi
+    log_cmd ceph status
+    log_cmd ceph health detail
+    echo
+}
+
+houston() {
+    echo "Gathering houston script outputs..."
+    log_cmd /usr/share/cockpit/45drives-system/scripts/cpu_info
+    log_cmd /usr/share/cockpit/45drives-system/scripts/ipmi
+    log_cmd /usr/share/cockpit/45drives-system/scripts/motherboard
+    log_cmd /usr/share/cockpit/45drives-system/scripts/pci
+    log_cmd /usr/share/cockpit/45drives-system/scripts/network
+    log_cmd /usr/share/cockpit/45drives-system/scripts/ram
+    log_cmd /usr/share/cockpit/45drives-system/scripts/sata
+    log_cmd /usr/share/cockpit/45drives-system/scripts/server_info
+    log_cmd /usr/share/cockpit/45drives-system/scripts/system
+    log_cmd /usr/share/cockpit/45drives-disks/scripts/disk_info
+    log_cmd /usr/share/cockpit/45drives-disks/scripts/server_info
+    log_cmd /usr/share/cockpit/45drives-disks/scripts/zfs_info
+    log_cmd /usr/share/cockpit/45drives-motherboard/helper_scripts/motherboard
+    log_cmd /usr/share/cockpit/45drives-motherboard/helper_scripts/pci
+    log_cmd /usr/share/cockpit/45drives-motherboard/helper_scripts/ram
+    log_cmd /usr/share/cockpit/45drives-motherboard/helper_scripts/sata
+    log_cmd /usr/share/cockpit/45drives-motherboard/helper_scripts/network
+    echo
+}
+
+snapshield() {
+    echo "Gathering snapshield info..."
+    if ! systemctl list-unit-files snapshield-radar >/dev/null; then
+        echo 'snapshield-radar service not present! assuming not installed.'
+        echo
+        return
+    fi
+    for service in snapshield-{radar,ui,webd,redis,postgres,prometheus}; do
+        log_cmd journalctl -u "$service"
+    done
+    for container in snapshield-{redis,postgres,ui}; do
+        log_cmd podman logs "$container"
+    done
+    cp_files /usr/share/snapshield/logs /usr/share/snapshield/*.log
+    echo
+}
+
+system_info
+
+drive_mapping
+
+smartctl_info
+
+houston
+
+snapshield
+
+zfs_info
+
+ceph_info
+
+ARCHIVE_PATH="$(pwd)/$ARCHIVE_NAME" || die 'Failed to get pwd!'
+
+cd "$TEMP_DIR" || die 'Failed to cd to temp dir!'
+
+zip -rq "$ARCHIVE_PATH" ./* || die 'Failed to create zip archive!'
+
+echo "Please send $ARCHIVE_NAME to 45Drives R&D"
