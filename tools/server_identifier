@@ -219,6 +219,10 @@ g_product_lut = {
 	"Stornado-F2-Turbo-G":				[g_mobo_to_version_lut["Turbo-G"]  ,0,4,"F2","F2STORNADO"],
 	"Stornado-F2-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,4,"F2","F2STORNADO"],
 
+	"Stornado-F16-Base":				[g_mobo_to_version_lut["Base"]  ,0,4,"F16","F2STORNADO"],
+	"Stornado-F16-Enhanced":			[g_mobo_to_version_lut["Enhanced"]  ,0,4,"F16","F2STORNADO"],
+	"Stornado-F16-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,4,"F16","F2STORNADO"],
+
 	"Proxinator-VM8-Base":				[g_mobo_to_version_lut["Good"]  ,0,1,"VM8","F2STORNADO"],
 	"Proxinator-VM8-Enhanced":			[g_mobo_to_version_lut["Better"]  ,0,1,"VM8","F2STORNADO"],
 	"Proxinator-VM8-Turbo":				[g_mobo_to_version_lut["Best"]  ,0,1,"VM8","F2STORNADO"],
