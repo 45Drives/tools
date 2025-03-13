@@ -1,3 +1,9 @@
+45drives-tools (4.0.7-1focal) focal; urgency=medium
+
+  * add Stornado F16 support
+
+ -- Brett Kelly <bkelly@45drives.com>  Thu, 13 Mar 2025 12:50:39 -0300
+
 45drives-tools (4.0.6-1focal) focal; urgency=medium
 
   * add VM4 to lsdev

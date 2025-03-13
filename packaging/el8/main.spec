@@ -81,6 +81,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Thu Mar 13 2025 Brett Kelly <bkelly@45drives.com> 4.0.7-1
+- add Stornado F16 support
 * Tue Mar 04 2025 Brett Kelly <bkelly@45drives.com> 4.0.6-1
 - add VM4 to lsdev
 * Mon Mar 03 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.5-1

@@ -3,7 +3,7 @@
     "name": "45drives-tools",
     "title": "45drives-tools",
     "prerelease": false,
-    "version": "4.0.6",
+    "version": "4.0.7",
     "buildVersion": "1",
     "author": "Brett Kelly <bkelly@45drives.com>",
     "url": "https://github.com/45Drives/tools",
@@ -65,7 +65,7 @@
     ],
     "changelog": {
         "urgency": "medium",
-        "version": "4.0.6",
+        "version": "4.0.7",
         "buildVersion": "1",
         "ignore": [],
         "date": null,

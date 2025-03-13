@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.6-1
+## 45drives-tools 4.0.7-1
 
-* add VM4 to lsdev
+* add Stornado F16 support
