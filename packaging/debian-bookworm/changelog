@@ -1,0 +1,5 @@
+45drives-tools (4.0.6-1bookworm) bookworm; urgency=medium
+
+  * First build for bookworm
+
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 04 Mar 2025 10:51:30 -0400
