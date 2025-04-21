@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.6-1
+## 45drives-tools 4.0.8-1
 
-* add VM4 to lsdev
+* Adds support for C8 UBM chassis
