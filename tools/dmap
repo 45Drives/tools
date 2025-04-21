@@ -431,6 +431,9 @@ def create_vdev_id(server):
 			"C8":[8],
 			"MI4":[0]
 		},
+		"STORINATORUBM":{
+			"C8_UBM":[8]
+		},
 		"HOMELAB":{
 			"HL15":[15],
 			"HL4":[4],

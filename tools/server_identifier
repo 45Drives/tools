@@ -79,6 +79,10 @@ g_product_lut = {
 	"Storinator-C8-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,1,"C8"  ,"STORINATOR"],
 	"Storinator-C8-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,0,1,"C8"  ,"STORINATOR"],
 
+	"Storinator-C8_UBM-Base":			[g_mobo_to_version_lut["Base"],0,1,"C8_UBM"  ,"STORINATORUBM"],
+	"Storinator-C8_UBM-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,1,"C8_UBM"  ,"STORINATORUBM"],
+	"Storinator-C8_UBM-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,0,1,"C8_UBM"  ,"STORINATORUBM"],
+
 	"Storinator-F8X1-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,1,0,"F8X1","F8"],
 	"Storinator-F8X1-Base":				[g_mobo_to_version_lut["Base"]  ,1,0,"F8X1","F8"],
 	"Storinator-F8X1-Enhanced":			[g_mobo_to_version_lut["Enhanced"]  ,1,0,"F8X1","F8"],
@@ -976,7 +980,7 @@ def main():
 	server["Alias Style"] = g_product_lut[server["Model"]][g_product_lut_idx["ALIAS_STYLE"]]
 
 	# set auto alias flag for servers that are automatically aliased using udev rules.
-	if server["Alias Style"] in ["F2STORNADO"]:
+	if server["Alias Style"] in ["F2STORNADO","STORINATORUBM"]:
 		server["Auto Alias"] = True
 	
 	# This is added to use only a single chassis size for the Stornado

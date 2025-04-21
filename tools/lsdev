@@ -325,6 +325,9 @@ def build_server(options):
 			"MI4":[4],
 			"HL15":[15]
 		},
+		"STORINATORUBM":{
+			"C8_UBM":[8]
+		},
 		"HOMELAB":{
 			"HL15":[15],
 			"HL4":[4],
