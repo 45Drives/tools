@@ -1,3 +1,9 @@
+45drives-tools (4.0.9-1bookworm) bookworm; urgency=medium
+
+  * added F16 support
+
+ -- Brett Kelly <bkelly@45drives.com>  Mon, 28 Apr 2025 11:27:07 -0300
+
 45drives-tools (4.0.8-1bookworm) bookworm; urgency=medium
 
   * Adds support for C8 UBM chassis

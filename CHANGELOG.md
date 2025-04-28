@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.8-1
+## 45drives-tools 4.0.9-1
 
-* Adds support for C8 UBM chassis
+* added F16 support
