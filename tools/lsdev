@@ -347,6 +347,7 @@ def build_server(options):
 		},
 		"F2STORNADO":{
 			"F2":[32],
+			"F16":[16],
 			"VM4":[4],
 			"VM8":[8],
 			"VM16":[16],
