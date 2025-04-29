@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.9-1
+## 45drives-tools 4.0.10-1
 
-* added F16 support
+* added mi4+ME03-CE0 support

@@ -1,3 +1,9 @@
+45drives-tools (4.0.10-1bookworm) bookworm; urgency=medium
+
+  * added mi4+ME03-CE0 support
+
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 29 Apr 2025 08:30:45 -0300
+
 45drives-tools (4.0.9-1bookworm) bookworm; urgency=medium
 
   * added F16 support
