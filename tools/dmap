@@ -724,7 +724,7 @@ def get_sata_pci_addresses():
     for line in lshw_result:
         if description_pattern.search(line):
             sata_found = True
-        elif line.strip() == "":  # Empty line indicates end of current section
+        elif "resources: " in line:  # "resources: ..." indicates last line of current section
             sata_found = False
 
         if sata_found:
