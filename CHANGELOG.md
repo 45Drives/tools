@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.10-1
+## 45drives-tools 4.0.11-1
 
-* added mi4+ME03-CE0 support
+* HL4/8 Updated get_sata_pci_addresses() function as it was not correctly filtering for SATA controllers.
