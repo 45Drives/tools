@@ -496,7 +496,11 @@ def create_vdev_id(server):
 		for i in range(0,len(server["HBA"])):
 			if server["HBA"][i]["Model"] in ["9361-16i","9361-24i"]:
 				hmap = hwraid_map(server["HBA"][i],server)
-			count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
+			if server["Chassis Size"] == "MI4":
+				count = 4
+				# If we are here, there are HWRAID cards present, so we can assume Mi4 will see up to 4 drives on the raid card
+			else:
+				count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
 			for j in range(0,count):
 				if(j>=15 and server["Alias Style"] == "H32" and i==len(alias_template[server["Alias Style"]][server["Chassis Size"]])-2):
 					# We are ailiasing a hybrid 32, which staggers the labels across the 2nd last and last rows.
