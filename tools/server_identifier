@@ -465,7 +465,7 @@ def getCardOrder():
 	if int(storcli2_controller_count) > 0:
 		return hba_card_order
 	if int(storcli64_controller_count) > 0:
-		hba_order_command = "/opt/45drives/tools/storcli64 show J | jq -r '.Controllers[0].\"Response Data\".\"IT System Overview\"[].\"PCI Address\"' | cut -d : -f 2"
+		hba_order_command = "/opt/45drives/tools/storcli64 /call show J | jq -r '.Controllers[].\"Response Data\".\"PCI Address\"' | cut -d : -f 2"
 		hba_order_process = subprocess.Popen(hba_order_command, shell=True, stdout=subprocess.PIPE)
 		stdout,_ = hba_order_process.communicate()
 		hba_cards = stdout.decode('utf-8').splitlines()
