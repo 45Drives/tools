@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ "$1" == "remove" ] || [ "$1" == "purge" ]; then
+    rm -rf /opt/45drives/tools
+    rm -rf /etc/45drives/server_info
+	rm -rf /opt/45drives/dalias
+	rm -f /usr/bin/cephfs-dir-stats
+	rm -f /usr/bin/dmap
+	rm -f /usr/bin/findosd
+	rm -f /usr/bin/lsdev
+	rm -f /usr/bin/server_identifier
+	rm -f /usr/bin/zcreate
+	rm -f /usr/bin/dalias
+	rm -f /usr/bin/wipedev
+    rmdir /etc/45drives --ignore-fail-on-non-empty
+    rmdir /opt/45drives --ignore-fail-on-non-empty
+fi

@@ -1,28 +1,24 @@
 {
-    "__version": "45D-R1",
+    "schema_version": "45D_AP_V2.0",
     "name": "45drives-tools",
     "title": "45drives-tools",
-    "prerelease": false,
-    "version": "4.0.7",
-    "buildVersion": "1",
+    "description": "cli tools for 45Drives server products",
+    "version": "4.0.11",
+    "build_number": "1",
+    "stable": true,
     "author": "Brett Kelly <bkelly@45drives.com>",
-    "url": "https://github.com/45Drives/tools",
-    "category": "utils",
-    "priority": "optional",
-    "licence": "GPL-3.0+",
-    "architecture": {
-        "deb": "amd64",
-        "el": "x86_64"
-    },
-    "description": {
-        "long": "cli tools for 45Drives server products",
-        "short": "cli tools for 45Drives server products"
-    },
+    "git_url": "https://github.com/45Drives/ceph-ansible-45d",
+    "license": "GPL-3.0+",
     "defaults": {
-        "urgency": "medium"
+        "change_urgency": "medium"
+    },
+    "architecture": {
+        "rocky": "x86_64",
+        "debian": "amd64",
+        "ubuntu": "amd64"
     },
     "dependencies": {
-        "deb": [
+        "ubuntu_common": [
             "ipmitool",
             "jq",
             "smartmontools (>= 7.0 )",
@@ -31,10 +27,9 @@
             "pciutils",
             "hdparm",
             "udev",
-            "mpi3mr-dkms",
             "lsscsi"
         ],
-        "el": [
+        "rocky_common": [
             "ipmitool",
             "jq",
             "smartmontools > 7.0",
@@ -42,32 +37,44 @@
             "python3",
             "pciutils",
             "hdparm",
-            "mpi3mr-dkms",
             "lsscsi"
         ]
     },
-    "releases": [
+    "builds": [
         {
-            "image": "ubuntu-focal-builder",
-            "codeName": "focal",
-            "type": "deb"
+            "group": "ubuntu",
+            "os_name": "ubuntu-focal",
+            "image": "ci.cr.45d.io/ci/simple/ubuntu-focal:1"
         },
         {
-            "image": "rocky-el8-builder",
-            "codeName": "el8",
-            "type": "el"
+            "group": "ubuntu",
+            "os_name": "ubuntu-jammy",
+            "image": "ci.cr.45d.io/ci/simple/ubuntu-jammy:1"
         },
         {
-            "image": "centos-el7-builder",
-            "codeName": "el7",
-            "type": "el"
+            "group": "rocky",
+            "os_name": "rocky-el8",
+            "image": "ci.cr.45d.io/ci/simple/rocky-el8:1"
+        },
+        {
+            "group": "rocky",
+            "os_name": "rocky-el9",
+            "image": "ci.cr.45d.io/ci/simple/rocky-el9:1"
+        },
+        {
+            "group": "debian",
+            "os_name": "debian-bookworm",
+            "image": "ci.cr.45d.io/ci/simple/ubuntu-jammy:1"
         }
+    ],
+    "repos": [
+        "community",
+        "enterprise"
     ],
     "changelog": {
         "urgency": "medium",
-        "version": "4.0.7",
-        "buildVersion": "1",
-        "ignore": [],
+        "version": "4.0.11",
+        "build_number": "1",
         "date": null,
         "packager": "Brett Kelly <bkelly@45drives.com>",
         "changes": []

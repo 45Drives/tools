@@ -1,0 +1,30 @@
+45drives-tools (4.0.11-1jammy) jammy; urgency=medium
+
+  * HL4/8 Updated get_sata_pci_addresses() function as it was not correctly filtering
+    for SATA controllers.
+
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 06 May 2025 11:59:43 -0300
+
+45drives-tools (4.0.10-1jammy) jammy; urgency=medium
+
+  * added mi4+ME03-CE0 support
+
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 29 Apr 2025 08:30:45 -0300
+
+45drives-tools (4.0.9-1jammy) jammy; urgency=medium
+
+  * added F16 support
+
+ -- Brett Kelly <bkelly@45drives.com>  Mon, 28 Apr 2025 11:27:07 -0300
+
+45drives-tools (4.0.8-1jammy) jammy; urgency=medium
+
+  * Adds support for C8 UBM chassis
+
+ -- Brett Kelly <bkelly@45drives.com>  Mon, 21 Apr 2025 13:45:19 -0300
+
+45drives-tools (4.0.0-1focal) jammy; urgency=medium
+
+  * jumping to 4.0 as we release for el9 and jammy
+
+ -- Brett Kelly <bkelly@45drives.com>  Fri, 07 Feb 2025 13:26:52 -0400
