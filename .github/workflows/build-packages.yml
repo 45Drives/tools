@@ -1,8 +1,6 @@
 name: Build Packages
 on:
   push:
-    branches: 
-      - build
     tags:
       - 'v*.*.*'
 jobs:
