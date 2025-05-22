@@ -458,10 +458,10 @@ def create_vdev_id(server):
 			"AV15":[0]
 		},
 		"DESTROYINATOR":{
-			"AV15":[8,0,0,0],
-			"Q30":[15,8,0,0],
-			"S45":[15,15,8,0],
-			"XL60":[15,15,15,8]
+			"AV15":[15,0,0,0],
+			"Q30":[15,15,0,0],
+			"S45":[15,15,15,0],
+			"XL60":[15,15,15,15]
 		},
 		"F8":{
 			"F8X1":[20],
@@ -491,7 +491,7 @@ def create_vdev_id(server):
 	# We have a valid combination of alias styles and chassis sizes.
 	version = get_version()
 	vdev_id_str = "# This file was generated using dmap {v} (/opt/45drives/tools/dmap).\n".format(v=version)
-	if len(server["HBA"]) > 0 and server["Chassis Size"] != "C8" and server["Alias Style"] != "DESTROYINATOR" and server["Alias Style"] != "F8":
+	if len(server["HBA"]) > 0 and server["Chassis Size"] != "C8" and server["Alias Style"] != "F8":
 		# we have hba cards to inspect/alias
 		for i in range(0,len(server["HBA"])):
 			if server["HBA"][i]["Model"] in ["9361-16i","9361-24i"]:
@@ -658,49 +658,66 @@ def alias_destroyinator(server,alias_template,phy_order):
 	bus_address_sata_2 = None
 	bus_address_sas = None
 	ata_suffix = ""
-	for i in range(0,len(server["HBA"])):
-		count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
-		for j in range(0,count):
-			# The default case for ailiasing hba cards.
-			vdev_id_str += (
-				"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
-					i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
-					)
-				)
-	if server["OS NAME"] == "CentOS Linux" and server["OS VERSION_ID"] == "7":
-		ata_suffix = ".0"
-
-	try:
-		lspci_result = subprocess.Popen(["lspci"], stdout=subprocess.PIPE,
-			universal_newlines=True).stdout
-	except OSError:
-		log("Error executing lspci.")
-		sys.exit(1)
-
-	for line in lspci_result:
-		regex_sata = re.search("(\w\w:\w\w.\w).*Intel.*SATA Controller",line)
-		if regex_sata != None and bus_address_sata == None:
-			bus_address_sata = "0000:"+regex_sata.group(1)
-		elif regex_sata != None and bus_address_sata_2 == None:
-			bus_address_sata_2 = "0000:"+regex_sata.group(1)
-		if bus_address_sata != None and bus_address_sata_2 != None:
-			break
-
-	if bus_address_sata != None :
-		for i in range(0,7):
-			#alias the drives connected to the on board sata sata connectors
-			#if there are two sata controllers, we want to only use the first one to alias the first of the last 7 drives in the unit
-			#otherwise we use the second sata controller for the remaining 6 drives. 
-			vdev_id_str += "alias {final_row}-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(
-				final_row=len(server["HBA"]),
-				drive=i+9,addr=bus_address_sata if i == 0 or bus_address_sata_2 == None else bus_address_sata_2,
-				i=i+2,
-				s=ata_suffix
-			)
+	if server["Motherboard"]["Manufacturer"] == "Giga Computing":
+		## If giga boards, use standard mapping
+		if len(server["HBA"]) > 0:
+			# we have hba cards to inspect/alias
+			for i in range(0,len(server["HBA"])):
+				count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
+				print(count)
+				for j in range(0,count):
+					if server["HBA"][i]["Model"] not in ["9600-24i", "9600-16i", "9361-16i", "9361-24i"]:
+						# The default case for ailiasing hba cards.
+						vdev_id_str += (
+							"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
+								i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
+								)
+							)
+		return vdev_id_str
 	else:
-		log("Error aliasing DESTROYINATOR")
-		sys.exit(1)
-	return vdev_id_str
+		for i in range(0,len(server["HBA"])):
+			count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
+			for j in range(0,count):
+				# The default case for ailiasing hba cards.
+				vdev_id_str += (
+					"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
+						i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=phy_order[server["HBA"][i]["Model"]][j]
+						)
+					)
+		if server["OS NAME"] == "CentOS Linux" and server["OS VERSION_ID"] == "7":
+			ata_suffix = ".0"
+
+		try:
+			lspci_result = subprocess.Popen(["lspci"], stdout=subprocess.PIPE,
+				universal_newlines=True).stdout
+		except OSError:
+			log("Error executing lspci.")
+			sys.exit(1)
+
+		for line in lspci_result:
+			regex_sata = re.search("(\w\w:\w\w.\w).*Intel.*SATA Controller",line)
+			if regex_sata != None and bus_address_sata == None:
+				bus_address_sata = "0000:"+regex_sata.group(1)
+			elif regex_sata != None and bus_address_sata_2 == None:
+				bus_address_sata_2 = "0000:"+regex_sata.group(1)
+			if bus_address_sata != None and bus_address_sata_2 != None:
+				break
+
+		if bus_address_sata != None :
+			for i in range(0,7):
+				#alias the drives connected to the on board sata sata connectors
+				#if there are two sata controllers, we want to only use the first one to alias the first of the last 7 drives in the unit
+				#otherwise we use the second sata controller for the remaining 6 drives. 
+				vdev_id_str += "alias {final_row}-{drive} /dev/disk/by-path/pci-{addr}-ata-{i}{s}\n".format(
+					final_row=len(server["HBA"]),
+					drive=i+9,addr=bus_address_sata if i == 0 or bus_address_sata_2 == None else bus_address_sata_2,
+					i=i+2,
+					s=ata_suffix
+				)
+		else:
+			log("Error aliasing DESTROYINATOR")
+			sys.exit(1)
+		return vdev_id_str
 
 
 ###############################################################################
