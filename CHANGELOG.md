@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.12-1
+## 45drives-tools 4.0.12-2
 
-* add support for mi4 UBM
+* update by-path address for MS03-6L0-000

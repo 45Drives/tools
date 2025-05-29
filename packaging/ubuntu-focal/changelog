@@ -1,3 +1,9 @@
+45drives-tools (4.0.12-2focal) focal; urgency=medium
+
+  * update by-path address for MS03-6L0-000
+
+ -- Brett Kelly <bkelly@45drives.com>  Thu, 29 May 2025 16:05:16 -0300
+
 45drives-tools (4.0.12-1focal) focal; urgency=medium
 
   * add support for mi4 UBM
