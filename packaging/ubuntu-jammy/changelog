@@ -1,3 +1,10 @@
+45drives-tools (4.0.13-1jammy) jammy; urgency=medium
+
+  * updated storcli2 to v8.12
+  * added locking mechanism to ubm mapping to not overload storcli2
+
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 03 Jun 2025 07:52:34 -0300
+
 45drives-tools (4.0.12-2jammy) jammy; urgency=medium
 
   * update by-path address for MS03-6L0-000

@@ -1,3 +1,4 @@
-## 45drives-tools 4.0.12-2
+## 45drives-tools 4.0.13-1
 
-* update by-path address for MS03-6L0-000
+* updated storcli2 to v8.12
+* added locking mechanism to ubm mapping to not overload storcli2
