@@ -177,7 +177,7 @@ partition_to_parent_name() {
 storcli2() {
   (
     cd /var/log || exit $?
-    /opt/45drives/tools/storcli2 "$@"
+    flock /run/45storcli2.run /opt/45drives/tools/storcli2 "$@"
   )
 }
 
