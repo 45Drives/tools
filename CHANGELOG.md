@@ -1,4 +1,4 @@
-## 45drives-tools 4.0.13-1
+## 45drives-tools 4.0.13--v
 
-* updated storcli2 to v8.12
-* added locking mechanism to ubm mapping to not overload storcli2
+* 4.0.14
+* fixes issue with MS73-HB0 boards not reporting HBA cards

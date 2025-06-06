@@ -1,3 +1,10 @@
+45drives-tools (4.0.13--vbookworm) bookworm; urgency=medium
+
+  * 4.0.14
+  * fixes issue with MS73-HB0 boards not reporting HBA cards
+
+ -- Brett Kelly <bkelly@45drives.com>  Fri, 06 Jun 2025 06:51:57 -0300
+
 45drives-tools (4.0.13-1bookworm) bookworm; urgency=medium
 
   * updated storcli2 to v8.12
