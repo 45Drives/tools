@@ -569,7 +569,16 @@ def hba_lspci(server):
 		"9660-16i", "9361-16i", "9361-24i"
 	]
 
-	rx_pci=re.compile(r"^(\w\w:\w\w\.\w).*\n.*(?:(?:(?:^\t).*\n)+^.*)?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|HBA 9405W-16i|9361-16i|HBA 9400-16i|9361-24i|9660-16i).*\n",re.MULTILINE)
+	if server["Motherboard"]["Product Name"] == "MS73-HB0-000":
+		rx_pci=re.compile(
+		r"^([0-9A-Fa-f]{4}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}\.[0-9A-Fa-f]).*\n"
+		r"\tSubsystem: .*?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|"
+		r"HBA 9405W-16i|9361-16i|HBA 9400-16i|9361-24i|9660-16i).*",
+		re.MULTILINE
+		)
+	else:
+		rx_pci=re.compile(r"^(\w\w:\w\w\.\w).*\n.*(?:(?:(?:^\t).*\n)+^.*)?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|HBA 9405W-16i|9361-16i|HBA 9400-16i|9361-24i|9660-16i).*\n",re.MULTILINE)
+	
 	ctl = 0
 	for match in rx_pci.finditer(lspci_result):
 		hba_dict["Model"] = match.group(2)
