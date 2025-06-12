@@ -24,17 +24,17 @@ g_product_lut_idx = {
 g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15"]
 
 g_mobo_to_version_lut = {
-	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC"],
-	"Base-B": ["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC"],
-	"Enhanced": ["X11SPL-F","X10SRL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC"],
-	"Enhanced-S":["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC"],
-	"Enhanced-AMD":["H11SSL-i","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC"],
-	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC"],
-	"Turbo-G":["X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC"],
-	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC"],
-	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC"],
-	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC"],
- 	"Super": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC"]
+	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
+	"Base-B": ["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
+	"Enhanced": ["X11SPL-F","X10SRL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
+	"Enhanced-S":["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
+	"Enhanced-AMD":["H11SSL-i","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
+	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
+	"Turbo-G":["X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
+	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
+	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
+	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
+ 	"Super": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"]
 }
 
 g_product_lut = {
@@ -334,39 +334,112 @@ def motherboard():
 						mobo_dict["Serial Number"] = regex.group(2)
 	return mobo_dict
 
+# def getDmidecodePCI(server):
+# 	try:
+# 		dmidecode_result = subprocess.Popen(
+# 			["dmidecode", "-t", "9"], stdout=subprocess.PIPE, universal_newlines=True).stdout.read()
+# 	except:
+# 		print("ERROR: dmidecode not installed")
+# 		exit(1)
+# 	pci_slots = []
+# 	# rx_pci=re.compile(r"^Handle.*\n(?:.|\n)+?^.*(?:Designation:\s+).*(?:PCIE|SLOT|Slot)(.).*(?:.|\n)+?^.*Bus Address:\s+(\S+).*",re.MULTILINE)
+# 	rx_pci = re.compile(r"^Handle.*\n(?:.|\n)+?^.*(?:Designation:\s+).*(?:PCIE|SLOT|Slot)(?:[^0-9]?(\d)).*(?:.|\n)+?^.*Bus Address:\s+(\S+).*",re.MULTILINE)
+# 	for match in rx_pci.finditer(dmidecode_result):
+# 		pci_slots.append({"ID":match.group(1),"Bus Address":match.group(2)})
+
+# 	if server["Motherboard"]["Product Name"] in ["EPC621D8A"]:
+# 	# the bus addresses from dmidecode may be invalid. Use lookup table and use a translated address.
+# 		BA_LUT = {
+# 			"EPC621D8A":{
+# 			"ff00:16:02.0":"0000:1c:00.0", #PCIE2
+# 			"ff00:64:00.0":"0000:65:00.0", #PCIE4
+# 			"ff00:64:02.0":"0000:66:00.0", #PCIE3
+# 			"ff00:b2:00.0":"0000:b3:00.0", #PCIE6
+# 			"ff00:b2:02.0":"0000:b4:00.0" #PCIE5
+# 			}
+# 		}
+
+# 		for slot in pci_slots:
+# 			if "Bus Address" in slot.keys() and slot["Bus Address"] in BA_LUT[server["Motherboard"]["Product Name"]].keys():
+# 				slot["Bus Address"] = BA_LUT[server["Motherboard"]["Product Name"]][slot["Bus Address"]]
+# 	return pci_slots
+
 def getDmidecodePCI(server):
-	try:
-		dmidecode_result = subprocess.Popen(
-			["dmidecode", "-t", "9"], stdout=subprocess.PIPE, universal_newlines=True).stdout.read()
-	except:
-		print("ERROR: dmidecode not installed")
-		exit(1)
-	pci_slots = []
-	# rx_pci=re.compile(r"^Handle.*\n(?:.|\n)+?^.*(?:Designation:\s+).*(?:PCIE|SLOT|Slot)(.).*(?:.|\n)+?^.*Bus Address:\s+(\S+).*",re.MULTILINE)
-	rx_pci = re.compile(r"^Handle.*\n(?:.|\n)+?^.*(?:Designation:\s+).*(?:PCIE|SLOT|Slot)(?:[^0-9]?(\d)).*(?:.|\n)+?^.*Bus Address:\s+(\S+).*",re.MULTILINE)
-	for match in rx_pci.finditer(dmidecode_result):
-		pci_slots.append({"ID":match.group(1),"Bus Address":match.group(2)})
+    try:
+        dmidecode_result = subprocess.Popen(
+            ["dmidecode", "-t", "9"],
+            stdout=subprocess.PIPE,
+            universal_newlines=True
+        ).stdout.read()
+    except:
+        print("ERROR: dmidecode not installed")
+        exit(1)
 
-	if server["Motherboard"]["Product Name"] in ["EPC621D8A","ROMED8-2T"]:
-	# the bus addresses from dmidecode may be invalid. Use lookup table and use a translated address.
-		BA_LUT = {
-			"EPC621D8A":{
-			"ff00:16:02.0":"0000:1c:00.0", #PCIE2
-			"ff00:64:00.0":"0000:65:00.0", #PCIE4
-			"ff00:64:02.0":"0000:66:00.0", #PCIE3
-			"ff00:b2:00.0":"0000:b3:00.0", #PCIE6
-			"ff00:b2:02.0":"0000:b4:00.0" #PCIE5
-			},
-			"ROMED8-2T":{
-			"0000:80:00.0":"0000:81:00.0", #PCIE1
-			"0000:00:00.0":"0000:01:00.0", #PCIE2
-			}
-		}
+    pci_slots = []
+    
+    # Match whole slot blocks with Designation and Bus Address
+    rx_slot = re.compile(
+        r"Handle.*?\n(.*?)\n\n",
+        re.DOTALL | re.MULTILINE
+    )
 
-		for slot in pci_slots:
-			if "Bus Address" in slot.keys() and slot["Bus Address"] in BA_LUT[server["Motherboard"]["Product Name"]].keys():
-				slot["Bus Address"] = BA_LUT[server["Motherboard"]["Product Name"]][slot["Bus Address"]]
-	return pci_slots
+    for slot_block in rx_slot.finditer(dmidecode_result):
+        block = slot_block.group(1)
+        lines = block.strip().splitlines()
+        slot_info = {}
+        for line in lines:
+            line = line.strip()
+            if line.startswith("Designation:"):
+                designation = line.split(":", 1)[1].strip()
+                slot_info["Designation"] = designation
+                slot_number = extract_pci_slot_number(designation)
+                if slot_number:
+                    slot_info["PCI Slot"] = slot_number
+            elif line.startswith("Bus Address:"):
+                slot_info["Bus Address"] = line.split(":", 1)[1].strip()
+        if "Bus Address" in slot_info and "PCI Slot" in slot_info:
+            pci_slots.append(slot_info)
+
+    # Special fixup for EPC621D8A
+    if server.get("Motherboard", {}).get("Product Name") == "EPC621D8A":
+        BA_LUT = {
+            "ff00:16:02.0": "0000:1c:00.0",  # PCIE2
+            "ff00:64:00.0": "0000:65:00.0",  # PCIE4
+            "ff00:64:02.0": "0000:66:00.0",  # PCIE3
+            "ff00:b2:00.0": "0000:b3:00.0",  # PCIE6
+            "ff00:b2:02.0": "0000:b4:00.0",  # PCIE5
+        }
+        for slot in pci_slots:
+            bus = slot.get("Bus Address", "")
+            if bus in BA_LUT:
+                slot["Bus Address"] = BA_LUT[bus]
+
+    return pci_slots
+
+
+def extract_pci_slot_number(designation):
+    """
+    Extracts just the numeric part of a PCIe slot designation.
+
+    Examples:
+    - "PCIE7"     → "7"
+    - "PCIE_7A"   → "7"
+    - "PCIE-8_B"  → "8"
+    - "Slot 23"   → "23"
+    """
+    if not designation:
+        return None
+
+    # Normalize the string (replace dashes/underscores and remove spaces)
+    clean = designation.upper().replace("-", "_").replace(" ", "")
+
+    # Match patterns like PCIE7, PCIE_7A, SLOT23, SLOT_23B, etc.
+    match = re.search(r"(PCIE|SLOT)[_]?(\d+)", clean)
+    if match:
+        return match.group(2)
+
+    return None  # Fallback if no match
+
 
 def getStorcliInfo(hba_card):
 	storcli_path = {
@@ -619,7 +692,8 @@ def hba_lspci(server):
 				if card["Bus Address"] in pci_slot["Bus Address"]:
 					# The bus address provided by dmidecode contains the bus address provided by lspci.
 					# we can assign the PCI Slot accordingly.
-					card["PCI Slot"] = pci_slot["ID"]
+					card["PCI Slot"] = pci_slot.get("PCI Slot", pci_slot.get("ID", "Unknown"))
+
 					if len(sys_bus_addrs) > 0 and pci_slot["Bus Address"] not in sys_bus_addrs:
 						# dmidecode gave a bus address that does not match the one used by the system
 						for j in range(0,len(sys_bus_addrs)):
