@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.11-1
+## 45drives-tools 4.0.15-1
 
-* HL4/8 Updated get_sata_pci_addresses() function as it was not correctly filtering for SATA controllers.
+* adds support for ROMED8-2T board to server_identifier
