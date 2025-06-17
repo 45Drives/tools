@@ -243,6 +243,10 @@ table_lookup_val() {
   }
   $ROW_SEARCH_COL == ROW_SEARCH_VAL {
     found_row = 1
+    if (OUTPUT_COL > NF) {
+      print "column out of range" > "/dev/stderr"
+      exit 1
+    }
     print $OUTPUT_COL
     exit 0
   }
@@ -308,6 +312,7 @@ table_lookup_col() {
 # slot_num_to_slot_name 2 -> "1-3"
 slot_num_to_slot_name() {
   local SLOT_NUM=$1
+  [[ -z "$SLOT_NUM" ]] && perror "slot number not provided" && return 2
   UBM_MAP_KEY=$(get_map_key) || return $?
   table_lookup_val "$SCRIPT_DIR/slot_name_map.txt" 0 "$UBM_MAP_KEY" $((1 + SLOT_NUM)) || perror "table_lookup_val failed"
 }
