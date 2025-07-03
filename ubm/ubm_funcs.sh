@@ -55,14 +55,9 @@ die() {
   exit $?
 }
 
-_get_map_key() {
-  if [[ -r "$CACHE_DIR/map_key" ]]; then
-    cat "$CACHE_DIR/map_key"
-    return 0
-  fi
-  (
-    set -o pipefail
-    ipmitool fru print 0 | awk -F: '
+_get_map_key() (
+  set -o pipefail
+  ipmitool fru print 0 | awk -F: '
       BEGIN {
         found_key = 0
       }
@@ -81,8 +76,7 @@ _get_map_key() {
         }
       }
       '
-  )
-}
+)
 
 # get_map_key
 # print map key for table lookups
@@ -95,15 +89,43 @@ get_map_key() {
       UBM_MAP_KEY="$(<"$CACHE_DIR/map_key")"
     else
       UBM_MAP_KEY=$(_get_map_key) || perror "Failed to get Product Name from FRU" || return $?
-      [ -d "$CACHE_DIR" ] || mkdir -p "$CACHE_DIR" >/dev/null
-      TMPFILE=$(mktemp -p "$CACHE_DIR") || return $?
-      echo "$UBM_MAP_KEY" >"$TMPFILE"
-      chmod 644 "$TMPFILE"
-      mv "$TMPFILE" "$CACHE_DIR/map_key" || return $?
+      _set_map_key_cache "$UBM_MAP_KEY"
     fi
   fi
   echo "$UBM_MAP_KEY"
   return 0
+}
+
+_set_map_key_cache() {
+  local map_key=$1
+  [ -z "$map_key" ] && perror "Must pass something as argument" && return 2
+  [ -d "$CACHE_DIR" ] || mkdir -p "$CACHE_DIR" >/dev/null || return $?
+  TMPFILE=$(mktemp -p "$CACHE_DIR") || return $?
+  echo "$map_key" >"$TMPFILE"
+  chmod 644 "$TMPFILE"
+  mv "$TMPFILE" "$CACHE_DIR/map_key" || return $?
+  UBM_MAP_KEY=$map_key
+}
+
+# set_map_key_cache MAP_KEY
+# override the map key cached value to spoof server as given type
+set_map_key_cache() {
+  local map_key=$1
+  [ -z "$map_key" ] && perror "Must pass something as argument" && return 2
+  if ! grep "^${map_key}\b" "$SCRIPT_DIR/slot_name_map.txt" >/dev/null 2>&1; then
+    perror "Invalid slot map key: $map_key"
+    return 2
+  fi
+
+  _set_map_key_cache "$map_key"
+}
+
+# reset_map_key_cache
+# undo any map key cache overrides
+reset_map_key_cache() {
+  unset UBM_MAP_KEY
+  rm -f "$CACHE_DIR/map_key" >/dev/null 2>&1
+  get_map_key >/dev/null
 }
 
 # normalize_block_dev_name DEV_PATH|SYSFS_PATH|DEV_OS_NAME

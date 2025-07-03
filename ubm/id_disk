@@ -36,6 +36,15 @@ if [ "$DEVTYPE" = "partition" ]; then
 fi
 
 if [ -z "$SLOT_NUM" ]; then
+  # first check if available as attr
+  SLOT_ATTR_PATH=/sys/block/"$BLOCK_DEV_KERNEL_NAME"/device/slot
+  if [ -r "$SLOT_ATTR_PATH" ]; then
+    set_env_var SLOT_NUM "$(cat "$SLOT_ATTR_PATH")"
+  fi
+fi
+
+if [ -z "$SLOT_NUM" ]; then
+  # if still not set, fall back to storcli2
   set_env_var WARN_SLOT_NUM_NOT_SET_VIA_ATTR 1
   SLOT_NUM=$(block_dev_to_slot_num "$BLOCK_DEV_KERNEL_NAME") || exit 0
   set_env_var SLOT_NUM "$SLOT_NUM"
