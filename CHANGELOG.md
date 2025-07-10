@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.15-1
+## 45drives-tools 4.0.16-1
 
-* adds support for ROMED8-2T board to server_identifier
+* update pci device paths for mi4 ubm
