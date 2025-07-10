@@ -1,34 +1,8 @@
-45drives-tools (4.0.14-1jammy) jammy; urgency=medium
+45drives-tools (4.0.15-1jammy) jammy; urgency=medium
 
-  * fixes issue with MS73-HB0 boards not reporting HBA cards
+  * adds support for ROMED8-2T board to server_identifier
 
- -- Brett Kelly <bkelly@45drives.com>  Mon, 09 Jun 2025 06:26:24 -0300
-
-45drives-tools (4.0.13--vjammy) jammy; urgency=medium
-
-  * 4.0.14
-  * fixes issue with MS73-HB0 boards not reporting HBA cards
-
- -- Brett Kelly <bkelly@45drives.com>  Fri, 06 Jun 2025 06:51:57 -0300
-
-45drives-tools (4.0.13-1jammy) jammy; urgency=medium
-
-  * updated storcli2 to v8.12
-  * added locking mechanism to ubm mapping to not overload storcli2
-
- -- Brett Kelly <bkelly@45drives.com>  Tue, 03 Jun 2025 07:52:34 -0300
-
-45drives-tools (4.0.12-2jammy) jammy; urgency=medium
-
-  * update by-path address for MS03-6L0-000
-
- -- Brett Kelly <bkelly@45drives.com>  Thu, 29 May 2025 16:05:16 -0300
-
-45drives-tools (4.0.12-1jammy) jammy; urgency=medium
-
-  * add support for mi4 UBM
-
- -- Brett Kelly <bkelly@45drives.com>  Thu, 29 May 2025 10:42:33 -0300
+ -- Jordan Keough <jkeough@45drives.com>  Thu, 12 Jun 2025 13:08:22 -0300
 
 45drives-tools (4.0.11-1jammy) jammy; urgency=medium
 

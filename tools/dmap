@@ -927,10 +927,10 @@ def alias_mi4_ubm(model,os_name,os_version_id,mobo_model):
 	bus_address_sata = None
 
 	if mobo_model in ["ME03-CE0-000"]:
-		vdev_id_str += "alias 1-1 /dev/disk/by-path/pci-0000:02:00.1-ata-1\n"
-		vdev_id_str += "alias 1-2 /dev/disk/by-path/pci-0000:02:00.1-ata-2\n"
-		vdev_id_str += "alias 1-3 /dev/disk/by-path/pci-0000:02:00.1-ata-3\n"
-		vdev_id_str += "alias 1-4 /dev/disk/by-path/pci-0000:02:00.1-ata-4\n"
+		vdev_id_str += "alias 1-1 /dev/disk/by-path/pci-0000:02:00.0-ata-5\n"
+		vdev_id_str += "alias 1-2 /dev/disk/by-path/pci-0000:02:00.0-ata-6\n"
+		vdev_id_str += "alias 1-3 /dev/disk/by-path/pci-0000:02:00.0-ata-7\n"
+		vdev_id_str += "alias 1-4 /dev/disk/by-path/pci-0000:02:00.0-ata-8\n"
 	
 	if mobo_model in ["MS03-6L0-000"]:
 		vdev_id_str += "alias 1-1 /dev/disk/by-path/pci-0000:00:17.0-ata-1\n"

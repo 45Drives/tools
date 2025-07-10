@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.14-1
+## 45drives-tools 4.0.15-1
 
-* fixes issue with MS73-HB0 boards not reporting HBA cards
+* adds support for ROMED8-2T board to server_identifier

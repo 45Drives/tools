@@ -77,18 +77,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
-* Mon Jun 09 2025 Brett Kelly <bkelly@45drives.com> 4.0.14-1
-- fixes issue with MS73-HB0 boards not reporting HBA cards
-* Fri Jun 06 2025 Brett Kelly <bkelly@45drives.com> 4.0.13--v
-- 4.0.14
-- fixes issue with MS73-HB0 boards not reporting HBA cards
-* Tue Jun 03 2025 Brett Kelly <bkelly@45drives.com> 4.0.13-1
-- updated storcli2 to v8.12
-- added locking mechanism to ubm mapping to not overload storcli2
-* Thu May 29 2025 Brett Kelly <bkelly@45drives.com> 4.0.12-2
-- update by-path address for MS03-6L0-000
-* Thu May 29 2025 Brett Kelly <bkelly@45drives.com> 4.0.12-1
-- add support for mi4 UBM
+* Thu Jun 12 2025 Jordan Keough <jkeough@45drives.com> 4.0.15-1
+- adds support for ROMED8-2T board to server_identifier
 * Tue May 06 2025 Brett Kelly <bkelly@45drives.com> 4.0.11-1
 - HL4/8 Updated get_sata_pci_addresses() function as it was not correctly filtering
   for SATA controllers.
