@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# shellcheck source=./ubm_funcs.sh
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/ubm_funcs.sh"
+
+check_ubm_func_support || exit $?
+
+usage() {
+    cat <<EOF
+ubm_override_alias_style ALIAS_STYLE - set alias style
+ubm_override_alias_style -r          - reset overrides
+
+  ALIAS_STYLE = one of:
+EOF
+    printf "    %s\n" $(awk '/^[^#]/ { print $1 }' "$SCRIPT_DIR/slot_name_map.txt")
+}
+
+RESET=false
+
+while getopts 'hr' opt; do
+    case $opt in
+    h)
+        usage
+        exit 0
+        ;;
+    r)
+        RESET=true
+        ;;
+    *)
+        usage >&2 # print to stderr
+        exit 2    # exit with usage error (2)
+        ;;
+    esac
+done
+shift $((OPTIND - 1)) # after this line, $@ will contain remaining non-option arguments
+
+if $RESET; then
+
+    reset_map_key_cache
+
+else
+
+    alias_style=$1
+
+    if [ -z "$alias_style" ]; then
+        perror "Must pass alias style!"
+        usage >&2
+        exit 2
+    fi
+
+    if ! set_map_key_cache "$alias_style"; then
+        result=$?
+        usage >&2
+        exit $result
+    fi
+
+fi
+
+echo "Set UBM alias style cache to $(get_map_key) ($CACHE_DIR/map_key)"
+echo "Slot mapping: $(all_slot_names)"
