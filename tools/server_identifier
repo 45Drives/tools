@@ -260,6 +260,9 @@ g_product_lut = {
 	"Destroyinator-XL60-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,4,"XL60","DESTROYINATOR"],
 	"Destroyinator-XL60-Enhanced-S":	[g_mobo_to_version_lut["Enhanced-S"]  ,0,4,"XL60","DESTROYINATOR"],
 
+	"Destroyinator-F16-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,4,"F16","F2STORNADO"],
+	"Destroyinator-F16-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"],0,4,"F16","F2STORNADO"],
+
 	"Storinator-AV15-VM":				[["VIRTUAL_MACHINE"],0,1,"AV15","STORINATOR"],
 	"Storinator-Q30-VM":				[["VIRTUAL_MACHINE"],0,2,"Q30","STORINATOR"],
 	"Storinator-S45-VM":				[["VIRTUAL_MACHINE"],0,3,"S45","STORINATOR"],

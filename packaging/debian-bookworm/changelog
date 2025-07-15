@@ -1,3 +1,9 @@
+45drives-tools (4.0.16-1bookworm) bookworm; urgency=medium
+
+  * Add Destroyinator F16 support
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 15 Jul 2025 11:43:33 -0300
+
 45drives-tools (4.0.15-1bookworm) bookworm; urgency=medium
 
   * adds support for ROMED8-2T board to server_identifier
