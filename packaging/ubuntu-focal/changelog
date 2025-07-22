@@ -1,3 +1,9 @@
+45drives-tools (4.0.16-2focal) focal; urgency=medium
+
+  * Updates dmap to properly parse lshw command output
+
+ -- Jordan Keough <jkeough@45drives.com>  Tue, 22 Jul 2025 11:48:57 -0300
+
 45drives-tools (4.0.16-1focal) focal; urgency=medium
 
   * Add Destroyinator F16 support

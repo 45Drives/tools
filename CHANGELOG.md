@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.16-1
+## 45drives-tools 4.0.16-2
 
-* Add Destroyinator F16 support
+* Updates dmap to properly parse lshw command output
