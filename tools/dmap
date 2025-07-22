@@ -731,7 +731,7 @@ def alias_destroyinator(server,alias_template,phy_order):
 ###############################################################################
 def get_sata_pci_addresses():
     try:
-        # Run the lshw command to get storage information
+		# Run the lshw command to get storage information
         lshw_result = subprocess.Popen(
             ["lshw", "-class", "storage"], stdout=subprocess.PIPE, universal_newlines=True
         ).stdout
@@ -740,23 +740,36 @@ def get_sata_pci_addresses():
         return []
 
     pci_addresses = []
-    sata_found = False  # Flag to track if we are in a SATA section
-
-    bus_info_pattern = re.compile(r"bus info:\s+pci@(\S+)")  # Regex to capture PCI bus info
-    description_pattern = re.compile(r"description:\s+SATA controller")  # To identify SATA sections
+    is_sata_block = False
+    block_lines = []
 
     for line in lshw_result:
-        if description_pattern.search(line):
-            sata_found = True
-        elif "resources: " in line:  # "resources: ..." indicates last line of current section
-            sata_found = False
+        line = line.strip()
+        if line.startswith("*-"):  # Start of a new block
+            if is_sata_block:
+                # Process the previous block
+                for l in block_lines:
+                    match = re.search(r"bus info:\s+pci@(\S+)", l)
+                    if match:
+                        pci_addresses.append(match.group(1))
+                        break  # Only one address per block
+            # Reset for the new block
+            block_lines = [line]
+            is_sata_block = False
+        else:
+            block_lines.append(line)
+            if "description: SATA controller" in line:
+                is_sata_block = True
 
-        if sata_found:
-            match = bus_info_pattern.search(line)
+    # Catch last block
+    if is_sata_block:
+        for l in block_lines:
+            match = re.search(r"bus info:\s+pci@(\S+)", l)
             if match:
-                pci_addresses.append(match.group(1))  # Capture PCI address
+                pci_addresses.append(match.group(1))
 
     return pci_addresses
+
 
 
 ###############################################################################
@@ -793,6 +806,7 @@ def alias_hl4():
 # Desc: 
 ###############################################################################
 def alias_hl8():
+    log("alias_hl8 called")
     vdev_id_str = ""
     hl4_order = [1, 2, 3, 4]
 
