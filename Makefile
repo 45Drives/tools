@@ -15,7 +15,8 @@ install:
 		ubm/on_enclosure_add \
 		ubm/on_enclosure_remove \
 		ubm/slot_led_ctrl \
-		ubm/ubm_func_wrapper.sh
+		ubm/ubm_func_wrapper.sh \
+		ubm/ubm_override_alias_style
 	install -m 644 -t "$(DESTDIR)/opt/45drives/ubm" \
 		ubm/ubm_funcs.sh \
 		ubm/slot_name_map.txt
@@ -41,6 +42,7 @@ endif
 	ln -sf /opt/45drives/tools/wipedev "$(DESTDIR)/usr/bin/wipedev"
 	ln -sf /opt/45drives/ubm/slot_led_ctrl "$(DESTDIR)/usr/bin/slot_led_ctrl"
 	ln -sf /opt/45drives/tools/slot_speeds "$(DESTDIR)/usr/bin/slot_speeds"
+	ln -sf /opt/45drives/tools/ubm_override_alias_style "$(DESTDIR)/usr/bin/ubm_override_alias_style"
 	for i in \
 		slot_num_to_slot_name \
 		slot_name_to_slot_num \
