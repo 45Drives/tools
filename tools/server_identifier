@@ -647,7 +647,7 @@ def hba_lspci(server):
 
 	if server["Motherboard"]["Product Name"] == "MS73-HB0-000":
 		rx_pci=re.compile(
-		r"^([0-9A-Fa-f]{4}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}\.[0-9A-Fa-f]).*\n"
+		r"^((?:[0-9A-Fa-f]{4}:)?[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}\.[0-9A-Fa-f]).*\n"
 		r"\tSubsystem: .*?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|"
 		r"HBA 9405W-16i|9361-16i|HBA 9400-16i|9361-24i|9660-16i).*",
 		re.MULTILINE
