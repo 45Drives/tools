@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.16-2
+## 45drives-tools 4.0.17-1
 
-* Updates dmap to properly parse lshw command output
+* Updates hba_lspci regex for MS73-HB0 boards to take both potential pci address formats reported by lspci (eg. 0000:16:00.0 and 16:00.0)
