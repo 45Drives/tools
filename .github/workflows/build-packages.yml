@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - master
-    tags:
-      - 'v*.*.*'
 jobs:
   prebuild:
     runs-on: buildinator-5
