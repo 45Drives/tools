@@ -21,7 +21,7 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8"]
 
 g_mobo_to_version_lut = {
 	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
@@ -262,6 +262,8 @@ g_product_lut = {
 
 	"Destroyinator-F16-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,4,"F16","F2STORNADO"],
 	"Destroyinator-F16-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"],0,4,"F16","F2STORNADO"],
+ 
+	"Studio-STUDIO8":             		[g_mobo_to_version_lut["Turbo"],0,0,"STUDIO8","STUDIO"],
 
 	"Storinator-AV15-VM":				[["VIRTUAL_MACHINE"],0,1,"AV15","STORINATOR"],
 	"Storinator-Q30-VM":				[["VIRTUAL_MACHINE"],0,2,"Q30","STORINATOR"],
@@ -336,36 +338,6 @@ def motherboard():
 					elif regex.group(1) == "Board Serial":
 						mobo_dict["Serial Number"] = regex.group(2)
 	return mobo_dict
-
-# def getDmidecodePCI(server):
-# 	try:
-# 		dmidecode_result = subprocess.Popen(
-# 			["dmidecode", "-t", "9"], stdout=subprocess.PIPE, universal_newlines=True).stdout.read()
-# 	except:
-# 		print("ERROR: dmidecode not installed")
-# 		exit(1)
-# 	pci_slots = []
-# 	# rx_pci=re.compile(r"^Handle.*\n(?:.|\n)+?^.*(?:Designation:\s+).*(?:PCIE|SLOT|Slot)(.).*(?:.|\n)+?^.*Bus Address:\s+(\S+).*",re.MULTILINE)
-# 	rx_pci = re.compile(r"^Handle.*\n(?:.|\n)+?^.*(?:Designation:\s+).*(?:PCIE|SLOT|Slot)(?:[^0-9]?(\d)).*(?:.|\n)+?^.*Bus Address:\s+(\S+).*",re.MULTILINE)
-# 	for match in rx_pci.finditer(dmidecode_result):
-# 		pci_slots.append({"ID":match.group(1),"Bus Address":match.group(2)})
-
-# 	if server["Motherboard"]["Product Name"] in ["EPC621D8A"]:
-# 	# the bus addresses from dmidecode may be invalid. Use lookup table and use a translated address.
-# 		BA_LUT = {
-# 			"EPC621D8A":{
-# 			"ff00:16:02.0":"0000:1c:00.0", #PCIE2
-# 			"ff00:64:00.0":"0000:65:00.0", #PCIE4
-# 			"ff00:64:02.0":"0000:66:00.0", #PCIE3
-# 			"ff00:b2:00.0":"0000:b3:00.0", #PCIE6
-# 			"ff00:b2:02.0":"0000:b4:00.0" #PCIE5
-# 			}
-# 		}
-
-# 		for slot in pci_slots:
-# 			if "Bus Address" in slot.keys() and slot["Bus Address"] in BA_LUT[server["Motherboard"]["Product Name"]].keys():
-# 				slot["Bus Address"] = BA_LUT[server["Motherboard"]["Product Name"]][slot["Bus Address"]]
-# 	return pci_slots
 
 def getDmidecodePCI(server):
     try:
@@ -668,10 +640,11 @@ def hba_lspci(server):
 			hybrid_flag = True
 		hba.append(hba_dict.copy())
 
-	hba_card_order = getCardOrder()
-	if hba_card_order:
-		formatted_hba_order = formatBusAddresses(hba_card_order)
-		fixControllerID(hba, formatted_hba_order)
+	if hba:
+		hba_card_order = getCardOrder()
+		if hba_card_order:
+			formatted_hba_order = formatBusAddresses(hba_card_order)
+			fixControllerID(hba, formatted_hba_order)
 
 	if len(hba) > 0:
 		for card in hba:

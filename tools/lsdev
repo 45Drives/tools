@@ -377,7 +377,10 @@ def build_server(options):
 			"2X":[16,16],
 			"3X":[16,16,16],
 			"4X":[16,16,16,16]
-		}
+		},
+  		"STUDIO":{
+			"STUDIO8":[4,4]
+		},
 	}
 	CURRENT_ROW = 0
 	DRIVE_COUNT = 0
