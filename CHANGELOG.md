@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.18-1
+## 45drives-tools 4.0.18-2
 
-* Adds DestroyinatorF16 and Studio8 support
+* Rebuilding with updated build-packages.yml -> create_release and sync_repo were not executed

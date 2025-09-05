@@ -1,3 +1,10 @@
+45drives-tools (4.0.18-2jammy) jammy; urgency=medium
+
+  * Rebuilding with updated build-packages.yml -> create_release and sync_repo were
+    not executed
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 05 Sep 2025 05:06:44 -0300
+
 45drives-tools (4.0.18-1jammy) jammy; urgency=medium
 
   * Adds DestroyinatorF16 and Studio8 support
