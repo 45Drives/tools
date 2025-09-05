@@ -1,3 +1,22 @@
+45drives-tools (4.0.17-1jammy) jammy; urgency=medium
+
+  * Updates hba_lspci regex for MS73-HB0 boards to take both potential pci address
+    formats reported by lspci (eg. 0000:16:00.0 and 16:00.0)
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 08 Aug 2025 09:25:00 -0300
+
+45drives-tools (4.0.16-2jammy) jammy; urgency=medium
+
+  * Updates dmap to properly parse lshw command output
+
+ -- Jordan Keough <jkeough@45drives.com>  Tue, 22 Jul 2025 11:48:57 -0300
+
+45drives-tools (4.0.16-1jammy) jammy; urgency=medium
+
+  * Add Destroyinator F16 support
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 15 Jul 2025 11:43:33 -0300
+
 45drives-tools (4.0.16-1jammy) jammy; urgency=medium
 
   * update pci device paths for mi4 ubm

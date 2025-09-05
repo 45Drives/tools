@@ -260,6 +260,9 @@ g_product_lut = {
 	"Destroyinator-XL60-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,4,"XL60","DESTROYINATOR"],
 	"Destroyinator-XL60-Enhanced-S":	[g_mobo_to_version_lut["Enhanced-S"]  ,0,4,"XL60","DESTROYINATOR"],
 
+	"Destroyinator-F16-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,4,"F16","F2STORNADO"],
+	"Destroyinator-F16-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"],0,4,"F16","F2STORNADO"],
+
 	"Storinator-AV15-VM":				[["VIRTUAL_MACHINE"],0,1,"AV15","STORINATOR"],
 	"Storinator-Q30-VM":				[["VIRTUAL_MACHINE"],0,2,"Q30","STORINATOR"],
 	"Storinator-S45-VM":				[["VIRTUAL_MACHINE"],0,3,"S45","STORINATOR"],
@@ -644,7 +647,7 @@ def hba_lspci(server):
 
 	if server["Motherboard"]["Product Name"] == "MS73-HB0-000":
 		rx_pci=re.compile(
-		r"^([0-9A-Fa-f]{4}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}\.[0-9A-Fa-f]).*\n"
+		r"^((?:[0-9A-Fa-f]{4}:)?[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}\.[0-9A-Fa-f]).*\n"
 		r"\tSubsystem: .*?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|"
 		r"HBA 9405W-16i|9361-16i|HBA 9400-16i|9361-24i|9660-16i).*",
 		re.MULTILINE

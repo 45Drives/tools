@@ -2,9 +2,7 @@ name: Build Packages
 on:
   push:
     branches:
-      - master
-    tags:
-      - 'v*.*.*'
+      - build
 jobs:
   prebuild:
     runs-on: buildinator-5
