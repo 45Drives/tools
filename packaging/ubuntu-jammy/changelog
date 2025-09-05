@@ -1,3 +1,9 @@
+45drives-tools (4.0.18-1jammy) jammy; urgency=medium
+
+  * Adds DestroyinatorF16 and Studio8 support
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 05 Sep 2025 04:50:14 -0300
+
 45drives-tools (4.0.17-1jammy) jammy; urgency=medium
 
   * Updates hba_lspci regex for MS73-HB0 boards to take both potential pci address
