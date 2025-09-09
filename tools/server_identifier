@@ -57,7 +57,7 @@ g_product_lut = {
 	"Compute-1UGW-Turbo":				[g_mobo_to_version_lut["Turbo"],0,0,"1UGW","1UGW"],
 	"Compute-1UGW-Super":				[g_mobo_to_version_lut["Super"],0,0,"1UGW","1UGW"],
 
-	"Homelab-HL15_BEAST":               [g_mobo_to_version_lut["Turbo"],1,0,"HL15_BEAST","HOMELAB"],
+	"HomeLab-HL15_BEAST":               [g_mobo_to_version_lut["Turbo"],1,0,"HL15_BEAST","HOMELAB"],
 	"HomeLab-HL15":                     [g_mobo_to_version_lut["Turbo"],0,0,"HL15","HOMELAB"],
 	"HomeLab-HL4":             			[g_mobo_to_version_lut["Turbo"],0,0,"HL4","HOMELAB"],
 	"HomeLab-HL8":             			[g_mobo_to_version_lut["Turbo"],0,0,"HL8","HOMELAB"],
