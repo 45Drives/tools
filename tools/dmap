@@ -861,8 +861,7 @@ def alias_hl15_beast():
 
     # Desired label order to emit
     desired_slots = (
-        [f"1-{i}" for i in range(1, 16)] +
-        [f"2-{i}" for i in range(1, 9)]
+        [f"1-{i}" for i in range(1, 24)]
     )
 
     # 1) Find the HBA pci base that actually has sas-phy entries, prefer the one
