@@ -436,7 +436,7 @@ def create_vdev_id(server):
 			"C8_UBM":[8]
 		},
 		"HOMELAB":{
-      		"HL15_BEAST":[15,8],
+      		"HL15_BEAST":[23],
 			"HL15":[15],
 			"HL4":[4],
 			"HL8":[4,4]
@@ -500,9 +500,26 @@ def create_vdev_id(server):
 	version = get_version()
 	vdev_id_str = "# This file was generated using dmap {v} (/opt/45drives/tools/dmap).\n".format(v=version)
  
- 	# SPECIAL CASE: HL15_BEAST (single HBA but two rows). Autodetect and return.
+ 	# HL15_BEAST: avoid autodetect loop on fresh systems (by-vdev not yet present).
+	# Use deterministic SAS phy ordering like other HBAs.
 	if server["Alias Style"] == "HOMELAB" and server["Chassis Size"] == "HL15_BEAST":
-		vdev_id_str += alias_hl15_beast()
+		# Expect a single 24i HBA; map first 23 bays.
+		if not server.get("HBA"):
+			log("!! ERROR !! No HBA found for HL15_BEAST")
+			sys.exit(1)
+		model = server["HBA"][0]["Model"]
+		bus   = server["HBA"][0]["Bus Address"]
+		count = 23
+		if model in ["9600-24i", "9600-16i", "9361-16i", "9361-24i"]:
+			log("!! ERROR !! Unexpected HBA model for HL15_BEAST: {m}".format(m=model))
+			sys.exit(1)
+		if model not in phy_order:
+			log("!! ERROR !! Unknown HBA model '{m}' for HL15_BEAST".format(m=model))
+			sys.exit(1)
+		for j in range(count):
+			p = phy_order[model][j]
+			vdev_id_str += "alias 1-{idx} /dev/disk/by-path/pci-{addr}-sas-phy{phy}-lun-0\n".format(
+				idx=j+1, addr=bus, phy=p)
 		return vdev_id_str
 
 	if len(server["HBA"]) > 0 and server["Chassis Size"] != "C8" and server["Alias Style"] != "F8":
@@ -847,110 +864,6 @@ def alias_hl8():
         )
 
     return vdev_id_str
-
-
-###############################################################################
-# Name: alias_hl15_beast
-# Args: None
-# Desc: Autodetect HL15 "beast" backplane mapping by correlating /dev/disk/by-vdev
-#       with SAS by-path (…-sas-phyN-lun-0). No manual phy_to_slot table needed.
-###############################################################################
-def alias_hl15_beast():
-    log("alias_hl15_beast autodetect")
-    vdev_id_str = []
-
-    # Desired label order to emit
-    desired_slots = (
-        [f"1-{i}" for i in range(1, 24)]
-    )
-
-    # 1) Find the HBA pci base that actually has sas-phy entries, prefer the one
-    #    with the most phys present.
-    bypath_phys = glob.glob("/dev/disk/by-path/pci-*-sas-phy*-lun-0")
-    if not bypath_phys:
-        raise RuntimeError("No SAS by-path entries found (pci-*-sas-phy*-lun-0).")
-
-    base_counts = {}
-    base_re = re.compile(r"(pci-[0-9a-fA-F:.]+)-sas-phy(\d+)-lun-0$")
-    for p in bypath_phys:
-        m = base_re.search(p)
-        if not m:
-            continue
-        base = m.group(1)
-        phy = int(m.group(2))
-        base_counts.setdefault(base, set()).add(phy)
-
-    hba_base = max(base_counts.items(), key=lambda kv: len(kv[1]))[0]
-
-    # 2) Build sdX -> (path, phy) for entries on the chosen HBA base
-    sd_to_phy = {}
-    for p in glob.glob(f"/dev/disk/by-path/{hba_base}-sas-phy*-lun-0"):
-        try:
-            target = os.path.realpath(p)            # -> /dev/sdX
-        except OSError:
-            continue
-        sd = os.path.basename(target)
-        m = base_re.search(p)
-        if not m:
-            continue
-        phy = int(m.group(2))
-        sd_to_phy[sd] = (p, phy)
-
-    # 3) Read existing by-vdev aliases (slot labels -> /dev/sdX[part])
-    byvdev_dir = "/dev/disk/by-vdev"
-    if not os.path.isdir(byvdev_dir):
-        raise RuntimeError(f"{byvdev_dir} not found. Run once with any mapping (even temporary) to bootstrap autodetect.")
-
-    slot_to_sd = {}
-    slot_name_re = re.compile(r"^\d+-\d+(?:-part\d+)?$")
-    for name in os.listdir(byvdev_dir):
-        if not slot_name_re.match(name):
-            continue
-        link = os.path.join(byvdev_dir, name)
-        if not os.path.islink(link):
-            continue
-        target = os.path.realpath(link)  # /dev/sdX or /dev/sdXn
-        sd = os.path.basename(target)
-        # strip partition suffix if present (sdX[0-9]+)
-        sd = re.sub(r"^((sd[a-z]+)).*$", r"\1", sd)
-        slot = name.split("-part")[0]  # normalize '1-10-part1' -> '1-10'
-        slot_to_sd[slot] = sd
-
-    if not slot_to_sd:
-        raise RuntimeError("No slot aliases found in /dev/disk/by-vdev; cannot learn mapping.")
-
-    # 4) Derive slot -> by-path using sd -> (path, phy) from the selected HBA
-    slot_to_bypath = {}
-    missing = []         # slots that exist but aren't on the selected HBA or have no matching by-path
-    for slot, sd in slot_to_sd.items():
-        tup = sd_to_phy.get(sd)
-        if tup is None:
-            # sd is either on another controller (NVMe, SATA, or different HBA) or missing
-            missing.append((slot, sd))
-            continue
-        bypath, _phy = tup
-        slot_to_bypath[slot] = bypath
-
-    # 5) Emit aliases for desired slots in the order you want.
-    #    Only emit aliases we can actually back with a by-path today.
-    emitted = set()
-    for slot in desired_slots:
-        bypath = slot_to_bypath.get(slot)
-        if bypath:
-            vdev_id_str.append(f"alias {slot} {bypath}")
-            emitted.add(slot)
-
-    # 6) Inform about expected-but-missing slots (helpful for empty bays or other controllers)
-    if missing or any(s not in emitted for s in desired_slots):
-        vdev_id_str.append("")
-        vdev_id_str.append("# Missing or not on this HBA (for reference):")
-        for slot in desired_slots:
-            if slot not in emitted:
-                sd = slot_to_sd.get(slot)
-                hint = f"({sd})" if sd else "(no sd link)"
-                vdev_id_str.append(f"#   {slot} {hint}")
-
-    return "\n".join(vdev_id_str) + "\n"
 
 
 ###############################################################################
