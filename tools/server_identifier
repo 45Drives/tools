@@ -1050,6 +1050,40 @@ def get_os():
 
 	return os_release_fields["NAME"],os_release_fields["VERSION_ID"]
 
+def infer_homelab_model_from_by_path():
+    """
+    Inspect /dev/disk/by-path and infer HL4 vs HL8 by counting ATA links
+    per SATA controller. Returns ("HomeLab-HL4", "HL4") or ("HomeLab-HL8","HL8"),
+    or (None, None) if inference is not conclusive.
+    """
+    base = "/dev/disk/by-path"
+    try:
+        names = os.listdir(base)
+    except FileNotFoundError:
+        return (None, None)
+
+    # Only plain ata symlinks, ignore partitions
+    ata = [n for n in names if "-ata-" in n and "part" not in n]
+    if not ata:
+        return (None, None)
+
+    # Group by controller PCI address prefix (pci-XXXX:XX:XX.X)
+    groups = {}
+    for n in ata:
+        # e.g., pci-0000:01:00.1-ata-3 -> controller "pci-0000:01:00.1"
+        ctrl = n.split("-ata-")[0]
+        groups.setdefault(ctrl, set()).add(n)
+
+    # Count unique bays (>=4 on one controller => HL4; two groups of >=4 => HL8)
+    big = [g for g, members in groups.items() if len(members) >= 4]
+    if len(big) == 1:
+        return ("HomeLab-HL4", "HL4")
+    if len(big) >= 2:
+        # two controllers with at least 4 each
+        return ("HomeLab-HL8", "HL8")
+    return (None, None)
+
+
 def main():
 	server = {
 		"Motherboard":"?",
@@ -1082,6 +1116,16 @@ def main():
 		server["Serial"] = serial_result["Product Serial"].upper()
 		server["Chassis Size"] = serial_result["Product Part Number"].upper()
 		server["Model"] = determine_model(server["Motherboard"]["Product Name"],server["HBA"],server["Chassis Size"]) if old_serial(serial_result) else serial_result["Product Name"]
+	
+ 	# If we don't have IPMI and fell back to a generic Product Name,
+	# try to infer if unit is HL4/HL8 from the actual SATA topology.
+	if not server["VM"]:
+		if server["Model"] in ("Storinator", "?", "", None):
+			if len(server.get("HBA", [])) == 0:
+				inferred_model, inferred_size = infer_homelab_model_from_by_path()
+				if inferred_model and inferred_size:
+					server["Model"] = inferred_model
+					server["Chassis Size"] = inferred_size
 
 	if server["Model"] == "?":
 		if len(server["HBA"]) > 0 and server["VM"]:
@@ -1092,7 +1136,7 @@ def main():
 	# set auto alias flag for servers that are automatically aliased using udev rules.
 	if server["Alias Style"] in ["F2STORNADO","STORINATORUBM"]:
 		if server["Chassis Size"] == "MI4_UBM" and len(server["HBA"]) == 0:
-			server["Auto Alias"] = False # If Mi4  and does not have a HBA card it is using onboard controllers and therefore cannot be auto mapped
+			server["Auto Alias"] = False # If Mi4 and does not have a HBA card it is using onboard controllers and therefore cannot be auto mapped
 		else: 
 			server["Auto Alias"] = True
 	
