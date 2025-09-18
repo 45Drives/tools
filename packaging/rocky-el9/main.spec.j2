@@ -77,6 +77,11 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Fri Sep 05 2025 Jordan Keough <jkeough@45drives.com> 4.0.18-2
+- Rebuilding with updated build-packages.yml -> create_release and sync_repo were
+  not executed
+* Fri Sep 05 2025 Jordan Keough <jkeough@45drives.com> 4.0.18-1
+- Adds DestroyinatorF16 and Studio8 support
 * Fri Aug 08 2025 Jordan Keough <jkeough@45drives.com> 4.0.17-1
 - Updates hba_lspci regex for MS73-HB0 boards to take both potential pci address
   formats reported by lspci (eg. 0000:16:00.0 and 16:00.0)
@@ -84,6 +89,8 @@ fi
 - Updates dmap to properly parse lshw command output
 * Tue Jul 15 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.16-1
 - Add Destroyinator F16 support
+* Thu Jul 10 2025 Brett Kelly <bkelly@45drives.com> 4.0.16-1
+- update pci device paths for mi4 ubm
 * Thu Jun 12 2025 Jordan Keough <jkeough@45drives.com> 4.0.15-1
 - adds support for ROMED8-2T board to server_identifier
 * Tue May 06 2025 Brett Kelly <bkelly@45drives.com> 4.0.11-1

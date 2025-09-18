@@ -12,6 +12,8 @@ import os
 from datetime import datetime
 import sys
 import shlex
+import glob
+import configparser
 
 g_product_lut_idx = {
 	"MOBO_MODEL":	0,
@@ -21,20 +23,20 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","HL15_BEAST"]
 
 g_mobo_to_version_lut = {
-	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
-	"Base-B": ["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
-	"Enhanced": ["X11SPL-F","X10SRL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
-	"Enhanced-S":["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
-	"Enhanced-AMD":["H11SSL-i","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
-	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
-	"Turbo-G":["X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
-	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
-	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
-	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"],
- 	"Super": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM"]
+	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
+	"Base-B": ["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
+	"Enhanced": ["X11SPL-F","X10SRL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
+	"Enhanced-S":["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
+	"Enhanced-AMD":["H11SSL-i","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
+	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
+	"Turbo-G":["X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
+	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
+	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
+	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
+ 	"Super": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"]
 }
 
 g_product_lut = {
@@ -55,6 +57,7 @@ g_product_lut = {
 	"Compute-1UGW-Turbo":				[g_mobo_to_version_lut["Turbo"],0,0,"1UGW","1UGW"],
 	"Compute-1UGW-Super":				[g_mobo_to_version_lut["Super"],0,0,"1UGW","1UGW"],
 
+	"HomeLab-HL15_BEAST":               [g_mobo_to_version_lut["Turbo"],1,0,"HL15_BEAST","HOMELAB"],
 	"HomeLab-HL15":                     [g_mobo_to_version_lut["Turbo"],0,0,"HL15","HOMELAB"],
 	"HomeLab-HL4":             			[g_mobo_to_version_lut["Turbo"],0,0,"HL4","HOMELAB"],
 	"HomeLab-HL8":             			[g_mobo_to_version_lut["Turbo"],0,0,"HL8","HOMELAB"],
@@ -273,6 +276,39 @@ g_product_lut = {
 	"Storinator":						[["?"],0,0,"?","STORINATOR"],
 	"?":								[["?"],0,0,"?","?"]
 }
+
+def read_latest_fru_ini(base_dir="/opt/45drives/serial45d/fru_ini"):
+    """
+    Returns dict like {"product": "...", "part": "...", "serial": "...", "ini_path": "..."}
+    from the newest .ini in base_dir, or None if not found/invalid.
+    """
+    try:
+        candidates = sorted(
+            glob.glob(os.path.join(base_dir, "*.ini")),
+            key=os.path.getmtime,
+            reverse=True
+        )
+        for path in candidates:
+            cp = configparser.ConfigParser()
+            cp.read(path)
+
+            if cp.has_section("product"):
+                product = cp.get("product", "product", fallback="").strip()
+                part    = cp.get("product", "part",    fallback="").strip()
+                serial  = cp.get("product", "serial",  fallback="").strip()
+
+                # fall back to [chassis] serial/part if product section is incomplete
+                if not serial and cp.has_section("chassis"):
+                    serial = cp.get("chassis", "serial", fallback="").strip()
+                if not part and cp.has_section("chassis"):
+                    part = cp.get("chassis", "part", fallback="").strip()
+
+                if product:
+                    return {"product": product, "part": part, "serial": serial, "ini_path": path}
+    except Exception:
+        pass
+    return None
+
 
 def motherboard():
 	# search through the output of the command "dmidecode -t 2" for motherboard information
@@ -775,21 +811,28 @@ def serial_check():
 	except:
 		print("ERROR: ipmitool is not installed")
 		exit(1)
-	
+ 
 	if ipmi_test:
-		# ipmitool fru command has returned a standard error. This can happen on a virtual machine
-		print("/opt/45drives/tools/server_identifier: ipmitool fru command failed. IPMI is not present on this system. Attempting to pull info from DMI tables")
+		# No IPMI — try FRU ini first
+		print("/opt/45drives/tools/server_identifier: ipmitool fru command failed. IPMI is not present on this system. Attempting to pull info from FRU ini")
+
+		fru = read_latest_fru_ini()
+		if fru:
+			serial_result["Product Name"]        = fru["product"]
+			serial_result["Product Part Number"] = fru.get("part", "") or "?"
+			serial_result["Product Serial"]      = fru.get("serial", "") or "?"
+			return serial_result
+
+		# FRU ini not found/usable — fall back to DMI (previous behavior)
+		print("/opt/45drives/tools/server_identifier: FRU ini not found or incomplete. Falling back to DMI tables")
 		with open('/sys/class/dmi/id/chassis_serial', 'r') as file:
 			serial_result["Product Serial"] = file.read().rstrip('\n')
-
 		with open('/sys/class/dmi/id/chassis_version', 'r') as file:
-			serial_result["Product Part Number"] = file.read().rstrip('\n')
-
-		serial_result["Product Name"] = "HomeLab-" + serial_result["Product Part Number"]
-
+			pn = file.read().rstrip('\n')
+		serial_result["Product Part Number"] = pn
+		serial_result["Product Name"] = "Storinator"  # safe default to avoid KeyError later
 		return serial_result
 
-	
 	ipmi_result = subprocess.Popen(["ipmitool","fru","print","0"],stdout=subprocess.PIPE,universal_newlines=True).stdout
 	for line in ipmi_result:
 		for field in serial_fields:
@@ -1007,6 +1050,40 @@ def get_os():
 
 	return os_release_fields["NAME"],os_release_fields["VERSION_ID"]
 
+def infer_homelab_model_from_by_path():
+    """
+    Inspect /dev/disk/by-path and infer HL4 vs HL8 by counting ATA links
+    per SATA controller. Returns ("HomeLab-HL4", "HL4") or ("HomeLab-HL8","HL8"),
+    or (None, None) if inference is not conclusive.
+    """
+    base = "/dev/disk/by-path"
+    try:
+        names = os.listdir(base)
+    except FileNotFoundError:
+        return (None, None)
+
+    # Only plain ata symlinks, ignore partitions
+    ata = [n for n in names if "-ata-" in n and "part" not in n]
+    if not ata:
+        return (None, None)
+
+    # Group by controller PCI address prefix (pci-XXXX:XX:XX.X)
+    groups = {}
+    for n in ata:
+        # e.g., pci-0000:01:00.1-ata-3 -> controller "pci-0000:01:00.1"
+        ctrl = n.split("-ata-")[0]
+        groups.setdefault(ctrl, set()).add(n)
+
+    # Count unique bays (>=4 on one controller => HL4; two groups of >=4 => HL8)
+    big = [g for g, members in groups.items() if len(members) >= 4]
+    if len(big) == 1:
+        return ("HomeLab-HL4", "HL4")
+    if len(big) >= 2:
+        # two controllers with at least 4 each
+        return ("HomeLab-HL8", "HL8")
+    return (None, None)
+
+
 def main():
 	server = {
 		"Motherboard":"?",
@@ -1039,6 +1116,16 @@ def main():
 		server["Serial"] = serial_result["Product Serial"].upper()
 		server["Chassis Size"] = serial_result["Product Part Number"].upper()
 		server["Model"] = determine_model(server["Motherboard"]["Product Name"],server["HBA"],server["Chassis Size"]) if old_serial(serial_result) else serial_result["Product Name"]
+	
+ 	# If we don't have IPMI and fell back to a generic Product Name,
+	# try to infer if unit is HL4/HL8 from the actual SATA topology.
+	if not server["VM"]:
+		if server["Model"] in ("Storinator", "?", "", None):
+			if len(server.get("HBA", [])) == 0:
+				inferred_model, inferred_size = infer_homelab_model_from_by_path()
+				if inferred_model and inferred_size:
+					server["Model"] = inferred_model
+					server["Chassis Size"] = inferred_size
 
 	if server["Model"] == "?":
 		if len(server["HBA"]) > 0 and server["VM"]:
@@ -1049,7 +1136,7 @@ def main():
 	# set auto alias flag for servers that are automatically aliased using udev rules.
 	if server["Alias Style"] in ["F2STORNADO","STORINATORUBM"]:
 		if server["Chassis Size"] == "MI4_UBM" and len(server["HBA"]) == 0:
-			server["Auto Alias"] = False # If Mi4  and does not have a HBA card it is using onboard controllers and therefore cannot be auto mapped
+			server["Auto Alias"] = False # If Mi4 and does not have a HBA card it is using onboard controllers and therefore cannot be auto mapped
 		else: 
 			server["Auto Alias"] = True
 	

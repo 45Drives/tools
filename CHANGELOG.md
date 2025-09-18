@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.17-1
+## 45drives-tools 4.0.18-2
 
-* Updates hba_lspci regex for MS73-HB0 boards to take both potential pci address formats reported by lspci (eg. 0000:16:00.0 and 16:00.0)
+* Rebuilding with updated build-packages.yml -> create_release and sync_repo were not executed

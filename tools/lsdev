@@ -330,6 +330,7 @@ def build_server(options):
 			"C8_UBM":[8]
 		},
 		"HOMELAB":{
+      		"HL15_BEAST":[23],
 			"HL15":[15],
 			"HL4":[4],
 			"HL8":[4,4]
@@ -668,6 +669,13 @@ def print_bays(server, options, osd, server_info):
 				else:
 					cell_string = "   " + cell_string
 			print_array[-1].append((cell_string, colour))
+   
+	# # Normalize column heights so ragged rows show fully
+	# max_height = max((len(col) for col in print_array), default=0)
+	# for col in print_array:
+	# 	while len(col) < max_height:
+	# 		# blank cell to keep columns aligned for rows with fewer bays
+	# 		col.append(("", ""))
 	
 	header_text = [
 		"Storage Disk Info"
