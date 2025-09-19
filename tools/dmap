@@ -502,7 +502,7 @@ def create_vdev_id(server):
  
  	# HL15_BEAST: two supported motherboard paths
 	#  - ProArt X870E-CREATOR WIFI: map all 23 via the single HBA (24i)
-	#  - ROMED8-2T/BCM: map 1-1..1-15 via HBA (16i), 1-16..1-23 via onboard SATA
+	#  - ROMED8-2T: map 1-1..1-15 via HBA (16i), 1-16..1-23 via onboard SATA
 	if server["Alias Style"] == "HOMELAB" and server["Chassis Size"] == "HL15_BEAST":
 		if not server.get("HBA"):
 			log("!! ERROR !! No HBA found for HL15_BEAST")
@@ -531,7 +531,7 @@ def create_vdev_id(server):
 			return alias_hl15_beast_romed8(server, phy_order)
 		else:
 			log("!! ERROR !! Unsupported motherboard for HL15_BEAST: {mobo}".format(mobo=mobo_name))
-			log("           Supported: ProArt X870E-CREATOR WIFI, ROMED8-2T/BCM")
+			log("           Supported: ProArt X870E-CREATOR WIFI, ROMED8-2T")
 			sys.exit(1)
 		return vdev_id_str
 
@@ -882,7 +882,7 @@ def alias_hl8():
 ###############################################################################
 # Name: alias_hl15_beast_romed8
 # Args: server, phy_order
-# Desc: HL15_BEAST mapping for ROMED8-2T/BCM:
+# Desc: HL15_BEAST mapping for ROMED8-2T:
 #       - First 15 drives on the single HBA (deterministic SAS phy order)
 #       - Last 8 drives (16..23) on onboard SATA: 4 on the first controller
 #         as ata-1..4, and 4 on the second controller as ata-1..4.
@@ -912,7 +912,7 @@ def alias_hl15_beast_romed8(server, phy_order):
 	# 2) Last 8 bays via onboard SATA (two controllers)
 	sata_addrs = get_sata_pci_addresses()
 	if len(sata_addrs) < 2:
-		log("!! ERROR !! Expected at least two SATA controllers on ROMED8-2T/BCM, found {n}".format(n=len(sata_addrs)))
+		log("!! ERROR !! Expected at least two SATA controllers on ROMED8-2T, found {n}".format(n=len(sata_addrs)))
 		sys.exit(1)
 	sata0, sata1 = sata_addrs[0], sata_addrs[1]
 
