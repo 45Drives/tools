@@ -26,17 +26,17 @@ g_product_lut_idx = {
 g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","HL15_BEAST"]
 
 g_mobo_to_version_lut = {
-	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
-	"Base-B": ["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
-	"Enhanced": ["X11SPL-F","X10SRL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
-	"Enhanced-S":["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
-	"Enhanced-AMD":["H11SSL-i","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
-	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
-	"Turbo-G":["X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
-	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
-	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
-	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"],
- 	"Super": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM", "ProArt X870E-CREATOR WIFI"]
+	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
+	"Base-B": ["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
+	"Enhanced": ["X11SPL-F","X10SRL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
+	"Enhanced-S":["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
+	"Enhanced-AMD":["H11SSL-i","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
+	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
+	"Turbo-G":["X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
+	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
+	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
+	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
+ 	"Super": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"]
 }
 
 g_product_lut = {
@@ -277,6 +277,26 @@ g_product_lut = {
 	"?":								[["?"],0,0,"?","?"]
 }
 
+def _safe_parse_int(s):
+    """Return int(s) if possible, else 0."""
+    try:
+        return int(str(s).strip().strip('"').strip("'"))
+    except Exception:
+        return 0
+
+def _run_and_get_stdout(cmd, timeout=8):
+    """
+    Run a command (shell=True) and return combined stdout/stderr as text.
+    On error/timeout, return empty string.
+    """
+    try:
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        out, _ = p.communicate(timeout=timeout)
+        return (out or b"").decode("utf-8", errors="replace")
+    except Exception:
+        return ""
+
+
 def read_latest_fru_ini(base_dir="/opt/45drives/serial45d/fru_ini"):
     """
     Returns dict like {"product": "...", "part": "...", "serial": "...", "ini_path": "..."}
@@ -488,9 +508,17 @@ def getStorcliInfo(hba_card):
 		"9361-16i": "jq '.Controllers[0].\"Response Data\".\"Basics\"'",
 		"9361-24i": "jq '.Controllers[0].\"Response Data\".\"Basics\"'"
 	}
-	if hba_card["Model"] not in storcli_path.keys() or hba_card["Model"] not in storcli_path.keys():
+	# if hba_card["Model"] not in storcli_path.keys() or hba_card["Model"] not in storcli_path.keys():
+	# 	print("Unable to proceed with unknown HBA card. {mod}".format(mod=hba_card["Model"]))
+	# 	sys.exit(1)
+	if (
+		hba_card["Model"] not in storcli_path
+		or hba_card["Model"] not in jq_version
+		or hba_card["Model"] not in jq_bus_address
+	):
 		print("Unable to proceed with unknown HBA card. {mod}".format(mod=hba_card["Model"]))
 		sys.exit(1)
+
 	storcli = subprocess.Popen(
 		shlex.split("{pth} /c{ctl} show all J".format(pth=storcli_path[hba_card["Model"]],ctl=hba_card["Ctl"])), stdout=subprocess.PIPE, universal_newlines=True)
 	storcli.wait()
@@ -538,31 +566,62 @@ def getStorcliInfo(hba_card):
 		print("Updating Controller ID: {ctl}, PCI Address: {pci}, Bus Address: {ba}".format(ctl=hba_card["Ctl"],pci=hba_card["PCI Address"],ba=hba_card["Bus Address"]))
 		hba_card["Bus Address"] = hba_card["PCI Address"]
 
+# def getCardOrder():
+# 	# Count the number of storcli2 compatible controllers. If not zero return from the function with that many controllers. Let the normal process take over.
+# 	# If storcli2 controllers are 0 and non zero storcli64 controllers continue with this function
+# 	# this function added to handle the case of the pre-F8X servers. this is not needed in 9600 series systems
+# 	# this will cause a mapping problem in the scenario of having 96XX and 93/94 cards in the system.
+# 	storcli64_check_command = "/opt/45drives/tools/storcli64 show J | jq '.Controllers[0].\"Response Data\".\"Number of Controllers\"'"
+# 	storcli64_check_process = subprocess.Popen(storcli64_check_command, shell=True, stdout=subprocess.PIPE)
+# 	storcli64_controller_count_str,_ = storcli64_check_process.communicate()
+# 	storcli64_controller_count = storcli64_controller_count_str.decode('utf-8').strip()
+# 	storcli2_check_command = "/opt/45drives/tools/storcli2 show J | jq '.Controllers[0].\"Response Data\".\"Number of Controllers\"'"
+# 	storcli2_check_process = subprocess.Popen(storcli2_check_command, shell=True, stdout=subprocess.PIPE)
+# 	storcli2_controller_count_str,_ = storcli2_check_process.communicate()
+# 	storcli2_controller_count = storcli2_controller_count_str.decode('utf-8').strip()
+
+# 	hba_card_order = []
+
+# 	if int(storcli2_controller_count) > 0:
+# 		return hba_card_order
+# 	if int(storcli64_controller_count) > 0:
+# 		hba_order_command = "/opt/45drives/tools/storcli64 /call show J | jq -r '.Controllers[].\"Response Data\".\"PCI Address\"' | cut -d : -f 2"
+# 		hba_order_process = subprocess.Popen(hba_order_command, shell=True, stdout=subprocess.PIPE)
+# 		stdout,_ = hba_order_process.communicate()
+# 		hba_cards = stdout.decode('utf-8').splitlines()
+# 		hba_card_order  =[item for item in hba_cards if item]
+# 		return hba_card_order
+
 def getCardOrder():
-	# Count the number of storcli2 compatible controllers. If not zero return from the function with that many controllers. Let the normal process take over.
-	# If storcli2 controllers are 0 and non zero storcli64 controllers continue with this function
-	# this function added to handle the case of the pre-F8X servers. this is not needed in 9600 series systems
-	# this will cause a mapping problem in the scenario of having 96XX and 93/94 cards in the system.
-	storcli64_check_command = "/opt/45drives/tools/storcli64 show J | jq '.Controllers[0].\"Response Data\".\"Number of Controllers\"'"
-	storcli64_check_process = subprocess.Popen(storcli64_check_command, shell=True, stdout=subprocess.PIPE)
-	storcli64_controller_count_str,_ = storcli64_check_process.communicate()
-	storcli64_controller_count = storcli64_controller_count_str.decode('utf-8').strip()
-	storcli2_check_command = "/opt/45drives/tools/storcli2 show J | jq '.Controllers[0].\"Response Data\".\"Number of Controllers\"'"
-	storcli2_check_process = subprocess.Popen(storcli2_check_command, shell=True, stdout=subprocess.PIPE)
-	storcli2_controller_count_str,_ = storcli2_check_process.communicate()
-	storcli2_controller_count = storcli2_controller_count_str.decode('utf-8').strip()
+    # Count the number of storcli2 compatible controllers. If not zero return from the function with that many controllers.
+    # If storcli2 controllers are 0 and non-zero storcli64 controllers, continue with this function.
+    # Note: storcli2 may crash and emit a glibc malloc assert to stderr; capture stderr and treat non-numeric as zero.
+    storcli64_check_command = "/opt/45drives/tools/storcli64 show J | jq -r '.Controllers[0].\"Response Data\".\"Number of Controllers\" // 0'"
+    storcli2_check_command  = "/opt/45drives/tools/storcli2  show J | jq -r '.Controllers[0].\"Response Data\".\"Number of Controllers\" // 0'"
 
-	hba_card_order = []
+    storcli2_out  = _run_and_get_stdout(storcli2_check_command, timeout=8)
+    storcli64_out = _run_and_get_stdout(storcli64_check_command, timeout=8)
 
-	if int(storcli2_controller_count) > 0:
-		return hba_card_order
-	if int(storcli64_controller_count) > 0:
-		hba_order_command = "/opt/45drives/tools/storcli64 /call show J | jq -r '.Controllers[].\"Response Data\".\"PCI Address\"' | cut -d : -f 2"
-		hba_order_process = subprocess.Popen(hba_order_command, shell=True, stdout=subprocess.PIPE)
-		stdout,_ = hba_order_process.communicate()
-		hba_cards = stdout.decode('utf-8').splitlines()
-		hba_card_order  =[item for item in hba_cards if item]
-		return hba_card_order
+    storcli2_controller_count  = _safe_parse_int(storcli2_out)
+    storcli64_controller_count = _safe_parse_int(storcli64_out)
+
+    hba_card_order = []
+
+    # If any 96xx (storcli2) controllers exist, skip custom ordering here.
+    if storcli2_controller_count > 0:
+        return hba_card_order
+
+    # Else, if older 93xx/94xx (storcli64) exist, derive order from storcli64
+    if storcli64_controller_count > 0:
+        hba_order_command = "/opt/45drives/tools/storcli64 /call show J | jq -r '.Controllers[].\"Response Data\".\"PCI Address\"' | cut -d : -f 2"
+        hba_order_process = subprocess.Popen(hba_order_command, shell=True, stdout=subprocess.PIPE)
+        stdout, _ = hba_order_process.communicate()
+        hba_cards = (stdout or b"").decode('utf-8', errors='replace').splitlines()
+        hba_card_order = [item.strip() for item in hba_cards if item.strip()]
+        return hba_card_order
+
+    # Nothing found / or commands failed
+    return hba_card_order
 
 def formatBusAddresses(hba_cards):
 	# take input of PCI address, alter to match format lspci expects for comparison
