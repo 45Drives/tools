@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.19-1
+## 45drives-tools 4.0.19-2
 
-* Package adds support for 45Studio and HL15_BEAST chassis
+* Forgot to merge some changes
