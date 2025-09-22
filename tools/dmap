@@ -20,7 +20,7 @@ import json
 import shlex
 import shutil
 from optparse import OptionParser
-
+import glob
 
 g_quiet = False
 g_enable_jbod = False
@@ -436,6 +436,7 @@ def create_vdev_id(server):
 			"C8_UBM":[8]
 		},
 		"HOMELAB":{
+      		"HL15_BEAST":[23],
 			"HL15":[15],
 			"HL4":[4],
 			"HL8":[4,4]
@@ -498,6 +499,42 @@ def create_vdev_id(server):
 	# We have a valid combination of alias styles and chassis sizes.
 	version = get_version()
 	vdev_id_str = "# This file was generated using dmap {v} (/opt/45drives/tools/dmap).\n".format(v=version)
+ 
+ 	# HL15_BEAST: two supported motherboard paths
+	#  - ProArt X870E-CREATOR WIFI: map all 23 via the single HBA (24i)
+	#  - ROMED8-2T: map 1-1..1-15 via HBA (16i), 1-16..1-23 via onboard SATA
+	if server["Alias Style"] == "HOMELAB" and server["Chassis Size"] == "HL15_BEAST":
+		if not server.get("HBA"):
+			log("!! ERROR !! No HBA found for HL15_BEAST")
+			sys.exit(1)
+		mobo_name = server.get("Motherboard", {}).get("Product Name", "")
+		# Normalize
+		mobo_name_norm = (mobo_name or "").upper()
+		if "PROART X870E-CREATOR WIFI".upper() in mobo_name_norm:
+			# 23 off the HBA
+			model = server["HBA"][0]["Model"]
+			bus   = server["HBA"][0]["Bus Address"]
+			count = 23
+			if model in ["9600-24i", "9600-16i", "9361-16i", "9361-24i"]:
+				log("!! ERROR !! Unexpected HBA model for HL15_BEAST (ProArt path): {m}".format(m=model))
+				sys.exit(1)
+			if model not in phy_order:
+				log("!! ERROR !! Unknown HBA model '{m}' for HL15_BEAST (ProArt path)".format(m=model))
+				sys.exit(1)
+			for j in range(count):
+				p = phy_order[model][j]
+				vdev_id_str += "alias 1-{idx} /dev/disk/by-path/pci-{addr}-sas-phy{phy}-lun-0\n".format(
+					idx=j+1, addr=bus, phy=p)
+			return vdev_id_str
+		elif "ROMED8-2T" in mobo_name_norm:
+			# 15 via HBA, last 8 via SATA
+			return alias_hl15_beast_romed8(server, phy_order)
+		else:
+			log("!! ERROR !! Unsupported motherboard for HL15_BEAST: {mobo}".format(mobo=mobo_name))
+			log("           Supported: ProArt X870E-CREATOR WIFI, ROMED8-2T")
+			sys.exit(1)
+		return vdev_id_str
+
 	if len(server["HBA"]) > 0 and server["Chassis Size"] != "C8" and server["Alias Style"] != "F8":
 		# we have hba cards to inspect/alias
 		for i in range(0,len(server["HBA"])):
@@ -840,6 +877,55 @@ def alias_hl8():
         )
 
     return vdev_id_str
+
+
+###############################################################################
+# Name: alias_hl15_beast_romed8
+# Args: server, phy_order
+# Desc: HL15_BEAST mapping for ROMED8-2T:
+#       - First 15 drives on the single HBA (deterministic SAS phy order)
+#       - Last 8 drives (16..23) on onboard SATA: 4 on the first controller
+#         as ata-1..4, and 4 on the second controller as ata-1..4.
+#       Assumes /dev/disk/by-path naming with -ata-* like other SATA helpers.
+###############################################################################
+def alias_hl15_beast_romed8(server, phy_order):
+	if not server.get("HBA"):
+		log("!! ERROR !! No HBA found for HL15_BEAST (ROMED8-2T path)")
+		sys.exit(1)
+	hba = server["HBA"][0]
+	model = hba.get("Model", "")
+	bus   = hba.get("Bus Address", "")
+	if model in ["9600-24i", "9600-16i", "9361-16i", "9361-24i"]:
+		log("!! ERROR !! Unexpected HBA model for HL15_BEAST (ROMED8-2T path): {m}".format(m=model))
+		sys.exit(1)
+	if model not in phy_order:
+		log("!! ERROR !! Unknown HBA model '{m}' for HL15_BEAST (ROMED8-2T path)".format(m=model))
+		sys.exit(1)
+
+	vdev_id_str = ""
+	# 1) First 15 bays via HBA
+	for j in range(15):
+		p = phy_order[model][j]
+		vdev_id_str += "alias 1-{idx} /dev/disk/by-path/pci-{addr}-sas-phy{phy}-lun-0\n".format(
+			idx=j+1, addr=bus, phy=p)
+
+	# 2) Last 8 bays via onboard SATA (two controllers)
+	sata_addrs = get_sata_pci_addresses()
+	if len(sata_addrs) < 2:
+		log("!! ERROR !! Expected at least two SATA controllers on ROMED8-2T, found {n}".format(n=len(sata_addrs)))
+		sys.exit(1)
+	sata0, sata1 = sata_addrs[0], sata_addrs[1]
+
+	# Map drives 16..19 from sata0 as ata-1..4
+	for k in range(4):
+		vdev_id_str += "alias 1-{idx} /dev/disk/by-path/pci-0000:{addr}-ata-{port}\n".format(
+			idx=16+k, addr=sata0, port=k+1)
+	# Map drives 20..23 from sata1 as ata-1..4
+	for k in range(4):
+		vdev_id_str += "alias 1-{idx} /dev/disk/by-path/pci-0000:{addr}-ata-{port}\n".format(
+			idx=20+k, addr=sata1, port=k+1)
+
+	return vdev_id_str
 
 ###############################################################################
 # Name: alias_pro4
