@@ -1,3 +1,9 @@
+45drives-tools (4.0.19-1focal) focal; urgency=medium
+
+  * Package adds support for 45Studio and HL15_BEAST chassis
+
+ -- Jordan Keough <jkeough@45drives.com>  Mon, 22 Sep 2025 05:46:50 -0300
+
 45drives-tools (4.0.18-2focal) focal; urgency=medium
 
   * Rebuilding with updated build-packages.yml -> create_release and sync_repo were

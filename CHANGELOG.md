@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.18-2
+## 45drives-tools 4.0.19-1
 
-* Rebuilding with updated build-packages.yml -> create_release and sync_repo were not executed
+* Package adds support for 45Studio and HL15_BEAST chassis
