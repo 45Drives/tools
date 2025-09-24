@@ -1,3 +1,9 @@
+45drives-tools (4.0.20-1bookworm) bookworm; urgency=medium
+
+  * Fixes infer_homelab_model func in server_identifer
+
+ -- Jordan Keough <jkeough@45drives.com>  Wed, 24 Sep 2025 06:18:04 -0300
+
 45drives-tools (4.0.19-2bookworm) bookworm; urgency=medium
 
   * Forgot to merge some changes

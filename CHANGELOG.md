@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.19-2
+## 45drives-tools 4.0.20-1
 
-* Forgot to merge some changes
+* Fixes infer_homelab_model func in server_identifer
