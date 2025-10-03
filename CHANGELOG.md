@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.20-1
+## 45drives-tools 4.0.21-1
 
-* Fixes infer_homelab_model func in server_identifer
+* Fixes HL15_BEAST drive mapping with ProArt mobo

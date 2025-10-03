@@ -1,3 +1,9 @@
+45drives-tools (4.0.21-1focal) focal; urgency=medium
+
+  * Fixes HL15_BEAST drive mapping with ProArt mobo
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 03 Oct 2025 05:24:04 -0300
+
 45drives-tools (4.0.20-1focal) focal; urgency=medium
 
   * Fixes infer_homelab_model func in server_identifer
