@@ -892,52 +892,90 @@ def alias_hl8():
 
 
 ###############################################################################
+# Helper: list existing /dev/disk/by-path entries for a SATA controller
+# - Dedupes ".0" variants (prefers the base "-ata-N" if both exist)
+# - Returns a list of full paths sorted by numeric port (ascending)
+###############################################################################
+def list_ata_port_paths(pci_addr):
+    pattern = f"/dev/disk/by-path/pci-{pci_addr}-ata-*"
+    paths = glob.glob(pattern)
+    # Keep only names that end with -ata-N or -ata-N.0 and extract N
+    rx = re.compile(rf"/dev/disk/by-path/pci-{re.escape(pci_addr)}-ata-(\d+)(?:\.0)?$")
+    best_by_port = {}
+    for p in paths:
+        m = rx.match(p)
+        if not m:
+            continue
+        n = int(m.group(1))
+        # Prefer base link without ".0" when both exist
+        if n not in best_by_port:
+            best_by_port[n] = p
+        else:
+            if best_by_port[n].endswith(".0") and not p.endswith(".0"):
+                best_by_port[n] = p
+    # Sort by port number
+    return [best_by_port[n] for n in sorted(best_by_port)]
+
+
+###############################################################################
 # Name: alias_hl15_beast_romed8
 # Args: server, phy_order
 # Desc: HL15_BEAST mapping for ROMED8-2T:
 #       - First 15 drives on the single HBA (deterministic SAS phy order)
-#       - Last 8 drives (16..23) on onboard SATA: 4 on the first controller
-#         as ata-1..4, and 4 on the second controller as ata-1..4.
-#       Assumes /dev/disk/by-path naming with -ata-* like other SATA helpers.
+#       - Last 8 drives (16..23) on onboard SATA discovered from actual by-path
 ###############################################################################
 def alias_hl15_beast_romed8(server, phy_order):
-	if not server.get("HBA"):
-		log("!! ERROR !! No HBA found for HL15_BEAST (ROMED8-2T path)")
-		sys.exit(1)
-	hba = server["HBA"][0]
-	model = hba.get("Model", "")
-	bus   = hba.get("Bus Address", "")
-	if model in ["9600-24i", "9600-16i", "9361-16i", "9361-24i"]:
-		log("!! ERROR !! Unexpected HBA model for HL15_BEAST (ROMED8-2T path): {m}".format(m=model))
-		sys.exit(1)
-	if model not in phy_order:
-		log("!! ERROR !! Unknown HBA model '{m}' for HL15_BEAST (ROMED8-2T path)".format(m=model))
-		sys.exit(1)
+    if not server.get("HBA"):
+        log("!! ERROR !! No HBA found for HL15_BEAST (ROMED8-2T path)")
+        sys.exit(1)
+    hba = server["HBA"][0]
+    model = hba.get("Model", "")
+    bus   = hba.get("Bus Address", "")
+    if model in ["9600-24i", "9600-16i", "9361-16i", "9361-24i"]:
+        log("!! ERROR !! Unexpected HBA model for HL15_BEAST (ROMED8-2T path): {m}".format(m=model))
+        sys.exit(1)
+    if model not in phy_order:
+        log("!! ERROR !! Unknown HBA model '{m}' for HL15_BEAST (ROMED8-2T path)".format(m=model))
+        sys.exit(1)
 
-	vdev_id_str = ""
-	# 1) First 15 bays via HBA
-	for j in range(15):
-		p = phy_order[model][j]
-		vdev_id_str += "alias 1-{idx} /dev/disk/by-path/pci-{addr}-sas-phy{phy}-lun-0\n".format(
-			idx=j+1, addr=bus, phy=p)
+    vdev_id_str = ""
+    # 1) First 15 bays via HBA
+    for j in range(15):
+        p = phy_order[model][j]
+        vdev_id_str += "alias 1-{idx} /dev/disk/by-path/pci-{addr}-sas-phy{phy}-lun-0\n".format(
+            idx=j+1, addr=bus, phy=p)
 
-	# 2) Last 8 bays via onboard SATA (two controllers)
-	sata_addrs = get_sata_pci_addresses()
-	if len(sata_addrs) < 2:
-		log("!! ERROR !! Expected at least two SATA controllers on ROMED8-2T, found {n}".format(n=len(sata_addrs)))
-		sys.exit(1)
-	sata0, sata1 = sata_addrs[0], sata_addrs[1]
+    # 2) Last 8 bays via onboard SATA (two controllers)
+    sata_addrs = get_sata_pci_addresses()
+    if len(sata_addrs) < 2:
+        log("!! ERROR !! Expected at least two SATA controllers on ROMED8-2T, found {n}".format(n=len(sata_addrs)))
+        sys.exit(1)
 
-	# Map drives 16..19 from sata0 as ata-1..4
-	for k in range(4):
-		vdev_id_str += "alias 1-{idx} /dev/disk/by-path/pci-0000:{addr}-ata-{port}\n".format(
-			idx=16+k, addr=sata0, port=k+1)
-	# Map drives 20..23 from sata1 as ata-1..4
-	for k in range(4):
-		vdev_id_str += "alias 1-{idx} /dev/disk/by-path/pci-0000:{addr}-ata-{port}\n".format(
-			idx=20+k, addr=sata1, port=k+1)
+    sata0, sata1 = sata_addrs[0], sata_addrs[1]
 
-	return vdev_id_str
+    # Discover real by-path suffixes for each controller
+    sata0_paths = list_ata_port_paths(sata0)
+    sata1_paths = list_ata_port_paths(sata1)
+
+    # Require at least 4 usable ports per controller
+    if len(sata0_paths) < 4:
+        log("!! ERROR !! Controller {a} exposes only {n} ata ports under /dev/disk/by-path. Need >= 4. Found: {lst}".format(
+            a=sata0, n=len(sata0_paths), lst=", ".join(os.path.basename(p) for p in sata0_paths)))
+        sys.exit(1)
+    if len(sata1_paths) < 4:
+        log("!! ERROR !! Controller {a} exposes only {n} ata ports under /dev/disk/by-path. Need >= 4. Found: {lst}".format(
+            a=sata1, n=len(sata1_paths), lst=", ".join(os.path.basename(p) for p in sata1_paths)))
+        sys.exit(1)
+
+    # Map drives 16..19 from the first 4 discovered ports on sata0
+    for i, path in enumerate(sata0_paths[:4], start=16):
+        vdev_id_str += "alias 1-{idx} {path}\n".format(idx=i, path=path)
+
+    # Map drives 20..23 from the first 4 discovered ports on sata1
+    for i, path in enumerate(sata1_paths[:4], start=20):
+        vdev_id_str += "alias 1-{idx} {path}\n".format(idx=i, path=path)
+
+    return vdev_id_str
 
 ###############################################################################
 # Name: alias_pro4
@@ -1219,7 +1257,7 @@ def main():
 
 	server = get_server_info()
 	
-	if server["Model"] is "HomeLab-HL15":
+	if server["Model"] == "HomeLab-HL15":
 		log("dmap is not compatible with HomeLab-HL15 Servers. You can perform device mapping manually using 'dalias'")
 		log("Try running: 'sudo dalias -t HL15'")
 		sys.exit(1)
