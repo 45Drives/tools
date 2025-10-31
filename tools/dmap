@@ -936,14 +936,13 @@ def alias_hl15_beast_romed8(server, phy_order):
     model = hba.get("Model", "")
     bus   = hba.get("Bus Address", "")
 
-	# expected_hba_model = ["9600-24i", "9600-16i", "9361-16i", "9361-24i"]
-    # if model not in [expected_hba_model]:
-    #     log("!! ERROR !! Unexpected HBA model for HL15_BEAST (ROMED8-2T path): {m}".format(m=model))
-    #     sys.exit(1)
-    # if model not in phy_order:
-    #     log("!! ERROR !! Unknown HBA model '{m}' for HL15_BEAST (ROMED8-2T path)".format(m=model))
-    #     sys.exit(1)
-    
+    if model not in ["HBA 9400-16i"]:
+        log("!! ERROR !! Unexpected HBA model for HL15_BEAST (ROMED8-2T path): {m}".format(m=model))
+        sys.exit(1)
+    if model not in phy_order:
+        log("!! ERROR !! Unknown HBA model '{m}' for HL15_BEAST (ROMED8-2T path)".format(m=model))
+        sys.exit(1)
+        
     vdev_id_str = ""
     # 1) First 15 bays via HBA
     for j in range(15):
