@@ -923,6 +923,10 @@ def list_ata_port_paths(pci_addr):
 # Desc: HL15_BEAST mapping for ROMED8-2T:
 #       - First 15 drives on the single HBA (deterministic SAS phy order)
 #       - Last 8 drives (16..23) on onboard SATA discovered from actual by-path
+# Extra:
+#   - Warns/exits if no SSDs are detected on onboard SATA (cannot infer block)
+#   - Detects the base block (1–4 or 5–8) from the first SSD it sees and
+#     applies that block to BOTH controllers.
 ###############################################################################
 def alias_hl15_beast_romed8(server, phy_order):
     if not server.get("HBA"):
@@ -931,13 +935,15 @@ def alias_hl15_beast_romed8(server, phy_order):
     hba = server["HBA"][0]
     model = hba.get("Model", "")
     bus   = hba.get("Bus Address", "")
-    if model in ["9600-24i", "9600-16i", "9361-16i", "9361-24i"]:
-        log("!! ERROR !! Unexpected HBA model for HL15_BEAST (ROMED8-2T path): {m}".format(m=model))
-        sys.exit(1)
-    if model not in phy_order:
-        log("!! ERROR !! Unknown HBA model '{m}' for HL15_BEAST (ROMED8-2T path)".format(m=model))
-        sys.exit(1)
 
+	# expected_hba_model = ["9600-24i", "9600-16i", "9361-16i", "9361-24i"]
+    # if model not in [expected_hba_model]:
+    #     log("!! ERROR !! Unexpected HBA model for HL15_BEAST (ROMED8-2T path): {m}".format(m=model))
+    #     sys.exit(1)
+    # if model not in phy_order:
+    #     log("!! ERROR !! Unknown HBA model '{m}' for HL15_BEAST (ROMED8-2T path)".format(m=model))
+    #     sys.exit(1)
+    
     vdev_id_str = ""
     # 1) First 15 bays via HBA
     for j in range(15):
@@ -957,25 +963,59 @@ def alias_hl15_beast_romed8(server, phy_order):
     sata0_paths = list_ata_port_paths(sata0)
     sata1_paths = list_ata_port_paths(sata1)
 
-    # Require at least 4 usable ports per controller
-    if len(sata0_paths) < 4:
-        log("!! ERROR !! Controller {a} exposes only {n} ata ports under /dev/disk/by-path. Need >= 4. Found: {lst}".format(
-            a=sata0, n=len(sata0_paths), lst=", ".join(os.path.basename(p) for p in sata0_paths)))
-        sys.exit(1)
-    if len(sata1_paths) < 4:
-        log("!! ERROR !! Controller {a} exposes only {n} ata ports under /dev/disk/by-path. Need >= 4. Found: {lst}".format(
-            a=sata1, n=len(sata1_paths), lst=", ".join(os.path.basename(p) for p in sata1_paths)))
+    # At least 1 SSD required overall so we can detect the global block (1–4 or 5–8)
+    combined = sata0_paths + sata1_paths
+    if not combined:
+        log("!! WARNING !! At least 1 SSD must be installed on the onboard SATA to auto-detect port block (1–4 vs 5–8). None found.")
         sys.exit(1)
 
-    # Map drives 16..19 from the first 4 discovered ports on sata0
-    for i, path in enumerate(sata0_paths[:4], start=16):
+    # Determine the block from the first detected SSD path
+    m = re.search(r"-ata-(\d+)(?:\.0)?$", combined[0])
+    if not m:
+        log("!! ERROR !! Unable to parse ATA port from first detected path: {p}".format(p=combined[0]))
+        sys.exit(1)
+    first_n = int(m.group(1))
+    base = 1 if 1 <= first_n <= 4 else 5
+    block = set(range(base, base + 4))
+
+    # Filter each controller to the selected block (keep order by port)
+    def filter_block(paths):
+        kept = []
+        for p in paths:
+            mm = re.search(r"-ata-(\d+)(?:\.0)?$", p)
+            if not mm:
+                continue
+            n = int(mm.group(1))
+            if n in block:
+                kept.append((n, p))
+        kept.sort(key=lambda t: t[0])
+        return [p for _, p in kept]
+
+    sata0_block = filter_block(sata0_paths)
+    sata1_block = filter_block(sata1_paths)
+
+    # Require 4 usable ports per controller within the chosen block
+    if len(sata0_block) < 4:
+        log("!! ERROR !! Controller {a} exposes only {n} ata ports in block {b}-{e}. Need 4. Found: {lst}".format(
+            a=sata0, n=len(sata0_block), b=base, e=base+3,
+            lst=", ".join(os.path.basename(p) for p in sata0_block)))
+        sys.exit(1)
+    if len(sata1_block) < 4:
+        log("!! ERROR !! Controller {a} exposes only {n} ata ports in block {b}-{e}. Need 4. Found: {lst}".format(
+            a=sata1, n=len(sata1_block), b=base, e=base+3,
+            lst=", ".join(os.path.basename(p) for p in sata1_block)))
+        sys.exit(1)
+
+    # Map drives 16..19 from the selected block on sata0
+    for i, path in enumerate(sata0_block[:4], start=16):
         vdev_id_str += "alias 1-{idx} {path}\n".format(idx=i, path=path)
 
-    # Map drives 20..23 from the first 4 discovered ports on sata1
-    for i, path in enumerate(sata1_paths[:4], start=20):
+    # Map drives 20..23 from the selected block on sata1
+    for i, path in enumerate(sata1_block[:4], start=20):
         vdev_id_str += "alias 1-{idx} {path}\n".format(idx=i, path=path)
 
     return vdev_id_str
+
 
 ###############################################################################
 # Name: alias_pro4
