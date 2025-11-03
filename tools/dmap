@@ -975,36 +975,6 @@ def alias_hl15_beast_romed8(server, phy_order):
 		sys.exit(1)
 	first_n = int(m.group(1))
 	base = 1 if 1 <= first_n <= 4 else 5
-	block = set(range(base, base + 4))
-
-	# Filter each controller to the selected block (keep order by port)
-	def filter_block(paths):
-		kept = []
-		for p in paths:
-			mm = re.search(r"-ata-(\d+)(?:\.0)?$", p)
-			if not mm:
-				continue
-			n = int(mm.group(1))
-			if n in block:
-				kept.append((n, p))
-		kept.sort(key=lambda t: t[0])
-		return [p for _, p in kept]
-
-	sata0_block = filter_block(sata0_paths)
-	sata1_block = filter_block(sata1_paths)
-
-	# Require 4 usable ports per controller within the chosen block
-	if len(sata0_block) < 4:
-		log("!! ERROR !! Controller {a} exposes only {n} ata ports in block {b}-{e}. Need 4. Found: {lst}".format(
-			a=sata0, n=len(sata0_block), b=base, e=base+3,
-			lst=", ".join(os.path.basename(p) for p in sata0_block)))
-		sys.exit(1)
-	if len(sata1_block) < 4:
-		log("!! ERROR !! Controller {a} exposes only {n} ata ports in block {b}-{e}. Need 4. Found: {lst}".format(
-			a=sata1, n=len(sata1_block), b=base, e=base+3,
-			lst=", ".join(os.path.basename(p) for p in sata1_block)))
-		sys.exit(1)
-
 	port_range = range(base, base + 4)
 
 	for i, port in enumerate(port_range, start=16):
