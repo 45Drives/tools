@@ -1,3 +1,10 @@
+45drives-tools (4.0.22-1bookworm) bookworm; urgency=medium
+
+  * Fixes dmap issue for HL15_BEAST with ROMED8-2T mobo -> Need to have at least
+    1 ssd inserted for this to work reliably
+
+ -- Jordan Keough <jkeough@45drives.com>  Mon, 03 Nov 2025 09:08:38 -0400
+
 45drives-tools (4.0.21-1bookworm) bookworm; urgency=medium
 
   * Fixes HL15_BEAST drive mapping with ProArt mobo
