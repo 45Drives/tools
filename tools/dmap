@@ -978,10 +978,10 @@ def alias_hl15_beast_romed8(server, phy_order):
 	port_range = range(base, base + 4)
 
 	for i, port in enumerate(port_range, start=16):
-		vdev_id_str += f"alias 1-{i} /dev/disk/by-path/pci-{sata0}-ata-{port}"
+		vdev_id_str += f"alias 1-{i} /dev/disk/by-path/pci-{sata0}-ata-{port}\n"
 
 	for i, port in enumerate(port_range, start=20):
-		vdev_id_str += f"alias 1-{i} /dev/disk/by-path/pci-{sata1}-ata-{port}"
+		vdev_id_str += f"alias 1-{i} /dev/disk/by-path/pci-{sata1}-ata-{port}\n"
 
 	return vdev_id_str
 
