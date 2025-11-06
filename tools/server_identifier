@@ -889,7 +889,10 @@ def serial_check():
 		with open('/sys/class/dmi/id/chassis_version', 'r') as file:
 			pn = file.read().rstrip('\n')
 		serial_result["Product Part Number"] = pn
-		serial_result["Product Name"] = "Storinator"  # safe default to avoid KeyError later
+		if pn in ["HL4", "HL8", "HL15", "HL15_BEAST"]:
+			serial_result["Product Name"] = "HomeLab-" + pn
+		else:
+			serial_result["Product Name"] = "Storinator"  # safe default to avoid KeyError later
 		return serial_result
 
 	ipmi_result = subprocess.Popen(["ipmitool","fru","print","0"],stdout=subprocess.PIPE,universal_newlines=True).stdout
