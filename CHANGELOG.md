@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.19-2
+## 45drives-tools 4.0.20-1
 
-* Forgot to merge some changes
+* Fix aliasing for HomeLab-HL15_BEAST with serialization stored in DMI
