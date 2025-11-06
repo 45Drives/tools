@@ -4,6 +4,31 @@
 
  -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 06 Nov 2025 07:22:57 -0400
 
+45drives-tools (4.0.23-1bookworm) bookworm; urgency=medium
+
+  * Fixes missing newline delimiter for ssd mapping in hl15beast_romed8
+
+ -- Jordan Keough <jkeough@45drives.com>  Mon, 03 Nov 2025 10:55:48 -0400
+
+45drives-tools (4.0.22-1bookworm) bookworm; urgency=medium
+
+  * Fixes dmap issue for HL15_BEAST with ROMED8-2T mobo -> Need to have at least
+    1 ssd inserted for this to work reliably
+
+ -- Jordan Keough <jkeough@45drives.com>  Mon, 03 Nov 2025 09:08:38 -0400
+
+45drives-tools (4.0.21-1bookworm) bookworm; urgency=medium
+
+  * Fixes HL15_BEAST drive mapping with ProArt mobo
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 03 Oct 2025 05:24:04 -0300
+
+45drives-tools (4.0.20-1bookworm) bookworm; urgency=medium
+
+  * Fixes infer_homelab_model func in server_identifer
+
+ -- Jordan Keough <jkeough@45drives.com>  Wed, 24 Sep 2025 06:18:04 -0300
+
 45drives-tools (4.0.19-2bookworm) bookworm; urgency=medium
 
   * Forgot to merge some changes
