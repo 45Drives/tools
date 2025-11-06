@@ -1,3 +1,9 @@
+45drives-tools (4.0.24-1jammy) jammy; urgency=medium
+
+  * Fix aliasing for HomeLab-HL15_BEAST with serialization stored in DMI
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 06 Nov 2025 08:01:17 -0400
+
 45drives-tools (4.0.23-1jammy) jammy; urgency=medium
 
   * Fixes missing newline delimiter for ssd mapping in hl15beast_romed8
