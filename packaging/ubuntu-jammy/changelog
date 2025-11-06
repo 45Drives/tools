@@ -1,3 +1,9 @@
+45drives-tools (4.0.20-1jammy) jammy; urgency=medium
+
+  * Fix aliasing for HomeLab-HL15_BEAST with serialization stored in DMI
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 06 Nov 2025 07:22:57 -0400
+
 45drives-tools (4.0.19-2jammy) jammy; urgency=medium
 
   * Forgot to merge some changes
