@@ -1,3 +1,9 @@
+45drives-tools (4.0.25-1bookworm) bookworm; urgency=medium
+
+  * Fix HL15 BEAST drive order for SSDs
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 10 Nov 2025 12:42:53 -0400
+
 45drives-tools (4.0.24-1bookworm) bookworm; urgency=medium
 
   * Fix aliasing for HomeLab-HL15_BEAST with serialization stored in DMI
