@@ -508,41 +508,19 @@ def create_vdev_id(server):
 			log("!! ERROR !! No HBA found for HL15_BEAST")
 			sys.exit(1)
 		mobo_name = server.get("Motherboard", {}).get("Product Name", "")
-		# Normalize
 		mobo_name_norm = (mobo_name or "").upper()
-		if "PROART X870E-CREATOR WIFI".upper() in mobo_name_norm:			
-   			# 23 off the HBA
-			model = server["HBA"][0]["Model"]
+		if len(server["HBA"]) > 0 and server["HBA"][0]["Model"] in phy_order and len(phy_order[server["HBA"][0]["Model"]]) >= 24:
 			bus   = server["HBA"][0]["Bus Address"]
-			count = 23
-			if model in ["9600-24i", "9600-16i", "9361-16i", "9361-24i"]:
-				log("!! ERROR !! Unexpected HBA model for HL15_BEAST (ProArt path): {m}".format(m=model))
-				sys.exit(1)
-			if model not in phy_order:
-				log("!! ERROR !! Unknown HBA model '{m}' for HL15_BEAST (ProArt path)".format(m=model))
-				sys.exit(1)
-			# for j in range(count):
-			# 	p = phy_order[model][j]
-			if model == "SAS9305-24i":
-				# Reorder last two x4 groups; keep PHY 20 at alias 1-20 (link down on this host)
-				override = [
-					2,3,1,0,    # 1-1..1-4
-					6,7,5,4,    # 1-5..1-8
-					18,19,17,16,# 1-9..1-12
-					22,23,21,   # 1-13..1-15
-					8,9,10,11,12,13,14,15  # 1-16..1-23
-				]
-			else:
-				override = phy_order[model][:count]
-			for j, p in enumerate(override[:count]):
-				vdev_id_str += "alias 1-{idx} /dev/disk/by-path/pci-{addr}-sas-phy{phy}-lun-0\n".format(
-					idx=j+1, addr=bus, phy=p)
+			hba_phy_order = phy_order[server["HBA"][0]["Model"]]
+			beast_phy_order = hba_phy_order[0:15] + [*reversed(hba_phy_order[16:20])] + [*reversed(hba_phy_order[20:24])]
+			for i, p in enumerate(beast_phy_order, start=1):
+				vdev_id_str += f"alias 1-{i} /dev/disk/by-path/pci-{bus}-sas-phy{p}-lun-0\n"
 			return vdev_id_str
 		elif "ROMED8-2T" in mobo_name_norm:
 			# 15 via HBA, last 8 via SATA
 			return alias_hl15_beast_romed8(server, phy_order)
 		else:
-			log("!! ERROR !! Unsupported motherboard for HL15_BEAST: {mobo}".format(mobo=mobo_name))
+			log("!! ERROR !! Unsupported motherboard / HBA for HL15_BEAST: {mobo}".format(mobo=mobo_name))
 			log("           Supported: ProArt X870E-CREATOR WIFI, ROMED8-2T")
 			sys.exit(1)
 		return vdev_id_str

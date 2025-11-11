@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.24-1
+## 45drives-tools 4.0.25-1
 
-* Fix aliasing for HomeLab-HL15_BEAST with serialization stored in DMI
+* Fix HL15 BEAST drive order for SSDs
