@@ -7,10 +7,14 @@ ENV{DEVTYPE}=="disk", ENV{DISK_HANDLED_BY_UBM}=="1", GOTO="68-vdev_end"
 
 ENV{DEVTYPE}=="disk", IMPORT{program}="/usr/lib/udev/vdev_id_45drives -d %k -c /etc/vdev_id.conf"
 
-KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_PATH}"
-KERNEL=="*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_ALT_PATH}"
-KERNEL=="*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_PATH}-part%n"
-KERNEL=="*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_ALT_PATH}-part%n"
+KERNEL=="sd*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_PATH}"
+KERNEL=="sd*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_ALT_PATH}"
+KERNEL=="nvme*n[0-9]|nvme*n[0-9][0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_PATH}"
+KERNEL=="nvme*n[0-9]|nvme*n[0-9][0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_ALT_PATH}"
+KERNEL=="sd*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_PATH}-part%n"
+KERNEL=="sd*[0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_ALT_PATH}-part%n"
+KERNEL=="nvme*n*p[0-9]|nvme*n*p[0-9][0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_PATH}-part%n"
+KERNEL=="nvme*n*p[0-9]|nvme*n*p[0-9][0-9]", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_ALT_PATH}-part%n"
 KERNEL=="dm-[0-9]*", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_PATH}"
 KERNEL=="dm-[0-9]*", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_ALT_PATH}"
 

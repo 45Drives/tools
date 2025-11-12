@@ -1,3 +1,4 @@
-## 45drives-tools 4.0.25-1
+## 45drives-tools 4.0.26-1
 
-* Fix HL15 BEAST drive order for SSDs
+* Add Proxinator VM2 support
+* Add vdev aliasing support for native NVMe

@@ -3,7 +3,9 @@
 ### Supported OS
   - CentOS 7.X
   - Rocky Linux 8.X
+  - Rocky Linux 9.X
   - Ubuntu 20.X.X
+  - Ubuntu 22.X.X
 
 ### Contents
   - Drive Aliasing
