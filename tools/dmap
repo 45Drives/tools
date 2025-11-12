@@ -363,8 +363,8 @@ def alias_by_path(chassis_size, motherboard_product_name):
 	lut_chassissize_mobo_to_aliases = {
 		"VM2": {
 			"ME03-CE0-000": [
-				("1-1", "pci-0000:43:00.0-nvme-1"),
-				("1-2", "pci-0000:42:00.0-nvme-1")
+				("1-1", "pci-0000:42:00.0-nvme-1"),
+				("1-2", "pci-0000:43:00.0-nvme-1")
 			]
 		}
 	}
