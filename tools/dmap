@@ -21,6 +21,7 @@ import shlex
 import shutil
 from optparse import OptionParser
 import glob
+import itertools
 
 g_quiet = False
 g_enable_jbod = False
@@ -356,7 +357,31 @@ def hwraid_map(HBA,server):
 		alias_ordered_list.append(device_id_list[entry])
 
 	return alias_ordered_list
-	
+
+
+def alias_by_path(chassis_size, motherboard_product_name):
+	lut_chassissize_mobo_to_aliases = {
+		"VM2": {
+			"ME03-CE0-000": [
+				("1-1", "pci-0000:43:00.0-nvme-1"),
+				("1-2", "pci-0000:42:00.0-nvme-1")
+			]
+		}
+	}
+
+	if chassis_size not in lut_chassissize_mobo_to_aliases:
+		log(f"/opt/45drives/tools/dmap: !! ERROR !! Alias style 'BYPATH' does not support chassis size '{chassis_size}'")
+		log(f"                          valid chassis sizes: {lut_chassissize_mobo_to_aliases.keys()}")
+		sys.exit(1)
+	if motherboard_product_name not in lut_chassissize_mobo_to_aliases[chassis_size]:
+		log(f"/opt/45drives/tools/dmap: !! ERROR !! Alias style 'BYPATH' with chassis size '{chassis_size}' does not support motherboard '{motherboard_product_name}'")
+		log(f"                          valid product names: {lut_chassissize_mobo_to_aliases[chassis_size].keys()}")
+		sys.exit(1)
+
+	return "\n".join(
+		itertools.starmap(lambda alias, path: f"alias {alias} /dev/disk/by-path/{path}",
+					 lut_chassissize_mobo_to_aliases[chassis_size][motherboard_product_name])) + "\n"
+
 
 ###############################################################################
 # Name: create_vdev_id
@@ -399,6 +424,12 @@ def hwraid_map(HBA,server):
 #       ints used as indexes into the phy_order dict's arrays. 
 ###############################################################################
 def create_vdev_id(server):
+	version = get_version()
+	vdev_id_str = "# This file was generated using dmap {v} (/opt/45drives/tools/dmap).\n".format(v=version)
+
+	if server["Alias Style"] == "BYPATH":
+		return vdev_id_str + alias_by_path(server["Chassis Size"], server["Motherboard"]["Product Name"])
+
 	phy_order = {
 		"HBA 9405W-16i" : [9,11,13,15,  8,10,12,14,  1,3,5,7,  0,2,4,6],
 		"HBA 9400-16i" : [9,11,13,15,  8,10,12,14,  1,3,5,7,  0,2,4,6],
@@ -497,8 +528,6 @@ def create_vdev_id(server):
 
 	log("")
 	# We have a valid combination of alias styles and chassis sizes.
-	version = get_version()
-	vdev_id_str = "# This file was generated using dmap {v} (/opt/45drives/tools/dmap).\n".format(v=version)
  
  	# HL15_BEAST: two supported motherboard paths
 	#  - ProArt X870E-CREATOR WIFI: map all 23 via the single HBA (24i)

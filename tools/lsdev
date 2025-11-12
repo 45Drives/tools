@@ -382,6 +382,9 @@ def build_server(options):
   		"STUDIO":{
 			"STUDIO8":[4,4]
 		},
+		"BYPATH": {
+			"VM2":[2],
+		}
 	}
 	CURRENT_ROW = 0
 	DRIVE_COUNT = 0
