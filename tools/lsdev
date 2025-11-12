@@ -45,7 +45,7 @@ class model_serial_ind:
 def count_partitions(path):
 	partitions = open("/proc/partitions", mode='r')
 	blk_name = os.path.basename(path)
-	return len(re.findall(blk_name + "\d{1,2}",partitions.read(),re.MULTILINE))
+	return len(re.findall(blk_name + "\d{1,2}|" + blk_name + "p\d{1,2}",partitions.read(),re.MULTILINE))
 
 ################################################################################
 # function name: only_flag_is_json
