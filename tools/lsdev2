@@ -1,0 +1,179 @@
+#!/usr/bin/env python3
+
+from typing import Iterable, Union, Tuple
+from abc import ABC, abstractmethod
+import json
+import itertools
+from pathlib import Path
+
+
+ROW_SLOT_COUNT_LUT = {
+    "H16": {
+        "AV15": [23],
+        "Q30": [15, 23],
+        "S45": [15, 15, 23],
+        "XL60": [15, 15, 15, 23],
+    },
+    "H32": {"Q30": [15, 32], "S45": [15, 15, 32], "XL60": [15, 15, 15, 32]},
+    "STORINATOR": {
+        "AV15": [15],
+        "Q30": [15, 15],
+        "S45": [15, 15, 15],
+        "XL60": [15, 15, 15, 15],
+        "C8": [4, 4],
+        "MI4": [4],
+        "HL15": [15],
+    },
+    "STORINATORUBM": {"MI4_UBM": [4], "C8_UBM": [8]},
+    "HOMELAB": {"HL15_BEAST": [23], "HL15": [15], "HL4": [4], "HL8": [4, 4]},
+    "PROFESSIONAL": {"PRO15": [15], "PRO4": [4], "PRO8": [4, 4]},
+    "STORNADO": {"AV15": [32], "F32": [32]},
+    "2USTORNADO": {"2U": [32]},
+    "F2STORNADO": {
+        "F2": [32],
+        "F16": [16],
+        "VM4": [4],
+        "VM8": [8],
+        "VM16": [16],
+        "VM32": [32],
+    },
+    "AV15-BASE": {"AV15": [15]},
+    "DESTROYINATOR": {
+        "AV15": [15],
+        "Q30": [15, 15],
+        "S45": [15, 15, 15],
+        "XL60": [15, 15, 15, 15],
+        "F16": [16],
+    },
+    "F8": {"F8X1": [20], "F8X2": [20, 20], "F8X3": [20, 20, 20]},
+    "SSG-6048R-E1CR24H": {"SSG-6048R-E1CR24H": [4, 4, 4, 4, 4, 4]},
+    "HBA16": {"1X": [16], "2X": [16, 16], "3X": [16, 16, 16], "4X": [16, 16, 16, 16]},
+    "STUDIO": {"STUDIO8": [4, 4]},
+    "BYPATH": {
+        "VM2": [2],
+    },
+}
+
+
+class Drive:
+    def __init__(self, dev_path: str):
+        self._dev_path = dev_path
+
+    def dev_path(self) -> str:
+        return self._dev_path
+
+
+class DriveDatum(ABC):
+    @staticmethod
+    @abstractmethod
+    def get(drive: Drive) -> str:
+        pass
+
+    header: str
+    json_key: str
+
+
+class DriveDevPath(DriveDatum):
+    header = "Dev"
+    json_key = "dev"
+
+    def get(drive: Drive):
+        return drive.dev_path()
+
+
+def get_drive(bay_id: str) -> Union[Drive, None]:
+    alias_path = Path(f"/dev/{bay_id}")
+    if alias_path.exists():
+        return Drive(alias_path.resolve())
+    return None
+
+
+class BoxCharacters:
+    vt = "|"
+    hz = "-"
+    ctl = "+"
+    ctr = "+"
+    cbl = "+"
+    cbr = "+"
+    tt = "+"
+    tr = "+"
+    tb = "+"
+    tl = "+"
+
+
+def slot_table(
+    drive_row_slot_counts: Iterable[int],
+    drive_data: Iterable[DriveDatum],
+    box: BoxCharacters = BoxCharacters,
+) -> str:
+    """
+    Print transpose of server slots grid
+
+    :param row_slot_counts: Description
+    :type row_slot_counts: Iterable[int]
+    :param drive_data: Description
+    :type drive_data: Iterable[DriveDatum]
+    :return: Description
+    :rtype: str
+    """
+    slot_row_count = len(drive_row_slot_counts)
+    max_row_slot_count = max(drive_row_slot_counts)
+    data_table = [[""] * max_row_slot_count] * slot_row_count
+    col_headers = [""] * slot_row_count
+    col_padding = [0] * slot_row_count
+    for slot_row_index, slot_count in enumerate(drive_row_slot_counts):
+        col_headers[slot_row_index] = (
+            f"Row {slot_row_index + 1} ID ({','.join(map(lambda d: d.header, drive_data))})"
+        )
+        for slot_index in range(slot_count):
+            bay_id = f"{slot_row_index + 1}-{slot_index + 1}"
+            drive = get_drive(bay_id=bay_id)
+            info = (
+                ",".join(map(lambda d: d.get(drive), drive_data))
+                if drive is not None
+                else "-"
+            )
+            data_table[slot_row_index][slot_index] = f"{bay_id} ({info})"
+        col_padding[slot_row_index] = max(
+            map(len, [col_headers[slot_row_index]] + data_table[slot_row_index])
+        )
+    table_header = f"{'Storage Disk Info':<{sum(col_padding) + len(col_padding) - 1}}"
+    table_col_headers = f" {box.vt} ".join(
+        itertools.starmap(lambda i, header: f"{header:<{col_padding[i]}}", enumerate(col_headers))
+    )
+    table_rows = []
+    for slot_index in range(max_row_slot_count):
+        table_rows.append(
+            f" {box.vt} ".join(
+                f"{info[slot_index]:<{col_padding[row_index]}}"
+                for row_index, info in enumerate(data_table)
+            )
+        )
+    max_row_width = max(map(len,[table_header] + [table_col_headers] + table_rows))
+    return "\n".join([
+        box.ctl + box.hz * (max_row_width + 2) + box.ctr,
+        box.vt + f" {table_header:<{max_row_width}} " + box.vt,
+        box.tl + box.hz * (max_row_width + 2) + box.tr,
+        *[box.vt + f" {row:<{max_row_width}} " + box.vt for row in table_rows],
+        box.cbl + box.hz * (max_row_width + 2) + box.cbr,
+    ])
+
+
+def get_alias_style_and_chassis_size() -> Tuple[str, str]:
+    try:
+        with open("/etc/45drives/server_info/server_info.json", "r") as f:
+            j = json.load(f)
+            return j["Alias Style"], j["Chassis Size"]
+    except OSError as e:
+        print("Unable to open server_info.json to determine model:", e)
+        print("Run 'dmap'")
+
+
+def main():
+    alias_style, chassis_size = get_alias_style_and_chassis_size()
+    print(slot_table(ROW_SLOT_COUNT_LUT[alias_style][chassis_size], [DriveDevPath]))
+    pass
+
+
+if __name__ == "__main__":
+    main()
