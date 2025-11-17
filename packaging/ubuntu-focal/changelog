@@ -1,3 +1,10 @@
+45drives-tools (4.0.26-1focal) focal; urgency=medium
+
+  * Add Proxinator VM2 support
+  * Add vdev aliasing support for native NVMe
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Wed, 12 Nov 2025 12:56:51 -0400
+
 45drives-tools (4.0.25-1focal) focal; urgency=medium
 
   * Fix HL15 BEAST drive order for SSDs
