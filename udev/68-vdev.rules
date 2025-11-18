@@ -5,7 +5,9 @@
 # skip these rules if disk was handled by 67-ubm.rules
 ENV{DEVTYPE}=="disk", ENV{DISK_HANDLED_BY_UBM}=="1", GOTO="68-vdev_end"
 
+ENV{DEVTYPE}=="disk", ENV{DISK_HANDLED_BY_CUSTOM_ALIASES}=="1", GOTO="68-vdev_skip_vdev_id"
 ENV{DEVTYPE}=="disk", IMPORT{program}="/usr/lib/udev/vdev_id_45drives -d %k -c /etc/vdev_id.conf"
+LABEL="68-vdev_skip_vdev_id"
 
 KERNEL=="sd*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_PATH}"
 KERNEL=="sd*[!0-9]", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", SYMLINK+="$env{ID_VDEV_ALT_PATH}"
