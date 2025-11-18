@@ -1,3 +1,9 @@
+45drives-tools (4.0.27-1jammy) jammy; urgency=medium
+
+  * custom aliases through looking at parent pcieport device for Proxinator VM2
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 18 Nov 2025 13:56:41 -0400
+
 45drives-tools (4.0.26-1jammy) jammy; urgency=medium
 
   * Add Proxinator VM2 support
