@@ -1,3 +1,9 @@
+45drives-tools (4.0.28-1focal) focal; urgency=medium
+
+  * swap phy cable order for 24i HBA BEAST SSDs
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 24 Nov 2025 11:37:18 -0400
+
 45drives-tools (4.0.27-1focal) focal; urgency=medium
 
   * custom aliases through looking at parent pcieport device for Proxinator VM2

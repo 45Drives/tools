@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.27-1
+## 45drives-tools 4.0.28-1
 
-* custom aliases through looking at parent pcieport device for Proxinator VM2
+* swap phy cable order for 24i HBA BEAST SSDs
