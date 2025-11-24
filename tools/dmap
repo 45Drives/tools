@@ -541,7 +541,7 @@ def create_vdev_id(server):
 		if len(server["HBA"]) > 0 and server["HBA"][0]["Model"] in phy_order and len(phy_order[server["HBA"][0]["Model"]]) >= 24:
 			bus   = server["HBA"][0]["Bus Address"]
 			hba_phy_order = phy_order[server["HBA"][0]["Model"]]
-			beast_phy_order = hba_phy_order[0:15] + [*reversed(hba_phy_order[16:20])] + [*reversed(hba_phy_order[20:24])]
+			beast_phy_order = hba_phy_order[0:15] + [*reversed(hba_phy_order[20:24])] + [*reversed(hba_phy_order[16:20])]
 			for i, p in enumerate(beast_phy_order, start=1):
 				vdev_id_str += f"alias 1-{i} /dev/disk/by-path/pci-{bus}-sas-phy{p}-lun-0\n"
 			return vdev_id_str
