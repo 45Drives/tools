@@ -984,6 +984,13 @@ def alias_hl15_beast_romed8(server, phy_order):
 	base = 1 if 1 <= first_n <= 4 else 5
 	port_range = range(base, base + 4)
 
+	if server["Motherboard"]["Product Name"] == "ROMED8-2T":
+		# not /BCM
+		# flip order of sata addresses and ports
+		# need to check with ROMED8-2T/BCM if ports also need to be flipped
+		sata0, sata1 = sata1, sata0
+		port_range = [*reversed(port_range)]
+
 	for i, port in enumerate(port_range, start=16):
 		vdev_id_str += f"alias 1-{i} /dev/disk/by-path/pci-{sata0}-ata-{port}\n"
 
