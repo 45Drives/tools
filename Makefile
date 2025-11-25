@@ -23,6 +23,7 @@ install:
 	install -m 644 -t "$(DESTDIR)/usr/lib/udev/rules.d" \
 		udev/61-flash-io-scheduler.rules \
 		udev/67-ubm.rules \
+		udev/68-0-custom-aliases.rules \
 		udev/68-vdev.rules
 	install -m 644 -t "$(DESTDIR)/opt/45drives/tools" \
 		udev/68-vdev.rules
