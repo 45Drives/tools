@@ -1,4 +1,3 @@
-## 45drives-tools 4.0.29-1
+## 45drives-tools 4.0.30-1
 
-* Flip SSD port order for ROMED8-2T HL15_BEAST
-* Add missing install line for 68-0-custom-aliases.rules UDEV rule
+* Fix udev rule issues affecting /etc/vdev_id.conf

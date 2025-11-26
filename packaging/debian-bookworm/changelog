@@ -1,3 +1,9 @@
+45drives-tools (4.0.30-1bookworm) bookworm; urgency=medium
+
+  * Fix udev rule issues affecting /etc/vdev_id.conf
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Wed, 26 Nov 2025 08:11:51 -0400
+
 45drives-tools (4.0.29-1bookworm) bookworm; urgency=medium
 
   * Flip SSD port order for ROMED8-2T HL15_BEAST
