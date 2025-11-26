@@ -17,14 +17,14 @@ SUBSYSTEMS=="scsi", DRIVERS=="sd", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk|parti
 SUBSYSTEMS=="scsi", DRIVERS=="sd", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk|partition", IMPORT{program}="/opt/45drives/ubm/id_disk %k"
 
 # DISK_HANDLED_BY_UBM environment variable will make udev skip rules in 68-vdev.rules
-ENV{SUBSYSTEM}=="block", ENV{SLOT_NUM}=="?*", ENV{SLOT_NAME}=="?*", ENV{DISK_HANDLED_BY_UBM}="1"
+ACTION=="add", ENV{SUBSYSTEM}=="block", ENV{SLOT_NUM}=="?*", ENV{SLOT_NAME}=="?*", ENV{DISK_HANDLED_BY_UBM}="1"
 
 KERNEL=="?*", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="disk", ENV{SLOT_NAME}=="?*", SYMLINK+="disk/by-vdev/$env{SLOT_NAME}", SYMLINK+="$env{SLOT_NAME}"
 KERNEL=="?*", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="disk", ENV{SLOT_NUM}=="?*", SYMLINK+="disk/by-slot-number/$env{SLOT_NUM}"
 KERNEL=="?*", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{SLOT_NAME}=="?*", SYMLINK+="disk/by-vdev/$env{SLOT_NAME}-part%n", SYMLINK+="$env{SLOT_NAME}-part%n"
 KERNEL=="?*", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="partition", ENV{SLOT_NUM}=="?*", SYMLINK+="disk/by-slot-number/$env{SLOT_NUM}-part%n"
 
-KERNEL=="?*", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="disk", ENV{ID_PATH}=="?*", ENV{SLOT_NAME}=="?*", RUN+="/opt/45drives/ubm/patch_vdev_id_conf $env{SLOT_NAME} $env{ID_PATH}"
+ENV{DISK_HANDLED_BY_UBM}=="1", KERNEL=="?*", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="disk", ENV{ID_PATH}=="?*", ENV{SLOT_NAME}=="?*", RUN+="/opt/45drives/ubm/patch_vdev_id_conf $env{SLOT_NAME} $env{ID_PATH}"
 
 ################################
 # Enclosure (backplane) rules
