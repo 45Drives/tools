@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.30-1
+## 45drives-tools 4.0.31-1
 
-* Fix udev rule issues affecting /etc/vdev_id.conf
+* Updates dmap with proper HL8 slot order
