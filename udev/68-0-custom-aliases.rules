@@ -1,0 +1,18 @@
+#
+# /lib/udev/rules.d/68-0-custom-aliases.rules
+#
+# udev rule definitions for direct cabled 45Drives servers, e.g. Proxinator VM2
+#
+# part of 45drives-tools
+#
+# Authors
+# Josh Boudreau <jboudreau@45drives.com>
+
+SUBSYSTEMS=="pci", DRIVERS=="nvme", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk|partition", IMPORT{program}="/opt/45drives/tools/id_disk_custom_alias %p"
+
+# skip running vdev_id
+ACTION=="add", ENV{SUBSYSTEM}=="block", ENV{ID_VDEV}=="?*", ENV{ID_VDEV_PATH}=="?*", ENV{ID_VDEV_ALT_PATH}=="?*", ENV{DISK_HANDLED_BY_CUSTOM_ALIASES}="1"
+
+ENV{DISK_HANDLED_BY_CUSTOM_ALIASES}=="1", KERNEL=="?*", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="disk", ENV{ID_PATH}=="?*", ENV{ID_VDEV}=="?*", RUN+="/opt/45drives/ubm/patch_vdev_id_conf $env{ID_VDEV} $env{ID_PATH}"
+
+# let 68-vdev.rules handle the rest

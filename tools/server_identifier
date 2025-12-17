@@ -23,7 +23,7 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","HL15_BEAST"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","HL15_BEAST","VM2"]
 
 g_mobo_to_version_lut = {
 	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
@@ -254,6 +254,10 @@ g_product_lut = {
 	"Proxinator-VM32-Enhanced":			[g_mobo_to_version_lut["Better"]  ,0,4,"VM32","F2STORNADO"],
 	"Proxinator-VM32-Turbo":			[g_mobo_to_version_lut["Best"]  ,0,4,"VM32","F2STORNADO"],
 
+	"Proxinator-VM2-Base":				[g_mobo_to_version_lut["Good"]  ,0,0,"VM2","BYPATH"],
+	"Proxinator-VM2-Enhanced":			[g_mobo_to_version_lut["Better"]  ,0,0,"VM2","BYPATH"],
+	"Proxinator-VM2-Turbo":				[g_mobo_to_version_lut["Best"]  ,0,0,"VM2","BYPATH"],
+
 	"Destroyinator-AV15-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,1,"AV15","DESTROYINATOR"],
 	"Destroyinator-AV15-Enhanced-S":	[g_mobo_to_version_lut["Enhanced-S"],0,1,"AV15","DESTROYINATOR"],
 	"Destroyinator-Q30-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,2,"Q30","DESTROYINATOR"],
@@ -369,7 +373,7 @@ def motherboard():
 		exit(1)
 	for line in dmi_result:
 		for field in mobo_dict.keys():
-			regex = re.search("^\s({fld}):\s+(.*)".format(fld=field),line)
+			regex = re.search("^\s+({fld}):\s+(.*)".format(fld=field),line)
 			if regex != None:
 					mobo_dict[regex.group(1)] = regex.group(2)
 
@@ -385,7 +389,7 @@ def motherboard():
 			print("ERROR: ipmitool fru failed to return result.")
 		for line in fru_result:
 			for field in ["Board Mfg", "Board Product", "Board Serial"]:
-				regex = re.search("^\s({fld})\s+:\s+(.*)".format(fld=field),line)
+				regex = re.search("^\s+({fld})\s+:\s+(.*)".format(fld=field),line)
 				if regex != None:
 					if regex.group(1) == "Board Mfg":
 						mobo_dict["Manufacturer"] = regex.group(2)
@@ -889,7 +893,10 @@ def serial_check():
 		with open('/sys/class/dmi/id/chassis_version', 'r') as file:
 			pn = file.read().rstrip('\n')
 		serial_result["Product Part Number"] = pn
-		serial_result["Product Name"] = "Storinator"  # safe default to avoid KeyError later
+		if pn in ["HL4", "HL8", "HL15", "HL15_BEAST"]:
+			serial_result["Product Name"] = "HomeLab-" + pn
+		else:
+			serial_result["Product Name"] = "Storinator"  # safe default to avoid KeyError later
 		return serial_result
 
 	ipmi_result = subprocess.Popen(["ipmitool","fru","print","0"],stdout=subprocess.PIPE,universal_newlines=True).stdout

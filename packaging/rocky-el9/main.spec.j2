@@ -77,6 +77,22 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Wed Nov 26 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.30-1
+- Fix udev rule issues affecting /etc/vdev_id.conf
+* Tue Nov 25 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.29-1
+- Flip SSD port order for ROMED8-2T HL15_BEAST
+- Add missing install line for 68-0-custom-aliases.rules UDEV rule
+* Mon Nov 24 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.28-1
+- swap phy cable order for 24i HBA BEAST SSDs
+* Tue Nov 18 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.27-1
+- custom aliases through looking at parent pcieport device for Proxinator VM2
+* Wed Nov 12 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.26-1
+- Add Proxinator VM2 support
+- Add vdev aliasing support for native NVMe
+* Mon Nov 10 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.25-1
+- Fix HL15 BEAST drive order for SSDs
+* Thu Nov 06 2025 Joshua Boudreau <jboudreau@45drives.com> 4.0.24-1
+- Fix aliasing for HomeLab-HL15_BEAST with serialization stored in DMI
 * Mon Nov 03 2025 Jordan Keough <jkeough@45drives.com> 4.0.23-1
 - Fixes missing newline delimiter for ssd mapping in hl15beast_romed8
 * Mon Nov 03 2025 Jordan Keough <jkeough@45drives.com> 4.0.22-1

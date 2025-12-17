@@ -1,3 +1,47 @@
+45drives-tools (4.0.30-1focal) focal; urgency=medium
+
+  * Fix udev rule issues affecting /etc/vdev_id.conf
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Wed, 26 Nov 2025 08:11:51 -0400
+
+45drives-tools (4.0.29-1focal) focal; urgency=medium
+
+  * Flip SSD port order for ROMED8-2T HL15_BEAST
+  * Add missing install line for 68-0-custom-aliases.rules UDEV rule
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 25 Nov 2025 11:55:35 -0400
+
+45drives-tools (4.0.28-1focal) focal; urgency=medium
+
+  * swap phy cable order for 24i HBA BEAST SSDs
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 24 Nov 2025 11:37:18 -0400
+
+45drives-tools (4.0.27-1focal) focal; urgency=medium
+
+  * custom aliases through looking at parent pcieport device for Proxinator VM2
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 18 Nov 2025 13:56:41 -0400
+
+45drives-tools (4.0.26-1focal) focal; urgency=medium
+
+  * Add Proxinator VM2 support
+  * Add vdev aliasing support for native NVMe
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Wed, 12 Nov 2025 12:56:51 -0400
+
+45drives-tools (4.0.25-1focal) focal; urgency=medium
+
+  * Fix HL15 BEAST drive order for SSDs
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 10 Nov 2025 12:42:53 -0400
+
+45drives-tools (4.0.24-1focal) focal; urgency=medium
+
+  * Fix aliasing for HomeLab-HL15_BEAST with serialization stored in DMI
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 06 Nov 2025 08:01:17 -0400
+
 45drives-tools (4.0.23-1focal) focal; urgency=medium
 
   * Fixes missing newline delimiter for ssd mapping in hl15beast_romed8

@@ -3,7 +3,7 @@
     "name": "45drives-tools",
     "title": "45drives-tools",
     "description": "cli tools for 45Drives server products",
-    "version": "4.0.23",
+    "version": "4.0.30",
     "build_number": "1",
     "stable": true,
     "author": "Brett Kelly <bkelly@45drives.com>",
@@ -27,7 +27,8 @@
             "pciutils",
             "hdparm",
             "udev",
-            "lsscsi"
+            "lsscsi",
+            "python3-pyudev"
         ],
         "rocky_common": [
             "ipmitool",
@@ -37,7 +38,8 @@
             "python3",
             "pciutils",
             "hdparm",
-            "lsscsi"
+            "lsscsi",
+            "python3-pyudev"
         ]
     },
     "builds": [
@@ -73,7 +75,7 @@
     ],
     "changelog": {
         "urgency": "medium",
-        "version": "4.0.23",
+        "version": "4.0.30",
         "build_number": "1",
         "date": null,
         "packager": "Brett Kelly <bkelly@45drives.com>",
