@@ -840,7 +840,7 @@ def get_sata_pci_addresses():
 ###############################################################################
 def alias_hl4():
     vdev_id_str = ""
-    hl4_order = [1, 2, 3, 4]
+    hl4_order = [4, 3, 2, 1]
 
     # Fetch SATA addresses dynamically
     sata_addresses = get_sata_pci_addresses()
