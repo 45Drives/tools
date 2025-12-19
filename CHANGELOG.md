@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.31-1
+## 45drives-tools 4.0.32-1
 
-* Updates dmap with proper HL8 slot order
+* Hotfix - reverses hl4 slot order

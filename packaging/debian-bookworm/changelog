@@ -1,3 +1,9 @@
+45drives-tools (4.0.32-1bookworm) bookworm; urgency=medium
+
+  * Hotfix - reverses hl4 slot order
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 19 Dec 2025 04:18:58 -0400
+
 45drives-tools (4.0.31-1bookworm) bookworm; urgency=medium
 
   * Updates dmap with proper HL8 slot order
