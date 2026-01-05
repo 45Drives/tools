@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.32-1
+## 45drives-tools 4.0.33-1
 
-* Hotfix - reverses hl4 slot order
+* Updates ubm udev trigger logic to run when 'change' actions trigger in addition to 'add' actions
