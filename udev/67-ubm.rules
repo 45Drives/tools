@@ -17,7 +17,7 @@ SUBSYSTEMS=="scsi", DRIVERS=="sd", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk|parti
 SUBSYSTEMS=="scsi", DRIVERS=="sd", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk|partition", IMPORT{program}="/opt/45drives/ubm/id_disk %k"
 
 # DISK_HANDLED_BY_UBM environment variable will make udev skip rules in 68-vdev.rules
-ACTION=="add", ENV{SUBSYSTEM}=="block", ENV{SLOT_NUM}=="?*", ENV{SLOT_NAME}=="?*", ENV{DISK_HANDLED_BY_UBM}="1"
+ACTION=="add|change", ENV{SUBSYSTEM}=="block", ENV{SLOT_NUM}=="?*", ENV{SLOT_NAME}=="?*", ENV{DISK_HANDLED_BY_UBM}="1"
 
 KERNEL=="?*", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="disk", ENV{SLOT_NAME}=="?*", SYMLINK+="disk/by-vdev/$env{SLOT_NAME}", SYMLINK+="$env{SLOT_NAME}"
 KERNEL=="?*", ENV{SUBSYSTEM}=="block", ENV{DEVTYPE}=="disk", ENV{SLOT_NUM}=="?*", SYMLINK+="disk/by-slot-number/$env{SLOT_NUM}"
