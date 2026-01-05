@@ -23,7 +23,7 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","HL15_BEAST","VM2"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","HL15_BEAST","F16","VM2"]
 
 g_mobo_to_version_lut = {
 	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
@@ -267,8 +267,10 @@ g_product_lut = {
 	"Destroyinator-XL60-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,4,"XL60","DESTROYINATOR"],
 	"Destroyinator-XL60-Enhanced-S":	[g_mobo_to_version_lut["Enhanced-S"]  ,0,4,"XL60","DESTROYINATOR"],
 
-	"Destroyinator-F16-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,4,"F16","F2STORNADO"],
+ 	"Destroyinator-F16-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,4,"F16","F2STORNADO"],
 	"Destroyinator-F16-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"],0,4,"F16","F2STORNADO"],
+	"Destroyinator-F16-Turbo":			[g_mobo_to_version_lut["Turbo"],0,4,"F16","F2STORNADO"],
+	"Destroyinator-F16-Turbo-G":		[g_mobo_to_version_lut["Turbo-G"],0,4,"F16","F2STORNADO"],
  
 	"Studio-STUDIO8":             		[g_mobo_to_version_lut["Turbo"],0,0,"STUDIO8","STUDIO"],
 

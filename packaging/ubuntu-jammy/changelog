@@ -1,3 +1,15 @@
+45drives-tools (4.0.32-1jammy) jammy; urgency=medium
+
+  * Hotfix - reverses hl4 slot order
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 19 Dec 2025 04:18:58 -0400
+
+45drives-tools (4.0.31-1jammy) jammy; urgency=medium
+
+  * Updates dmap with proper HL8 slot order
+
+ -- Jordan Keough <jkeough@45drives.com>  Wed, 17 Dec 2025 10:19:47 -0400
+
 45drives-tools (4.0.30-1jammy) jammy; urgency=medium
 
   * Fix udev rule issues affecting /etc/vdev_id.conf
