@@ -1,3 +1,9 @@
+45drives-tools (4.0.34-1jammy) jammy; urgency=medium
+
+  * Fixes nvme drive mapping on ubuntu 20
+
+ -- Jordan Keough <jkeough@45drives.com>  Thu, 08 Jan 2026 10:23:38 -0400
+
 45drives-tools (4.0.33-1jammy) jammy; urgency=medium
 
   * Updates ubm udev trigger logic to run when 'change' actions trigger in addition
