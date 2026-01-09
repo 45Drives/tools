@@ -1,3 +1,10 @@
+45drives-tools (4.0.35-1bookworm) bookworm; urgency=medium
+
+  * Updates loadtest to properly detect non-standard custom nvme aliasing paths (as
+    seen on ubu20 systems)
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 09 Jan 2026 05:45:27 -0400
+
 45drives-tools (4.0.34-1bookworm) bookworm; urgency=medium
 
   * Fixes nvme drive mapping on ubuntu 20

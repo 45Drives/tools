@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.34-1
+## 45drives-tools 4.0.35-1
 
-* Fixes nvme drive mapping on ubuntu 20
+* Updates loadtest to properly detect non-standard custom nvme aliasing paths (as seen on ubu20 systems)
