@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.35-1
+## 45drives-tools 4.0.36-1
 
-* Updates loadtest to properly detect non-standard custom nvme aliasing paths (as seen on ubu20 systems)
+* Merges nvme drive mapping and loadtest fixes to handle custom nvme aliasing paths as seen on ubu20 systems
