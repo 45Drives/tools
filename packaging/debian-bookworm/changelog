@@ -1,3 +1,10 @@
+45drives-tools (4.0.36-2bookworm) bookworm; urgency=medium
+
+  * Missed a commit in last merge, now has full fix for virtual nvme block devices
+    (ubu20)
+
+ -- Jordan Keough <jkeough@45drives.com>  Thu, 22 Jan 2026 06:06:59 -0400
+
 45drives-tools (4.0.36-1bookworm) bookworm; urgency=medium
 
   * Merges nvme drive mapping and loadtest fixes to handle custom nvme aliasing paths

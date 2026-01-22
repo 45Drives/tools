@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.36-1
+## 45drives-tools 4.0.36-2
 
-* Merges nvme drive mapping and loadtest fixes to handle custom nvme aliasing paths as seen on ubu20 systems
+* Missed a commit in last merge, now has full fix for virtual nvme block devices (ubu20)
