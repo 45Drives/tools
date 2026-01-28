@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.36-2
+## 45drives-tools 4.0.37-1
 
-* Missed a commit in last merge, now has full fix for virtual nvme block devices (ubu20)
+* Removes lines preventing dmap from working on HL15

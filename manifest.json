@@ -3,8 +3,8 @@
     "name": "45drives-tools",
     "title": "45drives-tools",
     "description": "cli tools for 45Drives server products",
-    "version": "4.0.36",
-    "build_number": "2",
+    "version": "4.0.37",
+    "build_number": "1",
     "stable": true,
     "author": "Brett Kelly <bkelly@45drives.com>",
     "git_url": "https://github.com/45Drives/ceph-ansible-45d",
@@ -75,8 +75,8 @@
     ],
     "changelog": {
         "urgency": "medium",
-        "version": "4.0.36",
-        "build_number": "2",
+        "version": "4.0.37",
+        "build_number": "1",
         "date": null,
         "packager": "Brett Kelly <bkelly@45drives.com>",
         "changes": []
