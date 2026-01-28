@@ -1278,11 +1278,6 @@ def main():
 		reset_map(conf_path)
 
 	server = get_server_info()
-	
-	if server["Model"] == "HomeLab-HL15":
-		log("dmap is not compatible with HomeLab-HL15 Servers. You can perform device mapping manually using 'dalias'")
-		log("Try running: 'sudo dalias -t HL15'")
-		sys.exit(1)
 
 	warn_hwraid(server)
 
