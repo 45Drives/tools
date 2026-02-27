@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.38-1
+## 45drives-tools 4.0.38-2
 
-* Adds Studio15
+* Rebuilding with added github write perms
