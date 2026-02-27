@@ -23,20 +23,20 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","HL15_BEAST","F16","VM2"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","HL15_BEAST","F16","VM2","2UGW_REV2"]
 
 g_mobo_to_version_lut = {
-	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
-	"Base-B": ["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
-	"Enhanced": ["X11SPL-F","X10SRL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
-	"Enhanced-S":["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
-	"Enhanced-AMD":["H11SSL-i","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
-	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
-	"Turbo-G":["X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
-	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
-	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
-	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"],
- 	"Super": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI"]
+	"Base": ["X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000"],
+	"Base-B": ["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000"],
+	"Enhanced": ["X11SPL-F","X10SRL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000"],
+	"Enhanced-S":["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000"],
+	"Enhanced-AMD":["H11SSL-i","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000"],
+	"Turbo": ["X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000"],
+	"Turbo-G":["X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000"],
+	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000"],
+	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000"],
+	"Best": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000"],
+ 	"Super": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000"]
 }
 
 g_product_lut = {
@@ -45,7 +45,14 @@ g_product_lut = {
 	"Gateway-2UGW-Enhanced":			[g_mobo_to_version_lut["Enhanced"],0,0,"2UGW","2UGW"],
 	"Gateway-2UGW-Enhanced-S":			[g_mobo_to_version_lut["Enhanced"],0,0,"2UGW","2UGW"],
 	"Gateway-2UGW-Turbo-G":				[g_mobo_to_version_lut["Turbo"],0,0,"2UGW","2UGW"],
- 
+ 	
+	"Gateway-2UGW_REV2-Base":				[g_mobo_to_version_lut["Base"],0,0,"2UGW_REV2","2UGW_REV2"],
+	"Gateway-2UGW_REV2-Base-B":				[g_mobo_to_version_lut["Base"],0,0,"2UGW_REV2","2UGW_REV2"],
+	"Gateway-2UGW_REV2-Enhanced":			[g_mobo_to_version_lut["Enhanced"],0,0,"2UGW_REV2","2UGW_REV2"],
+	"Gateway-2UGW_REV2-Enhanced-S":			[g_mobo_to_version_lut["Enhanced"],0,0,"2UGW_REV2","2UGW_REV2"],
+	"Gateway-2UGW_REV2-Turbo-G":				[g_mobo_to_version_lut["Turbo"],0,0,"2UGW_REV2","2UGW_REV2"],
+
+
  	"Gateway-1UGW-Base":				[g_mobo_to_version_lut["Base"],0,0,"1UGW","1UGW"],
 	"Gateway-1UGW-Base-B":				[g_mobo_to_version_lut["Base"],0,0,"1UGW","1UGW"],
 	"Gateway-1UGW-Enhanced":			[g_mobo_to_version_lut["Enhanced"],0,0,"1UGW","1UGW"],
@@ -1180,6 +1187,21 @@ def infer_homelab_model_from_sysfs_ports(allowed_mobos=None, detected_mobo_name=
 
     return (None, None)
 
+def normalize_model_key(model_name):
+	# Some firmware revisions report REV2 with dashes instead of underscores.
+	# Normalize to the LUT naming so lookups remain stable.
+	if model_name in g_product_lut:
+		return model_name
+	if "-REV2-" in model_name:
+		return model_name.replace("-REV2-", "_REV2-")
+	return model_name
+
+def normalize_chassis_size(chassis_size):
+	# Normalize REV2 part numbers to match internal LUT/template naming.
+	if chassis_size == "2UGW-REV2":
+		return "2UGW_REV2"
+	return chassis_size
+
 def main():
 	server = {
 		"Motherboard":"?",
@@ -1210,7 +1232,7 @@ def main():
 	if not server["VM"]:
 		serial_result = serial_check()
 		server["Serial"] = serial_result["Product Serial"].upper()
-		server["Chassis Size"] = serial_result["Product Part Number"].upper()
+		server["Chassis Size"] = normalize_chassis_size(serial_result["Product Part Number"].upper())
 		server["Model"] = determine_model(server["Motherboard"]["Product Name"],server["HBA"],server["Chassis Size"]) if old_serial(serial_result) else serial_result["Product Name"]
 	
  	# If we don't have IPMI and fell back to a generic Product Name,
@@ -1232,7 +1254,14 @@ def main():
 		if len(server["HBA"]) > 0 and server["VM"]:
 			vm_passthrough(server) 			# VM with hba pass through detected, update server accordingly
 
-	server["Alias Style"] = g_product_lut[server["Model"]][g_product_lut_idx["ALIAS_STYLE"]]
+	server["Model"] = normalize_model_key(server["Model"])
+	server["Chassis Size"] = normalize_chassis_size(server["Chassis Size"])
+	if server["Model"] in g_product_lut:
+		server["Alias Style"] = g_product_lut[server["Model"]][g_product_lut_idx["ALIAS_STYLE"]]
+	else:
+		server["Alias Style"] = "?"
+		print("/opt/45drives/tools/server_identifier: !! WARNING !!")
+		print("                              Unrecognized model \"{m}\". Alias style and HBA expectations are unknown.".format(m=server["Model"]))
 
 	# set auto alias flag for servers that are automatically aliased using udev rules.
 	if server["Alias Style"] in ["F2STORNADO","STORINATORUBM"]:
@@ -1252,10 +1281,11 @@ def main():
 	update_json_file(server,scan_time)
 
 	# warn user if improper number of HBA cards are detected.
-	if len(server["HBA"]) != g_product_lut[server["Model"]][g_product_lut_idx["24I_COUNT"]] + g_product_lut[server["Model"]][g_product_lut_idx["16I_COUNT"]]:
-		print("/opt/45drives/tools/server_identifier: !! WARNING !!")
-		print("                              Quantity of HBA Cards detected does not match the quantity expected")
-		print("                              for a \"{m}\". Drive aliasing may not work as desired. ".format(m=server["Model"]))
+	if server["Model"] in g_product_lut:
+		if len(server["HBA"]) != g_product_lut[server["Model"]][g_product_lut_idx["24I_COUNT"]] + g_product_lut[server["Model"]][g_product_lut_idx["16I_COUNT"]]:
+			print("/opt/45drives/tools/server_identifier: !! WARNING !!")
+			print("                              Quantity of HBA Cards detected does not match the quantity expected")
+			print("                              for a \"{m}\". Drive aliasing may not work as desired. ".format(m=server["Model"]))
 	exit(0)
 
 if __name__ == "__main__":

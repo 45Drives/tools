@@ -393,7 +393,7 @@ def build_server(options):
 	try:
 		vdev_id = open(CONFIG_PATH + "/vdev_id.conf", mode='r')
 	except IOError:
-		if "Chassis Size" in server_obj.keys() and server_obj["Chassis Size"] in ["2UGW"]:
+		if "Chassis Size" in server_obj.keys() and server_obj["Chassis Size"] in ["2UGW", "2UGW-REV2"]:
 			print("This program is intended to display disk information for servers with dedicated storage bays.".format(astyle=server_obj["Alias Style"]))
 			print("Use command line utilities such as lsblk to see disk information for Ceph Gateways.".format(astyle=server_obj["Alias Style"]))
 			exit(1)
@@ -404,7 +404,7 @@ def build_server(options):
 		print("Unable to determine Alias Style from /etc/45drives/server_info/server_info.json: ")
 		print(json.dumps(server_obj,indent=4))
 		exit(1)
-	elif "Chassis Size" in server_obj.keys() and server_obj["Chassis Size"] in ["2UGW"]:
+	elif "Chassis Size" in server_obj.keys() and server_obj["Chassis Size"] in ["2UGW", "2UGW-REV2"]:
 		print("This program is intended to display disk information for servers with dedicated storage bays.".format(astyle=server_obj["Alias Style"]))
 		print("Use command line utilities such as lsblk to see disk information for Ceph Gateways.".format(astyle=server_obj["Alias Style"]))
 		exit(1)
