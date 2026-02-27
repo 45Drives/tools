@@ -380,7 +380,8 @@ def build_server(options):
 			"4X":[16,16,16,16]
 		},
   		"STUDIO":{
-			"STUDIO8":[4,4]
+			"STUDIO8":[4,4],
+			"STUDIO15":[15]
 		},
 		"BYPATH": {
 			"VM2":[2],

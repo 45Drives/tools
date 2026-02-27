@@ -505,7 +505,8 @@ def create_vdev_id(server):
 			"F8X3":[20,20,20]
 		},
   		"STUDIO":{
-			"STUDIO8":[4,4]
+			"STUDIO8":[4,4],
+   			"STUDIO15":[15],
 		},
 		"?":{
 			"?":[0]
