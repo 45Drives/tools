@@ -1,3 +1,9 @@
+45drives-tools (4.0.38-1bookworm) bookworm; urgency=medium
+
+  * Adds Studio15
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 27 Feb 2026 08:17:24 -0400
+
 45drives-tools (4.0.37-1bookworm) bookworm; urgency=medium
 
   * Removes lines preventing dmap from working on HL15

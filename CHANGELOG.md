@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.37-1
+## 45drives-tools 4.0.38-1
 
-* Removes lines preventing dmap from working on HL15
+* Adds Studio15
