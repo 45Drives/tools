@@ -1,3 +1,55 @@
+45drives-tools (4.0.38-2jammy) jammy; urgency=medium
+
+  * Rebuilding with added github write perms
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 27 Feb 2026 09:12:36 -0400
+
+45drives-tools (4.0.38-1jammy) jammy; urgency=medium
+
+  * Adds Studio15
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 27 Feb 2026 08:17:24 -0400
+
+45drives-tools (4.0.37-1jammy) jammy; urgency=medium
+
+  * Removes lines preventing dmap from working on HL15
+
+ -- Jordan Keough <jkeough@45drives.com>  Wed, 28 Jan 2026 10:00:53 -0400
+
+45drives-tools (4.0.36-2jammy) jammy; urgency=medium
+
+  * Missed a commit in last merge, now has full fix for virtual nvme block devices
+    (ubu20)
+
+ -- Jordan Keough <jkeough@45drives.com>  Thu, 22 Jan 2026 06:06:59 -0400
+
+45drives-tools (4.0.36-1jammy) jammy; urgency=medium
+
+  * Merges nvme drive mapping and loadtest fixes to handle custom nvme aliasing paths
+    as seen on ubu20 systems
+
+ -- Jordan Keough <jkeough@45drives.com>  Thu, 22 Jan 2026 05:31:52 -0400
+
+45drives-tools (4.0.35-1jammy) jammy; urgency=medium
+
+  * Updates loadtest to properly detect non-standard custom nvme aliasing paths (as
+    seen on ubu20 systems)
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 09 Jan 2026 05:45:27 -0400
+
+45drives-tools (4.0.34-1jammy) jammy; urgency=medium
+
+  * Fixes nvme drive mapping on ubuntu 20
+
+ -- Jordan Keough <jkeough@45drives.com>  Thu, 08 Jan 2026 10:23:38 -0400
+
+45drives-tools (4.0.33-1jammy) jammy; urgency=medium
+
+  * Updates ubm udev trigger logic to run when 'change' actions trigger in addition
+    to 'add' actions
+
+ -- Jordan Keough <jkeough@45drives.com>  Mon, 05 Jan 2026 08:47:20 -0400
+
 45drives-tools (4.0.32-1jammy) jammy; urgency=medium
 
   * Hotfix - reverses hl4 slot order

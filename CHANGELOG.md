@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.32-1
+## 45drives-tools 4.0.38-2
 
-* Hotfix - reverses hl4 slot order
+* Rebuilding with added github write perms

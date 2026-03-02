@@ -34,32 +34,42 @@ def get_server_info():
         sys.exit(1)
 
 def get_disks_from_vdev_id():
-    vdev_id_txt = ""
     vpath = "/etc/vdev_id.conf"
-    if os.path.exists(vpath):
-        f = open(vpath, "r")
-        vdev_id_txt = f.read()
-        f.close()
-    else:
+    if not os.path.exists(vpath):
         print("/etc/vdev_id.conf not found. run 'dmap'.")
         sys.exit(1)
 
+    with open(vpath, "r") as f:
+        vdev_id_txt = f.read()
+
     disks = []
     for line in vdev_id_txt.split("\n"):
-        if line.startswith("alias"):
-            disks.append(
-                {
-                    "id": line.split()[1],
-                    "path": line.split()[2],
-                    "occupied": os.path.islink(line.split()[2]),
-                    "dev": os.path.basename(os.path.realpath(line.split()[2])) if os.path.islink(line.split()[2]) else "",
-                    "model": get_disk_model(line.split()[2])
-                }
-            )
+        if not line.startswith("alias"):
+            continue
+
+        disk_id = line.split()[1]
+        raw_path = line.split()[2]
+
+        # Vdev path may be a real symlink OR a ".." traversal path.
+        # Treat it as occupied if it exists.
+        exists = os.path.exists(raw_path)
+
+        # realpath resolves symlinks AND normalizes ".." paths
+        resolved = os.path.realpath(raw_path) if exists else ""
+        dev = os.path.basename(resolved) if resolved.startswith("/dev/") else ""
+
+        disks.append({
+            "id": disk_id,
+            "path": raw_path,
+            "occupied": exists,
+            "dev": dev,
+            "model": get_disk_model(raw_path) if exists else ""
+        })
+
     return disks
 
 def get_disk_model(disk_path):
-    if not os.path.islink(disk_path):
+    if not os.path.exists(disk_path):
         return ""
     device_name = os.path.basename(os.path.realpath(disk_path))
     smartctl = subprocess.Popen(shlex.split("smartctl --all /dev/{pth} -j".format(pth=device_name)), stdout=subprocess.PIPE, universal_newlines=True)
@@ -98,42 +108,63 @@ def get_scsi_info():
             })
     return scsi_info
 
-def consolidate_data(server_info,disks,scsi_info):
-    for hba in server_info["HBA"]:
+def consolidate_data(server_info, disks, scsi_info):
+    # Build quick lookup for SCSI devices by /dev/<name> (e.g., sda, sdb)
+    scsi_by_dev = {s["dev"]: s for s in scsi_info if s.get("dev")}
+    # Track which disks we successfully matched to lsscsi
+    matched = set()
+    # HBA mapping behavior for disks we can match
+    for hba in server_info.get("HBA", []):
         for disk in disks:
-            if hba["Bus Address"] in disk["path"]:
-                for scsi in scsi_info:
-                    if disk["dev"] == scsi["dev"]:
-                        if "disks" not in hba.keys():
-                            hba["disks"] = []
-                        hba["disks"].append(
-                            {
-                                "id":disk["id"],
-                                "path":disk["path"],
-                                "occupied":disk["occupied"],
-                                "dev":disk["dev"],
-                                "scsi_id":scsi["scsi_id"],
-                                "uuid":scsi["uuid"],
-                                "model":disk["model"]
-                            }
-                        )
-    for disk in disks:
-        for scsi in scsi_info:
-            if disk["dev"] == scsi["dev"]:
-                if "disks" not in server_info.keys():
-                    server_info["disks"] = []
-                server_info["disks"].append(
-                    {
-                        "id":disk["id"],
-                        "path":disk["path"],
-                        "occupied":disk["occupied"],
-                        "dev":disk["dev"],
-                        "scsi_id":scsi["scsi_id"],
-                        "uuid":scsi["uuid"],
-                        "model":disk["model"]
-                    }
-                )
+            if hba.get("Bus Address", "") and hba["Bus Address"] in disk.get("path", ""):
+                scsi = scsi_by_dev.get(disk.get("dev", ""))
+                if scsi:
+                    matched.add(disk["id"])
+                    if "disks" not in hba:
+                        hba["disks"] = []
+                    hba["disks"].append({
+                        "id": disk["id"],
+                        "path": disk["path"],
+                        "occupied": disk["occupied"],
+                        "dev": disk["dev"],
+                        "scsi_id": scsi.get("scsi_id", ""),
+                        "uuid": scsi.get("uuid", ""),
+                        "model": disk["model"],
+                    })
+    # Build server_info["disks"]
+    if "disks" not in server_info:
+        server_info["disks"] = []
 
+    # First, add all disks that matched lsscsi
+    for disk in disks:
+        scsi = scsi_by_dev.get(disk.get("dev", ""))
+        if scsi:
+            matched.add(disk["id"])
+            server_info["disks"].append({
+                "id": disk["id"],
+                "path": disk["path"],
+                "occupied": disk["occupied"],
+                "dev": disk["dev"],
+                "scsi_id": scsi.get("scsi_id", ""),
+                "uuid": scsi.get("uuid", ""),
+                "model": disk["model"],
+            })
+
+    # NVMe fallback: if not matched to lsscsi, still include it
+    for disk in disks:
+        if disk["id"] in matched:
+            continue
+        dev = disk.get("dev", "")
+        if dev.startswith("nvme"):
+            server_info["disks"].append({
+                "id": disk["id"],
+                "path": disk["path"],
+                "occupied": disk["occupied"],
+                "dev": dev,
+                "scsi_id": "",     # not applicable / unknown for NVMe here
+                "uuid": "",        # not applicable / unknown for NVMe here
+                "model": disk["model"],
+            })
 
 def setup_fio_file(server_info,RO,RW):
     FIO_PARAMS_RW={
@@ -264,39 +295,107 @@ def show_loadtest_disks(server_info):
             disk_str = "{d}, ".format(d=disk["id"])
     print(disk_str)
 
-def check_log(log,server_info):
-    print("Checking log for errors...",end=" ")
+
+def check_log(log, server_info):
+    print("Checking log for errors...", end=" ")
     power_reset_errors = []
     failed_io_errors = []
+
+    # SCSI patterns
     err_pwr_rst = re.compile(r"sd (\w+:\w+:\w+:\w+):.*(Power-on or device reset occurred)")
     err_failed_io = re.compile(r"sd (\w+:\w+:\w+:\w+): \[(sd\w+)\] (tag#\d+ FAILED .*$)")
+
+    # NVMe / block-layer patterns to catch "Buffer I/O error on dev nvme0n1", "I/O error, dev nvme0n1", blk-mq variants.
+    err_blk_io_1 = re.compile(r"\b(Buffer I/O error|I/O error)\b.*\bdev\s+(nvme\d+n\d+(?:p\d+)?)\b")
+    err_blk_io_2 = re.compile(r"\bblk_update_request: I/O error, dev\s+(nvme\d+n\d+(?:p\d+)?)\b")
+    err_blk_io_3 = re.compile(r"\bblk_mq_end_request: I/O error, dev\s+(nvme\d+n\d+(?:p\d+)?)\b")
+
+    # NVMe controller-level patterns to catch timeouts/resets/controller failures
+    err_nvme_ctrl_1 = re.compile(r"\bnvme\s+(nvme\d+):.*\b(timeout|timed out|I/O .* timeout)\b", re.IGNORECASE)
+    err_nvme_ctrl_2 = re.compile(r"\bnvme\s+(nvme\d+):.*\b(reset|resetting|controller reset)\b", re.IGNORECASE)
+    err_nvme_ctrl_3 = re.compile(r"\bnvme\s+(nvme\d+):.*\b(failed|failure|fatal|offline|dead)\b", re.IGNORECASE)
+    # Some kernels log "nvme0: ..." (without leading "nvme ")
+    err_nvme_ctrl_4 = re.compile(r"\b(nvme\d+):.*\b(timeout|timed out|reset|resetting|failed|fatal|offline|dead)\b", re.IGNORECASE)
+
     for line in log:
-        errorPwrRst = re.search(err_pwr_rst,line)
-        if errorPwrRst != None:
-            power_reset_errors.append({
-                "scsi_id": errorPwrRst.group(1),
-                "error_msg": errorPwrRst.group(2)
-            })
-        errorFailedIO = re.search(err_failed_io,line)
-        if errorFailedIO != None:
+        # SCSI detection
+        m = re.search(err_pwr_rst, line)
+        if m is not None:
+            power_reset_errors.append({"scsi_id": m.group(1), "error_msg": m.group(2)})
+
+        m = re.search(err_failed_io, line)
+        if m is not None:
             failed_io_errors.append({
-                "scsi_id": errorFailedIO.group(1),
-                "dev": errorFailedIO.group(2),
-                "error_msg": errorFailedIO.group(3)
+                "scsi_id": m.group(1),
+                "dev": m.group(2),
+                "error_msg": m.group(3)
             })
 
-    disks = server_info.get("disks",[])
+        # NVMe block-device detection
+        m = (re.search(err_blk_io_1, line) or
+             re.search(err_blk_io_2, line) or
+             re.search(err_blk_io_3, line))
+        if m is not None:
+            nvme_dev = m.group(m.lastindex)
+            failed_io_errors.append({
+                "scsi_id": "",
+                "dev": nvme_dev,
+                "error_msg": line.strip()
+            })
+
+        # NVMe controller-level detection
+        m = (re.search(err_nvme_ctrl_1, line) or
+             re.search(err_nvme_ctrl_2, line) or
+             re.search(err_nvme_ctrl_3, line) or
+             re.search(err_nvme_ctrl_4, line))
+        if m is not None:
+            ctrl = m.group(1)
+            failed_io_errors.append({
+                "scsi_id": "",
+                "dev": ctrl,          # controller name (nvme0)
+                "error_msg": line.strip()
+            })
+
+    disks = server_info.get("disks", [])
     bad_disks = set()
+
+    # SCSI correlation
     for perr in power_reset_errors:
         for disk in disks:
-            if perr.get("scsi_id","0:0:0:0") == disk.get("scsi_id",""):
-                print("\033[0;31mERROR:\033[0;0m {d}: [{sid}] -> {emsg} uuid={u}".format(d=disk["id"],sid=disk["scsi_id"],emsg=perr["error_msg"],u=disk["uuid"]))
+            if perr.get("scsi_id", "0:0:0:0") == disk.get("scsi_id", ""):
+                print("\033[0;31mERROR:\033[0;0m {d}: [{sid}] -> {emsg} uuid={u}".format(
+                    d=disk["id"], sid=disk.get("scsi_id", ""), emsg=perr["error_msg"], u=disk.get("uuid", "")
+                ))
                 bad_disks.add(disk["id"])
+
     for ioerr in failed_io_errors:
         for disk in disks:
-            if ioerr.get("scsi_id","0:0:0:0") == disk.get("scsi_id",""):
-                print("\033[0;31mERROR:\033[0;0m {d}: [{sid}][{sd}] -> {emsg} uuid={u}".format(d=disk["id"],sd=ioerr["dev"],sid=disk["scsi_id"],emsg=ioerr["error_msg"],u=disk["uuid"])) 
+            # SCSI match by scsi_id
+            if ioerr.get("scsi_id") and ioerr["scsi_id"] == disk.get("scsi_id", ""):
+                print("\033[0;31mERROR:\033[0;0m {d}: [{sid}][{sd}] -> {emsg} uuid={u}".format(
+                    d=disk["id"], sd=ioerr.get("dev", ""), sid=disk.get("scsi_id", ""),
+                    emsg=ioerr["error_msg"], u=disk.get("uuid", "")
+                ))
                 bad_disks.add(disk["id"])
+
+            # NVMe match by namespace name (nvme0n1) OR partition (nvme0n1p1)
+            if (not ioerr.get("scsi_id")) and ioerr.get("dev"):
+                evdev = ioerr["dev"]
+                ddev = disk.get("dev", "")
+
+                # Direct namespace/partition match:
+                if evdev == ddev:
+                    print("\033[0;31mERROR:\033[0;0m {d}: [dev={sd}] -> {emsg}".format(
+                        d=disk["id"], sd=evdev, emsg=ioerr["error_msg"]
+                    ))
+                    bad_disks.add(disk["id"])
+
+                # Controller event match: "nvme0" should match disk dev "nvme0n1" when the event dev is controller-shaped and disk dev is namespace-shaped.
+                elif re.fullmatch(r"nvme\d+", evdev) and ddev.startswith(evdev):
+                    print("\033[0;31mERROR:\033[0;0m {d}: [ctrl={sd}] -> {emsg}".format(
+                        d=disk["id"], sd=evdev, emsg=ioerr["error_msg"]
+                    ))
+                    bad_disks.add(disk["id"])
 
     if bad_disks == set():
         print("No errors found.")
