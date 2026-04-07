@@ -331,6 +331,7 @@ def build_server(options):
 		},
 		"HOMELAB":{
       		"HL15_BEAST":[23],
+			"X15":[15],
 			"HL15":[15],
 			"HL4":[4],
 			"HL8":[4,4]
