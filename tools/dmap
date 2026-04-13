@@ -503,7 +503,9 @@ def create_vdev_id(server):
 			"F8X1":[20],
 			"F8X2":[20,20],
 			"F8X3":[20,20,20],
-			"F8X3-2.0":[20,20,20]
+   			# "NVME-F8X1":[20],
+			# "NVME-F8X2":[20,20],
+			"NVME-F8X3":[20,20,20]
 		},
   		"STUDIO":{
 			"STUDIO8":[4,4],
@@ -712,8 +714,8 @@ def alias_f8(server,alias_template,phy_order):
 	}
 	vdev_id_str = ""
 
-	# ── F8X3-2.0 special case ──────────────────────────────────────────────
-	# F8X3-2.0 has 1x 9600-16i + 3x 9600-24i.  Physical cabling splits
+	# ── NVME-F8X3 special case ──────────────────────────────────────────────
+	# NVME-F8X3 has 1x 9600-16i + 3x 9600-24i.  Physical cabling splits
 	# multiple HBAs across each row (multi-HBA-per-row):
 	#
 	#   Row 1:  16i  (bays 1-12)  +  24i_A (bays 13-20)
@@ -732,7 +734,7 @@ def alias_f8(server,alias_template,phy_order):
 	#                   higher bus address → 24i_A (row 1-2 overlap)
 	#                   lower  bus address → 24i_C (row 2-3 overlap)
 	# ────────────────────────────────────────────────────────────────────────
-	if server.get("Chassis Size") == "F8X3-2.0":
+	if server.get("Chassis Size") == "NVME-F8X3":
 		hba_16i = None
 		hba_24i_list = []
 		for h in list(server.get("HBA", [])):
@@ -763,7 +765,7 @@ def alias_f8(server,alias_template,phy_order):
 			hba_24i_C = remaining[0]   # lower bus addr
 			hba_24i_A = remaining[1]   # higher bus addr
 
-			log("F8X3-2.0 HBA roles:")
+			log("NVME-F8X3 HBA roles:")
 			log("  16i       = {b} ({n} targets)".format(b=hba_16i["Bus Address"], n=len(t_16i)))
 			log("  24i_A     = {b} ({n} targets)".format(b=hba_24i_A["Bus Address"], n=len(t_24i[hba_24i_A["Bus Address"]])))
 			log("  24i_B     = {b} ({n} targets)".format(b=hba_24i_B["Bus Address"], n=len(t_24i[hba_24i_B["Bus Address"]])))
@@ -831,7 +833,7 @@ def alias_f8(server,alias_template,phy_order):
 			log("\n")
 			return vdev_id_str
 		else:
-			log("WARNING: F8X3-2.0 expected 1x 9600-16i + 3x 9600-24i but found: {m}".format(
+			log("WARNING: NVME-F8X3 expected 1x 9600-16i + 3x 9600-24i but found: {m}".format(
 				m=", ".join(h.get("Model","?") + " @ " + h.get("Bus Address","?") for h in server.get("HBA",[]))
 			))
 			log("         Falling back to generic F8 mapping")
