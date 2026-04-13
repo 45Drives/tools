@@ -436,7 +436,7 @@ def create_vdev_id(server):
 		"SAS9305-16i" : [2,3,1,0,  6,7,5,4,  18,19,17,16,  22,23,21,20],
 		"SAS9305-24i": [2,3,1,0,  6,7,5,4,  18,19,17,16,  22,23,21,20,  10,11,9,8,  14,15,13,12],
 		"AVAGO3108MegaRAID": [25,31,37,43, 26,32,38,44, 27,33,39,45, 28,34,41,46, 29,35,40,47, 30,36,42,48],
-		"9600-24i": [27,28,29,30,31,32,33,34,35,36,37,38,39,41,41,42,43,44,45,46,47,48,49,50],
+		"9600-24i": [27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50],
 		#"9600-16i": [27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42]
 		"9600-16i": [59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74]
 	}
@@ -503,7 +503,10 @@ def create_vdev_id(server):
 		"F8":{
 			"F8X1":[20],
 			"F8X2":[20,20],
-			"F8X3":[20,20,20]
+			"F8X3":[20,20,20],
+   			# "NVME-F8X1":[20],
+			# "NVME-F8X2":[20,20],
+			"NVME-F8X3":[20,20,20]
 		},
   		"STUDIO":{
 			"STUDIO8":[4,4],
@@ -660,7 +663,7 @@ def create_vdev_id(server):
 		vdev_id_str += alias_destroyinator(server,alias_template,phy_order)
 	elif server["Alias Style"] == "F8":
 		# we are using the DESTROYINATOR ailiasing scheme.
-		vdev_id_str += alias_f8(server,alias_template)
+		vdev_id_str += alias_f8(server,alias_template,phy_order)
 	elif server["Alias Style"] == "HOMELAB" and server["Chassis Size"] == "HL4":
 		vdev_id_str += alias_hl4()
 	elif server["Alias Style"] == "HOMELAB" and server["Chassis Size"] == "HL8":
@@ -677,7 +680,27 @@ def create_vdev_id(server):
 
 	return vdev_id_str
 
-def alias_f8(server,alias_template):
+def alias_f8(server,alias_template,phy_order):
+	def _discover_scsi_targets(bus_addr: str):
+		"""Return sorted unique SCSI target IDs visible under /dev/disk/by-path for a given PCI bus address."""
+		import glob
+		targets = set()
+		pattern = f"/dev/disk/by-path/pci-{bus_addr}-scsi-0:0:*:0"
+		for p in glob.glob(pattern):
+			# Ignore partition symlinks
+			if "-part" in p:
+				continue
+			base = os.path.basename(p)
+			# pci-0000:01:00.0-scsi-0:0:109:0
+			m = re.search(r"-scsi-0:0:(\d+):0$", base)
+			if not m:
+				continue
+			targets.add(int(m.group(1)))
+		return sorted(targets)
+
+	def _scsi_path_exists(bus_addr: str, target: int) -> bool:
+		return os.path.exists(f"/dev/disk/by-path/pci-{bus_addr}-scsi-0:0:{target}:0")
+
 	# Cables are installed into a 24i card with port 5 unused
 	# Order is as follows:
 	# P0 -> X-1 to X-3  (SSDs)
@@ -688,32 +711,213 @@ def alias_f8(server,alias_template):
 	# P5 -> UNUSED
 	f8_order = {
 		"SAS9305-24i": [0,1,3,2,  4,5,7,6,  8,9,11,10,  20,21,23,22,  16,17,19,18,    12,13,15,14],
-		"9600-24i": [30,29,28,27, 34,33,32,31, 46,45,44,43,  42,41,41,39,  38,37,36,35,  50,49,48,47]
+		"9600-24i": [30,29,28,27, 34,33,32,31, 46,45,44,43,  42,41,40,39,  38,37,36,35,  50,49,48,47]
 	}
 	vdev_id_str = ""
-	for i in range(0,len(server["HBA"])):
-		if server["HBA"][i]["Model"] in ["9361-16i","9361-24i"]:
-			hmap = hwraid_map(server["HBA"][i],server)
-		count = alias_template[server["Alias Style"]][server["Chassis Size"]][i]
+
+	# ── NVME-F8X3 special case ──────────────────────────────────────────────
+	# NVME-F8X3 has 1x 9600-16i + 3x 9600-24i.  Physical cabling splits
+	# multiple HBAs across each row (multi-HBA-per-row):
+	#
+	#   Row 1:  16i  (bays 1-12)  +  24i_A (bays 13-20)
+	#   Row 2:  24i_B (bays 1-12)  +  24i_A (bays 13-16)  +  24i_C (bays 17-20)
+	#   Row 3:  24i_B (bays 1-12)  +  24i_C (bays 13-20)
+	#
+	# Target ordering (derived from dalias):
+	#   Bays 1-12 (16i / 24i_B):  simple descending (reverse sorted targets)
+	#   Bays 13-20 (24i_A / 24i_C): reverse port-group order, ascending within
+	#                                 groups of 4
+	#
+	# HBA role identification:
+	#   16i         – only 9600-16i on the board  (12 bays)
+	#   24i_B (full) – the 9600-24i with the most targets  (24 bays)
+	#   24i_A / 24i_C – the two 12-target 9600-24is;
+	#                   higher bus address → 24i_A (row 1-2 overlap)
+	#                   lower  bus address → 24i_C (row 2-3 overlap)
+	# ────────────────────────────────────────────────────────────────────────
+	if server.get("Chassis Size") == "NVME-F8X3":
+		hba_16i = None
+		hba_24i_list = []
+		for h in list(server.get("HBA", [])):
+			if h.get("Model") == "9600-16i" and hba_16i is None:
+				hba_16i = h
+			elif h.get("Model") == "9600-24i":
+				hba_24i_list.append(h)
+
+		if hba_16i is not None and len(hba_24i_list) == 3:
+			# ── discover targets for every controller ──
+			t_16i = _discover_scsi_targets(hba_16i["Bus Address"])
+			t_24i = {}
+			for h in hba_24i_list:
+				t_24i[h["Bus Address"]] = _discover_scsi_targets(h["Bus Address"])
+
+			# ── identify roles ──
+			# 24i_B = the one with the most discovered targets (uses all 6 ports → 24 bays)
+			hba_24i_list_sorted = sorted(
+				hba_24i_list,
+				key=lambda h: (-len(t_24i[h["Bus Address"]]), h.get("Bus Address", ""))
+			)
+			hba_24i_B = hba_24i_list_sorted[0]
+			# Remaining two: higher bus address → 24i_A, lower → 24i_C
+			remaining = sorted(
+				hba_24i_list_sorted[1:],
+				key=lambda h: h.get("Bus Address", "")
+			)
+			hba_24i_C = remaining[0]   # lower bus addr
+			hba_24i_A = remaining[1]   # higher bus addr
+
+			log("NVME-F8X3 HBA roles:")
+			log("  16i       = {b} ({n} targets)".format(b=hba_16i["Bus Address"], n=len(t_16i)))
+			log("  24i_A     = {b} ({n} targets)".format(b=hba_24i_A["Bus Address"], n=len(t_24i[hba_24i_A["Bus Address"]])))
+			log("  24i_B     = {b} ({n} targets)".format(b=hba_24i_B["Bus Address"], n=len(t_24i[hba_24i_B["Bus Address"]])))
+			log("  24i_C     = {b} ({n} targets)".format(b=hba_24i_C["Bus Address"], n=len(t_24i[hba_24i_C["Bus Address"]])))
+
+			# ── ordering helpers ──
+			def _order_desc(targets, expected):
+				"""Bays 1-12 pattern: simple descending (highest target = bay 1)."""
+				if len(targets) >= expected:
+					return sorted(targets, reverse=True)[:expected]
+				elif targets:
+					base = min(targets)
+					return sorted(range(base, base + expected), reverse=True)
+				return [100000 + j for j in range(expected)]
+
+			def _order_reverse_group_asc(targets, expected):
+				"""Bays 13-20 pattern: reverse port-group order, ascending within groups of 4."""
+				if len(targets) >= expected:
+					st = sorted(targets)[:expected]
+				elif targets:
+					base = min(targets)
+					st = list(range(base, base + expected))
+				else:
+					return [100000 + j for j in range(expected)]
+				groups = [st[k:k+4] for k in range(0, len(st), 4)]
+				groups.reverse()
+				return [t for g in groups for t in g]
+
+			# ── compute ordered target lists per HBA ──
+			ord_16i   = _order_desc(t_16i, 12)
+			ord_24i_A = _order_reverse_group_asc(t_24i[hba_24i_A["Bus Address"]], 12)
+			ord_24i_B = _order_desc(t_24i[hba_24i_B["Bus Address"]], 24)
+			ord_24i_C = _order_reverse_group_asc(t_24i[hba_24i_C["Bus Address"]], 12)
+
+			# ── build the 60-bay alias map (3 rows × 20 bays) ──
+			bus_16i   = hba_16i["Bus Address"]
+			bus_24i_A = hba_24i_A["Bus Address"]
+			bus_24i_B = hba_24i_B["Bus Address"]
+			bus_24i_C = hba_24i_C["Bus Address"]
+
+			def _alias(row, bay, bus, target):
+				return "alias {r}-{b} /dev/disk/by-path/pci-{addr}-scsi-0:0:{t}:0\n".format(
+					r=row, b=bay, addr=bus, t=target)
+
+			# Row 1: 16i (bays 1-12)  +  24i_A (bays 13-20)
+			for j in range(12):
+				vdev_id_str += _alias(1, j + 1, bus_16i, ord_16i[j])
+			for j in range(8):
+				vdev_id_str += _alias(1, j + 13, bus_24i_A, ord_24i_A[j])
+
+			# Row 2: 24i_B (bays 1-12)  +  24i_A (bays 13-16)  +  24i_C (bays 17-20)
+			for j in range(12):
+				vdev_id_str += _alias(2, j + 1, bus_24i_B, ord_24i_B[j])
+			for j in range(4):
+				vdev_id_str += _alias(2, j + 13, bus_24i_A, ord_24i_A[j + 8])
+			for j in range(4):
+				vdev_id_str += _alias(2, j + 17, bus_24i_C, ord_24i_C[j])
+
+			# Row 3: 24i_B (bays 1-12)  +  24i_C (bays 13-20)
+			for j in range(12):
+				vdev_id_str += _alias(3, j + 1, bus_24i_B, ord_24i_B[j + 12])
+			for j in range(8):
+				vdev_id_str += _alias(3, j + 13, bus_24i_C, ord_24i_C[j + 4])
+
+			log("\n")
+			return vdev_id_str
+		else:
+			log("WARNING: NVME-F8X3 expected 1x 9600-16i + 3x 9600-24i but found: {m}".format(
+				m=", ".join(h.get("Model","?") + " @ " + h.get("Bus Address","?") for h in server.get("HBA",[]))
+			))
+			log("         Falling back to generic F8 mapping")
+
+	hbas = list(server.get("HBA", []))
+
+	for i in range(0,len(hbas)):
+		counts = alias_template[server["Alias Style"]][server["Chassis Size"]]
+		if i >= len(counts):
+			log(
+				"WARNING - More HBAs detected than template supports for {cs}. Ignoring extra controller: {model} @ {bus}".format(
+					cs=server["Chassis Size"],
+					model=hbas[i].get("Model","?"),
+					bus=hbas[i].get("Bus Address","?")
+				)
+			)
+			continue
+		hba = hbas[i]
+		if hba["Model"] in ["9361-16i","9361-24i"]:
+			hmap = hwraid_map(hba,server)
+		bus_addr = hba["Bus Address"]
+		discovered_targets = None
+		if hba["Model"] in ["9600-24i","9600-16i"]:
+			# On some platforms/drivers the visible SCSI target IDs are not stable (e.g. 109-128).
+			# Prefer discovering the actual by-path targets per controller bus address.
+			discovered_targets = _discover_scsi_targets(bus_addr)
+		count = counts[i]
 		for j in range(0,count):
-			if server["HBA"][i]["Model"]=="SAS9305-24i":
+			if hba["Model"]=="SAS9305-24i":
 				# The default case for ailiasing hba cards.
 				vdev_id_str += (
 					"alias {i}-{j} /dev/disk/by-path/pci-{addr}-sas-phy{p}-lun-0\n".format(
-						i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=f8_order[server["HBA"][i]["Model"]][j]
+						i=i+1,j=j+1,addr=hba["Bus Address"],p=f8_order[hba["Model"]][j]
 						)
 					)
-			elif server["HBA"][i]["Model"] in ["9600-24i"]:
-				# alias 9600 style cards, and attempt hardware raid cards with warning. 
+			elif hba["Model"] in ["9600-24i"]:
+				# Prefer the traditional F8 cabling map if those targets exist; otherwise fall back
+				# to discovered SCSI targets (platform-dependent target numbering).
+				mapped_target = f8_order[hba["Model"]][j]
+				if not _scsi_path_exists(bus_addr, mapped_target):
+					if discovered_targets:
+						if j < len(discovered_targets):
+							mapped_target = discovered_targets[j]
+						else:
+							# Pad beyond currently-visible targets (empty bays). Keeps row width stable for lsdev.
+							mapped_target = discovered_targets[-1] + (j - (len(discovered_targets) - 1))
 				vdev_id_str += (
 					"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
-						i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=f8_order[server["HBA"][i]["Model"]][j]
+						i=i+1,j=j+1,addr=bus_addr,p=mapped_target
 						)
 					)
-			elif server["HBA"][i]["Model"] in ["9361-24i"]:			
+			elif hba["Model"] in ["9600-16i"]:
+				# Prefer discovered targets when available to avoid duplicates and platform-specific numbering.
+				if discovered_targets:
+					ordered_targets = discovered_targets
+					if j < len(ordered_targets):
+						mapped_target = ordered_targets[j]
+					else:
+						# Beyond discovered targets = empty bay. Use impossible target ID to avoid duplicates.
+						mapped_target = 100000 + j
+				else:
+					po = phy_order.get(hba["Model"], [])
+					if j < len(po):
+						mapped_target = po[j]
+					else:
+						log(
+							"WARNING - No mapping for {model} {bus} slot {slot}; leaving bay empty".format(
+								model=hba.get("Model","?"),
+								bus=bus_addr,
+								slot=j+1
+							)
+						)
+						# Use an impossible target id so the by-path won't exist.
+						mapped_target = 100000 + j
 				vdev_id_str += (
 					"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
-						i=i+1,j=j+1,addr=server["HBA"][i]["Bus Address"],p=hmap[j]
+						i=i+1,j=j+1,addr=bus_addr,p=mapped_target
+						)
+					)
+			elif hba["Model"] in ["9361-24i"]:			
+				vdev_id_str += (
+					"alias {i}-{j} /dev/disk/by-path/pci-{addr}-scsi-0:0:{p}:0\n".format(
+						i=i+1,j=j+1,addr=hba["Bus Address"],p=hmap[j]
 						)
 					)
 				if hmap[j] == 99:
