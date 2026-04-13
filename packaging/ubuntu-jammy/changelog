@@ -1,3 +1,9 @@
+45drives-tools (4.0.39-1jammy) jammy; urgency=medium
+
+  * Adds support for new NVME-F8X3 and HomeLab X15 (Unraid Collab unit)
+
+ -- Jordan Keough <jkeough@45drives.com>  Mon, 13 Apr 2026 07:57:38 -0300
+
 45drives-tools (4.0.38-2jammy) jammy; urgency=medium
 
   * Rebuilding with added github write perms

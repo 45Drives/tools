@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.38-2
+## 45drives-tools 4.0.39-1
 
-* Rebuilding with added github write perms
+* Adds support for new NVME-F8X3 and HomeLab X15 (Unraid Collab unit)
