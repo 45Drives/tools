@@ -64,7 +64,10 @@ class table():
 		
 		# find the length of the longest string in each column (excluding headers)
 		for rows in self.c_txt:
-			self.column_width.append(len(max(rows, key=lambda t: len(t[0]))[0]))
+			if rows:
+				self.column_width.append(len(max(rows, key=lambda t: len(t[0]))[0]))
+			else:
+				self.column_width.append(0)
 		
 		# compare the column label length to the longest string in each column
 		# add padding to the highest value, these are then summed to form the 

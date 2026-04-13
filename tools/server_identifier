@@ -860,22 +860,47 @@ def serial_check():
 		exit(1)
  
 	if ipmi_test:
-		# No IPMI — try FRU ini first
-		print("/opt/45drives/tools/server_identifier: ipmitool fru command failed. IPMI is not present on this system. Attempting to pull info from FRU ini")
+		# No IPMI — try FRU ini first, then supplement with DMI
+		print("/opt/45drives/tools/server_identifier: ipmitool fru command failed. IPMI is not present on this system. Attempting to pull info from FRU ini and DMI tables")
+
+		# Read DMI tables for serial and part number (hardware-burned, most reliable)
+		dmi_serial = None
+		dmi_pn = None
+		try:
+			with open('/sys/class/dmi/id/chassis_serial', 'r') as file:
+				dmi_serial = file.read().rstrip('\n')
+		except Exception:
+			pass
+		try:
+			with open('/sys/class/dmi/id/chassis_version', 'r') as file:
+				dmi_pn = file.read().rstrip('\n')
+		except Exception:
+			pass
 
 		fru = read_latest_fru_ini()
 		if fru:
 			serial_result["Product Name"]        = fru["product"]
 			serial_result["Product Part Number"] = fru.get("part", "") or "?"
-			serial_result["Product Serial"]      = fru.get("serial", "") or "?"
+			fru_serial = fru.get("serial", "") or ""
+			serial_result["Product Serial"]      = fru_serial if fru_serial else "?"
+
+			# Prefer DMI serial over FRU ini serial when DMI has a real value
+			# (FRU ini may contain placeholder serials from test runs)
+			if dmi_serial and dmi_serial not in ("?", "", "N/A", "Not Specified", "To Be Filled By O.E.M."):
+				if dmi_serial != fru_serial:
+					print("/opt/45drives/tools/server_identifier: Using DMI serial '{dmi}' (FRU ini had '{fru}')".format(dmi=dmi_serial, fru=fru_serial))
+				serial_result["Product Serial"] = dmi_serial
+
+			# Prefer DMI part number when FRU ini part is missing
+			if (not fru.get("part", "")) and dmi_pn and dmi_pn not in ("?", "", "N/A", "Not Specified", "To Be Filled By O.E.M."):
+				serial_result["Product Part Number"] = dmi_pn
+
 			return serial_result
 
-		# FRU ini not found/usable — fall back to DMI (previous behavior)
+		# FRU ini not found/usable — fall back to DMI only
 		print("/opt/45drives/tools/server_identifier: FRU ini not found or incomplete. Falling back to DMI tables")
-		with open('/sys/class/dmi/id/chassis_serial', 'r') as file:
-			serial_result["Product Serial"] = file.read().rstrip('\n')
-		with open('/sys/class/dmi/id/chassis_version', 'r') as file:
-			pn = file.read().rstrip('\n')
+		serial_result["Product Serial"] = dmi_serial if dmi_serial else "?"
+		pn = dmi_pn if dmi_pn else "?"
 		serial_result["Product Part Number"] = pn
 		if pn in ["HL4", "HL8", "HL15", "HL15_BEAST"]:
 			serial_result["Product Name"] = "HomeLab-" + pn
@@ -1218,10 +1243,23 @@ def main():
 		and server["Model"] in ("Storinator","?","",None)
 		and len(server.get("HBA",[])) == 0):
 		inferred_model, inferred_size = infer_homelab_model_from_sysfs_ports(
-			allowed_mobos=("B550I AORUS PRO AX"),
 			detected_mobo_name=mobo_name
 		)
 		if inferred_model:
+			server["Model"] = inferred_model
+			server["Chassis Size"] = inferred_size
+
+	# Also validate HomeLab models with no HBAs - sysfs inference may correct bad FRU data
+	# (e.g. FRU says HL15 but hardware is actually HL8)
+	if (not server["VM"]
+		and server["Model"].startswith("HomeLab-")
+		and server["Chassis Size"] not in ("HL4", "HL8")
+		and len(server.get("HBA",[])) == 0):
+		inferred_model, inferred_size = infer_homelab_model_from_sysfs_ports(
+			detected_mobo_name=mobo_name
+		)
+		if inferred_model:
+			print("/opt/45drives/tools/server_identifier: Correcting model from '{old}' to '{new}' based on SATA topology.".format(old=server["Model"], new=inferred_model))
 			server["Model"] = inferred_model
 			server["Chassis Size"] = inferred_size
 
