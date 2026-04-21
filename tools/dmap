@@ -504,8 +504,8 @@ def create_vdev_id(server):
 			"F8X1":[20],
 			"F8X2":[20,20],
 			"F8X3":[20,20,20],
-   			# "NVME-F8X1":[20],
-			# "NVME-F8X2":[20,20],
+   			"NVME-F8X1":[20],
+			"NVME-F8X2":[20,20],
 			"NVME-F8X3":[20,20,20]
 		},
   		"STUDIO":{
@@ -715,6 +715,151 @@ def alias_f8(server,alias_template,phy_order):
 	}
 	vdev_id_str = ""
 
+	# ── ordering helpers (shared by all NVME-F8X* special cases) ──
+	def _order_desc(targets, expected):
+		"""Bays 1-12 pattern: simple descending (highest target = bay 1)."""
+		if len(targets) >= expected:
+			return sorted(targets, reverse=True)[:expected]
+		elif targets:
+			base = min(targets)
+			return sorted(range(base, base + expected), reverse=True)
+		return [100000 + j for j in range(expected)]
+
+	def _order_reverse_group_asc(targets, expected):
+		"""Bays 13-20 pattern: reverse port-group order, ascending within groups of 4."""
+		if len(targets) >= expected:
+			st = sorted(targets)[:expected]
+		elif targets:
+			base = min(targets)
+			st = list(range(base, base + expected))
+		else:
+			return [100000 + j for j in range(expected)]
+		groups = [st[k:k+4] for k in range(0, len(st), 4)]
+		groups.reverse()
+		return [t for g in groups for t in g]
+
+	def _alias(row, bay, bus, target):
+		return "alias {r}-{b} /dev/disk/by-path/pci-{addr}-scsi-0:0:{t}:0\n".format(
+			r=row, b=bay, addr=bus, t=target)
+
+	# ── NVME-F8X1 special case ──────────────────────────────────────────────
+	# NVME-F8X1 has 2x 9600-16i: one for NVMe, one for HDD (SAS).
+	# Single row of 20 bays:
+	#
+	#   Row 1:  HDD-16i (bays 1-12)  +  NVMe-16i (bays 13-20)
+	#
+	# HBA role identification:
+	#   The 16i with more discovered scsi targets → HDD (12 bays)
+	#   The 16i with fewer discovered scsi targets → NVMe (8 bays)
+	# ────────────────────────────────────────────────────────────────────────
+	if server.get("Chassis Size") == "NVME-F8X1":
+		hba_16i_list = [h for h in server.get("HBA", []) if h.get("Model") == "9600-16i"]
+
+		if len(hba_16i_list) == 2:
+			t_16i = {}
+			for h in hba_16i_list:
+				t_16i[h["Bus Address"]] = _discover_scsi_targets(h["Bus Address"])
+
+			# More targets → HDD (12 bays), fewer → NVMe (8 bays)
+			sorted_16i = sorted(
+				hba_16i_list,
+				key=lambda h: (-len(t_16i[h["Bus Address"]]), h.get("Bus Address", ""))
+			)
+			hba_hdd  = sorted_16i[0]   # more targets = HDD
+			hba_nvme = sorted_16i[1]   # fewer targets = NVMe
+
+			log("NVME-F8X1 HBA roles:")
+			log("  HDD  (16i) = {b} ({n} targets)".format(b=hba_hdd["Bus Address"], n=len(t_16i[hba_hdd["Bus Address"]])))
+			log("  NVMe (16i) = {b} ({n} targets)".format(b=hba_nvme["Bus Address"], n=len(t_16i[hba_nvme["Bus Address"]])))
+
+			ord_hdd  = _order_desc(t_16i[hba_hdd["Bus Address"]], 12)
+			ord_nvme = _order_reverse_group_asc(t_16i[hba_nvme["Bus Address"]], 8)
+
+			bus_hdd  = hba_hdd["Bus Address"]
+			bus_nvme = hba_nvme["Bus Address"]
+
+			# Row 1: HDD-16i (bays 1-12) + NVMe-16i (bays 13-20)
+			for j in range(12):
+				vdev_id_str += _alias(1, j + 1, bus_hdd, ord_hdd[j])
+			for j in range(8):
+				vdev_id_str += _alias(1, j + 13, bus_nvme, ord_nvme[j])
+
+			log("\n")
+			return vdev_id_str
+		else:
+			log("WARNING: NVME-F8X1 expected 2x 9600-16i but found: {m}".format(
+				m=", ".join(h.get("Model","?") + " @ " + h.get("Bus Address","?") for h in server.get("HBA",[]))
+			))
+			log("         Falling back to generic F8 mapping")
+
+	# ── NVME-F8X2 special case ──────────────────────────────────────────────
+	# NVME-F8X2 has 2x 9600-16i (NVMe) + 1x 9600-24i (HDD/SAS).
+	# Two rows of 20 bays:
+	#
+	#   Row 1:  24i (bays 1-12 HDD)  +  NVMe-16i #1 (bays 13-20)
+	#   Row 2:  24i (bays 1-12 HDD)  +  NVMe-16i #2 (bays 13-20)
+	#
+	# HBA role identification:
+	#   9600-24i → HDD (all 24 HDD bays across both rows)
+	#   9600-16i's → NVMe (8 each); higher bus address → row 1, lower → row 2
+	# ────────────────────────────────────────────────────────────────────────
+	elif server.get("Chassis Size") == "NVME-F8X2":
+		hba_24i = None
+		hba_16i_list = []
+		for h in list(server.get("HBA", [])):
+			if h.get("Model") == "9600-24i" and hba_24i is None:
+				hba_24i = h
+			elif h.get("Model") == "9600-16i":
+				hba_16i_list.append(h)
+
+		if hba_24i is not None and len(hba_16i_list) == 2:
+			t_24i = _discover_scsi_targets(hba_24i["Bus Address"])
+			t_16i = {}
+			for h in hba_16i_list:
+				t_16i[h["Bus Address"]] = _discover_scsi_targets(h["Bus Address"])
+
+			# Sort NVMe 16i's by bus address: higher → row 1, lower → row 2
+			sorted_nvme = sorted(
+				hba_16i_list,
+				key=lambda h: h.get("Bus Address", ""),
+				reverse=True
+			)
+			hba_nvme_1 = sorted_nvme[0]   # higher bus addr → row 1
+			hba_nvme_2 = sorted_nvme[1]   # lower bus addr → row 2
+
+			log("NVME-F8X2 HBA roles:")
+			log("  HDD  (24i)    = {b} ({n} targets)".format(b=hba_24i["Bus Address"], n=len(t_24i)))
+			log("  NVMe #1 (16i) = {b} ({n} targets) [row 1]".format(b=hba_nvme_1["Bus Address"], n=len(t_16i[hba_nvme_1["Bus Address"]])))
+			log("  NVMe #2 (16i) = {b} ({n} targets) [row 2]".format(b=hba_nvme_2["Bus Address"], n=len(t_16i[hba_nvme_2["Bus Address"]])))
+
+			ord_hdd    = _order_desc(t_24i, 24)
+			ord_nvme_1 = _order_reverse_group_asc(t_16i[hba_nvme_1["Bus Address"]], 8)
+			ord_nvme_2 = _order_reverse_group_asc(t_16i[hba_nvme_2["Bus Address"]], 8)
+
+			bus_hdd    = hba_24i["Bus Address"]
+			bus_nvme_1 = hba_nvme_1["Bus Address"]
+			bus_nvme_2 = hba_nvme_2["Bus Address"]
+
+			# Row 1: 24i (bays 1-12 HDD) + NVMe-16i #1 (bays 13-20)
+			for j in range(12):
+				vdev_id_str += _alias(1, j + 1, bus_hdd, ord_hdd[j])
+			for j in range(8):
+				vdev_id_str += _alias(1, j + 13, bus_nvme_1, ord_nvme_1[j])
+
+			# Row 2: 24i (bays 1-12 HDD) + NVMe-16i #2 (bays 13-20)
+			for j in range(12):
+				vdev_id_str += _alias(2, j + 1, bus_hdd, ord_hdd[j + 12])
+			for j in range(8):
+				vdev_id_str += _alias(2, j + 13, bus_nvme_2, ord_nvme_2[j])
+
+			log("\n")
+			return vdev_id_str
+		else:
+			log("WARNING: NVME-F8X2 expected 2x 9600-16i + 1x 9600-24i but found: {m}".format(
+				m=", ".join(h.get("Model","?") + " @ " + h.get("Bus Address","?") for h in server.get("HBA",[]))
+			))
+			log("         Falling back to generic F8 mapping")
+
 	# ── NVME-F8X3 special case ──────────────────────────────────────────────
 	# NVME-F8X3 has 1x 9600-16i + 3x 9600-24i.  Physical cabling splits
 	# multiple HBAs across each row (multi-HBA-per-row):
@@ -735,7 +880,7 @@ def alias_f8(server,alias_template,phy_order):
 	#                   higher bus address → 24i_A (row 1-2 overlap)
 	#                   lower  bus address → 24i_C (row 2-3 overlap)
 	# ────────────────────────────────────────────────────────────────────────
-	if server.get("Chassis Size") == "NVME-F8X3":
+	elif server.get("Chassis Size") == "NVME-F8X3":
 		hba_16i = None
 		hba_24i_list = []
 		for h in list(server.get("HBA", [])):
@@ -772,29 +917,6 @@ def alias_f8(server,alias_template,phy_order):
 			log("  24i_B     = {b} ({n} targets)".format(b=hba_24i_B["Bus Address"], n=len(t_24i[hba_24i_B["Bus Address"]])))
 			log("  24i_C     = {b} ({n} targets)".format(b=hba_24i_C["Bus Address"], n=len(t_24i[hba_24i_C["Bus Address"]])))
 
-			# ── ordering helpers ──
-			def _order_desc(targets, expected):
-				"""Bays 1-12 pattern: simple descending (highest target = bay 1)."""
-				if len(targets) >= expected:
-					return sorted(targets, reverse=True)[:expected]
-				elif targets:
-					base = min(targets)
-					return sorted(range(base, base + expected), reverse=True)
-				return [100000 + j for j in range(expected)]
-
-			def _order_reverse_group_asc(targets, expected):
-				"""Bays 13-20 pattern: reverse port-group order, ascending within groups of 4."""
-				if len(targets) >= expected:
-					st = sorted(targets)[:expected]
-				elif targets:
-					base = min(targets)
-					st = list(range(base, base + expected))
-				else:
-					return [100000 + j for j in range(expected)]
-				groups = [st[k:k+4] for k in range(0, len(st), 4)]
-				groups.reverse()
-				return [t for g in groups for t in g]
-
 			# ── compute ordered target lists per HBA ──
 			ord_16i   = _order_desc(t_16i, 12)
 			ord_24i_A = _order_reverse_group_asc(t_24i[hba_24i_A["Bus Address"]], 12)
@@ -806,10 +928,6 @@ def alias_f8(server,alias_template,phy_order):
 			bus_24i_A = hba_24i_A["Bus Address"]
 			bus_24i_B = hba_24i_B["Bus Address"]
 			bus_24i_C = hba_24i_C["Bus Address"]
-
-			def _alias(row, bay, bus, target):
-				return "alias {r}-{b} /dev/disk/by-path/pci-{addr}-scsi-0:0:{t}:0\n".format(
-					r=row, b=bay, addr=bus, t=target)
 
 			# Row 1: 16i (bays 1-12)  +  24i_A (bays 13-20)
 			for j in range(12):
