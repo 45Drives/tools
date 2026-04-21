@@ -24,7 +24,7 @@ g_product_lut_idx = {
 }
 
 # g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","NVME-F8X1","NVME-F8X2","NVME-F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","STUDIO15","HL15_BEAST","F16","VM2"]
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","NVME-F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","STUDIO15","HL15_BEAST","F16","VM2","2UGW_REV2","X15"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","NVME-F8X1","NVME-F8X2","NVME-F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","STUDIO15","HL15_BEAST","F16","VM2","2UGW_REV2","X15"]
 
 g_mobo_to_version_lut = {
 	"Base": ["X11SPH-nCTF","X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000", "MW34-SP0-00"],
@@ -118,19 +118,19 @@ g_product_lut = {
 	"Storinator-F8X3-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,3,0,"F8X1","F8"],
 	"Storinator-F8X3-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,3,0,"F8X1","F8"],
  
-	# "Storinator-NVME-F8X1-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,1,1,"NVME-F8X1","F8"],
-	# "Storinator-NVME-F8X1-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,1,1,"NVME-F8X1","F8"],
-	# "Storinator-NVME-F8X1-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,1,1,"NVME-F8X1","F8"],
-	# "Storinator-NVME-F8X1-Enhanced-AMD":	[g_mobo_to_version_lut["Enhanced-AMD"]  ,1,1,"NVME-F8X1","F8"],
-	# "Storinator-NVME-F8X1-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,1,1,"NVME-F8X1","F8"],
-	# "Storinator-NVME-F8X1-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,1,1,"NVME-F8X1","F8"],
+	"Storinator-NVME-F8X1-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,1,1,"NVME-F8X1","F8"],
+	"Storinator-NVME-F8X1-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,1,1,"NVME-F8X1","F8"],
+	"Storinator-NVME-F8X1-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,1,1,"NVME-F8X1","F8"],
+	"Storinator-NVME-F8X1-Enhanced-AMD":	[g_mobo_to_version_lut["Enhanced-AMD"]  ,1,1,"NVME-F8X1","F8"],
+	"Storinator-NVME-F8X1-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,1,1,"NVME-F8X1","F8"],
+	"Storinator-NVME-F8X1-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,1,1,"NVME-F8X1","F8"],
  
-	# "Storinator-NVME-F8X2-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,2,1,"NVME-F8X2","F8"],
-	# "Storinator-NVME-F8X2-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,2,1,"NVME-F8X2","F8"],
-	# "Storinator-NVME-F8X2-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,2,1,"NVME-F8X2","F8"],
-	# "Storinator-NVME-F8X2-Enhanced-AMD":	[g_mobo_to_version_lut["Enhanced-AMD"]  ,2,1,"NVME-F8X2","F8"],
-	# "Storinator-NVME-F8X2-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,2,1,"NVME-F8X2","F8"],
-	# "Storinator-NVME-F8X2-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,2,1,"NVME-F8X2","F8"],
+	"Storinator-NVME-F8X2-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,2,1,"NVME-F8X2","F8"],
+	"Storinator-NVME-F8X2-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,2,1,"NVME-F8X2","F8"],
+	"Storinator-NVME-F8X2-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,2,1,"NVME-F8X2","F8"],
+	"Storinator-NVME-F8X2-Enhanced-AMD":	[g_mobo_to_version_lut["Enhanced-AMD"]  ,2,1,"NVME-F8X2","F8"],
+	"Storinator-NVME-F8X2-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,2,1,"NVME-F8X2","F8"],
+	"Storinator-NVME-F8X2-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,2,1,"NVME-F8X2","F8"],
 
 	"Storinator-NVME-F8X3-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,3,1,"NVME-F8X3","F8"],
 	"Storinator-NVME-F8X3-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,3,1,"NVME-F8X3","F8"],
@@ -1276,6 +1276,20 @@ def main():
 	# get OS NAME and OS VERSION_ID
 	server["OS NAME"], server["OS VERSION_ID"] = get_os()
 	update_json_file(server,scan_time)
+
+	# Create/remove fan controller sentinel file for Cockpit menu visibility
+	fan_controller_sentinel = "/etc/45drives/fan-controller-supported"
+	if server["Chassis Size"] in ["NVME-F8X1", "NVME-F8X2", "NVME-F8X3"]:
+		try:
+			open(fan_controller_sentinel, "w").close()
+		except Exception as e:
+			print("/opt/45drives/tools/server_identifier: Failed to create fan controller sentinel: " + str(e))
+	else:
+		try:
+			if os.path.exists(fan_controller_sentinel):
+				os.remove(fan_controller_sentinel)
+		except Exception as e:
+			print("/opt/45drives/tools/server_identifier: Failed to remove fan controller sentinel: " + str(e))
 
 	# warn user if improper number of HBA cards are detected.
 	if server["Model"] in g_product_lut:
