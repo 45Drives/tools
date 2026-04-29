@@ -14,6 +14,7 @@ import sys
 import shlex
 import glob
 import configparser
+from xmlrpc import server
 
 g_product_lut_idx = {
 	"MOBO_MODEL":	0,
@@ -722,7 +723,7 @@ def hba_lspci(server):
 		"9660-16i", "9361-16i", "9361-24i"
 	]
 
-	if server["Motherboard"]["Product Name"] == "MS73-HB0-000":
+	if server["Motherboard"]["Product Name"] in ["MS73-HB0-000", "MS73-HB2-000"]:
 		rx_pci=re.compile(
 		r"^((?:[0-9A-Fa-f]{4}:)?[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}\.[0-9A-Fa-f]).*\n"
 		r"\tSubsystem: .*?(9600-16i|9600-24i|SAS9305-16i|SAS9305-24i|"
