@@ -5,7 +5,7 @@
     "description": "cli tools for 45Drives server products",
     "version": "4.0.42",
     "build_number": "1",
-    "stable": true,
+    "stable": false,
     "author": "Brett Kelly <bkelly@45drives.com>",
     "git_url": "https://github.com/45Drives/ceph-ansible-45d",
     "license": "GPL-3.0+",
