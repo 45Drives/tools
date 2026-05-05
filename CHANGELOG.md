@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.41-1
+## 45drives-tools 4.0.42-1
 
-* Updates hba_lspci function's mobo strings to support MS73-HB2-000
+* adds GENOAD8X-2T/BCM mobo
