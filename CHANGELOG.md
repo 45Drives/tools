@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.42-1
+## 45drives-tools 4.0.43-1
 
-* adds GENOAD8X-2T/BCM mobo
+* Adds manual override mode to server_identifier and fixes some fru data matching issues
