@@ -28,7 +28,8 @@
             "hdparm",
             "udev",
             "lsscsi",
-            "python3-pyudev"
+            "python3-pyudev",
+            "mpi3mr-dkms"
         ],
         "rocky_common": [
             "ipmitool",
@@ -39,7 +40,8 @@
             "pciutils",
             "hdparm",
             "lsscsi",
-            "python3-pyudev"
+            "python3-pyudev",
+            "mpi3mr-dkms"
         ]
     },
     "builds": [
