@@ -1,3 +1,9 @@
+45drives-tools (4.0.43-1focal) focal; urgency=medium
+
+  * fix NVMe Hybrid support
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 11 May 2026 08:36:47 -0300
+
 45drives-tools (4.0.42-1focal) focal; urgency=medium
 
   * adds GENOAD8X-2T/BCM mobo
