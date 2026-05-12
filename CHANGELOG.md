@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.43-1
+## 45drives-tools 4.0.43-2
 
-* fix NVMe Hybrid support
+* Adds support for VM8-G2 and fixes nvme hybrid mapping issues

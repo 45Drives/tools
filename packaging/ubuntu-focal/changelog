@@ -1,3 +1,9 @@
+45drives-tools (4.0.43-2focal) focal; urgency=medium
+
+  * Adds support for VM8-G2 and fixes nvme hybrid mapping issues
+
+ -- Jordan Keough <jkeough@45drives.com>  Tue, 12 May 2026 08:28:15 -0300
+
 45drives-tools (4.0.43-1focal) focal; urgency=medium
 
   * fix NVMe Hybrid support
