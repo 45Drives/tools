@@ -24,7 +24,6 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-# g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","NVME-F8X1","NVME-F8X2","NVME-F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","STUDIO15","HL15_BEAST","F16","VM2"]
 g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","NVME-F8X1","NVME-F8X2","NVME-F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","STUDIO15","HL15_BEAST","F16","VM2","2UGW_REV2","X15"]
 
 g_mobo_to_version_lut = {
@@ -271,6 +270,10 @@ g_product_lut = {
 	"Proxinator-VM8-15mm-Base":			[g_mobo_to_version_lut["Base"]  ,0,2,"VM8","F2STORNADO"],
 	"Proxinator-VM8-15mm-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,2,"VM8","F2STORNADO"],
 	"Proxinator-VM8-15mm-Turbo":		[g_mobo_to_version_lut["Turbo"]  ,0,2,"VM8","F2STORNADO"],
+
+	"Proxinator-VM8-2G-Base":				[g_mobo_to_version_lut["Good"]  ,0,1,"VM8","F2STORNADO"],
+	"Proxinator-VM8-2G-Enhanced":			[g_mobo_to_version_lut["Better"]  ,0,1,"VM8","F2STORNADO"],
+	"Proxinator-VM8-2G-Turbo":				[g_mobo_to_version_lut["Best"]  ,0,1,"VM8","F2STORNADO"],
 
 	"Proxinator-VM4-15mm-Base":			[g_mobo_to_version_lut["Base"]  ,0,1,"VM4","F2STORNADO"],
 	"Proxinator-VM4-15mm-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,1,"VM4","F2STORNADO"],
