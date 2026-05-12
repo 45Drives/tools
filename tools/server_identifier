@@ -16,6 +16,9 @@ import glob
 import configparser
 from xmlrpc import server
 
+MANUAL_OVERRIDE_FILE = "/etc/45drives/server_info/manual_model_override.txt"
+UNKNOWN_VALUES = set(["", "?", "N/A", "NA", "NONE", "NULL", "UNKNOWN"])
+
 g_product_lut_idx = {
 	"MOBO_MODEL":	0,
 	"24I_COUNT":	1,
@@ -409,7 +412,7 @@ def motherboard():
 		exit(1)
 	for line in dmi_result:
 		for field in mobo_dict.keys():
-			regex = re.search("^\s+({fld}):\s+(.*)".format(fld=field),line)
+			regex = re.search(r"^\s+({fld}):\s+(.*)".format(fld=field),line)
 			if regex != None:
 					mobo_dict[regex.group(1)] = regex.group(2)
 
@@ -425,7 +428,7 @@ def motherboard():
 			print("ERROR: ipmitool fru failed to return result.")
 		for line in fru_result:
 			for field in ["Board Mfg", "Board Product", "Board Serial"]:
-				regex = re.search("^\s+({fld})\s+:\s+(.*)".format(fld=field),line)
+				regex = re.search(r"^\s+({fld})\s+:\s+(.*)".format(fld=field),line)
 				if regex != None:
 					if regex.group(1) == "Board Mfg":
 						mobo_dict["Manufacturer"] = regex.group(2)
@@ -912,38 +915,344 @@ def serial_check():
 	ipmi_result = subprocess.Popen(["ipmitool","fru","print","0"],stdout=subprocess.PIPE,universal_newlines=True).stdout
 	for line in ipmi_result:
 		for field in serial_fields:
-			regex = re.search("({fld})\s+:\s+(\S+)".format(fld=field),line)
+			regex = re.search(r"({fld})\s+:\s+(\S+)".format(fld=field),line)
 			if regex != None:
 				serial_result[regex.group(1)] = regex.group(2)
 	return serial_result
 
-def determine_model(mobo_model_str,hba_dict_lst,chassis_size_str):
-	# Use the detected hardware to identify whe model of storinator if it was serialised using the old 
-	# serialization tool.
+
+def _is_unknown(value):
+	if value is None:
+		return True
+	try:
+		return str(value).strip().upper() in UNKNOWN_VALUES
+	except Exception:
+		return True
+
+def _hba_counts_from_list(hba_dict_lst):
 	hba_16i_count = 0
 	hba_24i_count = 0
 
-	model = "?"
+
 	for card in hba_dict_lst:
-		if card["Drive Connections"] == 16:
+		try:
+			drive_connections = int(card.get("Drive Connections", 0))
+		except Exception:
+			drive_connections = 0
+		if drive_connections == 16:
 			hba_16i_count += 1
-		elif card["Drive Connections"] == 24:
+		elif drive_connections == 24:
 			hba_24i_count += 1
+	return hba_16i_count, hba_24i_count
+
+def _model_matches_known_hardware(model_name, mobo_model_str, hba_16i_count, hba_24i_count, chassis_size_str):
+	"""
+	Return True when a saved/manual model is compatible with the currently-known
+	hardware. Unknown hardware fields are not treated as mismatches.
+	"""
+	model_name = normalize_model_key(model_name)
+	if model_name not in g_product_lut:
+		return False
+
+	model_data = g_product_lut[model_name]
+
+	if not _is_unknown(mobo_model_str):
+		if mobo_model_str not in model_data[g_product_lut_idx["MOBO_MODEL"]]:
+			return False
+
+	if not _is_unknown(chassis_size_str):
+		if normalize_chassis_size(chassis_size_str) != model_data[g_product_lut_idx["CHASSIS_SIZE"]]:
+			return False
+
+	# HBA counts are useful even when the motherboard/chassis data is missing.
+	try:
+		if int(model_data[g_product_lut_idx["16I_COUNT"]]) != int(hba_16i_count):
+			return False
+		if int(model_data[g_product_lut_idx["24I_COUNT"]]) != int(hba_24i_count):
+			return False
+	except Exception:
+		return False
+
+	return True
+
+def _read_manual_model_override(mobo_model_str, hba_16i_count, hba_24i_count, chassis_size_str, ignore_manual_override=False):
+	"""
+	Read a saved manual model override. Supports both the old raw-text format and
+	the newer JSON format. Returns "?" when there is no valid compatible override.
+	"""
+	if ignore_manual_override:
+		return "?"
+
+	if not os.path.exists(MANUAL_OVERRIDE_FILE):
+		return "?"
+
+	try:
+		with open(MANUAL_OVERRIDE_FILE, "r") as f:
+			raw = f.read().strip()
+	except Exception as e:
+		print("/opt/45drives/tools/server_identifier: Warning: Could not read manual model override: {}".format(e))
+		return "?"
+
+	if not raw:
+		return "?"
+
+	model_name = raw
+	try:
+		data = json.loads(raw)
+		if isinstance(data, dict):
+			model_name = data.get("model", "?")
+	except Exception:
+		# Legacy format: file contains only the model name.
+		model_name = raw
+
+	model_name = normalize_model_key(str(model_name).strip())
+	if model_name not in g_product_lut:
+		print("/opt/45drives/tools/server_identifier: Warning: Ignoring unrecognized manual model override '{}'".format(model_name))
+		return "?"
+
+	if not _model_matches_known_hardware(model_name, mobo_model_str, hba_16i_count, hba_24i_count, chassis_size_str):
+		print("/opt/45drives/tools/server_identifier: Warning: Ignoring manual model override '{}' because it does not match detected hardware".format(model_name))
+		return "?"
+
+	print("/opt/45drives/tools/server_identifier: Using saved manual model selection: {}".format(model_name))
+	print("/opt/45drives/tools/server_identifier: (To change, delete: {})".format(MANUAL_OVERRIDE_FILE))
+	return model_name
+
+def _write_manual_model_override(model_name, mobo_model_str, hba_16i_count, hba_24i_count, chassis_size_str):
+	model_name = normalize_model_key(str(model_name).strip())
+	if model_name not in g_product_lut:
+		raise ValueError("Unrecognized model '{}'".format(model_name))
+
+	data = {
+		"model": model_name,
+		"motherboard": mobo_model_str,
+		"hba_16i_count": int(hba_16i_count),
+		"hba_24i_count": int(hba_24i_count),
+		"chassis_size": normalize_chassis_size(chassis_size_str),
+		"created_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+		"created_by": "server_identifier manual selection"
+	}
+
+	os.makedirs(os.path.dirname(MANUAL_OVERRIDE_FILE), exist_ok=True)
+	with open(MANUAL_OVERRIDE_FILE, "w") as f:
+		json.dump(data, f, indent=2, sort_keys=True)
+		f.write("\n")
+
+
+def _candidate_models_for_hardware(mobo_model_str, hba_16i_count, hba_24i_count, chassis_size_str, include_mobo=True):
+	matches = []
+	chassis_size_str = normalize_chassis_size(chassis_size_str)
 
 	for sys_type in g_product_lut.keys():
-		if (mobo_model_str in g_product_lut[sys_type][g_product_lut_idx["MOBO_MODEL"]] and
-			g_product_lut[sys_type][g_product_lut_idx["24I_COUNT"]] == hba_24i_count and
-			g_product_lut[sys_type][g_product_lut_idx["16I_COUNT"]] == hba_16i_count and
-			g_product_lut[sys_type][g_product_lut_idx["CHASSIS_SIZE"]] == chassis_size_str):
-				model = sys_type
+		if sys_type in ["?", "Storinator"]:
+			continue
+		model_data = g_product_lut[sys_type]
+		if include_mobo and not _is_unknown(mobo_model_str):
+			if mobo_model_str not in model_data[g_product_lut_idx["MOBO_MODEL"]]:
+				continue
+		if int(model_data[g_product_lut_idx["24I_COUNT"]]) != int(hba_24i_count):
+			continue
+		if int(model_data[g_product_lut_idx["16I_COUNT"]]) != int(hba_16i_count):
+			continue
+		if not _is_unknown(chassis_size_str):
+			if model_data[g_product_lut_idx["CHASSIS_SIZE"]] != chassis_size_str:
+				continue
+		matches.append(sys_type)
+
+	return matches
+
+def _model_sort_key(model_name, chassis_size_str):
+	"""
+	Sort ambiguous hardware matches deterministically. Prefer storage-family names
+	that are safer for aliasing, and prefer direct chassis models like
+	Storinator-Q30-* over hybrid aliases like Storinator-H8-Q30-* when hardware
+	alone cannot distinguish them.
+	"""
+	product_priority = ["Storinator", "Stornado", "HomeLab", "Professional", "Studio", "Proxinator", "Gateway", "Compute", "Destroyinator", "Archivinator"]
+	version_priority = ["Base", "Base-B", "Enhanced", "Enhanced-S", "Enhanced-AMD", "Good", "Better", "Best", "Super", "Turbo", "Turbo-G"]
+	parts = model_name.split("-")
+	family = parts[0] if parts else model_name
+	try:
+		family_score = product_priority.index(family)
+	except ValueError:
+		family_score = len(product_priority)
+
+	chassis_size_str = normalize_chassis_size(chassis_size_str)
+	# Direct model layout: Storinator-Q30-Enhanced. Hybrid/other layout:
+	# Storinator-H8-Q30-Enhanced. When all else is equal, choose direct.
+	direct_chassis_score = 0
+	if len(parts) > 1 and parts[1] == chassis_size_str:
+		direct_chassis_score = -1
+
+	version_score = len(version_priority)
+	for idx, version in enumerate(version_priority):
+		if model_name.endswith("-" + version):
+			version_score = idx
+			break
+
+	return (family_score, direct_chassis_score, version_score, model_name)
+
+def manual_model_selection(mobo_model_str, hba_16i_count, hba_24i_count, chassis_size_str, allow_prompt=True, ignore_manual_override=False):
+	"""
+	Interactive manual model selection when automatic detection fails.
+	Returns selected model name or "?" if user declines/non-interactive.
+	Saved overrides are checked even in non-interactive mode so dmap can use them.
+	"""
+	saved_model = _read_manual_model_override(
+		mobo_model_str,
+		hba_16i_count,
+		hba_24i_count,
+		chassis_size_str,
+		ignore_manual_override=ignore_manual_override
+	)
+	if saved_model != "?":
+		return saved_model
+
+	if not allow_prompt:
+		return "?"
+
+	# Check if running interactively only after checking saved overrides. dmap is
+	# non-interactive, but it should still honor a saved compatible override.
+	if not sys.stdin.isatty():
+		print("/opt/45drives/tools/server_identifier: Running non-interactively, cannot prompt for manual selection")
+		return "?"
+
+	print("\n" + "="*80)
+	print("MANUAL MODEL SELECTION")
+	print("="*80)
+	print("\nDetected Hardware Configuration:")
+	print("  Motherboard:      {}".format(mobo_model_str if not _is_unknown(mobo_model_str) else "Unknown"))
+	print("  24i HBA Cards:    {}".format(hba_24i_count))
+	print("  16i HBA Cards:    {}".format(hba_16i_count))
+	print("  Chassis Size:     {}".format(chassis_size_str if not _is_unknown(chassis_size_str) else "Unknown"))
+
+	possible_models = _candidate_models_for_hardware(
+		mobo_model_str,
+		hba_16i_count,
+		hba_24i_count,
+		chassis_size_str,
+		include_mobo=True
+	)
+
+	if not possible_models:
+		possible_models = _candidate_models_for_hardware(
+			"?",
+			hba_16i_count,
+			hba_24i_count,
+			chassis_size_str,
+			include_mobo=False
+		)
+
+	if not possible_models:
+		possible_models = [m for m in sorted(g_product_lut.keys()) if m not in ["?", "Storinator"]]
+
+	possible_models = sorted(possible_models, key=lambda m: _model_sort_key(m, chassis_size_str))
+
+	print("\n" + "-"*80)
+	print("Available Models (showing {}){}:".format(
+		len(possible_models),
+		" matching your hardware" if len(possible_models) < len(g_product_lut) - 2 else ""
+	))
+	print("-"*80)
+
+	for idx, model in enumerate(possible_models, 1):
+		model_data = g_product_lut[model]
+		print("{:3d}. {:45s} [Chassis: {:10s}, HBAs: {}x24i + {}x16i]".format(
+			idx,
+			model,
+			model_data[g_product_lut_idx["CHASSIS_SIZE"]],
+			model_data[g_product_lut_idx["24I_COUNT"]],
+			model_data[g_product_lut_idx["16I_COUNT"]]
+		))
+
+	print("\n  0. Skip manual selection (use generic 'Storinator')")
+	print("="*80)
+
+	while True:
+		try:
+			choice = input("\nSelect model number (0-{}): ".format(len(possible_models)))
+			choice_num = int(choice.strip())
+
+			if choice_num == 0:
+				print("Manual selection skipped.")
+				return "?"
+			elif 1 <= choice_num <= len(possible_models):
+				selected_model = possible_models[choice_num - 1]
+				confirm = input("Confirm selection: '{}' (y/n): ".format(selected_model))
+				if confirm.lower() in ['y', 'yes']:
+					save_choice = input("Save this selection permanently? (y/n): ")
+					if save_choice.lower() in ['y', 'yes']:
+						try:
+							_write_manual_model_override(selected_model, mobo_model_str, hba_16i_count, hba_24i_count, chassis_size_str)
+							print("Selection saved to: {}".format(MANUAL_OVERRIDE_FILE))
+							print("(To change later, delete this file or run server_identifier --clear-manual-model)")
+						except Exception as e:
+							print("Warning: Could not save selection: {}".format(e))
+
+					print("Selected model: {}".format(selected_model))
+					return selected_model
+				else:
+					print("Selection cancelled, try again.")
+			else:
+				print("Invalid selection. Enter a number between 0 and {}".format(len(possible_models)))
+		except ValueError:
+			print("Invalid input. Please enter a number.")
+		except (KeyboardInterrupt, EOFError):
+			print("\nManual selection cancelled.")
+			return "?"
+
+def determine_model(mobo_model_str, hba_dict_lst, chassis_size_str, allow_manual_prompt=True, ignore_manual_override=False, quiet=False, fallback_to_generic=True):
+	# Use the detected hardware to identify the model if the system was serialized
+	# using an old/unrecognized serialization format.
+	hba_16i_count, hba_24i_count = _hba_counts_from_list(hba_dict_lst)
+	matches = _candidate_models_for_hardware(
+		mobo_model_str,
+		hba_16i_count,
+		hba_24i_count,
+		chassis_size_str,
+		include_mobo=True
+	)
+
+	manual_override = _read_manual_model_override(
+		mobo_model_str,
+		hba_16i_count,
+		hba_24i_count,
+		chassis_size_str,
+		ignore_manual_override=ignore_manual_override
+	)
+	if manual_override != "?":
+		return manual_override
+
+	model = "?"
+	if len(matches) > 0:
+		matches = sorted(matches, key=lambda m: _model_sort_key(m, chassis_size_str))
+		model = matches[0]
+		if len(matches) > 1 and not quiet:
+			print("/opt/45drives/tools/server_identifier: Multiple hardware matches found: {}".format(", ".join(matches)))
+			print("/opt/45drives/tools/server_identifier: Selected '{}' based on product/chassis priority".format(model))
 
 	if model == "?":
+		if quiet:
+			return "?"
+
 		if mobo_model_str != "?":
 			print("/opt/45drives/tools/server_identifier: !! WARNING !! " + mobo_model_str + " Motherboard is not supported for Automatic Identification.")
 		print("/opt/45drives/tools/server_identifier: !! WARNING !! Automatic Identification failed. ")
-		print("/opt/45drives/tools/server_identifier: Setting Model to \"Storinator(Generic)\"")
-		# TODO: ADD A MANUAL SELECTION TOOL HERE
-		model = "Storinator"
+
+		model = manual_model_selection(
+			mobo_model_str,
+			hba_16i_count,
+			hba_24i_count,
+			chassis_size_str,
+			allow_prompt=allow_manual_prompt,
+			ignore_manual_override=ignore_manual_override
+		)
+
+		if model == "?":
+			if not fallback_to_generic:
+				return "?"
+			print("/opt/45drives/tools/server_identifier: Setting Model to \"Storinator(Generic)\"")
+			model = "Storinator"
 
 	return model
 
@@ -1051,8 +1360,11 @@ def vm_check(mobo_dict):
 	return (mobo_dict["Manufacturer"] == "?" and mobo_dict["Product Name"] == "?" and mobo_dict["Serial Number"] == "?")
 
 def old_serial(serial_result):
-	for field in serial_result.keys():
-		if serial_result[field] == "N/A":
+	# Only treat as old/invalid serial if CRITICAL fields are N/A.
+	# Asset Tag, Product Version, etc. being N/A is acceptable.
+	critical_fields = ["Product Name", "Product Serial", "Product Part Number"]
+	for field in critical_fields:
+		if field in serial_result and serial_result[field] == "N/A":
 			return True
 	return False
 
@@ -1072,7 +1384,7 @@ def vm_passthrough(server):
 		exit(1)
 	for hba_card in server["HBA"]:
 		for line in lspci_result:
-			regex = re.search("^({addr}).*{adap}".format(addr=hba_card["Bus Address"],adap=hba_card["Adapter"]),line)
+			regex = re.search(r"^({addr}).*{adap}".format(addr=hba_card["Bus Address"],adap=hba_card["Adapter"]),line)
 			if regex != None:
 				hba_card["Bus Address"] = "0000:" + regex.group(1)
 
@@ -1120,7 +1432,7 @@ def get_os():
 		os_release_file.close()
 		for line in os_release_lines:
 			for field in os_release_fields.keys():
-				regex = re.search("^({fld})=".format(fld=field) + '\"(.+?)\"',line)
+				regex = re.search(r"^({fld})=".format(fld=field) + '\"(.+?)\"',line)
 				if regex != None:
 					os_release_fields[regex.group(1)] = regex.group(2)
 
@@ -1189,12 +1501,30 @@ def infer_homelab_model_from_sysfs_ports(allowed_mobos=None, detected_mobo_name=
     return (None, None)
 
 def normalize_model_key(model_name):
-	# Some firmware revisions report REV2 with dashes instead of underscores.
-	# Normalize to the LUT naming so lookups remain stable.
+	# Normalize user/firmware/FRU Product Name strings to LUT keys where safe.
+	if model_name is None:
+		return "?"
+	model_name = str(model_name).strip()
+	if _is_unknown(model_name):
+		return "?"
 	if model_name in g_product_lut:
 		return model_name
+
+	# Some firmware revisions report REV2 with dashes instead of underscores.
 	if "-REV2-" in model_name:
-		return model_name.replace("-REV2-", "_REV2-")
+		candidate = model_name.replace("-REV2-", "_REV2-")
+		if candidate in g_product_lut:
+			return candidate
+
+	# Accept a common human-entered form with spaces instead of dashes.
+	candidate = re.sub(r"\s+", "-", model_name)
+	if candidate in g_product_lut:
+		return candidate
+	if "-REV2-" in candidate:
+		candidate_rev2 = candidate.replace("-REV2-", "_REV2-")
+		if candidate_rev2 in g_product_lut:
+			return candidate_rev2
+
 	return model_name
 
 def normalize_chassis_size(chassis_size):
@@ -1204,6 +1534,69 @@ def normalize_chassis_size(chassis_size):
 	return chassis_size
 
 def main():
+	# Parse command line arguments
+	import argparse
+	parser = argparse.ArgumentParser(
+		description='Identify 45Drives server model and configuration',
+		formatter_class=argparse.RawDescriptionHelpFormatter
+	)
+	# Internal test hook intentionally disabled for production builds.
+	# Re-enable only in a development branch if interactive menu testing is needed.
+	# parser.add_argument(
+	# 	'--test-manual-selection',
+	# 	action='store_true',
+	# 	help='Force manual model selection (for testing)'
+	# )
+	parser.add_argument(
+		'--set-manual-model',
+		metavar='MODEL',
+		help='Save MODEL as the manual fallback model override and exit'
+	)
+	parser.add_argument(
+		'--clear-manual-model',
+		action='store_true',
+		help='Remove the saved manual model override and exit'
+	)
+	parser.add_argument(
+		'--ignore-manual-override',
+		action='store_true',
+		help='Ignore any saved manual model override for this run'
+	)
+	parser.add_argument(
+		'--no-manual-prompt',
+		action='store_true',
+		help='Do not prompt for manual model selection even if running interactively'
+	)
+	args, unknown_args = parser.parse_known_args()
+	if unknown_args:
+		print("/opt/45drives/tools/server_identifier: Warning: Ignoring unknown arguments: {}".format(" ".join(unknown_args)))
+
+	if args.clear_manual_model:
+		try:
+			if os.path.exists(MANUAL_OVERRIDE_FILE):
+				os.remove(MANUAL_OVERRIDE_FILE)
+				print("/opt/45drives/tools/server_identifier: Removed manual model override: {}".format(MANUAL_OVERRIDE_FILE))
+			else:
+				print("/opt/45drives/tools/server_identifier: No manual model override exists: {}".format(MANUAL_OVERRIDE_FILE))
+		except Exception as e:
+			print("/opt/45drives/tools/server_identifier: Failed to remove manual model override: {}".format(e))
+			exit(1)
+		exit(0)
+
+	if args.set_manual_model:
+		manual_model = normalize_model_key(args.set_manual_model)
+		if manual_model not in g_product_lut:
+			print("/opt/45drives/tools/server_identifier: Unrecognized model '{}'".format(args.set_manual_model))
+			exit(1)
+		try:
+			_write_manual_model_override(manual_model, "?", 0, 0, "?")
+			print("/opt/45drives/tools/server_identifier: Saved manual model override: {}".format(manual_model))
+			print("/opt/45drives/tools/server_identifier: Override file: {}".format(MANUAL_OVERRIDE_FILE))
+		except Exception as e:
+			print("/opt/45drives/tools/server_identifier: Failed to save manual model override: {}".format(e))
+			exit(1)
+		exit(0)
+
 	server = {
 		"Motherboard":"?",
 		"HBA":[],
@@ -1234,8 +1627,46 @@ def main():
 		serial_result = serial_check()
 		server["Serial"] = serial_result["Product Serial"].upper()
 		server["Chassis Size"] = normalize_chassis_size(serial_result["Product Part Number"].upper())
-		server["Model"] = determine_model(server["Motherboard"]["Product Name"],server["HBA"],server["Chassis Size"]) if old_serial(serial_result) else serial_result["Product Name"]
-	
+		# server["Model"] = determine_model(server["Motherboard"]["Product Name"],server["HBA"],server["Chassis Size"]) if old_serial(serial_result) else serial_result["Product Name"]
+
+		# Determine model: prefer FRU Product Name if valid, otherwise detect from hardware.
+		# serial45d writes the authoritative model to Product Name. Hardware-only
+		# matching cannot reliably distinguish some Q30 Storinator/Destroyinator/etc.
+		# variants, so do not discard a valid FRU Product Name because optional FRU
+		# fields such as Product Asset Tag are N/A.
+		fru_product_name_raw = serial_result.get("Product Name", "")
+		fru_product_name = normalize_model_key(fru_product_name_raw)
+
+		if fru_product_name in g_product_lut:
+			server["Model"] = fru_product_name
+			print("/opt/45drives/tools/server_identifier: Using Product Name from FRU: {}".format(fru_product_name))
+
+			# Hardware detection is used only as a sanity check here. It must not
+			# override a valid FRU Product Name because ambiguous hardware can map to
+			# multiple products.
+			hardware_model = determine_model(
+				server["Motherboard"].get("Product Name", "?"),
+				server["HBA"],
+				server["Chassis Size"],
+				allow_manual_prompt=False,
+				ignore_manual_override=True,
+				quiet=True,
+				fallback_to_generic=False
+			)
+			if hardware_model not in ["?", "Storinator", fru_product_name]:
+				print("/opt/45drives/tools/server_identifier: !! WARNING !! FRU Product Name '{}' differs from hardware-detected '{}'".format(fru_product_name, hardware_model))
+		else:
+			if not _is_unknown(fru_product_name_raw):
+				print("/opt/45drives/tools/server_identifier: FRU Product Name '{}' not found in product lookup table".format(fru_product_name_raw))
+			print("/opt/45drives/tools/server_identifier: Detecting model from hardware configuration...")
+			server["Model"] = determine_model(
+				server["Motherboard"].get("Product Name", "?"),
+				server["HBA"],
+				server["Chassis Size"],
+				allow_manual_prompt=(not args.no_manual_prompt),
+				ignore_manual_override=args.ignore_manual_override
+			)
+   
  	# If we don't have IPMI and fell back to a generic Product Name,
 	# try to infer if unit is HL4/HL8 from the actual SATA topology.
 	mobo_name = server["Motherboard"].get("Product Name","")
@@ -1254,6 +1685,37 @@ def main():
 	if server["Model"] == "?":
 		if len(server["HBA"]) > 0 and server["VM"]:
 			vm_passthrough(server) 			# VM with hba pass through detected, update server accordingly
+   
+	# Internal test hook intentionally disabled for production builds.
+	# The manual selection menu is still reachable automatically when FRU and
+	# hardware identification fail on an interactive terminal, and saved manual
+	# overrides can still be managed with --set-manual-model/--clear-manual-model.
+	# if args.test_manual_selection:
+	# 	print("\n" + "="*80)
+	# 	print("TEST MODE: Forcing manual model selection")
+	# 	print("="*80)
+	# 	print("Current detection results:")
+	# 	print("  Model: {}".format(server["Model"]))
+	# 	print("  Chassis Size: {}".format(server["Chassis Size"]))
+	# 	print("  Motherboard: {}".format(server["Motherboard"].get("Product Name", "?")))
+	# 	print("  HBAs: {}".format(len(server.get("HBA", []))))
+		
+	# 	# Count HBAs
+	# 	hba_16i = sum(1 for hba in server.get("HBA", []) if hba.get("Drive Connections") == 16)
+	# 	hba_24i = sum(1 for hba in server.get("HBA", []) if hba.get("Drive Connections") == 24)
+		
+	# 	# Trigger manual selection
+	# 	manual_model = manual_model_selection(
+	# 		server["Motherboard"].get("Product Name", "?"),
+	# 		hba_16i,
+	# 		hba_24i,
+	# 		server["Chassis Size"],
+	# 		allow_prompt=True,
+	# 		ignore_manual_override=args.ignore_manual_override
+	# 	)
+	# 	if manual_model != "?":
+	# 		server["Model"] = manual_model
+	# 		print("\nTest mode: Model set to: {}".format(manual_model))
 
 	server["Model"] = normalize_model_key(server["Model"])
 	server["Chassis Size"] = normalize_chassis_size(server["Chassis Size"])
