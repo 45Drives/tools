@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.43-1
+## 45drives-tools 4.0.44-1
 
-* fix NVMe Hybrid support
+* Fix /etc/vdev_id.conf generation / patching by UBM udev rules
