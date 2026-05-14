@@ -1,3 +1,9 @@
+45drives-tools (4.0.45-1focal) focal; urgency=medium
+
+  * Fix slot name order for NVMe F8X
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 14 May 2026 14:06:25 -0300
+
 45drives-tools (4.0.44-1focal) focal; urgency=medium
 
   * Fix /etc/vdev_id.conf generation / patching by UBM udev rules
