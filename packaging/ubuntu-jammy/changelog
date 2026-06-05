@@ -1,3 +1,9 @@
+45drives-tools (4.0.46-1jammy) jammy; urgency=medium
+
+  * Adds new GENOAD8UD-2T/X550 mobo for VM2
+
+ -- Jordan Keough <jkeough@45drives.com>  Fri, 05 Jun 2026 08:44:56 -0300
+
 45drives-tools (4.0.45-1jammy) jammy; urgency=medium
 
   * Fix slot name order for NVMe F8X
