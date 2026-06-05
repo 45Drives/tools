@@ -44,7 +44,7 @@ generate_vdev_id_conf() {
   [[ ! -f "$VDEV_ID_CONF" ]] && generate_vdev_id_conf
   FOUND_LINE=false
   TMPFILE=$(mktemp)
-  LINE_TEST="^alias $SLOT_NAME"
+  LINE_TEST="^alias $SLOT_NAME "
   while IFS="" read -r line || [ -n "$line" ]; do
     if [[ "$line" =~ $LINE_TEST ]]; then
       FOUND_LINE=true

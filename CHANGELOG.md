@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.43-2
+## 45drives-tools 4.0.45-1
 
-* Adds support for VM8-G2 and fixes nvme hybrid mapping issues
+* Fix slot name order for NVMe F8X
