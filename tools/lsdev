@@ -389,6 +389,7 @@ def build_server(options):
 		},
 		"BYPATH": {
 			"VM2":[2],
+			"E16":[16]
 		}
 	}
 	CURRENT_ROW = 0
