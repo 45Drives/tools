@@ -28,12 +28,31 @@ def get_chassis_size_and_mobo() -> Optional[Tuple[str, str]]:
 def get_alias_pcieport_parents(
     chassis_size: str, mobo: str
 ) -> Optional[List[Dict[str, str]]]:
+    # This is a lookup table for custom alias servers. It maps the chassis size and motherboard product name to a mapping of PCIe port sys_name to the desired alias.
+    # The PCIe port sys_name is the address of the pcieport device in the sysfs tree, which can be found by traversing the ancestors of a device by
+    # running `udevadm info -a /dev/nvme0n1` and looking for the first ancestor with a driver of "pcieport". These addresses will be different for each motherboard model,
+    # but should be consistent for a given motherboard model.
+    #
+    # Format:
+    # Record<
+    #   ServerModel,
+    #   Record<
+    #       MotherboardProductName,
+    #       Record<
+    #           PCIePortSysName,
+    #           Alias
+    #       >
+    #   >
     lut_chassissize_mobo_to_aliases = {
         "VM2": {
             "ME03-CE0-000": {
                 "0000:40:03.1": "1-1",
                 "0000:40:03.2": "1-2",
-            }
+            },
+            "GENOAD8UD-2T/X550": {
+                "0000:40:03.3": "1-1",
+                "0000:40:03.4": "1-2",
+            },
         }
     }
     if chassis_size not in lut_chassissize_mobo_to_aliases:
