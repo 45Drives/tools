@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.45-1
+## 45drives-tools 4.0.46-1
 
-* Fix slot name order for NVMe F8X
+* Adds new GENOAD8UD-2T/X550 mobo for VM2
