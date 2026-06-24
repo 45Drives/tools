@@ -360,6 +360,10 @@ def hwraid_map(HBA,server):
 
 
 def alias_by_path(chassis_size, motherboard_product_name):
+    # This function does not actually work since the pcie addresses will change depending on what other
+    # pcie devices are present in the system.
+    # Update the get_alias_pcieport_parents() function in `id_disk_custom_alias` for BYPATH servers.
+    # This LUT can basically just have dummy data. The real alias lookup is done by 68-0-custom-aliases.rules and the `id_disk_custom_alias` script, not vdev_id.
 	lut_chassissize_mobo_to_aliases = {
 		"VM2": {
 			"ME03-CE0-000": [
