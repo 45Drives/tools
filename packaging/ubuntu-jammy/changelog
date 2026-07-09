@@ -1,3 +1,9 @@
+45drives-tools (4.0.47-1jammy) jammy; urgency=medium
+
+  * fix: correct debian-bookworm build image
+
+ -- Rachit Hans <rhans@45drives.com>  Wed, 08 Jul 2026 20:50:55 -0300
+
 45drives-tools (4.0.46-1jammy) jammy; urgency=medium
 
   * Adds new GENOAD8UD-2T/X550 mobo for VM2
