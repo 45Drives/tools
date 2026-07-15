@@ -1,52 +1,40 @@
-45drives-tools (4.0.47-1jammy) jammy; urgency=medium
+45drives-tools (4.0.47-1trixie) trixie; urgency=medium
 
   * fix: correct debian-bookworm build image
 
  -- Rachit Hans <rhans@45drives.com>  Wed, 08 Jul 2026 20:50:55 -0300
 
-45drives-tools (4.0.46-1jammy) jammy; urgency=medium
-
-  * Adds new GENOAD8UD-2T/X550 mobo for VM2
-
- -- Jordan Keough <jkeough@45drives.com>  Fri, 05 Jun 2026 08:44:56 -0300
-
-45drives-tools (4.0.45-1jammy) jammy; urgency=medium
+45drives-tools (4.0.45-1trixie) trixie; urgency=medium
 
   * Fix slot name order for NVMe F8X
 
  -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 14 May 2026 14:06:25 -0300
 
-45drives-tools (4.0.44-1jammy) jammy; urgency=medium
+45drives-tools (4.0.44-1trixie) trixie; urgency=medium
 
   * Fix /etc/vdev_id.conf generation / patching by UBM udev rules
 
  -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 14 May 2026 12:02:40 -0300
 
-45drives-tools (4.0.43-2jammy) jammy; urgency=medium
-
-  * Adds support for VM8-G2 and fixes nvme hybrid mapping issues
-
- -- Jordan Keough <jkeough@45drives.com>  Tue, 12 May 2026 08:28:15 -0300
-
-45drives-tools (4.0.43-1jammy) jammy; urgency=medium
+45drives-tools (4.0.43-1trixie) trixie; urgency=medium
 
   * fix NVMe Hybrid support
 
  -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 11 May 2026 08:36:47 -0300
 
-45drives-tools (4.0.42-1jammy) jammy; urgency=medium
+45drives-tools (4.0.42-1trixie) trixie; urgency=medium
 
   * adds GENOAD8X-2T/BCM mobo
 
  -- Jordan Keough <jkeough@45drives.com>  Tue, 05 May 2026 06:29:47 -0300
 
-45drives-tools (4.0.41-1jammy) jammy; urgency=medium
+45drives-tools (4.0.41-1trixie) trixie; urgency=medium
 
   * Updates hba_lspci function's mobo strings to support MS73-HB2-000
 
  -- Jordan Keough <jkeough@45drives.com>  Wed, 29 Apr 2026 11:01:39 -0300
 
-45drives-tools (4.0.40-1jammy) jammy; urgency=medium
+45drives-tools (4.0.40-1trixie) trixie; urgency=medium
 
   * Adds support for remaining NVME-F8X1 and NVME-F8X2 units, as well as fan-controller-supported
     sentinel file generation for conditionally showing the new fan-controller cockpit
@@ -54,235 +42,235 @@
 
  -- Jordan Keough <jkeough@45drives.com>  Tue, 21 Apr 2026 12:21:59 -0300
 
-45drives-tools (4.0.39-2jammy) jammy; urgency=medium
+45drives-tools (4.0.39-2trixie) trixie; urgency=medium
 
   * Updates MW34 board with accurate suffix (had 000 like other Giga boards but this
     one is 00)
 
  -- Jordan Keough <jkeough@45drives.com>  Fri, 17 Apr 2026 06:08:56 -0300
 
-45drives-tools (4.0.39-1jammy) jammy; urgency=medium
+45drives-tools (4.0.39-1trixie) trixie; urgency=medium
 
   * Adds support for new NVME-F8X3 and HomeLab X15 (Unraid Collab unit)
 
  -- Jordan Keough <jkeough@45drives.com>  Mon, 13 Apr 2026 07:57:38 -0300
 
-45drives-tools (4.0.38-2jammy) jammy; urgency=medium
+45drives-tools (4.0.38-2trixie) trixie; urgency=medium
 
   * Rebuilding with added github write perms
 
  -- Jordan Keough <jkeough@45drives.com>  Fri, 27 Feb 2026 09:12:36 -0400
 
-45drives-tools (4.0.38-1jammy) jammy; urgency=medium
+45drives-tools (4.0.38-1trixie) trixie; urgency=medium
 
   * Adds Studio15
 
  -- Jordan Keough <jkeough@45drives.com>  Fri, 27 Feb 2026 08:17:24 -0400
 
-45drives-tools (4.0.37-1jammy) jammy; urgency=medium
+45drives-tools (4.0.37-1trixie) trixie; urgency=medium
 
   * Removes lines preventing dmap from working on HL15
 
  -- Jordan Keough <jkeough@45drives.com>  Wed, 28 Jan 2026 10:00:53 -0400
 
-45drives-tools (4.0.36-2jammy) jammy; urgency=medium
+45drives-tools (4.0.36-2trixie) trixie; urgency=medium
 
   * Missed a commit in last merge, now has full fix for virtual nvme block devices
     (ubu20)
 
  -- Jordan Keough <jkeough@45drives.com>  Thu, 22 Jan 2026 06:06:59 -0400
 
-45drives-tools (4.0.36-1jammy) jammy; urgency=medium
+45drives-tools (4.0.36-1trixie) trixie; urgency=medium
 
   * Merges nvme drive mapping and loadtest fixes to handle custom nvme aliasing paths
     as seen on ubu20 systems
 
  -- Jordan Keough <jkeough@45drives.com>  Thu, 22 Jan 2026 05:31:52 -0400
 
-45drives-tools (4.0.35-1jammy) jammy; urgency=medium
+45drives-tools (4.0.35-1trixie) trixie; urgency=medium
 
   * Updates loadtest to properly detect non-standard custom nvme aliasing paths (as
     seen on ubu20 systems)
 
  -- Jordan Keough <jkeough@45drives.com>  Fri, 09 Jan 2026 05:45:27 -0400
 
-45drives-tools (4.0.34-1jammy) jammy; urgency=medium
+45drives-tools (4.0.34-1trixie) trixie; urgency=medium
 
   * Fixes nvme drive mapping on ubuntu 20
 
  -- Jordan Keough <jkeough@45drives.com>  Thu, 08 Jan 2026 10:23:38 -0400
 
-45drives-tools (4.0.33-1jammy) jammy; urgency=medium
+45drives-tools (4.0.33-1trixie) trixie; urgency=medium
 
   * Updates ubm udev trigger logic to run when 'change' actions trigger in addition
     to 'add' actions
 
  -- Jordan Keough <jkeough@45drives.com>  Mon, 05 Jan 2026 08:47:20 -0400
 
-45drives-tools (4.0.32-1jammy) jammy; urgency=medium
+45drives-tools (4.0.32-1trixie) trixie; urgency=medium
 
   * Hotfix - reverses hl4 slot order
 
  -- Jordan Keough <jkeough@45drives.com>  Fri, 19 Dec 2025 04:18:58 -0400
 
-45drives-tools (4.0.31-1jammy) jammy; urgency=medium
+45drives-tools (4.0.31-1trixie) trixie; urgency=medium
 
   * Updates dmap with proper HL8 slot order
 
  -- Jordan Keough <jkeough@45drives.com>  Wed, 17 Dec 2025 10:19:47 -0400
 
-45drives-tools (4.0.30-1jammy) jammy; urgency=medium
+45drives-tools (4.0.30-1trixie) trixie; urgency=medium
 
   * Fix udev rule issues affecting /etc/vdev_id.conf
 
  -- Joshua Boudreau <jboudreau@45drives.com>  Wed, 26 Nov 2025 08:11:51 -0400
 
-45drives-tools (4.0.29-1jammy) jammy; urgency=medium
+45drives-tools (4.0.29-1trixie) trixie; urgency=medium
 
   * Flip SSD port order for ROMED8-2T HL15_BEAST
   * Add missing install line for 68-0-custom-aliases.rules UDEV rule
 
  -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 25 Nov 2025 11:55:35 -0400
 
-45drives-tools (4.0.28-1jammy) jammy; urgency=medium
+45drives-tools (4.0.28-1trixie) trixie; urgency=medium
 
   * swap phy cable order for 24i HBA BEAST SSDs
 
  -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 24 Nov 2025 11:37:18 -0400
 
-45drives-tools (4.0.27-1jammy) jammy; urgency=medium
+45drives-tools (4.0.27-1trixie) trixie; urgency=medium
 
   * custom aliases through looking at parent pcieport device for Proxinator VM2
 
  -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 18 Nov 2025 13:56:41 -0400
 
-45drives-tools (4.0.26-1jammy) jammy; urgency=medium
+45drives-tools (4.0.26-1trixie) trixie; urgency=medium
 
   * Add Proxinator VM2 support
   * Add vdev aliasing support for native NVMe
 
  -- Joshua Boudreau <jboudreau@45drives.com>  Wed, 12 Nov 2025 12:56:51 -0400
 
-45drives-tools (4.0.25-1jammy) jammy; urgency=medium
+45drives-tools (4.0.25-1trixie) trixie; urgency=medium
 
   * Fix HL15 BEAST drive order for SSDs
 
  -- Joshua Boudreau <jboudreau@45drives.com>  Mon, 10 Nov 2025 12:42:53 -0400
 
-45drives-tools (4.0.24-1jammy) jammy; urgency=medium
+45drives-tools (4.0.24-1trixie) trixie; urgency=medium
 
   * Fix aliasing for HomeLab-HL15_BEAST with serialization stored in DMI
 
  -- Joshua Boudreau <jboudreau@45drives.com>  Thu, 06 Nov 2025 08:01:17 -0400
 
-45drives-tools (4.0.23-1jammy) jammy; urgency=medium
+45drives-tools (4.0.23-1trixie) trixie; urgency=medium
 
   * Fixes missing newline delimiter for ssd mapping in hl15beast_romed8
 
  -- Jordan Keough <jkeough@45drives.com>  Mon, 03 Nov 2025 10:55:48 -0400
 
-45drives-tools (4.0.22-1jammy) jammy; urgency=medium
+45drives-tools (4.0.22-1trixie) trixie; urgency=medium
 
   * Fixes dmap issue for HL15_BEAST with ROMED8-2T mobo -> Need to have at least
     1 ssd inserted for this to work reliably
 
  -- Jordan Keough <jkeough@45drives.com>  Mon, 03 Nov 2025 09:08:38 -0400
 
-45drives-tools (4.0.21-1jammy) jammy; urgency=medium
+45drives-tools (4.0.21-1trixie) trixie; urgency=medium
 
   * Fixes HL15_BEAST drive mapping with ProArt mobo
 
  -- Jordan Keough <jkeough@45drives.com>  Fri, 03 Oct 2025 05:24:04 -0300
 
-45drives-tools (4.0.20-1jammy) jammy; urgency=medium
+45drives-tools (4.0.20-1trixie) trixie; urgency=medium
 
   * Fixes infer_homelab_model func in server_identifer
 
  -- Jordan Keough <jkeough@45drives.com>  Wed, 24 Sep 2025 06:18:04 -0300
 
-45drives-tools (4.0.19-2jammy) jammy; urgency=medium
+45drives-tools (4.0.19-2trixie) trixie; urgency=medium
 
   * Forgot to merge some changes
 
  -- Jordan Keough <jkeough@45drives.com>  Mon, 22 Sep 2025 05:49:26 -0300
 
-45drives-tools (4.0.19-1jammy) jammy; urgency=medium
+45drives-tools (4.0.19-1trixie) trixie; urgency=medium
 
   * Package adds support for 45Studio and HL15_BEAST chassis
 
  -- Jordan Keough <jkeough@45drives.com>  Mon, 22 Sep 2025 05:46:50 -0300
 
-45drives-tools (4.0.18-2jammy) jammy; urgency=medium
+45drives-tools (4.0.18-2trixie) trixie; urgency=medium
 
   * Rebuilding with updated build-packages.yml -> create_release and sync_repo were
     not executed
 
  -- Jordan Keough <jkeough@45drives.com>  Fri, 05 Sep 2025 05:06:44 -0300
 
-45drives-tools (4.0.18-1jammy) jammy; urgency=medium
+45drives-tools (4.0.18-1trixie) trixie; urgency=medium
 
   * Adds DestroyinatorF16 and Studio8 support
 
  -- Jordan Keough <jkeough@45drives.com>  Fri, 05 Sep 2025 04:50:14 -0300
 
-45drives-tools (4.0.17-1jammy) jammy; urgency=medium
+45drives-tools (4.0.17-1trixie) trixie; urgency=medium
 
   * Updates hba_lspci regex for MS73-HB0 boards to take both potential pci address
     formats reported by lspci (eg. 0000:16:00.0 and 16:00.0)
 
  -- Jordan Keough <jkeough@45drives.com>  Fri, 08 Aug 2025 09:25:00 -0300
 
-45drives-tools (4.0.16-2jammy) jammy; urgency=medium
+45drives-tools (4.0.16-2trixie) trixie; urgency=medium
 
   * Updates dmap to properly parse lshw command output
 
  -- Jordan Keough <jkeough@45drives.com>  Tue, 22 Jul 2025 11:48:57 -0300
 
-45drives-tools (4.0.16-1jammy) jammy; urgency=medium
+45drives-tools (4.0.16-1trixie) trixie; urgency=medium
 
   * Add Destroyinator F16 support
 
  -- Joshua Boudreau <jboudreau@45drives.com>  Tue, 15 Jul 2025 11:43:33 -0300
 
-45drives-tools (4.0.16-1jammy) jammy; urgency=medium
+45drives-tools (4.0.16-1trixie) trixie; urgency=medium
 
   * update pci device paths for mi4 ubm
 
  -- Brett Kelly <bkelly@45drives.com>  Thu, 10 Jul 2025 11:29:43 -0300
 
-45drives-tools (4.0.15-1jammy) jammy; urgency=medium
+45drives-tools (4.0.15-1trixie) trixie; urgency=medium
 
   * adds support for ROMED8-2T board to server_identifier
 
  -- Jordan Keough <jkeough@45drives.com>  Thu, 12 Jun 2025 13:08:22 -0300
 
-45drives-tools (4.0.11-1jammy) jammy; urgency=medium
+45drives-tools (4.0.11-1trixie) trixie; urgency=medium
 
   * HL4/8 Updated get_sata_pci_addresses() function as it was not correctly filtering
     for SATA controllers.
 
  -- Brett Kelly <bkelly@45drives.com>  Tue, 06 May 2025 11:59:43 -0300
 
-45drives-tools (4.0.10-1jammy) jammy; urgency=medium
+45drives-tools (4.0.10-1trixie) trixie; urgency=medium
 
   * added mi4+ME03-CE0 support
 
  -- Brett Kelly <bkelly@45drives.com>  Tue, 29 Apr 2025 08:30:45 -0300
 
-45drives-tools (4.0.9-1jammy) jammy; urgency=medium
+45drives-tools (4.0.9-1trixie) trixie; urgency=medium
 
   * added F16 support
 
  -- Brett Kelly <bkelly@45drives.com>  Mon, 28 Apr 2025 11:27:07 -0300
 
-45drives-tools (4.0.8-1jammy) jammy; urgency=medium
+45drives-tools (4.0.8-1trixie) trixie; urgency=medium
 
   * Adds support for C8 UBM chassis
 
  -- Brett Kelly <bkelly@45drives.com>  Mon, 21 Apr 2025 13:45:19 -0300
 
-45drives-tools (4.0.0-1focal) jammy; urgency=medium
+45drives-tools (4.0.6-1trixie) trixie; urgency=medium
 
-  * jumping to 4.0 as we release for el9 and jammy
+  * First build for trixie
 
- -- Brett Kelly <bkelly@45drives.com>  Fri, 07 Feb 2025 13:26:52 -0400
+ -- Brett Kelly <bkelly@45drives.com>  Tue, 04 Mar 2025 10:51:30 -0400

@@ -3,7 +3,7 @@
     "name": "45drives-tools",
     "title": "45drives-tools",
     "description": "cli tools for 45Drives server products",
-    "version": "4.0.45",
+    "version": "4.0.47",
     "build_number": "1",
     "stable": true,
     "author": "Brett Kelly <bkelly@45drives.com>",
@@ -68,7 +68,12 @@
         {
             "group": "debian",
             "os_name": "debian-bookworm",
-            "image": "ci.cr.45d.io/ci/simple/ubuntu-jammy:1"
+            "image": "ci.cr.45d.io/ci/simple/debian-bookworm:1"
+        },
+        {
+            "group": "debian",
+            "os_name": "debian-trixie",
+            "image": "ci.cr.45d.io/ci/simple/debian-trixie:1"
         }
     ],
     "repos": [
@@ -77,7 +82,7 @@
     ],
     "changelog": {
         "urgency": "medium",
-        "version": "4.0.45",
+        "version": "4.0.47",
         "build_number": "1",
         "date": null,
         "packager": "Brett Kelly <bkelly@45drives.com>",
