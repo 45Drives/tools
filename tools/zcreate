@@ -207,7 +207,7 @@ class Zpool_qualities:
         self.devices = dev
         devs = subprocess.Popen(["zpool", "status"], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
         for line in devs:
-            regex = re.search("^\s+([a-zA-Z]+).+$", line)
+            regex = re.search(r"^\s+([a-zA-Z]+).+$", line)
             for device in self.devices:
                 if regex != None and regex.group(1) != None and regex.group(1) == device.s_device:
                     self.devices.remove(device)
@@ -226,7 +226,7 @@ class Zpool_qualities:
             devs = subprocess.Popen(["zpool", "status"], universal_newlines=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE).stdout
             test_name = None
             for line in devs:
-                regex = re.search("^\s+({n}+).+$".format(n = self.name), line)
+                regex = re.search(r"^\s+({n}+).+$".format(n = self.name), line)
                 if regex != None:
                     test_name=regex.group(1)
                     break
@@ -284,7 +284,7 @@ class Zpool_qualities:
     def get_drives_count(self): 
         devs = subprocess.Popen(["zpool", "status"], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
         for line in devs:
-            regex = re.search("^\s+([a-zA-Z]+).+$", line)
+            regex = re.search(r"^\s+([a-zA-Z]+).+$", line)
             for device in self.devices:
                 if regex != None and regex.group(1) != None and regex.group(1) == device.s_device:
                     self.devices.remove(device)
@@ -330,7 +330,7 @@ def setVdevCount(Zpool_q): # Starting at default vdev_count for chassis size, if
     bays_count = 0
     allDRIVES=subprocess.Popen(["cat", "/etc/zfs/vdev_id.conf"], stdout = subprocess.PIPE, universal_newlines = True).stdout
     for line in allDRIVES:
-        regex = re.search("^alias\s(\S+)\s", line)
+        regex = re.search(r"^alias\s(\S+)\s", line)
         if regex != None:
             bays_count += 1 
         vdev_count=1 
@@ -361,7 +361,7 @@ def init_Zpool_devices():
     devices = []
     lsdev = subprocess.Popen(["lsdev", "-tdn"], stdout=subprocess.PIPE, universal_newlines=True).stdout
     for line in lsdev:
-        regex = re.findall("(\d+-\d+)\s+\(/dev/([a-z]+),([a-zA-Z]+)\)", line)
+        regex = re.findall(r"(\d+-\d+)\s+\(/dev/([a-z]+),([a-zA-Z]+)\)", line)
         if len(regex) >= 1:
             i = 0
             while i <= len(regex)-1:
