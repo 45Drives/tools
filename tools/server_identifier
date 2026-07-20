@@ -413,7 +413,7 @@ def motherboard():
 		exit(1)
 	for line in dmi_result:
 		for field in mobo_dict.keys():
-			regex = re.search("^\s+({fld}):\s+(.*)".format(fld=field),line)
+			regex = re.search(r"^\s+({fld}):\s+(.*)".format(fld=field),line)
 			if regex != None:
 					mobo_dict[regex.group(1)] = regex.group(2)
 
@@ -429,7 +429,7 @@ def motherboard():
 			print("ERROR: ipmitool fru failed to return result.")
 		for line in fru_result:
 			for field in ["Board Mfg", "Board Product", "Board Serial"]:
-				regex = re.search("^\s+({fld})\s+:\s+(.*)".format(fld=field),line)
+				regex = re.search(r"^\s+({fld})\s+:\s+(.*)".format(fld=field),line)
 				if regex != None:
 					if regex.group(1) == "Board Mfg":
 						mobo_dict["Manufacturer"] = regex.group(2)
@@ -916,7 +916,7 @@ def serial_check():
 	ipmi_result = subprocess.Popen(["ipmitool","fru","print","0"],stdout=subprocess.PIPE,universal_newlines=True).stdout
 	for line in ipmi_result:
 		for field in serial_fields:
-			regex = re.search("({fld})\s+:\s+(\S+)".format(fld=field),line)
+			regex = re.search(r"({fld})\s+:\s+(\S+)".format(fld=field),line)
 			if regex != None:
 				serial_result[regex.group(1)] = regex.group(2)
 	return serial_result
