@@ -44,11 +44,14 @@ generate_vdev_id_conf() {
   [[ ! -f "$VDEV_ID_CONF" ]] && generate_vdev_id_conf
   FOUND_LINE=false
   TMPFILE=$(mktemp)
-  LINE_TEST="^alias $SLOT_NAME"
+  LINE_TEST="^alias $SLOT_NAME "
   while IFS="" read -r line || [ -n "$line" ]; do
     if [[ "$line" =~ $LINE_TEST ]]; then
-      FOUND_LINE=true
-      printf "alias %s /dev/disk/by-path/%s\n" "$SLOT_NAME" "$SLOT_DEV_BY_PATH" >>"$TMPFILE"
+      if ! $FOUND_LINE; then
+        # Write replacement only for the first match; skip subsequent duplicates
+        printf "alias %s /dev/disk/by-path/%s\n" "$SLOT_NAME" "$SLOT_DEV_BY_PATH" >>"$TMPFILE"
+        FOUND_LINE=true
+      fi
     else
       printf '%s\n' "$line" >>"$TMPFILE"
     fi

@@ -360,11 +360,39 @@ def hwraid_map(HBA,server):
 
 
 def alias_by_path(chassis_size, motherboard_product_name):
+    # This function does not actually work since the pcie addresses will change depending on what other
+    # pcie devices are present in the system.
+    # Update the get_alias_pcieport_parents() function in `id_disk_custom_alias` for BYPATH servers.
+    # This LUT can basically just have dummy data. The real alias lookup is done by 68-0-custom-aliases.rules and the `id_disk_custom_alias` script, not vdev_id.
 	lut_chassissize_mobo_to_aliases = {
 		"VM2": {
 			"ME03-CE0-000": [
 				("1-1", "pci-0000:42:00.0-nvme-1"),
 				("1-2", "pci-0000:43:00.0-nvme-1")
+			],
+			"GENOAD8UD-2T/X550": [
+				("1-1", "pci-0000:41:00.0-nvme-1"),
+				("1-2", "pci-0000:43:00.0-nvme-1")
+			]
+		},
+		"E16": {
+			"GENOAD8X-2T/BCM": [
+				("1-1", "pci-0000:81:00.0-nvme-1"),
+				("1-2", "pci-0000:83:00.0-nvme-1"),
+				("1-3", "pci-0000:85:00.0-nvme-1"),
+				("1-4", "pci-0000:87:00.0-nvme-1"),
+				("2-1", "pci-0000:89:00.0-nvme-1"),
+				("2-2", "pci-0000:8b:00.0-nvme-1"),
+				("2-3", "pci-0000:8d:00.0-nvme-1"),
+				("2-4", "pci-0000:8f:00.0-nvme-1"),
+				("3-1", "pci-0000:c1:00.0-nvme-1"),
+				("3-2", "pci-0000:c3:00.0-nvme-1"),
+				("3-3", "pci-0000:c5:00.0-nvme-1"),
+				("3-4", "pci-0000:c7:00.0-nvme-1"),
+				("4-1", "pci-0000:c9:00.0-nvme-1"),
+				("4-2", "pci-0000:cb:00.0-nvme-1"),
+				("4-3", "pci-0000:cd:00.0-nvme-1"),
+				("4-4", "pci-0000:cf:00.0-nvme-1")
 			]
 		}
 	}

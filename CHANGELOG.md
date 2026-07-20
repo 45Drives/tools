@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.43-1
+## 45drives-tools 4.0.46-1
 
-* fix NVMe Hybrid support
+* Adds new GENOAD8UD-2T/X550 mobo for VM2
