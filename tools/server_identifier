@@ -1096,116 +1096,7 @@ def _model_sort_key(model_name, chassis_size_str):
 
 	return (family_score, direct_chassis_score, version_score, model_name)
 
-def manual_model_selection(mobo_model_str, hba_16i_count, hba_24i_count, chassis_size_str, allow_prompt=True, ignore_manual_override=False):
-	"""
-	Interactive manual model selection when automatic detection fails.
-	Returns selected model name or "?" if user declines/non-interactive.
-	Saved overrides are checked even in non-interactive mode so dmap can use them.
-	"""
-	saved_model = _read_manual_model_override(
-		mobo_model_str,
-		hba_16i_count,
-		hba_24i_count,
-		chassis_size_str,
-		ignore_manual_override=ignore_manual_override
-	)
-	if saved_model != "?":
-		return saved_model
-
-	if not allow_prompt:
-		return "?"
-
-	# Check if running interactively only after checking saved overrides. dmap is
-	# non-interactive, but it should still honor a saved compatible override.
-	if not sys.stdin.isatty():
-		print("/opt/45drives/tools/server_identifier: Running non-interactively, cannot prompt for manual selection")
-		return "?"
-
-	print("\n" + "="*80)
-	print("MANUAL MODEL SELECTION")
-	print("="*80)
-	print("\nDetected Hardware Configuration:")
-	print("  Motherboard:      {}".format(mobo_model_str if not _is_unknown(mobo_model_str) else "Unknown"))
-	print("  24i HBA Cards:    {}".format(hba_24i_count))
-	print("  16i HBA Cards:    {}".format(hba_16i_count))
-	print("  Chassis Size:     {}".format(chassis_size_str if not _is_unknown(chassis_size_str) else "Unknown"))
-
-	possible_models = _candidate_models_for_hardware(
-		mobo_model_str,
-		hba_16i_count,
-		hba_24i_count,
-		chassis_size_str,
-		include_mobo=True
-	)
-
-	if not possible_models:
-		possible_models = _candidate_models_for_hardware(
-			"?",
-			hba_16i_count,
-			hba_24i_count,
-			chassis_size_str,
-			include_mobo=False
-		)
-
-	if not possible_models:
-		possible_models = [m for m in sorted(g_product_lut.keys()) if m not in ["?", "Storinator"]]
-
-	possible_models = sorted(possible_models, key=lambda m: _model_sort_key(m, chassis_size_str))
-
-	print("\n" + "-"*80)
-	print("Available Models (showing {}){}:".format(
-		len(possible_models),
-		" matching your hardware" if len(possible_models) < len(g_product_lut) - 2 else ""
-	))
-	print("-"*80)
-
-	for idx, model in enumerate(possible_models, 1):
-		model_data = g_product_lut[model]
-		print("{:3d}. {:45s} [Chassis: {:10s}, HBAs: {}x24i + {}x16i]".format(
-			idx,
-			model,
-			model_data[g_product_lut_idx["CHASSIS_SIZE"]],
-			model_data[g_product_lut_idx["24I_COUNT"]],
-			model_data[g_product_lut_idx["16I_COUNT"]]
-		))
-
-	print("\n  0. Skip manual selection (use generic 'Storinator')")
-	print("="*80)
-
-	while True:
-		try:
-			choice = input("\nSelect model number (0-{}): ".format(len(possible_models)))
-			choice_num = int(choice.strip())
-
-			if choice_num == 0:
-				print("Manual selection skipped.")
-				return "?"
-			elif 1 <= choice_num <= len(possible_models):
-				selected_model = possible_models[choice_num - 1]
-				confirm = input("Confirm selection: '{}' (y/n): ".format(selected_model))
-				if confirm.lower() in ['y', 'yes']:
-					save_choice = input("Save this selection permanently? (y/n): ")
-					if save_choice.lower() in ['y', 'yes']:
-						try:
-							_write_manual_model_override(selected_model, mobo_model_str, hba_16i_count, hba_24i_count, chassis_size_str)
-							print("Selection saved to: {}".format(MANUAL_OVERRIDE_FILE))
-							print("(To change later, delete this file or run server_identifier --clear-manual-model)")
-						except Exception as e:
-							print("Warning: Could not save selection: {}".format(e))
-
-					print("Selected model: {}".format(selected_model))
-					return selected_model
-				else:
-					print("Selection cancelled, try again.")
-			else:
-				print("Invalid selection. Enter a number between 0 and {}".format(len(possible_models)))
-		except ValueError:
-			print("Invalid input. Please enter a number.")
-		except (KeyboardInterrupt, EOFError):
-			print("\nManual selection cancelled.")
-			return "?"
-
-def determine_model(mobo_model_str, hba_dict_lst, chassis_size_str, allow_manual_prompt=True, ignore_manual_override=False, quiet=False, fallback_to_generic=True):
+def determine_model(mobo_model_str, hba_dict_lst, chassis_size_str, ignore_manual_override=False, quiet=False, fallback_to_generic=True):
 	# Use the detected hardware to identify the model if the system was serialized
 	# using an old/unrecognized serialization format.
 	hba_16i_count, hba_24i_count = _hba_counts_from_list(hba_dict_lst)
@@ -1243,20 +1134,10 @@ def determine_model(mobo_model_str, hba_dict_lst, chassis_size_str, allow_manual
 			print("/opt/45drives/tools/server_identifier: !! WARNING !! " + mobo_model_str + " Motherboard is not supported for Automatic Identification.")
 		print("/opt/45drives/tools/server_identifier: !! WARNING !! Automatic Identification failed. ")
 
-		model = manual_model_selection(
-			mobo_model_str,
-			hba_16i_count,
-			hba_24i_count,
-			chassis_size_str,
-			allow_prompt=allow_manual_prompt,
-			ignore_manual_override=ignore_manual_override
-		)
-
-		if model == "?":
-			if not fallback_to_generic:
-				return "?"
-			print("/opt/45drives/tools/server_identifier: Setting Model to \"Storinator(Generic)\"")
-			model = "Storinator"
+		if not fallback_to_generic:
+			return "?"
+		print("/opt/45drives/tools/server_identifier: Setting Model to \"Storinator(Generic)\"")
+		model = "Storinator"
 
 	return model
 
@@ -1544,48 +1425,14 @@ def main():
 		description='Identify 45Drives server model and configuration',
 		formatter_class=argparse.RawDescriptionHelpFormatter
 	)
-	# Internal test hook intentionally disabled for production builds.
-	# Re-enable only in a development branch if interactive menu testing is needed.
-	# parser.add_argument(
-	# 	'--test-manual-selection',
-	# 	action='store_true',
-	# 	help='Force manual model selection (for testing)'
-	# )
 	parser.add_argument(
 		'--set-manual-model',
 		metavar='MODEL',
 		help='Save MODEL as the manual fallback model override and exit'
 	)
-	parser.add_argument(
-		'--clear-manual-model',
-		action='store_true',
-		help='Remove the saved manual model override and exit'
-	)
-	parser.add_argument(
-		'--ignore-manual-override',
-		action='store_true',
-		help='Ignore any saved manual model override for this run'
-	)
-	parser.add_argument(
-		'--no-manual-prompt',
-		action='store_true',
-		help='Do not prompt for manual model selection even if running interactively'
-	)
 	args, unknown_args = parser.parse_known_args()
 	if unknown_args:
 		print("/opt/45drives/tools/server_identifier: Warning: Ignoring unknown arguments: {}".format(" ".join(unknown_args)))
-
-	if args.clear_manual_model:
-		try:
-			if os.path.exists(MANUAL_OVERRIDE_FILE):
-				os.remove(MANUAL_OVERRIDE_FILE)
-				print("/opt/45drives/tools/server_identifier: Removed manual model override: {}".format(MANUAL_OVERRIDE_FILE))
-			else:
-				print("/opt/45drives/tools/server_identifier: No manual model override exists: {}".format(MANUAL_OVERRIDE_FILE))
-		except Exception as e:
-			print("/opt/45drives/tools/server_identifier: Failed to remove manual model override: {}".format(e))
-			exit(1)
-		exit(0)
 
 	if args.set_manual_model:
 		manual_model = normalize_model_key(args.set_manual_model)
@@ -1652,7 +1499,6 @@ def main():
 				server["Motherboard"].get("Product Name", "?"),
 				server["HBA"],
 				server["Chassis Size"],
-				allow_manual_prompt=False,
 				ignore_manual_override=True,
 				quiet=True,
 				fallback_to_generic=False
@@ -1666,9 +1512,7 @@ def main():
 			server["Model"] = determine_model(
 				server["Motherboard"].get("Product Name", "?"),
 				server["HBA"],
-				server["Chassis Size"],
-				allow_manual_prompt=(not args.no_manual_prompt),
-				ignore_manual_override=args.ignore_manual_override
+				server["Chassis Size"]
 			)
    
  	# If we don't have IPMI and fell back to a generic Product Name,
@@ -1690,37 +1534,6 @@ def main():
 		if len(server["HBA"]) > 0 and server["VM"]:
 			vm_passthrough(server) 			# VM with hba pass through detected, update server accordingly
    
-	# Internal test hook intentionally disabled for production builds.
-	# The manual selection menu is still reachable automatically when FRU and
-	# hardware identification fail on an interactive terminal, and saved manual
-	# overrides can still be managed with --set-manual-model/--clear-manual-model.
-	# if args.test_manual_selection:
-	# 	print("\n" + "="*80)
-	# 	print("TEST MODE: Forcing manual model selection")
-	# 	print("="*80)
-	# 	print("Current detection results:")
-	# 	print("  Model: {}".format(server["Model"]))
-	# 	print("  Chassis Size: {}".format(server["Chassis Size"]))
-	# 	print("  Motherboard: {}".format(server["Motherboard"].get("Product Name", "?")))
-	# 	print("  HBAs: {}".format(len(server.get("HBA", []))))
-		
-	# 	# Count HBAs
-	# 	hba_16i = sum(1 for hba in server.get("HBA", []) if hba.get("Drive Connections") == 16)
-	# 	hba_24i = sum(1 for hba in server.get("HBA", []) if hba.get("Drive Connections") == 24)
-		
-	# 	# Trigger manual selection
-	# 	manual_model = manual_model_selection(
-	# 		server["Motherboard"].get("Product Name", "?"),
-	# 		hba_16i,
-	# 		hba_24i,
-	# 		server["Chassis Size"],
-	# 		allow_prompt=True,
-	# 		ignore_manual_override=args.ignore_manual_override
-	# 	)
-	# 	if manual_model != "?":
-	# 		server["Model"] = manual_model
-	# 		print("\nTest mode: Model set to: {}".format(manual_model))
-
 	server["Model"] = normalize_model_key(server["Model"])
 	server["Chassis Size"] = normalize_chassis_size(server["Chassis Size"])
 	if server["Model"] in g_product_lut:
