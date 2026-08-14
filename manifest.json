@@ -3,7 +3,7 @@
     "name": "45drives-tools",
     "title": "45drives-tools",
     "description": "cli tools for 45Drives server products",
-    "version": "4.0.48",
+    "version": "4.0.49",
     "build_number": "1",
     "stable": true,
     "author": "Brett Kelly <bkelly@45drives.com>",
@@ -82,7 +82,7 @@
     ],
     "changelog": {
         "urgency": "medium",
-        "version": "4.0.48",
+        "version": "4.0.49",
         "build_number": "1",
         "date": null,
         "packager": "Brett Kelly <bkelly@45drives.com>",
