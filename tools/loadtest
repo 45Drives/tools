@@ -99,7 +99,7 @@ def get_scsi_info():
     lsscsi_output = subprocess.Popen(
         shlex.split(command_str), stdout=subprocess.PIPE, universal_newlines=True).stdout
     for line in lsscsi_output:
-        regex = re.search("\[(.*)\]\s+\S+\s+(\S+)\s+\/dev\/(\S+)",line)
+        regex = re.search(r"\[(.*)\]\s+\S+\s+(\S+)\s+\/dev\/(\S+)",line)
         if regex != None:
             scsi_info.append({
                 "scsi_id": regex.group(1),
