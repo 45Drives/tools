@@ -21,7 +21,7 @@ def get_attribute(path, attribute):
 	if child.wait() != 0:
 		return "?"
 	output_string = child.stdout.read()
-	attribute_re = attribute.replace(".", "\.")
+	attribute_re = attribute.replace(".", r"\.")
 	search = re.search(f"^{attribute_re}=\"([^\"]+)\"$", output_string, re.MULTILINE)
 	if search:
 		return search.group(1)
