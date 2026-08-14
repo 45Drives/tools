@@ -330,7 +330,13 @@ def build_server(options):
 			"C8_UBM":[8],
 			"NVME-F8X1":[20],
 			"NVME-F8X2":[20,20],
-			"NVME-F8X3":[20,20,20]
+			"NVME-F8X3":[20,20,20],
+			"NVME-F8X1-U2":[20],
+			"NVME-F8X2-U2":[20,20],
+			"NVME-F8X3-U2":[20,20,20],
+			"NVME-F8X1-EDSFF":[20],
+			"NVME-F8X2-EDSFF":[20,20],
+			"NVME-F8X3-EDSFF":[20,20,20]
 		},
 		"HOMELAB":{
       		"HL15_BEAST":[23],

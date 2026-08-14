@@ -27,7 +27,7 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","NVME-F8X1","NVME-F8X2","NVME-F8X3","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","STUDIO15","HL15_BEAST","F16","VM2","2UGW_REV2","X15","E16"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","NVME-F8X1","NVME-F8X2","NVME-F8X3","NVME-F8X1-U2","NVME-F8X1-EDSFF","NVME-F8X2-U2","NVME-F8X2-EDSFF","NVME-F8X3-U2","NVME-F8X3-EDSFF","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","STUDIO15","HL15_BEAST","F16","VM2","2UGW_REV2","X15"]
 
 g_mobo_to_version_lut = {
 	"Base": ["X11SPH-nCTF","X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000", "MW34-SP0-00", "X13SAE-F","GENOAD8X-2T/BCM","GENOAD8UD-2T/X550"],
@@ -127,7 +127,21 @@ g_product_lut = {
 	"Storinator-NVME-F8X1-Enhanced-AMD":	[g_mobo_to_version_lut["Enhanced-AMD"]  ,0,2,"NVME-F8X1","STORINATORUBM"],
 	"Storinator-NVME-F8X1-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,0,2,"NVME-F8X1","STORINATORUBM"],
 	"Storinator-NVME-F8X1-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,0,2,"NVME-F8X1","STORINATORUBM"],
+
+	"Storinator-NVME-F8X1-U2-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,0,2,"NVME-F8X1-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X1-U2-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,2,"NVME-F8X1-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X1-U2-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,0,2,"NVME-F8X1-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X1-U2-Enhanced-AMD":	[g_mobo_to_version_lut["Enhanced-AMD"]  ,0,2,"NVME-F8X1-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X1-U2-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,0,2,"NVME-F8X1-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X1-U2-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,0,2,"NVME-F8X1-U2","STORINATORUBM"],
  
+	"Storinator-NVME-F8X1-EDSFF-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,0,2,"NVME-F8X1-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X1-EDSFF-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,2,"NVME-F8X1-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X1-EDSFF-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,0,2,"NVME-F8X1-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X1-EDSFF-Enhanced-AMD":	[g_mobo_to_version_lut["Enhanced-AMD"]  ,0,2,"NVME-F8X1-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X1-EDSFF-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,0,2,"NVME-F8X1-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X1-EDSFF-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,0,2,"NVME-F8X1-EDSFF","STORINATORUBM"],
+
 	"Storinator-NVME-F8X2-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,1,2,"NVME-F8X2","STORINATORUBM"],
 	"Storinator-NVME-F8X2-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,1,2,"NVME-F8X2","STORINATORUBM"],
 	"Storinator-NVME-F8X2-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,1,2,"NVME-F8X2","STORINATORUBM"],
@@ -135,13 +149,41 @@ g_product_lut = {
 	"Storinator-NVME-F8X2-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,1,2,"NVME-F8X2","STORINATORUBM"],
 	"Storinator-NVME-F8X2-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,1,2,"NVME-F8X2","STORINATORUBM"],
 
+	"Storinator-NVME-F8X2-U2-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,1,2,"NVME-F8X2-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X2-U2-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,1,2,"NVME-F8X2-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X2-U2-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,1,2,"NVME-F8X2-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X2-U2-Enhanced-AMD":	[g_mobo_to_version_lut["Enhanced-AMD"]  ,1,2,"NVME-F8X2-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X2-U2-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,1,2,"NVME-F8X2-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X2-U2-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,1,2,"NVME-F8X2-U2","STORINATORUBM"],
+
+	"Storinator-NVME-F8X2-EDSFF-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,1,2,"NVME-F8X2-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X2-EDSFF-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,1,2,"NVME-F8X2-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X2-EDSFF-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,1,2,"NVME-F8X2-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X2-EDSFF-Enhanced-AMD":	[g_mobo_to_version_lut["Enhanced-AMD"]  ,1,2,"NVME-F8X2-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X2-EDSFF-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,1,2,"NVME-F8X2-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X2-EDSFF-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,1,2,"NVME-F8X2-EDSFF","STORINATORUBM"],
+
 	"Storinator-NVME-F8X3-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,3,1,"NVME-F8X3","STORINATORUBM"],
 	"Storinator-NVME-F8X3-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,3,1,"NVME-F8X3","STORINATORUBM"],
 	"Storinator-NVME-F8X3-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,3,1,"NVME-F8X3","STORINATORUBM"],
 	"Storinator-NVME-F8X3-Enhanced-AMD":	[g_mobo_to_version_lut["Enhanced-AMD"]  ,3,1,"NVME-F8X3","STORINATORUBM"],
 	"Storinator-NVME-F8X3-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,3,1,"NVME-F8X3","STORINATORUBM"],
 	"Storinator-NVME-F8X3-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,3,1,"NVME-F8X3","STORINATORUBM"],
-	
+
+	"Storinator-NVME-F8X3-U2-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,3,1,"NVME-F8X3-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X3-U2-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,3,1,"NVME-F8X3-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X3-U2-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,3,1,"NVME-F8X3-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X3-U2-Enhanced-AMD":	[g_mobo_to_version_lut["Enhanced-AMD"]  ,3,1,"NVME-F8X3-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X3-U2-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,3,1,"NVME-F8X3-U2","STORINATORUBM"],
+	"Storinator-NVME-F8X3-U2-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,3,1,"NVME-F8X3-U2","STORINATORUBM"],
+
+	"Storinator-NVME-F8X3-EDSFF-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,3,1,"NVME-F8X3-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X3-EDSFF-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,3,1,"NVME-F8X3-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X3-EDSFF-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,3,1,"NVME-F8X3-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X3-EDSFF-Enhanced-AMD":	[g_mobo_to_version_lut["Enhanced-AMD"]  ,3,1,"NVME-F8X3-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X3-EDSFF-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,3,1,"NVME-F8X3-EDSFF","STORINATORUBM"],
+	"Storinator-NVME-F8X3-EDSFF-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,3,1,"NVME-F8X3-EDSFF","STORINATORUBM"],
+
 	"Storinator-H8-AV15-Base-B":		[g_mobo_to_version_lut["Base-B"]  ,0,1,"AV15","STORINATOR"],
 	"Storinator-H8-AV15-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,1,"AV15","STORINATOR"],
 	"Storinator-H8-AV15-Enhanced-S":	[g_mobo_to_version_lut["Enhanced-S"]  ,0,1,"AV15","STORINATOR"],
@@ -1562,7 +1604,7 @@ def main():
 
 	# Create/remove fan controller sentinel file for Cockpit menu visibility
 	fan_controller_sentinel = "/etc/45drives/fan-controller-supported"
-	if server["Chassis Size"] in ["NVME-F8X1", "NVME-F8X2", "NVME-F8X3"]:
+	if server["Chassis Size"] in ["NVME-F8X1","NVME-F8X2","NVME-F8X3","NVME-F8X1-U2", "NVME-F8X2-U2", "NVME-F8X3-U2","NVME-F8X1-EDSFF","NVME-F8X2-EDSFF","NVME-F8X3-EDSFF"]:
 		try:
 			open(fan_controller_sentinel, "w").close()
 		except Exception as e:
