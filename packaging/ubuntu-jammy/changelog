@@ -1,3 +1,9 @@
+45drives-tools (4.0.50-1jammy) jammy; urgency=medium
+
+  * Adds TURIN mobo for E16 unit
+
+ -- Jordan Keough <jkeough@45drives.com>  Thu, 20 Aug 2026 12:01:10 -0300
+
 45drives-tools (4.0.49-1jammy) jammy; urgency=medium
 
   * Adds support for nvme-f8x-u2 and nvme-f8x-edsff variants
