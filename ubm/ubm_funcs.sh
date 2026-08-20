@@ -334,9 +334,65 @@ table_lookup_col() {
 # slot_num_to_slot_name 2 -> "1-3"
 slot_num_to_slot_name() {
   local SLOT_NUM=$1
+  local SLOT_INDEX
   [[ -z "$SLOT_NUM" ]] && perror "slot number not provided" && return 2
+  [[ ! "$SLOT_NUM" =~ ^[0-9]+$ ]] && perror "Invalid slot number: $SLOT_NUM" && return 2
   UBM_MAP_KEY=$(get_map_key) || return $?
-  table_lookup_val "$SCRIPT_DIR/slot_name_map.txt" 0 "$UBM_MAP_KEY" $((1 + SLOT_NUM)) || perror "table_lookup_val failed"
+  SLOT_INDEX=$(validate_slot_num_for_map_key "$SLOT_NUM" "$UBM_MAP_KEY") || perror "validate_slot_num_for_map_key failed" || return $?
+  table_lookup_val "$SCRIPT_DIR/slot_name_map.txt" 0 "$UBM_MAP_KEY" $((1 + SLOT_INDEX)) || perror "table_lookup_val failed"
+}
+
+# map_key_slot_count [ MAP_KEY ]
+#
+# Get number of slots defined for a map key in slot_name_map.txt
+map_key_slot_count() {
+  local MAP_KEY=$1
+  if [[ -z "$MAP_KEY" ]]; then
+    MAP_KEY=$(get_map_key) || return $?
+  fi
+  awk -v MAP_KEY="$MAP_KEY" '
+  BEGIN {
+    found_key = 0
+  }
+  $1 == MAP_KEY {
+    found_key = 1
+    print NF - 1
+    exit 0
+  }
+  END {
+    if (!found_key) {
+      print "map key lookup failed" > "/dev/stderr"
+      exit 1
+    }
+  }
+  ' "$SCRIPT_DIR/slot_name_map.txt" || perror $? "Failed to lookup slot count for map key '$MAP_KEY'"
+}
+
+# validate_slot_num_for_map_key SLOT_NUM [ MAP_KEY ]
+#
+# Validate that a physical slot number is within the range defined
+# by slot_name_map.txt for the map key. Echoes the slot number on
+# success, fails otherwise.
+validate_slot_num_for_map_key() {
+  local SLOT_NUM=$1
+  local MAP_KEY=$2
+  local SLOT_COUNT
+
+  [[ ! "$SLOT_NUM" =~ ^[0-9]+$ ]] && perror "Invalid slot number: $SLOT_NUM" && return 2
+
+  if [[ -z "$MAP_KEY" ]]; then
+    MAP_KEY=$(get_map_key) || return $?
+  fi
+
+  SLOT_COUNT=$(map_key_slot_count "$MAP_KEY") || return $?
+  [[ ! "$SLOT_COUNT" =~ ^[0-9]+$ || "$SLOT_COUNT" -le 0 ]] && perror "Invalid slot count: $SLOT_COUNT" && return 2
+
+  if ((SLOT_NUM >= SLOT_COUNT)); then
+    perror "Slot number $SLOT_NUM out of range for map key $MAP_KEY ($SLOT_COUNT slots)"
+    return 2
+  fi
+
+  echo "$SLOT_NUM"
 }
 
 # slot_name_to_slot_num SLOT_NAME
