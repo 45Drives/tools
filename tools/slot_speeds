@@ -205,6 +205,7 @@ else
         grep "^$MAP_KEY\s" <<EOF | cut -d' ' -f2-
 # Add new direct-attached (non-ubm) servers here:
 STORNADO-E16 $(echo {1..4}-{1..4})
+PROXINATOR-VM2 1-1 1-2
 EOF
     ) || exit $?
     ALL_SLOT_SPEEDS_JSON="$(get_slot_speeds_json_direct_attached "$SLOT_NAMES")"
