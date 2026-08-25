@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -o pipefail
 
 usage() {
     local exit_code=$1
@@ -31,63 +32,195 @@ shift $((OPTIND - 1))
 # shellcheck source=../ubm/ubm_funcs.sh
 source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../ubm/ubm_funcs.sh"
 
-SLOT_NAME_LUT=$(all_slot_names | jq -R '[ split(" ") | .[] | select(length > 0) ]')
+# slot_speeds_json format:
+# {
+#     "slot_num": 20,
+#     "enclosure_id": 62,
+#     "controller_num": 3,
+#     "type": "NVMe",
+#     "width": "x2",
+#     "width_max": "x4",
+#     "rate": "16.0GT/s",
+#     "rate_max": "16.0GT/s",
+#     "model": "Micron_7450_MTFDKCB3T8TFR",
+#     "firmware_rev": "E2MU200",
+#     "serial": "sdlkfjsdf",
+#     "state": "JBOD",
+#     "status": "Good",
+#     "dev_path": "/dev/sdh",
+#     "slot_name": "3-5",
+#     "storcli_path": "/c3/e62/s20",
+#     "size": "3.493 TiB"
+# }[]
 
-ALL_SLOT_SPEEDS_JSON=$(
-    set -o pipefail
-    storcli2 /call/eall/sall show all J | jq -e '
-    '"$SLOT_NAME_LUT"' as $slot_name_lut |
-    [
-        # keep only controller responses with "Drives List" in output
-        .Controllers[] | select(."Response Data"."Drives List") |
-        # save controller number to inject into each element of "Drives List"
-        (."Command Status"."Controller" | tonumber) as $controller_num |
-        # expand "Drives List" for transformation
-        ."Response Data"."Drives List"[] |
-        # transform each element of "Drives List"
-        {
-            slot_num: ."Drive Information"."EID:Slt" | split (":")[1] | tonumber,
-            enclosure_id: ."Drive Information"."EID:Slt" | split (":")[0] | tonumber,
-            controller_num: $controller_num,
-            type: ( ."Drive Information"."Intf" | if . then gsub("\\s*$"; "") else . end),
-            width: ."Drive Detailed Information"."Negotiated Link Width",
-            width_max: ."Drive Detailed Information"."Capable Link Width",
-            # a little tricky for rate as storcli2 returns array of link speeds
-            rate: (
-                ."Drive Detailed Information"."Path Information" |
-                if type == "array" then
-                    map(."Negotiated Speed" // ."NegotiatedSpeed") |
-                    map(select(.)) |
-                    if length > 0 then
-                        join(",")
+get_slot_speeds_json_ubm() {
+    local SLOT_NAMES=$1
+    SLOT_NAME_LUT=$(echo "$SLOT_NAMES" | jq -R '[ split(" ") | .[] | select(length > 0) ]') || exit $?
+
+    (
+        set -o pipefail
+        storcli2 /call/eall/sall show all J | jq -e '
+        '"$SLOT_NAME_LUT"' as $slot_name_lut |
+        [
+            # keep only controller responses with "Drives List" in output
+            .Controllers[] | select(."Response Data"."Drives List") |
+            # save controller number to inject into each element of "Drives List"
+            (."Command Status"."Controller" | tonumber) as $controller_num |
+            # expand "Drives List" for transformation
+            ."Response Data"."Drives List"[] |
+            # transform each element of "Drives List"
+            {
+                slot_num: ."Drive Information"."EID:Slt" | split (":")[1] | tonumber,
+                enclosure_id: ."Drive Information"."EID:Slt" | split (":")[0] | tonumber,
+                controller_num: $controller_num,
+                type: ( ."Drive Information"."Intf" | if . then gsub("\\s*$"; "") else . end),
+                width: ."Drive Detailed Information"."Negotiated Link Width",
+                width_max: ."Drive Detailed Information"."Capable Link Width",
+                # a little tricky for rate as storcli2 returns array of link speeds
+                rate: (
+                    ."Drive Detailed Information"."Path Information" |
+                    if type == "array" then
+                        map(."Negotiated Speed" // ."NegotiatedSpeed") |
+                        map(select(.)) |
+                        if length > 0 then
+                            join(",")
+                        else
+                            null
+                        end
                     else
-                        null
+                        .
                     end
-                else
-                    .
-                end
-            ),
-            rate_max: ."Drive Detailed Information"."Capable Speed",
-            model: ( ."Drive Detailed Information"."Model" | if . then gsub("\\s*$"; "") else . end),
-            firmware_rev: ( ."Drive Detailed Information"."Firmware Revision Level" | if . then gsub("\\s*$"; "") else . end),
-            state: ."Drive Information"."State",
-            status: ."Drive Information"."Status",
-            dev_path: ."Drive Detailed Information"."OS Drive Name"
-        } |
-        . + { slot_name: ( $slot_name_lut[.slot_num] ) } |
-        . + { storcli_path: ("/c" + (.controller_num | tostring) + "/e" + (.enclosure_id | tostring) + "/s" + (.slot_num | tostring)) }
-    ] | sort_by(.slot_num)
-'
-) || {
-    EXIT_CODE=$?
-    echo "Error: failed to get slot info ($EXIT_CODE)" >&2
-    exit $EXIT_CODE
+                ),
+                rate_max: ."Drive Detailed Information"."Capable Speed",
+                model: ( ."Drive Detailed Information"."Model" | if . then gsub("\\s*$"; "") else . end),
+                serial: ( ."Drive Detailed Information"."Serial Number" | if . then gsub("\\s*$"; "") else . end),
+                firmware_rev: ( ."Drive Detailed Information"."Firmware Revision Level" | if . then gsub("\\s*$"; "") else . end),
+                state: ."Drive Information"."State",
+                status: ."Drive Information"."Status",
+                dev_path: ."Drive Detailed Information"."OS Drive Name",
+                size: ."Drive Information"."Size"
+            } |
+            . + { slot_name: ( $slot_name_lut[.slot_num] ) } |
+            . + { storcli_path: ("/c" + (.controller_num | tostring) + "/e" + (.enclosure_id | tostring) + "/s" + (.slot_num | tostring)) }
+        ] | sort_by(.slot_num)
+    '
+    ) || {
+        EXIT_CODE=$?
+        echo "Error: failed to get slot info ($EXIT_CODE)" >&2
+        exit $EXIT_CODE
+    }
 }
+
+get_slot_speeds_json_direct_attached() {
+    local SLOT_NAMES=$1
+
+    local slot_num=0
+    local last_slot
+    local last_slot=""
+    for s in $SLOT_NAMES; do
+        test -b "/dev/$s" && last_slot=$s
+    done
+    echo '['
+    for slot_name in $SLOT_NAMES; do
+        if ! test -b "/dev/$slot_name"; then
+            slot_num=$((slot_num+1))
+            continue
+        fi
+        echo '{'
+        (
+            source <(udevadm info -q property -x "/dev/$slot_name")
+
+            printf '"slot_num": %d,\n' $slot_num
+            printf '"enclosure_id": "-",\n'
+            printf '"controller_num": "-",\n'
+            printf '"type": "%s",\n' "$(
+            if [[ "$DEVPATH" == *"/nvme/"* || "$ID_VENDOR" == "NVMe" ]]; then
+                echo NVMe
+            elif [[ "$DEVPATH" == *"/ata"* || "$ID_VENDOR" == "ATA" ]]; then
+                echo SATA
+            else
+                echo ?
+            fi
+            )"
+            printf '"width": "x%s",\n' "$(
+            if [[ "$DEVPATH" == *"/nvme/"* ]]; then
+                cat "/sys/$DEVPATH/../../../current_link_width"
+            elif [[ "$DEVPATH" == *"/ata"* || "$ID_VENDOR" == "ATA" ]]; then
+                echo 1
+            else
+                echo ?
+            fi
+            )"
+            printf '"width_max": "x%s",\n' "$(
+            if [[ "$DEVPATH" == *"/nvme/"* ]]; then
+                cat "/sys/$DEVPATH/../../../max_link_width"
+            elif [[ "$DEVPATH" == *"/ata"* || "$ID_VENDOR" == "ATA" ]]; then
+                echo 1
+            else
+                echo ?
+            fi
+            )"
+            printf '"rate": "%s",\n' "$(
+            if [[ "$DEVPATH" == *"/nvme/"* ]]; then
+                sed 's; GT/s PCIe;GT/s;' "/sys/$DEVPATH/../../../current_link_speed"
+            elif [[ "$DEVPATH" == *"/ata"* || "$ID_VENDOR" == "ATA" ]]; then
+                sed 's; Gbps;Gb/s;' "/sys/class/ata_link/link$(echo "$DEVPATH" | grep -oP 'ata\K[0-9]+')/sata_spd"
+            else
+                echo ?
+            fi
+            )"
+            printf '"rate_max": "%s",\n' "$(
+            if [[ "$DEVPATH" == *"/nvme/"* ]]; then
+                sed 's; GT/s PCIe;GT/s;' "/sys/$DEVPATH/../../../max_link_speed"
+            elif [[ "$DEVPATH" == *"/ata"* || "$ID_VENDOR" == "ATA" ]]; then
+                sed 's; Gbps;Gb/s;' "/sys/class/ata_link/link$(echo "$DEVPATH" | grep -oP 'ata\K[0-9]+')/sata_spd_limit"
+            else
+                echo ?
+            fi
+            )"
+            printf '"model": "%s",\n' "$ID_MODEL"
+            printf '"firmware_rev": "%s",\n' "$ID_REVISION"
+            printf '"serial": "%s",\n' "$ID_SERIAL_SHORT"
+            printf '"state": "%s",\n' "$(
+                cat "/sys/$DEVPATH/../state" || echo "?"
+            )"
+            printf '"status": "-",\n'
+            printf '"dev_path": "%s",\n' "$DEVNAME"
+            printf '"slot_name": "%s",\n' "$slot_name"
+            printf '"storcli_path": "-",\n'
+            printf '"size": "%s"\n' "$(lsblk --output SIZE -n -d "$DEVNAME" | tr -d ' ')"
+        )
+        slot_num=$((slot_num+1))
+        printf '}'
+        if [[ "$slot_name" != "$last_slot" ]]; then
+            printf ','
+        fi
+        echo
+    done
+    echo ']'
+}
+
+if check_ubm_func_support -q; then
+    SLOT_NAMES="$(all_slot_names)" || exit $?
+    ALL_SLOT_SPEEDS_JSON="$(get_slot_speeds_json_ubm "$SLOT_NAMES")"
+else
+    MAP_KEY=$(get_map_key) || exit $?
+    SLOT_NAMES=$(
+        grep "^$MAP_KEY " <<EOF | cut -d' ' -f2-
+# Add new direct-attached (non-ubm) servers here:
+STORNADO-E16 $(echo {1..4}-{1..4})
+PROXINATOR-VM2 1-1 1-2
+EOF
+    ) || exit $?
+    ALL_SLOT_SPEEDS_JSON="$(get_slot_speeds_json_direct_attached "$SLOT_NAMES")"
+fi
 
 if $JSON; then
     echo "$ALL_SLOT_SPEEDS_JSON"
     exit 0
 fi
+
+SLOT_NAME_LUT=$(echo "$SLOT_NAMES" | jq -R '[ split(" ") | .[] | select(length > 0) ]') || exit $?
 
 (
     jq -re '
@@ -117,14 +250,16 @@ fi
         rate_max: "Max Rate",
         model: "Model",
         firmware_rev: "FW Rev",
+        serial: "Serial Number",
         state: "State",
         status: "Status",
         dev_path: "Device Path",
         slot_name: "Slot Name",
         storcli_path: "Storcli2 Path",
+        size: "Size",
     }] + . |
     # transform objects into arrays for tsv output
-    .[] | [ .slot_num, .slot_name, .storcli_path, .type, .width, .width_max, .rate, .rate_max, .model, .firmware_rev, .state, .status, .dev_path ] |
+    .[] | [ .slot_num, .slot_name, .storcli_path, .type, .width, .width_max, .rate, .rate_max, .model, .firmware_rev, .serial, .state, .status, .dev_path, .size ] |
     # replace any nulls with "-"
     map(. // "-") |
     @tsv
