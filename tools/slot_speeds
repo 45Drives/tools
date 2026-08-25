@@ -116,15 +116,19 @@ get_slot_speeds_json_direct_attached() {
 
     local slot_num=0
     local last_slot
-    last_slot=$(echo "$SLOT_NAMES" | awk '{print $NF}')
+    local last_slot=""
+    for s in $SLOT_NAMES; do
+        test -b "/dev/$s" && last_slot=$s
+    done
     echo '['
     for slot_name in $SLOT_NAMES; do
         if ! test -b "/dev/$slot_name"; then
+            slot_num=$((slot_num+1))
             continue
         fi
         echo '{'
         (
-            source <(udevadm info -q property -x "/dev/disk/by-vdev/$slot_name")
+            source <(udevadm info -q property -x "/dev/$slot_name")
 
             printf '"slot_num": %d,\n' $slot_num
             printf '"enclosure_id": "-",\n'
@@ -138,7 +142,7 @@ get_slot_speeds_json_direct_attached() {
                 echo ?
             fi
             )"
-            printf '"width": "x%d",\n' "$(
+            printf '"width": "x%s",\n' "$(
             if [[ "$DEVPATH" == *"/nvme/"* ]]; then
                 cat "/sys/$DEVPATH/../../../current_link_width"
             elif [[ "$DEVPATH" == *"/ata"* || "$ID_VENDOR" == "ATA" ]]; then
@@ -147,7 +151,7 @@ get_slot_speeds_json_direct_attached() {
                 echo ?
             fi
             )"
-            printf '"width_max": "x%d",\n' "$(
+            printf '"width_max": "x%s",\n' "$(
             if [[ "$DEVPATH" == *"/nvme/"* ]]; then
                 cat "/sys/$DEVPATH/../../../max_link_width"
             elif [[ "$DEVPATH" == *"/ata"* || "$ID_VENDOR" == "ATA" ]]; then
@@ -160,7 +164,7 @@ get_slot_speeds_json_direct_attached() {
             if [[ "$DEVPATH" == *"/nvme/"* ]]; then
                 sed 's; GT/s PCIe;GT/s;' "/sys/$DEVPATH/../../../current_link_speed"
             elif [[ "$DEVPATH" == *"/ata"* || "$ID_VENDOR" == "ATA" ]]; then
-                sed 's; Gbps;Gb/s;' "/sys/class/ata_link/link$(echo "$DEV_PATH" | grep -oP 'ata\K[0-9]+')/sata_spd"
+                sed 's; Gbps;Gb/s;' "/sys/class/ata_link/link$(echo "$DEVPATH" | grep -oP 'ata\K[0-9]+')/sata_spd"
             else
                 echo ?
             fi
@@ -169,7 +173,7 @@ get_slot_speeds_json_direct_attached() {
             if [[ "$DEVPATH" == *"/nvme/"* ]]; then
                 sed 's; GT/s PCIe;GT/s;' "/sys/$DEVPATH/../../../max_link_speed"
             elif [[ "$DEVPATH" == *"/ata"* || "$ID_VENDOR" == "ATA" ]]; then
-                sed 's; Gbps;Gb/s;' "/sys/class/ata_link/link$(echo "$DEV_PATH" | grep -oP 'ata\K[0-9]+')/sata_spd_limit"
+                sed 's; Gbps;Gb/s;' "/sys/class/ata_link/link$(echo "$DEVPATH" | grep -oP 'ata\K[0-9]+')/sata_spd_limit"
             else
                 echo ?
             fi
@@ -202,7 +206,7 @@ if check_ubm_func_support -q; then
 else
     MAP_KEY=$(get_map_key) || exit $?
     SLOT_NAMES=$(
-        grep "^$MAP_KEY\s" <<EOF | cut -d' ' -f2-
+        grep "^$MAP_KEY " <<EOF | cut -d' ' -f2-
 # Add new direct-attached (non-ubm) servers here:
 STORNADO-E16 $(echo {1..4}-{1..4})
 PROXINATOR-VM2 1-1 1-2
