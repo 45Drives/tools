@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.50-1
+## 45drives-tools 4.0.51-1
 
-* Adds TURIN mobo for E16 unit
+* Fixes slot order for NVME-F8X2-U2 and NVME-F8X3-U2
