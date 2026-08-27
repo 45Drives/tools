@@ -27,7 +27,7 @@ g_product_lut_idx = {
 	"ALIAS_STYLE":	4
 }
 
-g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","NVME-F8X1","NVME-F8X2","NVME-F8X3","NVME-F8X1-U2","NVME-F8X1-EDSFF","NVME-F8X2-U2","NVME-F8X2-EDSFF","NVME-F8X3-U2","NVME-F8X3-EDSFF","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","STUDIO15","HL15_BEAST","F16","VM2","2UGW_REV2","X15"]
+g_chassis_sizes = ["?","AV15","Q30","S45","XL60","F8X1","F8X2","F8X3","NVME-F8X1","NVME-F8X2","NVME-F8X3","NVME-F8X1-U2","NVME-F8X1-EDSFF","NVME-F8X2-U2","NVME-F8X2-EDSFF","NVME-F8X3-U2","NVME-F8X3-EDSFF","2U","2UGW","1UGW","F2","HL15","VM8","VM16","VM32","HL4","HL8","PRO4","PRO8","PRO15","STUDIO8","STUDIO15","HL15_BEAST","F16","VM2","2UGW_REV2","X15","X4"]
 
 g_mobo_to_version_lut = {
 	"Base": ["X11SPH-nCTF","X11SSH-CTF","X11SSM-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000", "MW34-SP0-00", "X13SAE-F","GENOAD8X-2T/BCM","GENOAD8UD-2T/X550","TURIND8X-2T/500W"],
@@ -35,7 +35,7 @@ g_mobo_to_version_lut = {
 	"Enhanced": ["X11SPL-F","X10SRL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000", "MW34-SP0-00", "X13SAE-F","GENOAD8X-2T/BCM","GENOAD8UD-2T/X550","TURIND8X-2T/500W"],
 	"Enhanced-S":["X11SPL-F","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000", "MW34-SP0-00", "X13SAE-F","GENOAD8X-2T/BCM","GENOAD8UD-2T/X550","TURIND8X-2T/500W"],
 	"Enhanced-AMD":["H11SSL-i","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000", "MW34-SP0-00", "X13SAE-F","GENOAD8X-2T/BCM","GENOAD8UD-2T/X550","TURIND8X-2T/500W"],
-	"Turbo": ["X11SPH-nCTF","X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000", "MW34-SP0-00", "X13SAE-F","GENOAD8X-2T/BCM","GENOAD8UD-2T/X550","TURIND8X-2T/500W"],
+	"Turbo": ["X11SPH-nCTF","X11DPL-i","X10DRL-i","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","B860I WiFi","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000", "MW34-SP0-00", "X13SAE-F","GENOAD8X-2T/BCM","GENOAD8UD-2T/X550","TURIND8X-2T/500W"],
 	"Turbo-G":["X11SPH-nCTF","X11SPL-F","X12DPi-N6","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000", "MW34-SP0-00", "X13SAE-F","GENOAD8X-2T/BCM","GENOAD8UD-2T/X550","TURIND8X-2T/500W"],
 	"Good": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000", "MW34-SP0-00", "X13SAE-F","GENOAD8X-2T/BCM","GENOAD8UD-2T/X550","TURIND8X-2T/500W"],
 	"Better": ["H12SSL-i","H12SSL-I","ME03-CE0-000","MS03-6L0-000","MS73-HB0-000","MZ73-LM0-000","MC13-LE1-000","B550I AORUS PRO","EC266D2I-2T/AQC","ROMED8-2T/BCM","ROMED8-2T", "ProArt X870E-CREATOR WIFI","MH53-G40-000", "MW34-SP0-00", "X13SAE-F","GENOAD8X-2T/BCM","GENOAD8UD-2T/X550","TURIND8X-2T/500W"],
@@ -72,6 +72,7 @@ g_product_lut = {
 	"HomeLab-HL4":             			[g_mobo_to_version_lut["Turbo"],0,0,"HL4","HOMELAB"],
 	"HomeLab-HL8":             			[g_mobo_to_version_lut["Turbo"],0,0,"HL8","HOMELAB"],
  	"HomeLab-X15":             			[g_mobo_to_version_lut["Turbo"],0,1,"X15","HOMELAB"],
+ 	"HomeLab-X4":              			[g_mobo_to_version_lut["Turbo"],0,0,"X4","HOMELAB"],
  
  	"Professional-PRO15":               [g_mobo_to_version_lut["Turbo"],0,1,"PRO15","PROFESSIONAL"],
 	"Professional-PRO4":             	[g_mobo_to_version_lut["Turbo"],0,0,"PRO4","PROFESSIONAL"],
@@ -390,7 +391,20 @@ def read_latest_fru_ini(base_dir="/opt/45drives/serial45d/fru_ini"):
     """
     Returns dict like {"product": "...", "part": "...", "serial": "...", "ini_path": "..."}
     from the newest .ini in base_dir, or None if not found/invalid.
+
+    Any .ini whose [board] serial does not match this machine's DMI board serial
+    is skipped: those are left over from a previous board and must not be used to
+    identify the current system. This matters for units serialized via serial.bat
+    (HL4/HL8/X4), which update DMI but never write a new .ini here.
     """
+    # This machine's board serial, used to reject .ini files from other boards.
+    dmi_board_serial = ""
+    try:
+        with open("/sys/class/dmi/id/board_serial", "r") as f:
+            dmi_board_serial = f.read().strip()
+    except Exception:
+        dmi_board_serial = ""
+
     try:
         candidates = sorted(
             glob.glob(os.path.join(base_dir, "*.ini")),
@@ -400,6 +414,14 @@ def read_latest_fru_ini(base_dir="/opt/45drives/serial45d/fru_ini"):
         for path in candidates:
             cp = configparser.ConfigParser()
             cp.read(path)
+
+            # Reject .ini files belonging to a different motherboard.
+            if dmi_board_serial and cp.has_section("board"):
+                ini_board_serial = cp.get("board", "serial", fallback="").strip()
+                if ini_board_serial and ini_board_serial != dmi_board_serial:
+                    print("/opt/45drives/tools/server_identifier: Ignoring stale FRU ini {p} (board serial '{i}' != this board '{d}')".format(
+                        p=path, i=ini_board_serial, d=dmi_board_serial))
+                    continue
 
             if cp.has_section("product"):
                 product = cp.get("product", "product", fallback="").strip()
@@ -952,7 +974,7 @@ def serial_check():
 		with open('/sys/class/dmi/id/chassis_version', 'r') as file:
 			pn = file.read().rstrip('\n')
 		serial_result["Product Part Number"] = pn
-		if pn in ["HL4", "HL8", "HL15", "HL15_BEAST"]:
+		if pn in ["HL4", "HL8", "HL15", "HL15_BEAST", "X4", "X15"]:
 			serial_result["Product Name"] = "HomeLab-" + pn
 		else:
 			serial_result["Product Name"] = "Storinator"  # safe default to avoid KeyError later
@@ -1386,10 +1408,16 @@ def infer_homelab_model_from_sysfs_ports(allowed_mobos=None, detected_mobo_name=
     Infer HL4 vs HL8 by counting ATA ports per SATA controller in sysfs.
     Works with zero drives installed.
 
-    Returns ("HomeLab-HL4", "HL4") / ("HomeLab-HL8","HL8") / (None, None).
+    Returns ("HomeLab-HL4", "HL4") / ("HomeLab-HL8","HL8") /
+    ("HomeLab-X4", "X4") / (None, None).
     If allowed_mobos is provided, only runs inference when the detected
     motherboard name is in that whitelist.
     """
+    # Boards that are only ever used in a single 4-bay SKU. When one of these
+    # is detected we can map straight to the model without port-count guessing.
+    FOUR_BAY_MOBO_TO_MODEL = {
+        "B860I WiFi": ("HomeLab-X4", "X4"),
+    }
     if allowed_mobos and detected_mobo_name not in allowed_mobos:
         return (None, None)
 
@@ -1419,6 +1447,13 @@ def infer_homelab_model_from_sysfs_ports(allowed_mobos=None, detected_mobo_name=
     # Count usable ports per controller. We consider a controller "big"
     # when it exposes >=4 ATA ports (HL series wiring).
     big = [pci for pci, ports in groups.items() if len(ports) >= 4]
+
+    # The 4-bay SKU differs per motherboard: the B860I WiFi board is only
+    # ever used in the X4, while the B550I AORUS PRO AX is HL4/HL8.
+    if detected_mobo_name in FOUR_BAY_MOBO_TO_MODEL:
+        if len(big) >= 1:
+            return FOUR_BAY_MOBO_TO_MODEL[detected_mobo_name]
+        return (None, None)
 
     if len(big) == 1:
         return ("HomeLab-HL4", "HL4")
@@ -1565,7 +1600,7 @@ def main():
 		and server["Model"] in ("Storinator","?","",None)
 		and len(server.get("HBA",[])) == 0):
 		inferred_model, inferred_size = infer_homelab_model_from_sysfs_ports(
-			allowed_mobos=("B550I AORUS PRO AX"),
+			allowed_mobos=("B550I AORUS PRO AX", "B860I WiFi"),
 			detected_mobo_name=mobo_name
 		)
 		if inferred_model:
