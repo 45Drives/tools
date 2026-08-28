@@ -499,6 +499,7 @@ def create_vdev_id(server):
 			"X15":[15],
   			"HL15":[15],
 			"HL4":[4],
+			"X4":[4],
 			"HL8":[4,4]
 		},
 		"PROFESSIONAL":{
@@ -583,6 +584,13 @@ def create_vdev_id(server):
 			log("           Supported: ProArt X870E-CREATOR WIFI, ROMED8-2T")
 			sys.exit(1)
 		return vdev_id_str
+
+	# X4: bays are always wired to the onboard SATA controller, never to an HBA.
+	# This must be checked before the generic HBA branch below, otherwise an
+	# unrelated HBA in the system would capture the aliases and point 1-1..1-4
+	# at drives that aren't in the X4 bays.
+	if server["Alias Style"] == "HOMELAB" and server["Chassis Size"] == "X4":
+		return vdev_id_str + alias_x4(server)
 
 	if len(server["HBA"]) > 0 and server["Chassis Size"] != "C8" and server["Alias Style"] != "F8":
 		# we have hba cards to inspect/alias
@@ -885,6 +893,91 @@ def alias_hl4():
         vdev_id_str += (
             "alias 1-{s} /dev/disk/by-path/pci-{addr}-ata-{p}\n".format(
                 s=i + 1, p=hl4_order[i], addr=primary_sata_address
+            )
+        )
+
+    return vdev_id_str
+
+
+###############################################################################
+# Name: sata_controller_has_ata_ports
+# Args: pci_addr - PCI address of a SATA controller, e.g. "0000:80:17.0"
+#       ports    - list of ATA port numbers that must be present
+# Desc: Returns True when the controller's sysfs node exposes every requested
+#       ataN link. The kernel creates /sys/bus/pci/devices/<addr>/ataN for each
+#       port an AHCI controller owns, so this identifies which controller the
+#       bays actually hang off instead of guessing by enumeration order.
+###############################################################################
+def sata_controller_has_ata_ports(pci_addr, ports):
+    dev_path = "/sys/bus/pci/devices/{addr}".format(addr=pci_addr)
+    if not os.path.isdir(dev_path):
+        return False
+    return all(
+        os.path.exists(os.path.join(dev_path, "ata{p}".format(p=p))) for p in ports
+    )
+
+
+###############################################################################
+# Name: alias_x4
+# Args:
+# Desc: HomeLab X4 - 4 bay unit on the ASRock B860I WiFi board.
+#       The board exposes 8 ATA ports on a single onboard SATA controller
+#       (e.g. 0000:80:17.0) but only ports 5-8 are wired to the drive bays,
+#       and they map to bays in ascending order:
+#           bay 1-1 -> ata5, 1-2 -> ata6, 1-3 -> ata7, 1-4 -> ata8
+#       This differs from the HL4 (which uses ports 1-4 in descending order),
+#       so this is kept separate from alias_hl4().
+###############################################################################
+def alias_x4(server=None):
+    vdev_id_str = ""
+    # Bay 1..4 -> ATA port 5..8 (confirmed against B860I WiFi hardware)
+    x4_order = [5, 6, 7, 8]
+
+    # Guard against future X4 board revisions with a different SATA topology.
+    # Fail loudly rather than silently emitting aliases for the wrong ports.
+    supported_mobos = ["B860I WIFI"]
+    if server is not None:
+        mobo_name = server.get("Motherboard", {}).get("Product Name", "") or ""
+        if mobo_name.upper() not in supported_mobos:
+            log("!! ERROR !! Unsupported motherboard for X4: {mobo}".format(mobo=mobo_name))
+            log("           Supported: B860I WiFi")
+            sys.exit(1)
+
+    # Fetch SATA addresses dynamically
+    sata_addresses = get_sata_pci_addresses()
+
+    if len(sata_addresses) < 1:
+        raise RuntimeError("No SATA controllers found for X4 configuration.")
+
+    # Pick the controller by the ports it actually owns rather than by
+    # enumeration order. lshw does not guarantee the onboard controller comes
+    # first, so on a unit with an add-in SATA card sata_addresses[0] could be
+    # the card and we would emit four confidently-wrong aliases. Matching on
+    # the ataN links keeps add-in cards working while making a wrong mapping
+    # impossible.
+    candidates = [
+        addr
+        for addr in sata_addresses
+        if sata_controller_has_ata_ports(addr, x4_order)
+    ]
+
+    if len(candidates) != 1:
+        raise RuntimeError(
+            "Expected exactly 1 SATA controller exposing ports {ports} for X4 "
+            "configuration, found {n}: {cand} (all SATA controllers: {all})".format(
+                ports=x4_order,
+                n=len(candidates),
+                cand=candidates,
+                all=sata_addresses,
+            )
+        )
+
+    primary_sata_address = candidates[0]
+
+    for i in range(len(x4_order)):
+        vdev_id_str += (
+            "alias 1-{s} /dev/disk/by-path/pci-{addr}-ata-{p}\n".format(
+                s=i + 1, p=x4_order[i], addr=primary_sata_address
             )
         )
 
