@@ -343,6 +343,7 @@ def build_server(options):
 			"X15":[15],
 			"HL15":[15],
 			"HL4":[4],
+			"X4":[4],
 			"HL8":[4,4]
 		},
   		"PROFESSIONAL":{
