@@ -974,7 +974,7 @@ def serial_check():
 		with open('/sys/class/dmi/id/chassis_version', 'r') as file:
 			pn = file.read().rstrip('\n')
 		serial_result["Product Part Number"] = pn
-		if pn in ["HL4", "HL8", "HL15", "HL15_BEAST", "X4", "X15"]:
+		if pn in ["HL4", "HL8", "HL15", "HL15_BEAST", "X4"]:
 			serial_result["Product Name"] = "HomeLab-" + pn
 		else:
 			serial_result["Product Name"] = "Storinator"  # safe default to avoid KeyError later
