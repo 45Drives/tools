@@ -391,20 +391,7 @@ def read_latest_fru_ini(base_dir="/opt/45drives/serial45d/fru_ini"):
     """
     Returns dict like {"product": "...", "part": "...", "serial": "...", "ini_path": "..."}
     from the newest .ini in base_dir, or None if not found/invalid.
-
-    Any .ini whose [board] serial does not match this machine's DMI board serial
-    is skipped: those are left over from a previous board and must not be used to
-    identify the current system. This matters for units serialized via serial.bat
-    (HL4/HL8/X4), which update DMI but never write a new .ini here.
     """
-    # This machine's board serial, used to reject .ini files from other boards.
-    dmi_board_serial = ""
-    try:
-        with open("/sys/class/dmi/id/board_serial", "r") as f:
-            dmi_board_serial = f.read().strip()
-    except Exception:
-        dmi_board_serial = ""
-
     try:
         candidates = sorted(
             glob.glob(os.path.join(base_dir, "*.ini")),
@@ -414,14 +401,6 @@ def read_latest_fru_ini(base_dir="/opt/45drives/serial45d/fru_ini"):
         for path in candidates:
             cp = configparser.ConfigParser()
             cp.read(path)
-
-            # Reject .ini files belonging to a different motherboard.
-            if dmi_board_serial and cp.has_section("board"):
-                ini_board_serial = cp.get("board", "serial", fallback="").strip()
-                if ini_board_serial and ini_board_serial != dmi_board_serial:
-                    print("/opt/45drives/tools/server_identifier: Ignoring stale FRU ini {p} (board serial '{i}' != this board '{d}')".format(
-                        p=path, i=ini_board_serial, d=dmi_board_serial))
-                    continue
 
             if cp.has_section("product"):
                 product = cp.get("product", "product", fallback="").strip()
