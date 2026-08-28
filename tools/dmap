@@ -900,6 +900,24 @@ def alias_hl4():
 
 
 ###############################################################################
+# Name: sata_controller_has_ata_ports
+# Args: pci_addr - PCI address of a SATA controller, e.g. "0000:80:17.0"
+#       ports    - list of ATA port numbers that must be present
+# Desc: Returns True when the controller's sysfs node exposes every requested
+#       ataN link. The kernel creates /sys/bus/pci/devices/<addr>/ataN for each
+#       port an AHCI controller owns, so this identifies which controller the
+#       bays actually hang off instead of guessing by enumeration order.
+###############################################################################
+def sata_controller_has_ata_ports(pci_addr, ports):
+    dev_path = "/sys/bus/pci/devices/{addr}".format(addr=pci_addr)
+    if not os.path.isdir(dev_path):
+        return False
+    return all(
+        os.path.exists(os.path.join(dev_path, "ata{p}".format(p=p))) for p in ports
+    )
+
+
+###############################################################################
 # Name: alias_x4
 # Args:
 # Desc: HomeLab X4 - 4 bay unit on the ASRock B860I WiFi board.
@@ -931,8 +949,30 @@ def alias_x4(server=None):
     if len(sata_addresses) < 1:
         raise RuntimeError("No SATA controllers found for X4 configuration.")
 
-    # The B860I WiFi has a single onboard SATA controller
-    primary_sata_address = sata_addresses[0]
+    # Pick the controller by the ports it actually owns rather than by
+    # enumeration order. lshw does not guarantee the onboard controller comes
+    # first, so on a unit with an add-in SATA card sata_addresses[0] could be
+    # the card and we would emit four confidently-wrong aliases. Matching on
+    # the ataN links keeps add-in cards working while making a wrong mapping
+    # impossible.
+    candidates = [
+        addr
+        for addr in sata_addresses
+        if sata_controller_has_ata_ports(addr, x4_order)
+    ]
+
+    if len(candidates) != 1:
+        raise RuntimeError(
+            "Expected exactly 1 SATA controller exposing ports {ports} for X4 "
+            "configuration, found {n}: {cand} (all SATA controllers: {all})".format(
+                ports=x4_order,
+                n=len(candidates),
+                cand=candidates,
+                all=sata_addresses,
+            )
+        )
+
+    primary_sata_address = candidates[0]
 
     for i in range(len(x4_order)):
         vdev_id_str += (
