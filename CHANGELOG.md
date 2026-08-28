@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.51-2
+## 45drives-tools 4.0.52-1
 
-* Fixes slot order for NVME-F8X*-U2 units and fixes slot speeds for direct attached units
+* added support for X4

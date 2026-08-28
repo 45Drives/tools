@@ -1,3 +1,9 @@
+45drives-tools (4.0.52-1jammy) jammy; urgency=medium
+
+  * added support for X4
+
+ -- Rachit Hans <rhans@45drives.com>  Fri, 28 Aug 2026 11:28:23 -0300
+
 45drives-tools (4.0.51-2jammy) jammy; urgency=medium
 
   * Fixes slot order for NVME-F8X*-U2 units and fixes slot speeds for direct attached
