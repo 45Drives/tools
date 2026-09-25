@@ -4,7 +4,7 @@
     "title": "45drives-tools",
     "description": "cli tools for 45Drives server products",
     "version": "4.0.52",
-    "build_number": "1",
+    "build_number": "2",
     "stable": true,
     "author": "Brett Kelly <bkelly@45drives.com>",
     "git_url": "https://github.com/45Drives/ceph-ansible-45d",
@@ -28,8 +28,7 @@
             "hdparm",
             "udev",
             "lsscsi",
-            "python3-pyudev",
-            "mpi3mr-dkms"
+            "python3-pyudev"
         ],
         "rocky_common": [
             "ipmitool",
@@ -40,8 +39,7 @@
             "pciutils",
             "hdparm",
             "lsscsi",
-            "python3-pyudev",
-            "mpi3mr-dkms"
+            "python3-pyudev"
         ]
     },
     "builds": [
@@ -83,7 +81,7 @@
     "changelog": {
         "urgency": "medium",
         "version": "4.0.52",
-        "build_number": "1",
+        "build_number": "2",
         "date": null,
         "packager": "Brett Kelly <bkelly@45drives.com>",
         "changes": []

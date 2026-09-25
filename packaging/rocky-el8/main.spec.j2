@@ -10,6 +10,7 @@ URL: {{ git_url }}
 Source0: %{name}-%{version}.tar.gz
 BuildArch: {{ architecture.rocky }}
 Requires: {{ dependencies.rocky_common | join(',') }}
+Recommends: mpi3mr-dkms
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -77,6 +78,8 @@ fi
 /usr/lib/udev/rules.d/*
 
 %changelog
+* Fri Sep 25 2026 Joshua Boudreau <jboudreau@45drives.com> 4.0.52-2
+- Change mpi3mr-dkms from dependency to recommends
 * Fri Aug 28 2026 Rachit Hans <rhans@45drives.com> 4.0.52-1
 - added support for X4
 * Tue Aug 25 2026 Jordan Keough <jkeough@45drives.com> 4.0.51-2

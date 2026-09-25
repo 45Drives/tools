@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.52-1
+## 45drives-tools 4.0.52-2
 
-* added support for X4
+* Change mpi3mr-dkms from dependency to recommends
