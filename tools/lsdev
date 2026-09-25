@@ -19,7 +19,10 @@ from optparse import OptionParser
 import math
 from enum import Enum
 import time
+from concurrent.futures import ThreadPoolExecutor
 from table_print import *
+
+SMARTCTL_WORKERS = 16
 
 EXIT_CODE = 0
 
@@ -123,7 +126,7 @@ def smartctl(drive):
 	drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
 	drive["model-name"] = output["model_name"] if "model_name" in output.keys() else "?"
 	drive["serial"] = output["serial_number"] if "serial_number" in output.keys() else "?"
-	drive["capacity"] = output["user_capacity"]["bytes"] if "user_capacity" in output.keys() else "?"
+	drive["capacity"] = format_bytes(output["user_capacity"]["bytes"] if "user_capacity" in output.keys() else "?")
 	drive["firm-ver"] = output["firmware_version"] if "firmware_version" in output.keys() else "?"
 	drive["rotation-rate"] = output["rotation_rate"] if "rotation_rate" in output.keys() else "?"
 	if "ata_smart_attributes" in output.keys():
@@ -201,6 +204,30 @@ def get_model_serial_firmware(device_name):
 			firmware=regex_firmware.group(1).rstrip()
 			break
 	return (model,serial,firmware)
+
+################################################################################
+# function name: get_lsblk_model_serial_dict
+# receives: nothing
+# does: executes lsblk once for all disks and parses model, serial, revision
+# returns: dictionary of dev path : (model, serial, firmware)
+# why: hdparm -I only works on ATA drives, fails on SAS drives
+################################################################################
+def get_lsblk_model_serial_dict():
+	info = {}
+	try:
+		child = subprocess.Popen(
+			["lsblk","--nodeps","--noheadings","--pairs","--output","NAME,MODEL,SERIAL,REV"],
+			stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,universal_newlines=True
+		)
+	except OSError:
+		return info
+	outs, _ = child.communicate()
+	unescape = lambda v: re.sub(r"\\x([0-9a-fA-F]{2})", lambda m: chr(int(m.group(1), 16)), v).strip()
+	for line in outs.splitlines():
+		fields = {k: unescape(v) for k, v in re.findall(r'(\w+)="([^"]*)"', line)}
+		if fields.get("NAME"):
+			info["/dev/" + fields["NAME"]] = (fields.get("MODEL",""), fields.get("SERIAL",""), fields.get("REV",""))
+	return info
 
 ################################################################################
 # function name: check_ceph
@@ -292,6 +319,7 @@ def build_server(options):
 	capacity_lut = None
 	if options.outputCapacity:
 		capacity_lut = get_capacity_dict()
+	lsblk_lut = get_lsblk_model_serial_dict() if call_hdparm else {}
 	# model_serial = get_model_serial() if call_lsblk else {}
 	server = [[]] # server[row][bay]
 		# load the existing server_info.json file in as a json object.
@@ -476,17 +504,22 @@ def build_server(options):
 			bay["partitions"] = count_partitions(bay["dev"])
 			if options.outputType or only_flag_is_json(options):
 				bay["disk_type"] = disk_type(bay["dev"])
-			if call_smartctl:
-				smartctl(bay) # get metadata
-				if EXIT_CODE == 0:
-					bay["capacity"] = format_bytes(bay["capacity"])
-			elif options.outputCapacity and bay["dev"] in capacity_lut:
+			if not call_smartctl and options.outputCapacity and bay["dev"] in capacity_lut:
 				bay["capacity"] = format_bytes(capacity_lut[bay["dev"]])
 			if call_hdparm:
 				bay["model-name"], bay["serial"], bay["firm-ver"] = get_model_serial_firmware(bay["dev"])
+				fallback = lsblk_lut.get(bay["dev"], ("", "", ""))
+				for key, value in zip(("model-name", "serial", "firm-ver"), fallback):
+					if bay[key] == "unknown" and value:
+						bay[key] = value
 		# insert copy of bay
 		server[CURRENT_ROW].append(bay.copy())
 	vdev_id.close()
+	if call_smartctl:
+		# smartctl is I/O bound per drive; run in parallel to keep large chassis fast
+		occupied = [bay for row in server for bay in row if bay["occupied"]]
+		with ThreadPoolExecutor(max_workers=SMARTCTL_WORKERS) as pool:
+			list(pool.map(smartctl, occupied))
 	return server, server_obj
 
 ################################################################################
