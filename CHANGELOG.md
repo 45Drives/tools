@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.52-2
+## 45drives-tools 4.0.53-1
 
-* Change mpi3mr-dkms from dependency to recommends
+* fix x4 dmap order
