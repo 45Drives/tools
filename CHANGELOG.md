@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.52-1
+## 45drives-tools 4.0.53-1
 
-* added support for X4
+* fix x4 dmap order
