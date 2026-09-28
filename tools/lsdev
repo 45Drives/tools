@@ -126,7 +126,7 @@ def smartctl(drive):
 	drive["model-family"] = output["model_family"] if "model_family" in output.keys() else "?"
 	drive["model-name"] = output["model_name"] if "model_name" in output.keys() else "?"
 	drive["serial"] = output["serial_number"] if "serial_number" in output.keys() else "?"
-	drive["capacity"] = format_bytes(output["user_capacity"]["bytes"] if "user_capacity" in output.keys() else "?")
+drive["capacity"] = format_bytes(output["user_capacity"]["bytes"]) if "user_capacity" in output.keys() else "?"
 	drive["firm-ver"] = output["firmware_version"] if "firmware_version" in output.keys() else "?"
 	drive["rotation-rate"] = output["rotation_rate"] if "rotation_rate" in output.keys() else "?"
 	if "ata_smart_attributes" in output.keys():
