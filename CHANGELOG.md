@@ -1,3 +1,3 @@
-## 45drives-tools 4.0.53-1
+## 45drives-tools 4.0.54-1
 
-* fix x4 dmap order
+* Updates slot_name_map.txt to include VM8_2G
