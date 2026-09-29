@@ -492,7 +492,11 @@ def create_vdev_id(server):
 		},
 		"STORINATORUBM":{
 			"MI4_UBM":[4],
-			"C8_UBM":[8]
+			"C8_UBM":[8],
+            "AV15_UBM":[15],
+            "Q30_UBM":[15,15],
+            "S45_UBM":[15,15,15],
+            "XL60_UBM":[15,15,15,15]
 		},
 		"HOMELAB":{
       		"HL15_BEAST":[23],
