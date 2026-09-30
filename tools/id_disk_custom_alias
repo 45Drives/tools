@@ -131,6 +131,11 @@ def main():
         return
     chassis_size, mobo = result
     alias_parents = get_alias_pcieport_parents(chassis_size, mobo)
+    if len(sys.argv) > 1 and sys.argv[1] == "--list-aliases":
+        if alias_parents is None:
+            sys.exit(1)
+        print(" ".join(alias_parents.values()))
+        return
     if alias_parents is None:
         # not a custom alias server
         return
