@@ -356,6 +356,10 @@ def build_server(options):
 		"STORINATORUBM":{
 			"MI4_UBM":[4],
 			"C8_UBM":[8],
+			"AV15_UBM":[15,4],
+			"Q30_UBM":[15,15,4],
+			"S45_UBM":[15,15,15,4],
+			"XL60_UBM":[15,15,15,15,4],
 			"NVME-F8X1":[20],
 			"NVME-F8X2":[20,20],
 			"NVME-F8X3":[20,20,20],
