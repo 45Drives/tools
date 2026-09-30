@@ -19,6 +19,22 @@ from xmlrpc import server
 MANUAL_OVERRIDE_FILE = "/etc/45drives/server_info/manual_model_override.txt"
 UNKNOWN_VALUES = set(["", "?", "N/A", "NA", "NONE", "NULL", "UNKNOWN"])
 
+FRU_INI_DIR = "/opt/45drives/serial45d/fru_ini"
+
+# Motherboards that ship without a BMC. These boards have no FRU EEPROM, so a
+# FRU ini found on such a system can never legitimately describe it -- it must
+# have arrived from another machine (cloned boot disk, swapped SSD, restored
+# backup, or a bench that previously serialized a different unit). For these
+# boards DMI is authoritative because it lives in firmware and travels with
+# the hardware.
+NO_IPMI_MOBOS = (
+	"B550I AORUS PRO AX",
+	"B760I AORUS PRO",
+	"B860I WiFi",
+	"ProArt X870E-CREATOR WIFI",
+	"MS-CF03",
+)
+
 g_product_lut_idx = {
 	"MOBO_MODEL":	0,
 	"24I_COUNT":	1,
@@ -387,7 +403,38 @@ def _run_and_get_stdout(cmd, timeout=8):
         return ""
 
 
-def read_latest_fru_ini(base_dir="/opt/45drives/serial45d/fru_ini"):
+def _read_dmi_id(field):
+    """
+    Read a single value from /sys/class/dmi/id/. Returns "" when unavailable.
+    """
+    try:
+        with open(os.path.join("/sys/class/dmi/id", field), "r") as f:
+            return f.read().strip()
+    except Exception:
+        return ""
+
+
+def _serial_from_dmi(serial_result):
+    """
+    Populate serial_result from the DMI tables. DMI lives in firmware, so it
+    stays with the hardware across boot-disk clones and SSD swaps.
+
+    Only chassis part numbers that map 1:1 to a product get a Product Name.
+    Anything else is left as "?" so the caller falls through to hardware
+    detection -- DMI alone cannot distinguish e.g. PRO8-Base from PRO8-Turbo,
+    and guessing a generic name here would suppress that detection entirely.
+    """
+    serial_result["Product Serial"] = _read_dmi_id("chassis_serial") or "?"
+    pn = _read_dmi_id("chassis_version")
+    serial_result["Product Part Number"] = pn or "?"
+    if pn in ["HL4", "HL8", "HL15", "HL15_BEAST", "X4"]:
+        serial_result["Product Name"] = "HomeLab-" + pn
+    else:
+        serial_result["Product Name"] = "?"
+    return serial_result
+
+
+def read_latest_fru_ini(base_dir=FRU_INI_DIR):
     """
     Returns dict like {"product": "...", "part": "...", "serial": "...", "ini_path": "..."}
     from the newest .ini in base_dir, or None if not found/invalid.
@@ -936,9 +983,24 @@ def serial_check():
 		exit(1)
  
 	if ipmi_test:
-		# No IPMI — try FRU ini first
-		print("/opt/45drives/tools/server_identifier: ipmitool fru command failed. IPMI is not present on this system. Attempting to pull info from FRU ini")
+		# No IPMI on this system.
+		print("/opt/45drives/tools/server_identifier: ipmitool fru command failed. IPMI is not present on this system.")
 
+		mobo_product_name = motherboard().get("Product Name", "?")
+
+		# A board with no BMC has no FRU EEPROM, so any FRU ini on disk came
+		# from a different machine (cloned boot disk, swapped SSD, restored
+		# backup, or a bench that previously serialized another unit). DMI
+		# lives in firmware and travels with the hardware, so trust it instead.
+		if mobo_product_name in NO_IPMI_MOBOS:
+			print("/opt/45drives/tools/server_identifier: Motherboard '{}' has no BMC. Using DMI tables as the source of truth.".format(mobo_product_name))
+			if glob.glob(os.path.join(FRU_INI_DIR, "*.ini")):
+				print("/opt/45drives/tools/server_identifier: !! WARNING !! Ignoring FRU ini file(s) in {}".format(FRU_INI_DIR))
+				print("                              This system cannot store FRU data, so those files describe a different machine.")
+			return _serial_from_dmi(serial_result)
+
+		# Board may legitimately hold FRU data but ipmitool is unavailable.
+		print("/opt/45drives/tools/server_identifier: Attempting to pull info from FRU ini")
 		fru = read_latest_fru_ini()
 		if fru:
 			serial_result["Product Name"]        = fru["product"]
@@ -948,16 +1010,7 @@ def serial_check():
 
 		# FRU ini not found/usable — fall back to DMI (previous behavior)
 		print("/opt/45drives/tools/server_identifier: FRU ini not found or incomplete. Falling back to DMI tables")
-		with open('/sys/class/dmi/id/chassis_serial', 'r') as file:
-			serial_result["Product Serial"] = file.read().rstrip('\n')
-		with open('/sys/class/dmi/id/chassis_version', 'r') as file:
-			pn = file.read().rstrip('\n')
-		serial_result["Product Part Number"] = pn
-		if pn in ["HL4", "HL8", "HL15", "HL15_BEAST", "X4"]:
-			serial_result["Product Name"] = "HomeLab-" + pn
-		else:
-			serial_result["Product Name"] = "Storinator"  # safe default to avoid KeyError later
-		return serial_result
+		return _serial_from_dmi(serial_result)
 
 	ipmi_result = subprocess.Popen(["ipmitool","fru","print","0"],stdout=subprocess.PIPE,universal_newlines=True).stdout
 	for line in ipmi_result:
@@ -1428,7 +1481,7 @@ def infer_homelab_model_from_sysfs_ports(allowed_mobos=None, detected_mobo_name=
     big = [pci for pci, ports in groups.items() if len(ports) >= 4]
 
     # The 4-bay SKU differs per motherboard: the B860I WiFi board is only
-    # ever used in the X4, while the B550I AORUS PRO AX is HL4/HL8.
+    # ever used in the X4, while the B550I AORUS PRO is HL4/HL8.
     if detected_mobo_name in FOUR_BAY_MOBO_TO_MODEL:
         if len(big) >= 1:
             return FOUR_BAY_MOBO_TO_MODEL[detected_mobo_name]
@@ -1544,7 +1597,11 @@ def main():
 		fru_product_name_raw = serial_result.get("Product Name", "")
 		fru_product_name = normalize_model_key(fru_product_name_raw)
 
-		if fru_product_name in g_product_lut:
+		# "?" is a placeholder, not a model name, but it is a key in
+		# g_product_lut -- so a plain membership test would accept it and skip
+		# hardware detection. _serial_from_dmi() returns it for chassis that
+		# cannot be identified from DMI alone.
+		if fru_product_name in g_product_lut and not _is_unknown(fru_product_name):
 			server["Model"] = fru_product_name
 			print("/opt/45drives/tools/server_identifier: Using Product Name from FRU: {}".format(fru_product_name))
 
@@ -1575,8 +1632,18 @@ def main():
 	# try to infer if unit is HL4/HL8 from the actual SATA topology.
 	mobo_name = server["Motherboard"].get("Product Name","")
 
+	# This inference can only ever return a HomeLab model, so require a second
+	# signal that the chassis really is HomeLab. An unknown chassis size is
+	# allowed (that is the case the inference exists for), but a chassis size
+	# that positively says otherwise -- 1UGW, PRO8, STUDIO15, ... -- must not
+	# be overwritten with HL4/HL8.
+	chassis_allows_homelab = normalize_chassis_size(server.get("Chassis Size", "?")) in (
+		"?", "", "HL4", "HL8", "HL15", "HL15_BEAST", "X4"
+	)
+
 	if (not server["VM"]
 		and server["Model"] in ("Storinator","?","",None)
+		and chassis_allows_homelab
 		and len(server.get("HBA",[])) == 0):
 		inferred_model, inferred_size = infer_homelab_model_from_sysfs_ports(
 			allowed_mobos=("B550I AORUS PRO AX", "B860I WiFi"),
