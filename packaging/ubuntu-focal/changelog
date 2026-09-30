@@ -1,3 +1,10 @@
+45drives-tools (4.0.55-1focal) focal; urgency=medium
+
+  * Fixes mapping issues on BYPATH aliased servers (E16/VM2) + Fixes stale FRU ini
+    files on non-IPMI motherboards
+
+ -- Jordan Keough <jkeough@45drives.com>  Wed, 30 Sep 2026 07:27:53 -0300
+
 45drives-tools (4.0.54-1focal) focal; urgency=medium
 
   * Updates slot_name_map.txt to include VM8_2G
