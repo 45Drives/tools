@@ -6,6 +6,7 @@ if [ "$1" == "remove" ] || [ "$1" == "purge" ]; then
 	rm -rf /opt/45drives/dalias
 	rm -f /usr/bin/cephfs-dir-stats
 	rm -f /usr/bin/dmap
+	rm -f /etc/udev/rules.d/69-vdev-devpath.rules
 	rm -f /usr/bin/findosd
 	rm -f /usr/bin/lsdev
 	rm -f /usr/bin/server_identifier

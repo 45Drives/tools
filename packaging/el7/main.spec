@@ -34,6 +34,7 @@ if [ $1 == 0 ];then
     rm -rf /etc/45drives/server_info
 	rm -f /usr/bin/cephfs-dir-stats
 	rm -f /usr/bin/dmap
+	rm -f /etc/udev/rules.d/69-vdev-devpath.rules
 	rm -f /usr/bin/findosd
 	rm -f /usr/bin/lsdev
 	rm -f /usr/bin/server_identifier
