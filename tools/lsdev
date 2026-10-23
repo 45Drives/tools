@@ -722,13 +722,6 @@ def print_bays(server, options, osd, server_info):
 				else:
 					cell_string = "   " + cell_string
 			print_array[-1].append((cell_string, colour))
-   
-	# # Normalize column heights so ragged rows show fully
-	# max_height = max((len(col) for col in print_array), default=0)
-	# for col in print_array:
-	# 	while len(col) < max_height:
-	# 		# blank cell to keep columns aligned for rows with fewer bays
-	# 		col.append(("", ""))
 	
 	header_text = [
 		"Storage Disk Info"
@@ -744,7 +737,15 @@ def print_bays(server, options, osd, server_info):
 	for row in reversed(range(len(server["rows"]))):
 		h_txt = ("Row " + str(row + 1) + " ID (" + choose_output_header(options)) + ")"
 		col_headers.append(h_txt)
-	
+
+
+	# pad all cols to same length
+	max_col_len = max(len(c) for c in print_array)
+	# print("max col len", max_col_len)
+	for col in print_array:
+		col.extend( [["","GREY"]]*(max_col_len - len(col)))
+
+	# print(json.dumps(print_array, indent=1))
 	table_print(ansi = options.colour, c_count = len(print_array), c_txt = print_array, c_labels = col_headers, h_txt = header_text, padding = 1)
 	
 	# legend
