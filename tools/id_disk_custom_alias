@@ -91,7 +91,15 @@ def get_alias_pcieport_parents(
                 "0000:80:01.4": "4-3",
                 "0000:80:01.3": "4-4"
             }
-        }
+        },
+        "XL60_UBM": {
+            "TURIND8X-2T/500W": {
+                "0000:80:03.1": "5-1",
+                "0000:80:03.2": "5-2",
+                "0000:80:03.3": "5-3",
+                "0000:80:03.4": "5-4"
+            }
+        },
     }
     if chassis_size not in lut_chassissize_mobo_to_aliases:
         set_env_var("CUSTOM_ALIAS_ERR", f"unsupported chassis size: {chassis_size}")
