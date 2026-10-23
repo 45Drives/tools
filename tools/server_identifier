@@ -101,6 +101,10 @@ g_product_lut = {
 	"Storinator-AV15-Enhanced-AMD":		[g_mobo_to_version_lut["Enhanced-AMD"],0,1,"AV15","STORINATOR"],
 	"Storinator-AV15-Turbo":			[g_mobo_to_version_lut["Turbo"],0,1,"AV15","STORINATOR"],
 	"Storinator-AV15-Turbo-G":		    [g_mobo_to_version_lut["Turbo-G"],0,1,"AV15","STORINATOR"],
+ 
+	"Storinator-AV15_UBM-Base":			[g_mobo_to_version_lut["Base"]    ,0,1,"AV15_UBM","STORINATORUBM"],
+    "Storinator-AV15_UBM-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,1,"AV15_UBM","STORINATORUBM"],
+    "Storinator-AV15_UBM-Turbo":		[g_mobo_to_version_lut["Turbo"]   ,0,1,"AV15_UBM","STORINATORUBM"],
 
 	"Storinator-C8-Base":				[g_mobo_to_version_lut["Base"],0,1,"C8"  ,"STORINATOR"],
 	"Storinator-C8-Base-B":				[g_mobo_to_version_lut["Base-B"],0,1,"C8"  ,"STORINATOR"],
@@ -288,6 +292,10 @@ g_product_lut = {
 	"Storinator-Q30-Enhanced-AMD":		[g_mobo_to_version_lut["Enhanced-AMD"]  ,0,2,"Q30" ,"STORINATOR"],
 	"Storinator-Q30-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,2,"Q30" ,"STORINATOR"],
 	"Storinator-Q30-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,0,2,"Q30" ,"STORINATOR"],
+ 
+	"Storinator-Q30_UBM-Base":			[g_mobo_to_version_lut["Base"]    ,0,2,"Q30_UBM","STORINATORUBM"],
+    "Storinator-Q30_UBM-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,2,"Q30_UBM","STORINATORUBM"],
+    "Storinator-Q30_UBM-Turbo":			[g_mobo_to_version_lut["Turbo"]   ,0,2,"Q30_UBM","STORINATORUBM"],
 
 	"Storinator-S45-Base":				[g_mobo_to_version_lut["Base"]  ,0,3,"S45" ,"STORINATOR"],
 	"Storinator-S45-Base-B":			[g_mobo_to_version_lut["Base-B"]  ,0,3,"S45" ,"STORINATOR"],
@@ -297,11 +305,18 @@ g_product_lut = {
 	"Storinator-S45-Turbo":				[g_mobo_to_version_lut["Turbo"]  ,0,3,"S45" ,"STORINATOR"],
 	"Storinator-S45-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,0,3,"S45" ,"STORINATOR"],
 
+	"Storinator-S45_UBM-Base":			[g_mobo_to_version_lut["Base"]    ,0,3,"S45_UBM","STORINATORUBM"],
+    "Storinator-S45_UBM-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,3,"S45_UBM","STORINATORUBM"],
+    "Storinator-S45_UBM-Turbo":			[g_mobo_to_version_lut["Turbo"]   ,0,3,"S45_UBM","STORINATORUBM"],
+
 	"Storinator-XL60-Enhanced":			[g_mobo_to_version_lut["Enhanced"]  ,0,4,"XL60","STORINATOR"],
 	"Storinator-XL60-Enhanced-S":		[g_mobo_to_version_lut["Enhanced-S"]  ,0,4,"XL60","STORINATOR"],
 	"Storinator-XL60-Enhanced-AMD":		[g_mobo_to_version_lut["Enhanced-AMD"]  ,0,4,"XL60","STORINATOR"],
 	"Storinator-XL60-Turbo":			[g_mobo_to_version_lut["Turbo"]  ,0,4,"XL60","STORINATOR"],
 	"Storinator-XL60-Turbo-G":			[g_mobo_to_version_lut["Turbo-G"]  ,0,4,"XL60","STORINATOR"],
+ 
+    "Storinator-XL60_UBM-Enhanced":		[g_mobo_to_version_lut["Enhanced"],0,4,"XL60_UBM","STORINATORUBM"],
+    "Storinator-XL60_UBM-Turbo":		[g_mobo_to_version_lut["Turbo"]   ,0,4,"XL60_UBM","STORINATORUBM"],
 
 	"Stornado-AV15-Enhanced":			[g_mobo_to_version_lut["Enhanced"]  ,0,2,"AV15","STORNADO"],
 	"Stornado-AV15-Enhanced-S":			[g_mobo_to_version_lut["Enhanced-S"]  ,0,2,"AV15","STORNADO"],
@@ -333,9 +348,9 @@ g_product_lut = {
 	"Proxinator-VM8-15mm-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,2,"VM8","F2STORNADO"],
 	"Proxinator-VM8-15mm-Turbo":		[g_mobo_to_version_lut["Turbo"]  ,0,2,"VM8","F2STORNADO"],
 
-	"Proxinator-VM8-2G-Base":				[g_mobo_to_version_lut["Good"]  ,0,1,"VM8","F2STORNADO"],
-	"Proxinator-VM8-2G-Enhanced":			[g_mobo_to_version_lut["Better"]  ,0,1,"VM8","F2STORNADO"],
-	"Proxinator-VM8-2G-Turbo":				[g_mobo_to_version_lut["Best"]  ,0,1,"VM8","F2STORNADO"],
+	"Proxinator-VM8-2G-Base":			[g_mobo_to_version_lut["Good"]  ,0,1,"VM8","F2STORNADO"],
+	"Proxinator-VM8-2G-Enhanced":		[g_mobo_to_version_lut["Better"]  ,0,1,"VM8","F2STORNADO"],
+	"Proxinator-VM8-2G-Turbo":			[g_mobo_to_version_lut["Best"]  ,0,1,"VM8","F2STORNADO"],
 
 	"Proxinator-VM4-15mm-Base":			[g_mobo_to_version_lut["Base"]  ,0,1,"VM4","F2STORNADO"],
 	"Proxinator-VM4-15mm-Enhanced":		[g_mobo_to_version_lut["Enhanced"]  ,0,1,"VM4","F2STORNADO"],
@@ -368,7 +383,7 @@ g_product_lut = {
 	"Destroyinator-F16-Turbo-G":		[g_mobo_to_version_lut["Turbo-G"],0,4,"F16","F2STORNADO"],
  
 	"Studio-STUDIO8":             		[g_mobo_to_version_lut["Turbo"],0,0,"STUDIO8","STUDIO"],
-    "Studio-STUDIO15":                   [g_mobo_to_version_lut["Turbo"],0,0,"STUDIO15","STUDIO"],
+    "Studio-STUDIO15":                  [g_mobo_to_version_lut["Turbo"],0,0,"STUDIO15","STUDIO"],
 
 	"Storinator-AV15-VM":				[["VIRTUAL_MACHINE"],0,1,"AV15","STORINATOR"],
 	"Storinator-Q30-VM":				[["VIRTUAL_MACHINE"],0,2,"Q30","STORINATOR"],
