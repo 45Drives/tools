@@ -463,10 +463,10 @@ def build_server(options):
 		if not line or line == "" or line[0] == '#':
 			continue
 		# extract bay indices and by-path path
-		regex = re.search(r"^alias\s+(\d{1,2})-(\d{1,2})\s+(.*)$",line)
+		regex = re.search(r"^alias\s+(\d{1,2}|N)-(\d{1,2})\s+(.*)$",line)
 		if regex == None:
 			continue
-		CARD = int(regex.group(1))
+		CARD = regex.group(1)
 		DRIVE = int(regex.group(2))
 		DRIVE_COUNT += 1
 		# new row
