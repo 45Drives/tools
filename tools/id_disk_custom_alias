@@ -3,31 +3,30 @@
 # 2025 Josh Boudreau <jboudreau@45drives.com>
 
 import json
-from typing import List, Tuple, Optional, Dict
+from typing import List, Tuple, Optional, Dict, Union, ClassVar
 import pyudev
 import sys
 import os
 import re
+import subprocess
+from argparse import ArgumentParser
 
-context = pyudev.Context()
+
+def extract_value(pattern: str, text: str) -> Optional[str]:
+    s = re.search(pattern, text, flags=re.MULTILINE)
+    if s is None:
+        return None
+    try:
+        return s.group(1)
+    except IndexError:
+        return s.group(0)
+
 
 def set_env_var(key, value):
     print(f"{key}={value}")
 
 
-def get_chassis_size_and_mobo() -> Optional[Tuple[str, str]]:
-    try:
-        with open("/etc/45drives/server_info/server_info.json", "r") as f:
-            server_info = json.load(f)
-        return server_info["Chassis Size"], server_info["Motherboard"]["Product Name"]
-    except Exception as e:
-        set_env_var("CUSTOM_ALIAS_ERR", str(e))
-        return None
-
-
-def get_alias_pcieport_parents(
-    chassis_size: str, mobo: str
-) -> Optional[List[Dict[str, str]]]:
+class AliasManager:
     # This is a lookup table for custom alias servers. It maps the chassis size and motherboard product name to a mapping of PCIe port sys_name to the desired alias.
     # The PCIe port sys_name is the address of the pcieport device in the sysfs tree, which can be found by traversing the ancestors of a device by
     # running `udevadm info -a /dev/nvme0n1` and looking for the first ancestor with a driver of "pcieport". These addresses will be different for each motherboard model,
@@ -43,7 +42,7 @@ def get_alias_pcieport_parents(
     #           Alias
     #       >
     #   >
-    lut_chassissize_mobo_to_aliases = {
+    LUT_CHASSISSIZE_MOBO_TO_ALIASES: ClassVar = {
         "VM2": {
             "ME03-CE0-000": {
                 "0000:40:03.1": "1-1",
@@ -71,7 +70,7 @@ def get_alias_pcieport_parents(
                 "0000:c0:03.1": "4-1",
                 "0000:c0:03.2": "4-2",
                 "0000:c0:03.3": "4-3",
-                "0000:c0:03.4": "4-4"
+                "0000:c0:03.4": "4-4",
             },
             "TURIND8X-2T/500W": {
                 "0000:40:01.2": "1-1",
@@ -89,86 +88,157 @@ def get_alias_pcieport_parents(
                 "0000:80:01.2": "4-1",
                 "0000:80:01.1": "4-2",
                 "0000:80:01.4": "4-3",
-                "0000:80:01.3": "4-4"
+                "0000:80:01.3": "4-4",
+            },
+        },
+        **{
+            chassis_size: {
+                "TURIND8X-2T/500W": {
+                    "0000:80:01.4": "N-1",
+                    "0000:80:01.3": "N-2",
+                    "0000:80:01.2": "N-3",
+                    "0000:80:01.1": "N-4",
+                }
             }
-        }
+            for chassis_size in ("XL60_UBM", "S45_UBM", "Q30_UBM", "AV15_UBM")
+        },
     }
-    if chassis_size not in lut_chassissize_mobo_to_aliases:
-        set_env_var("CUSTOM_ALIAS_ERR", f"unsupported chassis size: {chassis_size}")
-        return None
-    lut = lut_chassissize_mobo_to_aliases[chassis_size]
-    if mobo not in lut:
-        set_env_var(
-            "CUSTOM_ALIAS_ERR", f"unsupported motherboard for {chassis_size}: {mobo}"
+
+    chassis_size: str
+    mobo: str
+
+    #  Record<
+    #      PCIePortSysName,
+    #      Alias
+    #  >
+    pcieport_alias_lut: Dict[str, str]
+
+    context: pyudev.Context
+
+    def __init__(self):
+        self.chassis_size, self.mobo = self._get_chassis_size_and_mobo()
+        self.pcieport_alias_lut = self._get_pcieport_alias_lut(
+            self.chassis_size, self.mobo
         )
-        return None
-    return lut[mobo]
+        self.context = pyudev.Context()
 
+    @staticmethod
+    def _get_chassis_size_and_mobo() -> Tuple[str, str]:
+        try:
+            fru = subprocess.check_output(
+                ["ipmitool", "fru"], encoding="utf-8", timeout=10.0
+            )
+            chassis_size = extract_value(r"^\s*Product Part Number\s*:\s*(.*)$", fru)
+            mobo = extract_value(r"^\s*Board Product\s*:\s*(.*)$", fru)
+            if chassis_size is None or mobo is None:
+                raise ValueError("Missing chassis or motherboard in FRU output")
+            return chassis_size.strip(), mobo.strip()
+        except (
+            OSError,  # missing executable, permission errors
+            subprocess.CalledProcessError,  # ipmitool returned nonzero
+            subprocess.TimeoutExpired,
+            UnicodeError,  # output decoding failure
+            ValueError,  # expected FRU fields missing
+        ):
+            with open("/etc/45drives/server_info/server_info.json", "r") as f:
+                server_info = json.load(f)
+            return server_info["Chassis Size"], server_info["Motherboard"][
+                "Product Name"
+            ]
 
-def get_device_from_devpath(devpath: str) -> pyudev.Device:
-    """
-    Given a DEVPATH (e.g. '/devices/.../tty/ttyUSB0'),
-    return the corresponding pyudev Device.
-    """
-    sys_path = os.path.join("/sys", devpath.lstrip("/"))
-    return pyudev.Devices.from_sys_path(context, sys_path)
+    @classmethod
+    def _get_pcieport_alias_lut(cls, chassis_size: str, mobo: str) -> Dict[str, str]:
+        if chassis_size in cls.LUT_CHASSISSIZE_MOBO_TO_ALIASES:
+            # custom aliasing is applicable
+            lut_mobo_to_aliases = cls.LUT_CHASSISSIZE_MOBO_TO_ALIASES[chassis_size]
+            if mobo in lut_mobo_to_aliases:
+                return lut_mobo_to_aliases[mobo]
+            else:
+                raise NotImplementedError(
+                    f"Motherboard unsupported for aliasing {chassis_size}: {mobo}"
+                )
+        else:
+            raise NotImplementedError(
+                f"Chassis size not applicable for custom aliasing: {chassis_size}"
+            )
 
+    def alias(self, device: Union[str, pyudev.Device]):
+        if isinstance(device, str):
+            path = device
+            sys_path = (
+                path
+                if path.startswith("/sys")
+                else os.path.join("/sys", path.lstrip("/"))
+            )
+            try:
+                device = pyudev.Devices.from_sys_path(self.context, sys_path)
+            except pyudev.DeviceNotFoundAtPathError:
+                dev_path = (
+                    path
+                    if path.startswith("/dev")
+                    else os.path.join("/dev", path.lstrip("/"))
+                )
+                device = pyudev.Devices.from_device_file(self.context, dev_path)
+            return self.alias(device)
+        try:
+            pcieport_parent: str = next(
+                d for d in device.ancestors if d.driver == "pcieport"
+            ).sys_name
+        except StopIteration:
+            if "nvme" in device.sys_name:
+                # special case for NVMe:
+                # try stripping down to nvme subsystem device
+                nvme_device = pyudev.Devices.from_name(
+                    self.context,
+                    "nvme",
+                    extract_value(r"(nvme\d+)n\d+", device.sys_name),
+                )
+                try:
+                    pcieport_parent = next(
+                        d for d in nvme_device.ancestors if d.driver == "pcieport"
+                    ).sys_name
+                except StopIteration:
+                    raise ValueError(
+                        f"Drive has no pcieport parents: {device.sys_name}"
+                    )
+            else:
+                raise ValueError(f"Drive has no pcieport parents: {device.sys_name}")
+        return self.pcieport_alias_lut[pcieport_parent]
 
-def get_pcieport_parent_sys_name(device: pyudev.Device) -> Optional[str]:
-    try:
-        pcieport_parent = next(
-            d for d in device.ancestors if d.driver == "pcieport"
-        )
-        return pcieport_parent.sys_name
-    except StopIteration:
-        # no pcieport parent found
-        return None
+    def alias_from_environment(self):
+        return self.alias(pyudev.Devices.from_environment(self.context))
+
+    def list_aliases(self):
+        return self.pcieport_alias_lut.values()
 
 
 def main():
-    result = get_chassis_size_and_mobo()
-    if result is None:
-        return
-    chassis_size, mobo = result
-    alias_parents = get_alias_pcieport_parents(chassis_size, mobo)
-    if len(sys.argv) > 1 and sys.argv[1] == "--list-aliases":
-        if alias_parents is None:
-            sys.exit(1)
-        print(" ".join(alias_parents.values()))
-        return
-    if alias_parents is None:
-        # not a custom alias server
-        return
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--list-aliases",
+        action="store_true",
+        default=False,
+        help="Print all custom alias labels and exit",
+    )
+    parser.add_argument("path", nargs="?", type=str)
 
-    if len(sys.argv) > 1:
-        devpath = sys.argv[1]
-    else:
-        devpath = os.environ.get("DEVPATH")
+    args = parser.parse_args()
 
-    if not devpath:
-        set_env_var("CUSTOM_ALIAS_ERR", "device path not provided!")
-        return
-    
-    device = get_device_from_devpath(devpath)
-    pcieport_parent_sys_name = get_pcieport_parent_sys_name(device)
-    if pcieport_parent_sys_name is None:
-        # special case for NVMe:
-        # try stripping down to nvme subsystem device
-        nvme_block_name: str = device.sys_name
-        m = re.match(r"(nvme\d+)n\d+", nvme_block_name)
-        if m:
-            nvme_device = pyudev.Devices.from_name(context, "nvme", m.group(1))
-            pcieport_parent_sys_name = get_pcieport_parent_sys_name(nvme_device)
-
-    if pcieport_parent_sys_name not in alias_parents:
-        # not mapped
+    if args.list_aliases:
+        print(" ".join(AliasManager().list_aliases()))
         return
 
-    alias = alias_parents[pcieport_parent_sys_name]
-
-    set_env_var("ID_VDEV", alias)
-    set_env_var("ID_VDEV_PATH", os.path.join("disk/by-vdev", alias))
-    set_env_var("ID_VDEV_ALT_PATH", alias)
+    try:
+        mgr = AliasManager()
+        if args.path:
+            alias = mgr.alias(args.path)
+        else:
+            alias = mgr.alias_from_environment()
+        set_env_var("ID_VDEV", alias)
+        set_env_var("ID_VDEV_PATH", os.path.join("disk/by-vdev", alias))
+        set_env_var("ID_VDEV_ALT_PATH", alias)
+    except BaseException as e:
+        set_env_var("CUSTOM_ALIAS_ERR", f"{e.__class__.__name__}: {e}")
 
 
 if __name__ == "__main__":
