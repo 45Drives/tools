@@ -3,13 +3,16 @@
 # 2025 Josh Boudreau <jboudreau@45drives.com>
 
 import json
-from typing import List, Tuple, Optional, Dict, Union, ClassVar
+from typing import List, Tuple, Optional, Dict, Union, ClassVar, NamedTuple
 import pyudev
 import sys
 import os
 import re
 import subprocess
 from argparse import ArgumentParser
+
+
+ctx = pyudev.Context()
 
 
 def extract_value(pattern: str, text: str) -> Optional[str]:
@@ -26,58 +29,99 @@ def set_env_var(key, value):
     print(f"{key}={value}")
 
 
-class AliasManager:
-    # Boards that accept more than one CPU generation can expose different PCIe root
-    # buses for the same physical slot (e.g. TURIND8X-2T/500W: an EPYC 9004 CPU has
-    # 4 root buses, an EPYC 9005 CPU has 8). These override the default table in
-    # get_alias_pcieport_parents() when the root complex at 0000:00:00.0 matches.
-    #
-    # Format:
-    # Record<
-    #   ServerModel,
-    #   Record<
-    #       MotherboardProductName,
-    #       Record<
-    #           RootComplexPCIDeviceID,
-    #           Record<PCIePortSysName, Alias>
-    #       >
-    #   >
-    # >
-    CPU_SPECIFIC_LUT = {
-        "E16": {
-            "TURIND8X-2T/500W": {
-                # EPYC 9005 CPU: PCIE0=20:, PCIE2=00:, PCIE4=e0:, PCIE6=c0:
-                "0x153a": {
-                    "0000:20:01.2": "1-1",
-                    "0000:20:01.1": "1-2",
-                    "0000:20:01.4": "1-3",
-                    "0000:20:01.3": "1-4",
-                    "0000:00:01.2": "2-1",
-                    "0000:00:01.1": "2-2",
-                    "0000:00:01.4": "2-3",
-                    "0000:00:01.3": "2-4",
-                    "0000:e0:01.2": "3-1",
-                    "0000:e0:01.1": "3-2",
-                    "0000:e0:01.4": "3-3",
-                    "0000:e0:01.3": "3-4",
-                    "0000:c0:01.2": "4-1",
-                    "0000:c0:01.1": "4-2",
-                    "0000:c0:01.4": "4-3",
-                    "0000:c0:01.3": "4-4",
-                },
-            }
-        }
-    }
+class PCIeAddress(NamedTuple):
+    domain: int
+    bus: int
+    device: int
+    function: int
+
+    def __str__(self):
+        return f"{self.domain:04x}:{self.bus:02x}:{self.device:02x}.{self.function:01x}"
 
     @staticmethod
-    def get_root_complex_device_id() -> Optional[str]:
+    def from_str(addr: str) -> "PCIeAddress":
         try:
-            with open("/sys/bus/pci/devices/0000:00:00.0/device", "r") as f:
-                return f.read().strip().lower()
-        except OSError:
-            return None
+            domain, bus, device_function = addr.split(":")
+            device, function = device_function.split(".")
+            return PCIeAddress(
+                domain=int(domain, base=16),
+                bus=int(bus, base=16),
+                device=int(device, base=16),
+                function=int(function, base=16),
+            )
+        except Exception as e:
+            raise ValueError(f"Invalid PCIe address '{addr}': {e}")
 
 
+def find_pcieport_address(addr: str) -> Optional[str]:
+    try:
+        device = pyudev.Devices.from_sys_path(ctx, f"/sys/bus/pci/devices/{addr}")
+    except pyudev.DeviceNotFoundAtPathError:
+        return None
+    if device.driver == "pcieport":
+        return addr
+    try:
+        return next(d for d in device.ancestors if d.driver == "pcieport").sys_name
+    except StopIteration:
+        return None
+
+
+def _get_slot_addr_cache():
+    slot_info_blocks = (
+        subprocess.check_output(
+            r"dmidecode -t slot -q",
+            shell=True,
+            executable="/bin/bash",
+            encoding="utf-8",
+        )
+        .strip()
+        .split("System Slot Information")
+    )
+    cache = {}
+    for block in slot_info_blocks:
+        designation = extract_value(r"Designation: (.*)$", block)
+        if designation is None:
+            continue
+        addr = extract_value(r"Bus Address: (.*)$", block)
+        if addr is None:
+            continue
+        if not addr.startswith("0000:"):
+            addr = "0000:" + addr
+        addr = find_pcieport_address(addr)
+        if addr is None:
+            continue
+        pcie_addr = PCIeAddress.from_str(addr)
+        for d in designation.split("/"):
+            cache[d] = pcie_addr
+    return cache
+
+
+class PCIeSlot:
+    _SLOT_ADDR_CACHE: ClassVar[Dict[str, PCIeAddress]] = _get_slot_addr_cache()
+
+    def __init__(self, dmi_designation: str):
+        self.dmi_designation = dmi_designation
+        if dmi_designation in PCIeSlot._SLOT_ADDR_CACHE:
+            self.base_address = PCIeSlot._SLOT_ADDR_CACHE[dmi_designation]
+        else:
+            # raise ValueError(f"System Slot '{dmi_designation}' not found in DMI tables!")
+            self.base_address = PCIeAddress(-1, -1, -1, -1)
+
+    def __str__(self):
+        return str(self.base_address)
+
+    def port(self, port_num: int):
+        if port_num not in range(1, 5):
+            raise ValueError(f"Invalid port number '{port_num}'")
+        return self.base_address._replace(
+            function=self.base_address.function + port_num - 1
+        )
+
+    def __hash__(self):
+        return hash(self.base_address)
+
+
+class AliasManager:
     # This is a lookup table for custom alias servers. It maps the chassis size and motherboard product name to a mapping of PCIe port sys_name to the desired alias.
     # The PCIe port sys_name is the address of the pcieport device in the sysfs tree, which can be found by traversing the ancestors of a device by
     # running `udevadm info -a /dev/nvme0n1` and looking for the first ancestor with a driver of "pcieport". These addresses will be different for each motherboard model,
@@ -96,64 +140,47 @@ class AliasManager:
     LUT_CHASSISSIZE_MOBO_TO_ALIASES: ClassVar = {
         "VM2": {
             "ME03-CE0-000": {
-                "0000:40:03.1": "1-1",
-                "0000:40:03.2": "1-2",
+                PCIeAddress.from_str("0000:40:03.1"): "1-1", # TODO - find DMI designation
+                PCIeAddress.from_str("0000:40:03.2"): "1-2", # TODO - find DMI designation
             },
-            "GENOAD8UD-2T/X550": {
-                "0000:40:03.3": "1-1",
-                "0000:40:03.4": "1-2",
-            },
-            "TURIND8UD-2T/X550": {
-                "0000:40:03.3": "1-1",
-                "0000:40:03.4": "1-2",
+            **{
+                mobo: {
+                    PCIeSlot("MCIO4").port(1): "1-1",
+                    PCIeSlot("MCIO2").port(2): "1-2",
+                }
+                for mobo in ("GENOAD8UD-2T/X550", "TURIND8UD-2T/X550")
             },
         },
         "E16": {
-            "GENOAD8X-2T/BCM": {
-                "0000:80:01.1": "1-1",
-                "0000:80:01.2": "1-2",
-                "0000:80:01.3": "1-3",
-                "0000:80:01.4": "1-4",
-                "0000:80:03.1": "2-1",
-                "0000:80:03.2": "2-2",
-                "0000:80:03.3": "2-3",
-                "0000:80:03.4": "2-4",
-                "0000:c0:01.1": "3-1",
-                "0000:c0:01.2": "3-2",
-                "0000:c0:01.3": "3-3",
-                "0000:c0:01.4": "3-4",
-                "0000:c0:03.1": "4-1",
-                "0000:c0:03.2": "4-2",
-                "0000:c0:03.3": "4-3",
-                "0000:c0:03.4": "4-4",
-            },
-            # EPYC 9004 CPU; EPYC 9005 CPUs use CPU_SPECIFIC_LUT instead
-            "TURIND8X-2T/500W": {
-                "0000:40:01.2": "1-1",
-                "0000:40:01.1": "1-2",
-                "0000:40:01.4": "1-3",
-                "0000:40:01.3": "1-4",
-                "0000:00:01.2": "2-1",
-                "0000:00:01.4": "2-2",
-                "0000:00:01.1": "2-3",
-                "0000:00:01.3": "2-4",
-                "0000:c0:01.2": "3-1",
-                "0000:c0:01.1": "3-2",
-                "0000:c0:01.4": "3-3",
-                "0000:c0:01.3": "3-4",
-                "0000:80:01.2": "4-1",
-                "0000:80:01.1": "4-2",
-                "0000:80:01.4": "4-3",
-                "0000:80:01.3": "4-4",
-            },
+            **{
+                mobo: {
+                    PCIeSlot("PCIE0").port(2): "1-1",  # "0000:40:01.2": "1-1",
+                    PCIeSlot("PCIE0").port(1): "1-2",  # "0000:40:01.1": "1-2",
+                    PCIeSlot("PCIE0").port(4): "1-3",  # "0000:40:01.4": "1-3",
+                    PCIeSlot("PCIE0").port(3): "1-4",  # "0000:40:01.3": "1-4",
+                    PCIeSlot("PCIE2").port(2): "2-1",  # "0000:00:01.2": "2-1",
+                    PCIeSlot("PCIE2").port(4): "2-2",  # "0000:00:01.4": "2-2",
+                    PCIeSlot("PCIE2").port(1): "2-3",  # "0000:00:01.1": "2-3",
+                    PCIeSlot("PCIE2").port(3): "2-4",  # "0000:00:01.3": "2-4",
+                    PCIeSlot("PCIE4").port(2): "3-1",  # "0000:c0:01.2": "3-1",
+                    PCIeSlot("PCIE4").port(1): "3-2",  # "0000:c0:01.1": "3-2",
+                    PCIeSlot("PCIE4").port(4): "3-3",  # "0000:c0:01.4": "3-3",
+                    PCIeSlot("PCIE4").port(3): "3-4",  # "0000:c0:01.3": "3-4",
+                    PCIeSlot("PCIE6").port(2): "4-1",  # "0000:80:01.2": "4-1",
+                    PCIeSlot("PCIE6").port(1): "4-2",  # "0000:80:01.1": "4-2",
+                    PCIeSlot("PCIE6").port(4): "4-3",  # "0000:80:01.4": "4-3",
+                    PCIeSlot("PCIE6").port(3): "4-4",  # "0000:80:01.3": "4-4",
+                }
+                for mobo in ("GENOAD8X-2T/BCM", "TURIND8X-2T/500W")
+            }
         },
         **{
             chassis_size: {
                 "TURIND8X-2T/500W": {
-                    "0000:80:01.4": "N-1",
-                    "0000:80:01.3": "N-2",
-                    "0000:80:01.2": "N-3",
-                    "0000:80:01.1": "N-4",
+                    PCIeSlot("PCIE6").port(4): "N-1",  # "0000:80:01.4": "N-1",
+                    PCIeSlot("PCIE6").port(3): "N-2",  # "0000:80:01.3": "N-2",
+                    PCIeSlot("PCIE6").port(2): "N-3",  # "0000:80:01.2": "N-3",
+                    PCIeSlot("PCIE6").port(1): "N-4",  # "0000:80:01.1": "N-4",
                 }
             }
             for chassis_size in ("XL60_UBM", "S45_UBM", "Q30_UBM", "AV15_UBM")
@@ -167,16 +194,13 @@ class AliasManager:
     #      PCIePortSysName,
     #      Alias
     #  >
-    pcieport_alias_lut: Dict[str, str]
-
-    context: pyudev.Context
+    pcieport_alias_lut: Dict[PCIeAddress, str]
 
     def __init__(self):
         self.chassis_size, self.mobo = self._get_chassis_size_and_mobo()
         self.pcieport_alias_lut = self._get_pcieport_alias_lut(
             self.chassis_size, self.mobo
         )
-        self.context = pyudev.Context()
 
     @staticmethod
     def _get_chassis_size_and_mobo() -> Tuple[str, str]:
@@ -203,14 +227,7 @@ class AliasManager:
             ]
 
     @classmethod
-    def _get_pcieport_alias_lut(cls, chassis_size: str, mobo: str) -> Dict[str, str]:
-        cpu_specific = cls.CPU_SPECIFIC_LUT.get(chassis_size, {}).get(mobo, {})
-        if cpu_specific:
-            device_id = cls.get_root_complex_device_id()
-            if device_id is not None:
-                aliases = cpu_specific.get(device_id)
-                if aliases is not None:
-                    return aliases
+    def _get_pcieport_alias_lut(cls, chassis_size: str, mobo: str) -> Dict[PCIeAddress, str]:
         if chassis_size in cls.LUT_CHASSISSIZE_MOBO_TO_ALIASES:
             # custom aliasing is applicable
             lut_mobo_to_aliases = cls.LUT_CHASSISSIZE_MOBO_TO_ALIASES[chassis_size]
@@ -234,14 +251,14 @@ class AliasManager:
                 else os.path.join("/sys", path.lstrip("/"))
             )
             try:
-                device = pyudev.Devices.from_sys_path(self.context, sys_path)
+                device = pyudev.Devices.from_sys_path(ctx, sys_path)
             except pyudev.DeviceNotFoundAtPathError:
                 dev_path = (
                     path
                     if path.startswith("/dev")
                     else os.path.join("/dev", path.lstrip("/"))
                 )
-                device = pyudev.Devices.from_device_file(self.context, dev_path)
+                device = pyudev.Devices.from_device_file(ctx, dev_path)
             return self.alias(device)
         try:
             pcieport_parent: str = next(
@@ -252,7 +269,7 @@ class AliasManager:
                 # special case for NVMe:
                 # try stripping down to nvme subsystem device
                 nvme_device = pyudev.Devices.from_name(
-                    self.context,
+                    ctx,
                     "nvme",
                     extract_value(r"(nvme\d+)n\d+", device.sys_name),
                 )
@@ -266,10 +283,10 @@ class AliasManager:
                     )
             else:
                 raise ValueError(f"Drive has no pcieport parents: {device.sys_name}")
-        return self.pcieport_alias_lut[pcieport_parent]
+        return self.pcieport_alias_lut[PCIeAddress.from_str(pcieport_parent)]
 
     def alias_from_environment(self):
-        return self.alias(pyudev.Devices.from_environment(self.context))
+        return self.alias(pyudev.Devices.from_environment(ctx))
 
     def list_aliases(self):
         return self.pcieport_alias_lut.values()
@@ -277,18 +294,40 @@ class AliasManager:
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument(
+    alt_command = parser.add_mutually_exclusive_group()
+    alt_command.add_argument(
         "--list-aliases",
         action="store_true",
         default=False,
         help="Print all custom alias labels and exit",
     )
-    parser.add_argument("path", nargs="?", type=str)
+    alt_command.add_argument(
+        "--dump-lut",
+        action="store_true",
+        default=False,
+        help="Print dump of lookup tables",
+    )
+    alt_command.add_argument("path", nargs="?", type=str)
 
     args = parser.parse_args()
 
     if args.list_aliases:
         print(" ".join(AliasManager().list_aliases()))
+        return
+
+    if args.dump_lut:
+        print(
+            json.dumps(
+                {
+                    k1: {
+                        k2: {str(k3): v3 for k3, v3 in v2.items()}
+                        for k2, v2 in v1.items()
+                    }
+                    for k1, v1 in AliasManager.LUT_CHASSISSIZE_MOBO_TO_ALIASES.items()
+                },
+                indent=2,
+            )
+        )
         return
 
     try:
