@@ -7,6 +7,7 @@ install:
 	mkdir -p "$(DESTDIR)/opt/45drives/dalias"
 	mkdir -p "$(DESTDIR)/usr/bin"
 	mkdir -p "$(DESTDIR)/usr/lib/udev/rules.d"
+	mkdir -p "$(DESTDIR)/etc/logrotate.d"
 	cp -a tools/* "$(DESTDIR)/opt/45drives/tools"
 	cp -a dalias/* "$(DESTDIR)/opt/45drives/dalias"
 	install -m 755 -t "$(DESTDIR)/opt/45drives/ubm" \
@@ -29,6 +30,7 @@ install:
 		udev/68-vdev.rules
 	install -D -m 644 tools/zfs-scrub.timer "$(DESTDIR)"/etc/systemd/system/zfs-scrub.timer
 	install -D -m 644 tools/zfs-scrub.service "$(DESTDIR)"/etc/systemd/system/zfs-scrub.service
+	cp -a logrotate.d/* "$(DESTDIR)"/etc/logrotate.d
 
 ifdef TOOLS_VERSION
 	echo $(TOOLS_VERSION) > "$(DESTDIR)/etc/45drives/server_info/tools_version"

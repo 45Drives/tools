@@ -1,0 +1,8 @@
+/var/log/id_disk_custom_alias.log {
+    size 5M
+    rotate 5
+    compress
+    missingok
+    notifempty
+    create
+}
