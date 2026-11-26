@@ -373,6 +373,10 @@ def alias_by_path(chassis_size, motherboard_product_name):
 			"GENOAD8UD-2T/X550": [
 				("1-1", "pci-0000:41:00.0-nvme-1"),
 				("1-2", "pci-0000:43:00.0-nvme-1")
+			],
+			"TURIND8UD-2T/X550": [
+				("1-1", "pci-0000:41:00.0-nvme-1"),
+				("1-2", "pci-0000:43:00.0-nvme-1")
 			]
 		},
 		"E16": {

@@ -1,29 +1,282 @@
 #!/usr/bin/env python3
 
-# 2025 Josh Boudreau <jboudreau@45drives.com>
+# 2025-2026 Josh Boudreau <jboudreau@45drives.com>
 
 import json
-from typing import List, Tuple, Optional, Dict, Union, ClassVar
-import pyudev
-import sys
+import logging
 import os
 import re
 import subprocess
 from argparse import ArgumentParser
+from typing import (
+    Callable,
+    ClassVar,
+    Dict,
+    List,
+    NamedTuple,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
+
+import pyudev
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+logger_ctx = {
+    "device": "UNKNOWN",
+}
+logger = logging.LoggerAdapter(logger, logger_ctx)
+Result = TypeVar("Result")
 
 
-def extract_value(pattern: str, text: str) -> Optional[str]:
+def extract_value(
+    pattern: str, text: str, type: Callable[[str], Result] = str
+) -> Optional[Result]:
     s = re.search(pattern, text, flags=re.MULTILINE)
     if s is None:
         return None
     try:
-        return s.group(1)
+        return type(s.group(1))
     except IndexError:
-        return s.group(0)
+        return type(s.group(0))
 
 
 def set_env_var(key, value):
     print(f"{key}={value}")
+
+
+CTX = pyudev.Context()
+
+
+def to_udev(path: Union[str, pyudev.Device]) -> pyudev.Device:
+    if isinstance(path, pyudev.Device):
+        return path
+    sys_path = (
+        path if path.startswith("/sys") else os.path.join("/sys", path.lstrip("/"))
+    )
+    try:
+        return pyudev.Devices.from_sys_path(CTX, sys_path)
+    except pyudev.DeviceNotFoundAtPathError:
+        dev_path = (
+            path if path.startswith("/dev") else os.path.join("/dev", path.lstrip("/"))
+        )
+        return pyudev.Devices.from_device_file(CTX, dev_path)
+
+
+class PCIeAddress(NamedTuple):
+    domain: int
+    bus: int
+    device: int
+    function: int
+
+    def __str__(self):
+        return f"{self.domain:04x}:{self.bus:02x}:{self.device:02x}.{self.function:01x}"
+
+    @staticmethod
+    def from_str(addr: str) -> "PCIeAddress":
+        try:
+            domain, bus, device_function = addr.split(":")
+            device, function = device_function.split(".")
+            return PCIeAddress(
+                domain=int(domain, base=16),
+                bus=int(bus, base=16),
+                device=int(device, base=16),
+                function=int(function, base=16),
+            )
+        except Exception as e:
+            raise ValueError(f"Invalid PCIe address '{addr}': {e}")
+
+    @classmethod
+    def from_udev(cls, device: pyudev.Device) -> "PCIeAddress":
+        return cls.from_str(device.sys_name)
+
+
+class PCIeSlotAddressFinder:
+    def __init__(self):
+        slot_info_blocks = (
+            subprocess.check_output(
+                r"dmidecode -t slot -q",
+                shell=True,
+                executable="/bin/bash",
+                encoding="utf-8",
+            )
+            .strip()
+            .split("System Slot Information")
+        )
+        self._pcie_slot_addrs: Dict[int, str] = {}
+        self._mcio_addrs: Dict[int, str] = {}
+        self._m2_addrs: Dict[int, str] = {}
+        for block in slot_info_blocks:
+            designation = extract_value(r"Designation: (.*)$", block)
+            if designation is None:
+                continue
+            addr = extract_value(r"Bus Address: (.*)$", block)
+            if addr is None:
+                continue
+            # if not addr.startswith("0000:") and not addr.startswith("0001:"):
+            #     addr = "0000:" + addr
+            # addr = find_pcieport_address(addr)
+            # if addr is None:
+            # continue
+            for d in designation.split("/"):
+                pcie_num = extract_value(r"PCIE_?(\d+)$", d, type=int)
+                if pcie_num is not None:
+                    self._pcie_slot_addrs[pcie_num] = addr
+                    continue
+                mcio_num = extract_value(r"MCIO_?(\d+)$", d, type=int)
+                if mcio_num is not None:
+                    self._mcio_addrs[mcio_num] = addr
+                    continue
+                m2_num = extract_value(r"M2_(\d+)$", d, type=int)
+                if m2_num is not None:
+                    self._m2_addrs[m2_num] = addr
+                    continue
+
+    def pcie(self, num: int) -> Optional[str]:
+        return self._pcie_slot_addrs.get(num)
+
+    def mcio(self, num: int) -> Optional[str]:
+        return self._mcio_addrs.get(num)
+
+    def m2(self, num: int) -> Optional[str]:
+        return self._m2_addrs.get(num)
+
+    def dump_luts(self) -> dict:
+        return {
+            "pcie": self._pcie_slot_addrs,
+            "mcio": self._mcio_addrs,
+            "m2": self._m2_addrs,
+        }
+
+
+class PCIeSlotBase:
+    _address_finder: ClassVar[PCIeSlotAddressFinder] = PCIeSlotAddressFinder()
+
+    def __init__(self, name: str, address: Optional[str], bifurcation_offset: int = 0):
+        self.name = name
+        self.address = address
+        self.bifurcation_offset = int(bifurcation_offset)
+        self._pcieport: Optional[pyudev.Device] = None
+        self.logger = logging.LoggerAdapter(
+            logger.logger.getChild(str(self)), logger_ctx
+        )
+
+        if self.address is None:
+            self.logger.warning("no address found for slot")
+
+    def __str__(self):
+        return f"{self.__class__.__name__}({self.name}, {self.address}, {self.bifurcation_offset})"
+
+    @property
+    def pcieport(self) -> pyudev.Device:
+        if self._pcieport is None:
+            if self.address is None:
+                raise ValueError(f"{self}: no address found")
+            device = pyudev.Devices.from_sys_path(
+                CTX, f"/sys/bus/pci/devices/{self.address}"
+            )
+            if device.driver == "pcieport":
+                self.logger.debug("slot is pcieport")
+                self._pcieport = device
+            else:
+                try:
+                    self._pcieport = next(
+                        ancestor
+                        for ancestor in device.ancestors
+                        if ancestor.driver == "pcieport"
+                    )
+                except StopIteration:
+                    raise RuntimeError(f"{self}: could not find pcieport ancestor")
+            self.logger.debug(f"pcieport is {self._pcieport}")
+        return self._pcieport
+
+    def is_match(self, device: Union[str, pyudev.Device]) -> bool:
+        device = to_udev(device)
+        if self.address is None:
+            return False
+        logger = logging.LoggerAdapter(
+            self.logger.logger.getChild(f"is_match({device})"), logger_ctx
+        )
+        if device.driver == "pcieport":
+            device_pcieport = device
+        else:
+            try:
+                device_pcieport = next(
+                    ancestor
+                    for ancestor in device.ancestors
+                    if ancestor.driver == "pcieport"
+                )
+            except StopIteration:
+                logger.warning("could not find pcieport ancestor for device")
+                return False
+        logger.debug(f"device pcieport is {device_pcieport}")
+        try:
+            slot_pcieport_addr = PCIeAddress.from_udev(self.pcieport)
+        except pyudev.DeviceNotFoundAtPathError:
+            logger.debug("slot device not found")
+            return False
+        device_pcieport_addr = PCIeAddress.from_udev(device_pcieport)
+        if slot_pcieport_addr._replace(function=0) == device_pcieport_addr._replace(
+            function=0
+        ):
+            logger.debug("pcieport addrs devices match")
+            offset = device_pcieport_addr.function - slot_pcieport_addr.function
+            if offset == self.bifurcation_offset:
+                logger.info("addr function offset matches bifurcation offset, MATCHED!")
+                return True
+            logger.info(
+                f"addr function incorrect offset: is {offset} wants {self.bifurcation_offset}"
+            )
+        logger.info("no match")
+        return False
+
+    @classmethod
+    def all_slots(cls) -> List["PCIeSlotBase"]:
+        return [
+            *[
+                PCIeSlotBase(f"PCIE{num}", addr, offset)
+                for num, addr in cls._address_finder._pcie_slot_addrs.items()
+                for offset in range(4)
+            ],
+            *[
+                PCIeSlotBase(f"MCIO{num}", addr, offset)
+                for num, addr in cls._address_finder._mcio_addrs.items()
+                for offset in range(2)
+            ],
+            *[
+                PCIeSlotBase(f"M2_{num}", addr)
+                for num, addr in cls._address_finder._m2_addrs.items()
+            ],
+        ]
+
+
+class PCIeSlot(PCIeSlotBase):
+    def __init__(self, slot_number: int, bifurcation_offset: int = 0):
+        super().__init__(
+            f"PCIE{slot_number}",
+            self._address_finder.pcie(slot_number),
+            bifurcation_offset=bifurcation_offset,
+        )
+
+
+class MCIO(PCIeSlotBase):
+    def __init__(self, slot_number: int, bifurcation_offset: int = 0):
+        super().__init__(
+            f"MCIO{slot_number}",
+            self._address_finder.mcio(slot_number),
+            bifurcation_offset=bifurcation_offset,
+        )
+
+
+class M2(PCIeSlotBase):
+    def __init__(self, slot_number: int, bifurcation_offset: int = 0):
+        super().__init__(
+            f"M2_{slot_number}",
+            self._address_finder.m2(slot_number),
+            bifurcation_offset=bifurcation_offset,
+        )
 
 
 class AliasManager:
@@ -38,66 +291,58 @@ class AliasManager:
     #   Record<
     #       MotherboardProductName,
     #       Record<
-    #           PCIePortSysName,
-    #           Alias
+    #           Alias,
+    #           PCIeSlotBase,
     #       >
     #   >
     LUT_CHASSISSIZE_MOBO_TO_ALIASES: ClassVar = {
         "VM2": {
             "ME03-CE0-000": {
-                "0000:40:03.1": "1-1",
-                "0000:40:03.2": "1-2",
+                "1-1": PCIeSlotBase(
+                    "PCIE?", "0000:40:03.1", 0
+                ),  # TODO - find DMI designation
+                "1-2": PCIeSlotBase(
+                    "PCIE?", "0000:40:03.2", 0
+                ),  # TODO - find DMI designation
             },
-            "GENOAD8UD-2T/X550": {
-                "0000:40:03.3": "1-1",
-                "0000:40:03.4": "1-2",
+            **{
+                mobo: {
+                    "1-1": MCIO(4, bifurcation_offset=0),
+                    "1-2": MCIO(2, bifurcation_offset=1),
+                }
+                for mobo in ("GENOAD8UD-2T/X550", "TURIND8UD-2T/X550")
             },
         },
         "E16": {
-            "GENOAD8X-2T/BCM": {
-                "0000:80:01.1": "1-1",
-                "0000:80:01.2": "1-2",
-                "0000:80:01.3": "1-3",
-                "0000:80:01.4": "1-4",
-                "0000:80:03.1": "2-1",
-                "0000:80:03.2": "2-2",
-                "0000:80:03.3": "2-3",
-                "0000:80:03.4": "2-4",
-                "0000:c0:01.1": "3-1",
-                "0000:c0:01.2": "3-2",
-                "0000:c0:01.3": "3-3",
-                "0000:c0:01.4": "3-4",
-                "0000:c0:03.1": "4-1",
-                "0000:c0:03.2": "4-2",
-                "0000:c0:03.3": "4-3",
-                "0000:c0:03.4": "4-4",
-            },
-            "TURIND8X-2T/500W": {
-                "0000:40:01.2": "1-1",
-                "0000:40:01.1": "1-2",
-                "0000:40:01.4": "1-3",
-                "0000:40:01.3": "1-4",
-                "0000:00:01.2": "2-1",
-                "0000:00:01.4": "2-2",
-                "0000:00:01.1": "2-3",
-                "0000:00:01.3": "2-4",
-                "0000:c0:01.2": "3-1",
-                "0000:c0:01.1": "3-2",
-                "0000:c0:01.4": "3-3",
-                "0000:c0:01.3": "3-4",
-                "0000:80:01.2": "4-1",
-                "0000:80:01.1": "4-2",
-                "0000:80:01.4": "4-3",
-                "0000:80:01.3": "4-4",
-            },
+            **{
+                mobo: {
+                    "1-1": PCIeSlot(0, bifurcation_offset=1),  # "0000:40:01.2": "1-1",
+                    "1-2": PCIeSlot(0, bifurcation_offset=0),  # "0000:40:01.1": "1-2",
+                    "1-3": PCIeSlot(0, bifurcation_offset=3),  # "0000:40:01.4": "1-3",
+                    "1-4": PCIeSlot(0, bifurcation_offset=2),  # "0000:40:01.3": "1-4",
+                    "2-1": PCIeSlot(2, bifurcation_offset=1),  # "0000:00:01.2": "2-1",
+                    "2-2": PCIeSlot(2, bifurcation_offset=3),  # "0000:00:01.4": "2-2",
+                    "2-3": PCIeSlot(2, bifurcation_offset=0),  # "0000:00:01.1": "2-3",
+                    "2-4": PCIeSlot(2, bifurcation_offset=2),  # "0000:00:01.3": "2-4",
+                    "3-1": PCIeSlot(4, bifurcation_offset=1),  # "0000:c0:01.2": "3-1",
+                    "3-2": PCIeSlot(4, bifurcation_offset=0),  # "0000:c0:01.1": "3-2",
+                    "3-3": PCIeSlot(4, bifurcation_offset=3),  # "0000:c0:01.4": "3-3",
+                    "3-4": PCIeSlot(4, bifurcation_offset=2),  # "0000:c0:01.3": "3-4",
+                    "4-1": PCIeSlot(6, bifurcation_offset=1),  # "0000:80:01.2": "4-1",
+                    "4-2": PCIeSlot(6, bifurcation_offset=0),  # "0000:80:01.1": "4-2",
+                    "4-3": PCIeSlot(6, bifurcation_offset=3),  # "0000:80:01.4": "4-3",
+                    "4-4": PCIeSlot(6, bifurcation_offset=2),  # "0000:80:01.3": "4-4",
+                }
+                for mobo in ("GENOAD8X-2T/BCM", "TURIND8X-2T/500W")
+            }
         },
         **{
             chassis_size: {
                 "TURIND8X-2T/500W": {
-                    "0000:80:01.4": "N-1",
-                    "0000:80:01.3": "N-2",
-                    "0000:80:01.2": "N-3",
-                    "0000:80:01.1": "N-4",
+                    "N-1": PCIeSlot(6, bifurcation_offset=3),  # "0000:80:01.4": "N-1",
+                    "N-2": PCIeSlot(6, bifurcation_offset=2),  # "0000:80:01.3": "N-2",
+                    "N-3": PCIeSlot(6, bifurcation_offset=1),  # "0000:80:01.2": "N-3",
+                    "N-4": PCIeSlot(6, bifurcation_offset=0),  # "0000:80:01.1": "N-4",
                 }
             }
             for chassis_size in ("XL60_UBM", "S45_UBM", "Q30_UBM", "AV15_UBM")
@@ -108,25 +353,22 @@ class AliasManager:
     mobo: str
 
     #  Record<
-    #      PCIePortSysName,
-    #      Alias
+    #      str (alias),
+    #      PCIeSlotBase
     #  >
-    pcieport_alias_lut: Dict[str, str]
-
-    context: pyudev.Context
+    pcieport_alias_lut: Dict[str, PCIeSlotBase]
 
     def __init__(self):
         self.chassis_size, self.mobo = self._get_chassis_size_and_mobo()
         self.pcieport_alias_lut = self._get_pcieport_alias_lut(
             self.chassis_size, self.mobo
         )
-        self.context = pyudev.Context()
 
     @staticmethod
     def _get_chassis_size_and_mobo() -> Tuple[str, str]:
         try:
             fru = subprocess.check_output(
-                ["ipmitool", "fru"], encoding="utf-8", timeout=10.0
+                ["ipmitool", "fru", "print", "0"], encoding="utf-8", timeout=10.0
             )
             chassis_size = extract_value(r"^\s*Product Part Number\s*:\s*(.*)$", fru)
             mobo = extract_value(r"^\s*Board Product\s*:\s*(.*)$", fru)
@@ -147,7 +389,9 @@ class AliasManager:
             ]
 
     @classmethod
-    def _get_pcieport_alias_lut(cls, chassis_size: str, mobo: str) -> Dict[str, str]:
+    def _get_pcieport_alias_lut(
+        cls, chassis_size: str, mobo: str
+    ) -> Dict[str, PCIeSlotBase]:
         if chassis_size in cls.LUT_CHASSISSIZE_MOBO_TO_ALIASES:
             # custom aliasing is applicable
             lut_mobo_to_aliases = cls.LUT_CHASSISSIZE_MOBO_TO_ALIASES[chassis_size]
@@ -162,82 +406,163 @@ class AliasManager:
                 f"Chassis size not applicable for custom aliasing: {chassis_size}"
             )
 
-    def alias(self, device: Union[str, pyudev.Device]):
-        if isinstance(device, str):
-            path = device
-            sys_path = (
-                path
-                if path.startswith("/sys")
-                else os.path.join("/sys", path.lstrip("/"))
+    def alias(self, device: Union[str, pyudev.Device], ensure_exclusive: bool = False):
+        device = to_udev(device)
+        logger_ctx["device"] = device.sys_name
+        if "nvme" in device.sys_name:
+            # special case for NVMe:
+            # try stripping down to nvme subsystem device
+            device = pyudev.Devices.from_name(
+                CTX,
+                "nvme",
+                extract_value(r"(nvme\d+)", device.sys_name),
             )
+        generator = (
+            alias_name
+            for alias_name, slot in self.pcieport_alias_lut.items()
+            if slot.is_match(device)
+        )
+        if ensure_exclusive:
+            all_matches = [*generator]
+            if not all_matches:
+                raise RuntimeError("No match!")
+            if len(all_matches) > 1:
+                raise RuntimeError(
+                    f"Matched more than once! {[str(match) for match in all_matches].join(', ')}"
+                )
+            return all_matches[0]
+        else:
             try:
-                device = pyudev.Devices.from_sys_path(self.context, sys_path)
-            except pyudev.DeviceNotFoundAtPathError:
-                dev_path = (
-                    path
-                    if path.startswith("/dev")
-                    else os.path.join("/dev", path.lstrip("/"))
-                )
-                device = pyudev.Devices.from_device_file(self.context, dev_path)
-            return self.alias(device)
-        try:
-            pcieport_parent: str = next(
-                d for d in device.ancestors if d.driver == "pcieport"
-            ).sys_name
-        except StopIteration:
-            if "nvme" in device.sys_name:
-                # special case for NVMe:
-                # try stripping down to nvme subsystem device
-                nvme_device = pyudev.Devices.from_name(
-                    self.context,
-                    "nvme",
-                    extract_value(r"(nvme\d+)n\d+", device.sys_name),
-                )
-                try:
-                    pcieport_parent = next(
-                        d for d in nvme_device.ancestors if d.driver == "pcieport"
-                    ).sys_name
-                except StopIteration:
-                    raise ValueError(
-                        f"Drive has no pcieport parents: {device.sys_name}"
-                    )
-            else:
-                raise ValueError(f"Drive has no pcieport parents: {device.sys_name}")
-        return self.pcieport_alias_lut[pcieport_parent]
-
-    def alias_from_environment(self):
-        return self.alias(pyudev.Devices.from_environment(self.context))
+                return next(generator)
+            except StopIteration:
+                raise RuntimeError("No match!")
 
     def list_aliases(self):
-        return self.pcieport_alias_lut.values()
+        return self.pcieport_alias_lut.keys()
+
+    def dump_luts(self) -> dict:
+        return {
+            "chassis_size": self.chassis_size,
+            "motherboard": self.mobo,
+            "matched_lut": {k: str(v) for k, v in self.pcieport_alias_lut.items()},
+            "all_luts": {
+                k1: {
+                    k2: {k3: str(v3) for k3, v3 in v2.items()} for k2, v2 in v1.items()
+                }
+                for k1, v1 in self.LUT_CHASSISSIZE_MOBO_TO_ALIASES.items()
+            },
+        }
 
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument(
+    alt_command = parser.add_mutually_exclusive_group(required=True)
+    alt_command.add_argument(
         "--list-aliases",
         action="store_true",
         default=False,
         help="Print all custom alias labels and exit",
     )
-    parser.add_argument("path", nargs="?", type=str)
+    alt_command.add_argument(
+        "--dump-lut",
+        action="store_true",
+        default=False,
+        help="Print dump of lookup tables",
+    )
+    alt_command.add_argument("device", nargs="?", type=str, metavar="DEVICE")
+
+    parser.add_argument(
+        "--test-pcie",
+        type=lambda x: PCIeSlot(*(int(y) for y in x.split("."))),
+        action="append",
+        default=[],
+        metavar="SLOT_NUMBER[.BIFURCATION_OFFSET]",
+        help="Check if DEVICE matches given PCIe slot number",
+    )
+
+    parser.add_argument(
+        "--test-all", action="store_true", help="Test all discovered slots"
+    )
+    parser.add_argument("-v", action="count", default=0, help="increase log verbosity")
+
+    parser.add_argument("--log", type=str, help="Log to log file")
 
     args = parser.parse_args()
+    console_formatter = logging.Formatter(
+        "%(device)s [%(levelname)s] %(name)s: %(message)s"
+    )
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(console_formatter)
+    if args.v == 0:
+        console_handler.setLevel(logging.CRITICAL)
+    elif args.v == 1:
+        console_handler.setLevel(logging.INFO)
+    else:
+        console_handler.setLevel(logging.DEBUG)
+    logger.logger.addHandler(console_handler)
+
+    if args.log:
+        log_formatter = logging.Formatter(
+            "%(asctime)s %(device)s [%(levelname)s] %(name)s: %(message)s"
+        )
+        from logging.handlers import WatchedFileHandler
+
+        log_handler = WatchedFileHandler(
+            args.log,
+            mode="a",
+            encoding="utf-8",
+        )
+        log_handler.setFormatter(log_formatter)
+        logger.logger.addHandler(log_handler)
+
+    if args.device is not None:
+        logger_ctx["device"] = args.device
+        if args.test_all:
+            matching_slots = []
+            for slot in PCIeSlotBase.all_slots():
+                print(f"Testing {slot} ============================")
+                result = slot.is_match(args.device)
+                if result:
+                    matching_slots.append(slot)
+                print(f"{slot}: match result: {result}")
+                print()
+            print("Device matched by:", *matching_slots)
+            return
+        elif args.test_pcie:
+            for slot in args.test_pcie:
+                slot: PCIeSlot
+                print(f"{slot}: match result: {slot.is_match(args.device)}")
+            return
 
     if args.list_aliases:
         print(" ".join(AliasManager().list_aliases()))
         return
 
+    if args.dump_lut:
+        print(
+            json.dumps(
+                {
+                    "PCIeAddressFinder": PCIeSlotBase._address_finder.dump_luts(),
+                    "AliasManager": AliasManager().dump_luts(),
+                },
+                indent=2,
+            )
+        )
+        return
+
     try:
         mgr = AliasManager()
-        if args.path:
-            alias = mgr.alias(args.path)
+        
+        if args.device is not None:
+            alias = mgr.alias(args.device)
         else:
             alias = mgr.alias_from_environment()
+        logger.info(f"alias = {alias}")
         set_env_var("ID_VDEV", alias)
         set_env_var("ID_VDEV_PATH", os.path.join("disk/by-vdev", alias))
         set_env_var("ID_VDEV_ALT_PATH", alias)
     except BaseException as e:
+        logger.exception("Failed to get alias")
         set_env_var("CUSTOM_ALIAS_ERR", f"{e.__class__.__name__}: {e}")
 
 
