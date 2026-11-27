@@ -1,3 +1,10 @@
+45drives-tools (4.1.0-rc1jammy) jammy; urgency=medium
+
+  * Storinator SR support
+  * Overhaul by-path aliasing in id_disk_custom_alias
+
+ -- Joshua Boudreau <jboudreau@45drives.com>  Fri, 27 Nov 2026 10:04:27 -0400
+
 45drives-tools (4.0.55-1jammy) jammy; urgency=medium
 
   * Fixes mapping issues on BYPATH aliased servers (E16/VM2) + Fixes stale FRU ini
